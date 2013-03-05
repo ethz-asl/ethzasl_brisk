@@ -1,0 +1,18 @@
+<package>
+  <description brief="agast">
+
+     agast
+
+  </description>
+  <author>Elmar Mair</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/agast</url>
+  <depend package="opencv2"/>
+   <export>
+    <cpp cflags="-I${prefix}/include" lflags=" -L${prefix}/lib -lagast"/>
+  </export>
+
+</package>
+
+
