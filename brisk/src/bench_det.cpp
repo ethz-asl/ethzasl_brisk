@@ -170,10 +170,10 @@ int main(int argc, char ** argv) {
 
 	// create the detector:
 	cv::Ptr<cv::FeatureDetector> harrisdet = new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculatorFloat>(
-			0,0);
+			3,30);
 	cv::Ptr<cv::FeatureDetector> briskdet = new cv::BriskFeatureDetector(60,4);
 
-	int its = 100;
+	int its = 1;
 	struct timeval start;
 	struct timeval end;
 	double dt;
@@ -209,7 +209,7 @@ int kpt = 0;
 	std::cout<<"Harris took "<<dt / (double)its<<" ms per iteration for image "<<imgGray1.cols<<"x"<<imgGray1.rows<<" pixels"<<std::endl;
 	
 	cv::Mat out;
-	cv::drawKeypoints(imgGray1,keypoints1,out);
+	cv::drawKeypoints(imgGray1,keypoints1,out,cv::Scalar(255,0,0),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 	cv::imshow("img1",out);
 	cv::waitKey();
 

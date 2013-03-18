@@ -298,9 +298,9 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv:
 				__m128i mask1 = _mm_set_epi8(ceil(_LUT.at<float>(y,15)*nsc),ceil(_LUT.at<float>(y,14)*nsc),ceil(_LUT.at<float>(y,13)*nsc),ceil(_LUT.at<float>(y,12)*nsc),ceil(_LUT.at<float>(y,11)*nsc),ceil(_LUT.at<float>(y,10)*nsc),ceil(_LUT.at<float>(y,9)*nsc),ceil(_LUT.at<float>(y,8)*nsc),ceil(_LUT.at<float>(y,7)*nsc),ceil(_LUT.at<float>(y,6)*nsc),ceil(_LUT.at<float>(y,5)*nsc),ceil(_LUT.at<float>(y,4)*nsc),ceil(_LUT.at<float>(y,3)*nsc),ceil(_LUT.at<float>(y,2)*nsc),ceil(_LUT.at<float>(y,1)*nsc),ceil(_LUT.at<float>(y,0)*nsc));
 				__m128i mask2 = _mm_set_epi8(0,ceil(_LUT.at<float>(y,30)*nsc),ceil(_LUT.at<float>(y,29)*nsc),ceil(_LUT.at<float>(y,28)*nsc),ceil(_LUT.at<float>(y,27)*nsc),ceil(_LUT.at<float>(y,26)*nsc),ceil(_LUT.at<float>(y,25)*nsc),ceil(_LUT.at<float>(y,24)*nsc),ceil(_LUT.at<float>(y,23)*nsc),ceil(_LUT.at<float>(y,22)*nsc),ceil(_LUT.at<float>(y,21)*nsc),ceil(_LUT.at<float>(y,20)*nsc),_LUT.at<float>(y,19)*nsc,ceil(_LUT.at<float>(y,18)*nsc),ceil(_LUT.at<float>(y,17)*nsc),ceil(_LUT.at<float>(y,16)*nsc));
 				_mm_storeu_si128((__m128i*)&occupancy.at<uchar>(cy+y-15,cx-15),
-						_mm_max_epu8 (mem1, mask1));
+						_mm_adds_epu8 (mem1, mask1));
 				_mm_storeu_si128((__m128i*)&occupancy.at<uchar>(cy+y-15,cx+1),
-						_mm_max_epu8 (mem2, mask2));
+						_mm_adds_epu8 (mem2, mask2));
 			}
 
 			// store

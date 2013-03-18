@@ -38,8 +38,8 @@ rosbuild_add_library(${PROJECT_NAME} src/brisk.cpp include/brisk/hammingsse.hpp 
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)b
-#rosbuild_add_executable(demo src/demo.cpp)
-#target_link_libraries(demo ${PROJECT_NAME})
+#rosbuild_add_executable(demo2 src/demo2.cpp)
+#target_link_libraries(demo2 ${PROJECT_NAME})
 
 rosbuild_add_executable(benchdet src/bench_det.cpp)
 target_link_libraries(benchdet ${PROJECT_NAME})
