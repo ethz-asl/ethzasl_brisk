@@ -31,6 +31,7 @@
 #else
 #include <cv_bridge/CvBridge.h>
 #endif
+#include <falsecolor.h>
 
 cv::Ptr<cv::FeatureDetector> detector;
 cv::Ptr<cv::DescriptorExtractor> extractor;
@@ -195,10 +196,17 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     //	  img_mono32F_scaled.convertTo(img_mono8,CV_8UC1);
     //	  half_img_mono32F_scaled.convertTo(half_img_mono8,CV_8UC1);
 
-    cv::Mat img_mono8;
-    img_mono8.create(img.rows, img.cols, CV_8UC1);
-    converter_16_8::Instance().convert_to8bit(img, img_mono8);
+    static bool dofalsecolor = true;
 
+
+    cv::Mat img_mono8_ir, img_mono8;
+    img_mono8_ir.create(img.rows, img.cols, CV_8UC1);
+    converter_16_8::Instance().convert_to8bit(img, img_mono8_ir);
+    if(dofalsecolor){
+      convertFalseColor(img_mono8_ir, img_mono8, palette::False_color_palette3);
+    }else{
+      img_mono8 = img_mono8_ir;
+    }
     // draw stuff
     cv::Mat drawing;
     cv::drawKeypoints(img_mono8,keypoints,drawing,
@@ -215,6 +223,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     cv::imshow("Matches",matchImg);
     //cv::imshow("Half", half_img_mono8);
     cv::imshow("Points", drawing);
+
+    char key = cv::waitKey(20);
+    if(key == 'c'){
+      dofalsecolor = !dofalsecolor;
+    }
 
     // memory
     descriptorsLast=descriptors;

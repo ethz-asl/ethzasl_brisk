@@ -34,6 +34,7 @@ add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverlo
 
 #common commands for building c++ executables and libraries
 rosbuild_add_library(${PROJECT_NAME} src/brisk.cpp include/brisk/hammingsse.hpp src/harris.cpp src/HarrisScoreCalculator.cpp src/HarrisScoreCalculatorFloat.cpp)
+rosbuild_add_library(false_color src/false_color.cpp)
 #target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
@@ -45,4 +46,4 @@ rosbuild_add_executable(benchdet src/bench_det.cpp)
 target_link_libraries(benchdet ${PROJECT_NAME})
 
 rosbuild_add_executable(flir_node src/flir.cpp)
-target_link_libraries(flir_node ${PROJECT_NAME})
+target_link_libraries(flir_node ${PROJECT_NAME} false_color)
