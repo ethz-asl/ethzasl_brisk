@@ -263,6 +263,10 @@ int main(int argc, char **argv)
   cvNamedWindow("Raw");
   cvNamedWindow("Matches");
   cvNamedWindow("Points");
+  cvMoveWindow("Raw", 50,50);
+  cvMoveWindow("Matches", 50,350);
+  cvMoveWindow("Points", 400,50);
+
   cvStartWindowThread();
   image_transport::ImageTransport it(nh);
   image_transport::Subscriber sub = it.subscribe("cam2/image_raw", 1, imageCallback);
