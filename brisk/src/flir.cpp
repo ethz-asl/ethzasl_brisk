@@ -191,7 +191,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 
     //convert 8 bit and false color conversion
-    static bool dofalsecolor = true;
+    static bool dofalsecolor = false;
 
     cv::Mat img_mono8_ir, img_mono8;
     img_mono8_ir.create(img.rows, img.cols, CV_8UC1);
