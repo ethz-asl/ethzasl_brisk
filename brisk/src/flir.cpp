@@ -263,9 +263,9 @@ int main(int argc, char **argv)
   cvNamedWindow("Raw");
   cvNamedWindow("Matches");
   cvNamedWindow("Points");
-  cvMoveWindow("Raw", 50,50);
-  cvMoveWindow("Matches", 50,350);
-  cvMoveWindow("Points", 400,50);
+  cvMoveWindow("Raw", 200,50);
+  cvMoveWindow("Matches", 200,350);
+  cvMoveWindow("Points", 550,50);
 
   cvStartWindowThread();
   image_transport::ImageTransport it(nh);
