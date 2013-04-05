@@ -73,21 +73,28 @@ public:
     return *inst_;
   }
 
-  void convert_to8bit(const cv::Mat& img16, cv::Mat& img8)
+  void convert_to8bit(const cv::Mat& img16, cv::Mat& img8, bool doTempConversion)
   {
 
-    uint16_t min = std::numeric_limits<uint16_t>::max();
-    uint16_t max = 0;
+    double min = std::numeric_limits<uint16_t>::max();
+    double max = 0;
 
     //make a histogram of intensities
-    typedef std::map<uint16_t, int> hist_t;
+    typedef std::map<double, int> hist_t;
     hist_t hist;
 
     for (int i = 0; i < img16.cols; ++i)
     {
       for (int j = 0; j < img16.rows; ++j)
       {
-        uint16_t temp = img16.at<uint16_t>(j, i);
+        uint16_t power = img16.at<uint16_t>(j, i);
+        double temp;
+        if(doTempConversion){
+          temp = sqrt(sqrt(sqrt((double)power)));
+        }else{
+          temp = power;
+        }
+
         hist[temp]++;
       }
     }
@@ -123,12 +130,22 @@ public:
     {
       for (int j = 0; j < img16.rows; ++j)
       {
-        double temp = (double)(img16.at<uint16_t>(j, i) - min_);
+        double temp;
+        if(doColorConversion){
+          temp = sqrt(sqrt(sqrt((double)img16.at<uint16_t>(j, i) - min_)));
+        }else{
+          temp = (double)(img16.at<uint16_t>(j, i) - min_);
+        }
+
         int val = ((temp / (max_ - min_)) * 255);
         val = val > std::numeric_limits<uint8_t>::max() ? std::numeric_limits<uint8_t>::max() : val < 0 ? 0 : val; //saturate
         img8.at<uint8_t>(j, i) = (uint8_t)val;
       }
     }
+
+    //draw a legend
+
+
 
     firstframe_ = false;
   }
@@ -195,7 +212,9 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
     cv::Mat img_mono8_ir, img_mono8;
     img_mono8_ir.create(img.rows, img.cols, CV_8UC1);
-    converter_16_8::Instance().convert_to8bit(img, img_mono8_ir);
+
+    bool doTempScaling = true;
+    converter_16_8::Instance().convert_to8bit(img, img_mono8_ir, doTempScaling);
 
     if (dofalsecolor)
     {
