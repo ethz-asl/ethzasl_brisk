@@ -28,11 +28,14 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
  */
-#include <falsecolor.h>
+#include <flir/falsecolor.h>
 #include <cmath>
 #include <vector>
 #include <iostream>
 #include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <boost/lexical_cast.hpp>
+#include <iomanip>
 
 #define DEG2RAD 0.01745329
 palette GetPalette(palette::palettetypes pal)
@@ -222,7 +225,7 @@ palette GetPalette(palette::palettetypes pal)
 }
 #undef DEG2RAD
 
-void convertFalseColor(const cv::Mat& srcmat, cv::Mat& dstmat, palette::palettetypes paltype)
+void convertFalseColor(const cv::Mat& srcmat, cv::Mat& dstmat, palette::palettetypes paltype, bool drawlegend, double mintemp, double maxtemp)
 {
 
   palette pal = GetPalette(paltype);
@@ -232,6 +235,7 @@ void convertFalseColor(const cv::Mat& srcmat, cv::Mat& dstmat, palette::palettet
   cv::Size sz = srcmat.size();
   const unsigned char* src = srcmat.data;
   unsigned char* dst = dstmat.data;
+
 
   if (srcmat.isContinuous() && dstmat.isContinuous())
   {
@@ -251,5 +255,157 @@ void convertFalseColor(const cv::Mat& srcmat, cv::Mat& dstmat, palette::palettet
     }
   }
 
+  //draw a legend if true Temperatures
+  if(drawlegend){
+
+    //get min max to scale the legend
+    double max_val;
+    double min_val;
+    cv::minMaxIdx(srcmat, &min_val, &max_val);
+
+    enum{
+      legenddiscretization = 5,
+      legendnumbers = 5,
+      legendwidth = 5,
+      x_0 = 20,
+      y_0 = 10,
+    };
+    double stepsize;
+
+    //    std::cout<<"mintemp "<<mintemp<<" maxtemp "<<maxtemp<<std::endl;
+
+    //draw legend color bar
+    for(int i = y_0 ; i < dstmat.rows - y_0 ; ++i){
+      int py = dstmat.rows - i;
+      int val = (i - y_0) / (double)(dstmat.rows - y_0 * 2) * 255.;
+      cv::rectangle(dstmat, cv::Point(x_0, py), cv::Point(x_0 + legendwidth, py + 1),
+                    CV_RGB(pal.colors[val].rgbRed, pal.colors[val].rgbGreen, pal.colors[val].rgbBlue ), -1);
+    }
+
+    //draw temp tick labels
+    stepsize = (dstmat.rows - y_0 * 2) / (double)legendnumbers;
+    for(int i = 0 ; i <= legendnumbers ; ++i){
+      int py = y_0 + (legendnumbers - i) * stepsize + 5; //bottom up
+      double tempval = (mintemp - 273.15) + i * (maxtemp - mintemp) / (double)legendnumbers;
+      std::stringstream ss;
+      ss<<std::setprecision(2)<<tempval<<" C";
+      cv::putText(dstmat, ss.str(), cv::Point(x_0 + 20, py), CV_FONT_HERSHEY_SIMPLEX, 0.4, CV_RGB(255,255,255), 1);
+    }
+
+    //draw ticks into legends
+    stepsize = (dstmat.rows - y_0 * 2) / (double)legenddiscretization;
+    for(int i = 0 ; i <= legenddiscretization ; ++i){
+      int py = y_0 + (legenddiscretization - i) * stepsize; //bottom up
+      cv::line(dstmat, cv::Point(x_0 - 2, py), cv::Point(x_0 + legendwidth + 2, py), CV_RGB(255,255,255), 1);
+    }
+  }
+
 }
 
+converter_16_8::converter_16_8()
+{
+  min_ = std::numeric_limits<uint16_t>::max();
+  max_ = 0;
+  firstframe_ = true;
+}
+
+converter_16_8::~converter_16_8()
+{
+  delete inst_;
+  inst_ = NULL;
+}
+
+double converter_16_8::getMin(){
+  return min_;
+}
+double converter_16_8::getMax(){
+  return max_;
+}
+void converter_16_8::convert_to8bit(const cv::Mat& img16, cv::Mat& img8, bool doTempConversion)
+{
+  if(img8.empty()){ //make an image if the user has provided nothing
+    img8.create(cvSize(img16.cols, img16.rows), CV_8UC1);
+  }
+
+  double min = std::numeric_limits<uint16_t>::max();
+  double max = 0;
+
+  //make a histogram of intensities
+  typedef std::map<double, int> hist_t;
+  hist_t hist;
+
+  //values to convert power to temperature in K^4
+  double slope = 2.58357167114001779457e-07;
+  double y_0 = 2.26799217314804718626e+03;
+
+  auto powerToK4 = [slope, y_0] (double power) -> double { return sqrt(sqrt(((double)power - y_0) / slope)) - 3; }; //adjustment -3 for slightly wrong fit
+
+  double bucketwidth = 2.; //bucketwidth in degrees K
+
+  for (int i = 0; i < img16.cols; ++i)
+  {
+    for (int j = 0; j < img16.rows; ++j)
+    {
+      double power = img16.at<uint16_t>(j, i);
+      double temp;
+      if(doTempConversion){
+        temp = powerToK4(power);
+      }else{
+        temp = power;
+      }
+      temp = round(temp / bucketwidth) * bucketwidth;
+      hist[temp]++;
+    }
+  }
+
+  //find the main section of the histogram
+  for (hist_t::const_iterator it = hist.begin(); it != hist.end(); ++it)
+  {
+    if (it->second > histminmembersperbucket)
+    {
+      if (it->first > max)
+      {
+        max = it->first;
+      }
+      if (it->first < min)
+      {
+        min = it->first;
+      }
+    }
+  }
+
+  if (firstframe_)
+  {
+    min_ = min;
+    max_ = max;
+  }
+
+//  std::cout<<"min: "<<min-273.15<<" max: "<<max-273.15<<" sm: min: "<<min_-273.15<<" max: "<<max_-273.15<<std::endl;
+
+  //exp smoothing
+  double expsm = 0.95;
+  min_ = expsm * min_ + (1. - expsm) * min;
+  max_ = expsm * max_ + (1. - expsm) * max;
+
+  for (int i = 0; i < img16.cols; ++i)
+  {
+    for (int j = 0; j < img16.rows; ++j)
+    {
+      double temp;
+      if(doTempConversion){
+        temp = powerToK4(img16.at<uint16_t>(j, i));
+      }else{
+        temp = (double)(img16.at<uint16_t>(j, i));
+      }
+
+      int val = (((temp - min_) / (max_ - min_)) * 255);
+
+      val = val > std::numeric_limits<uint8_t>::max() ? std::numeric_limits<uint8_t>::max() : val < 0 ? 0 : val; //saturate
+      img8.at<uint8_t>(j, i) = (uint8_t)val;
+    }
+  }
+
+  firstframe_ = false;
+}
+
+converter_16_8* converter_16_8::inst_ = NULL;

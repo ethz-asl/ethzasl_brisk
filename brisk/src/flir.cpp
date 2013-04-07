@@ -29,7 +29,7 @@
 #else
 #include <cv_bridge/CvBridge.h>
 #endif
-#include <falsecolor.h>
+#include <flir/falsecolor.h>
 
 cv::Ptr<cv::FeatureDetector> detector;
 cv::Ptr<cv::DescriptorExtractor> extractor;
@@ -39,117 +39,7 @@ cv::Mat descriptorsLast;
 std::vector<cv::KeyPoint> keypointsLast;
 cv::Mat img_mono8Last;
 
-class converter_16_8
-{
-  enum
-  {
-    histminmembersperbucket = 10,
-  };
-private:
-  uint16_t max_;
-  uint16_t min_;
-  static converter_16_8* inst_;
-  bool firstframe_;
-public:
-  converter_16_8()
-  {
-    min_ = std::numeric_limits<uint16_t>::max();
-    max_ = 0;
-    firstframe_ = true;
-  }
 
-  ~converter_16_8()
-  {
-    delete inst_;
-    inst_ = NULL;
-  }
-
-  static converter_16_8& Instance()
-  {
-    if (!inst_)
-    {
-      inst_ = new converter_16_8;
-    }
-    return *inst_;
-  }
-
-  void convert_to8bit(const cv::Mat& img16, cv::Mat& img8, bool doTempConversion)
-  {
-
-    double min = std::numeric_limits<uint16_t>::max();
-    double max = 0;
-
-    //make a histogram of intensities
-    typedef std::map<double, int> hist_t;
-    hist_t hist;
-
-    for (int i = 0; i < img16.cols; ++i)
-    {
-      for (int j = 0; j < img16.rows; ++j)
-      {
-        uint16_t power = img16.at<uint16_t>(j, i);
-        double temp;
-        if(doTempConversion){
-          temp = sqrt(sqrt(sqrt((double)power)));
-        }else{
-          temp = power;
-        }
-
-        hist[temp]++;
-      }
-    }
-
-    //find the main section of the histogram
-    for (hist_t::const_iterator it = hist.begin(); it != hist.end(); ++it)
-    {
-      if (it->second > histminmembersperbucket)
-      {
-        if (it->first > max)
-        {
-          max = it->first;
-        }
-        if (it->first < min)
-        {
-          min = it->first;
-        }
-      }
-    }
-
-    if (firstframe_)
-    {
-      min_ = min;
-      max_ = max;
-    }
-
-    //exp smoothing
-    double expsm = 0.95;
-    min_ = expsm * min_ + (1. - expsm) * min;
-    max_ = expsm * max_ + (1. - expsm) * max;
-
-    for (int i = 0; i < img16.cols; ++i)
-    {
-      for (int j = 0; j < img16.rows; ++j)
-      {
-        double temp;
-        if(doColorConversion){
-          temp = sqrt(sqrt(sqrt((double)img16.at<uint16_t>(j, i) - min_)));
-        }else{
-          temp = (double)(img16.at<uint16_t>(j, i) - min_);
-        }
-
-        int val = ((temp / (max_ - min_)) * 255);
-        val = val > std::numeric_limits<uint8_t>::max() ? std::numeric_limits<uint8_t>::max() : val < 0 ? 0 : val; //saturate
-        img8.at<uint8_t>(j, i) = (uint8_t)val;
-      }
-    }
-
-    //draw a legend
-
-
-
-    firstframe_ = false;
-  }
-};
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
@@ -218,7 +108,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
     if (dofalsecolor)
     {
-      convertFalseColor(img_mono8_ir, img_mono8, palette::False_color_palette4);
+      convertFalseColor(img_mono8_ir, img_mono8, palette::False_color_palette4, doTempScaling, converter_16_8::Instance().getMin(), converter_16_8::Instance().getMax());
     }
     else
     {
@@ -295,4 +185,3 @@ int main(int argc, char **argv)
   return 0;
 }
 
-converter_16_8* converter_16_8::inst_ = NULL;

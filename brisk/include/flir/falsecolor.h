@@ -34,6 +34,34 @@
 
 #include <opencv2/core/core.hpp>
 
+
+class converter_16_8
+{
+  enum
+  {
+    histminmembersperbucket = 10,
+  };
+private:
+  double max_;
+  double min_;
+  static converter_16_8* inst_;
+  bool firstframe_;
+public:
+  converter_16_8();
+  ~converter_16_8();
+  static converter_16_8& Instance()
+  {
+    if (!inst_)
+    {
+      inst_ = new converter_16_8;
+    }
+    return *inst_;
+  }
+  double getMax();
+  double getMin();
+  void convert_to8bit(const cv::Mat& img16, cv::Mat& img8, bool doTempConversion);
+};
+
 struct color
 {
   unsigned char rgbBlue;
@@ -56,6 +84,6 @@ struct palette
 
 palette GetPalette(palette::palettetypes pal);
 
-void convertFalseColor(const cv::Mat& srcmat, cv::Mat& dstmat, palette::palettetypes paltype);
+void convertFalseColor(const cv::Mat& srcmat, cv::Mat& dstmat, palette::palettetypes paltype, bool drawlegend = false, double mintemp = 0, double maxtemp = 0);
 
 #endif /* FALSECOLOR_H_ */
