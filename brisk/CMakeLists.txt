@@ -39,8 +39,8 @@ rosbuild_add_library(false_color src/false_color.cpp)
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)b
-#rosbuild_add_executable(demo2 src/demo2.cpp)
-#target_link_libraries(demo2 ${PROJECT_NAME})
+rosbuild_add_executable(livedemo src/livedemo.cpp)
+target_link_libraries(livedemo ${PROJECT_NAME})
 
 rosbuild_add_executable(benchdet src/bench_det.cpp)
 target_link_libraries(benchdet ${PROJECT_NAME})

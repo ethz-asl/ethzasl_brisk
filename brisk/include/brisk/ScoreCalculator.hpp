@@ -12,8 +12,11 @@
 
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/core/core.hpp>
+#include <sm/timing/Timer.hpp>
 
 namespace brisk{
+
+typedef sm::timing::DummyTimer TimerSwitchable;
 
 // abstract base class to provide an interface for score calculation of any sort.
 template<typename SCORE_TYPE>
