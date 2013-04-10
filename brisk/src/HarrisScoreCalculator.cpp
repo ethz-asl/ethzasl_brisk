@@ -10,8 +10,9 @@
 #include <brisk/HarrisScoreCalculator.hpp>
 #include <brisk/sseFilters.hpp>
 #include <opencv2/highgui/highgui.hpp>
-
 #include <sys/time.h>
+
+
 
 namespace brisk{
 
@@ -20,11 +21,17 @@ void HarrisScoreCalculator::initializeScores(){
 	cv::Mat DxDx,DyDy,DxDy;
 
 	// pipeline
+	TimerSwitchable timerFancyOp1("0.1.0 BRISK Detection: 2nd moment matrix images computation (per layer)");
 	getCovarEntries(_img, DxDx1,DyDy1,DxDy1);
+	timerFancyOp1.stop();
+	TimerSwitchable timerFancyOp2("0.1.1 BRISK Detection: 3 times Gaussian filter of 2nd mom. mat. (per layer)");
 	filterGauss3by316S(DxDx1, DxDx);
 	filterGauss3by316S(DyDy1, DyDy);
 	filterGauss3by316S(DxDy1, DxDy);
+	timerFancyOp2.stop();
+	TimerSwitchable timerFancyOp3("0.1.2 BRISK Detection: Harris corner score image (per layer)");
 	cornerHarris(DxDx,DyDy,DxDy,_scores);
+	timerFancyOp3.stop();
 }
 
 void HarrisScoreCalculator::get2dMaxima(std::vector<PointWithScore>& points, int absoluteThreshold){

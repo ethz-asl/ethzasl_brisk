@@ -16,6 +16,8 @@
 #include <brisk/ScoreCalculator.hpp>
 #include <brisk/ScaleSpaceLayer.hpp>
 
+#include <sm/timing/Timer.hpp>
+
 namespace brisk{
 
 // uses the common feature interface to construct a generic

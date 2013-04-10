@@ -19,8 +19,13 @@
 #include <boost/shared_ptr.hpp>
 //#include "../include/descriptorEval/leuteneggerDescriptor.h"
 #include <brisk/brisk.h>
+#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/nonfree/nonfree.hpp>
 #include <fstream>
 #include <iostream>
+#include <brisk/HarrisScoreCalculator.hpp>
+#include <brisk/ScaleSpaceFeatureDetector.hpp>
+#include <sm/timing/Timer.hpp>
 
 using namespace std;
 
@@ -94,7 +99,7 @@ public:
 				n_(n), it_(n_)
 	{
 		image_sub_ = it_.subscribe(
-				"camera/image_raw", 1, &ImageSubscriber::imageCallback, this);
+				"cam0/image_raw", 1, &ImageSubscriber::imageCallback, this);
 
 		// also init shared data:
 		sharedData.frameID=0;
@@ -328,7 +333,7 @@ private:
 					}
 				}
 				lastkey=key;
-				key=cv::waitKey(1);
+				key=cv::waitKey(2);
 			}
 
 
@@ -417,11 +422,18 @@ int main(int argc, char ** argv) {
 			threshold = 30;
 		detector = new cv::FastFeatureDetector(threshold,true);
 	}
+	else if(strncmp("BRISK_old", argv[1], 9 )==0){
+		threshold = atoi(argv[1]+9);
+		if(threshold==0)
+			threshold = 30;
+		detector = new cv::BriskFeatureDetector(threshold,4);
+	}
 	else if(strncmp("BRISK", argv[1], 5 )==0){
 		threshold = atoi(argv[1]+5);
 		if(threshold==0)
 			threshold = 30;
-		detector = new cv::BriskFeatureDetector(threshold,4);
+		detector = new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>(
+					4,threshold,20);
 	}
 	else if(strncmp("SURF", argv[1], 4 )==0){
 		threshold = atoi(argv[1]+4);
@@ -430,11 +442,8 @@ int main(int argc, char ** argv) {
 		detector = new cv::SurfFeatureDetector(threshold);
 	}
 	else if(strncmp("SIFT", argv[1], 4 )==0){
-		float thresh = 0.04 / cv::SIFT::CommonParams::DEFAULT_NOCTAVE_LAYERS / 2.0;
 		float edgeThreshold=atof(argv[1]+4);
-		if(edgeThreshold==0)
-			thresh = 10.0;
-		detector = new cv::SiftFeatureDetector(thresh,edgeThreshold);
+		detector = new cv::SiftFeatureDetector(0,3,0.04,edgeThreshold);
 		//I=1; // save time, this is so slow anyways...
 	}
 	if (detector.empty()){
@@ -491,10 +500,10 @@ int main(int argc, char ** argv) {
 	// match descriptors:
 	cv::Ptr<cv::DescriptorMatcher> descriptorMatcher;
 	if(std::string(argv[3])=="BruteForce-HammingSse"){
-		descriptorMatcher = new cv::BruteForceMatcher<cv::HammingSse>();
+		descriptorMatcher = new cv::BruteForceMatcherSse;
 	}
 	else{
-		descriptorMatcher = new cv::BruteForceMatcher<cv::L2<float> >();
+		descriptorMatcher = new cv::BFMatcher(cv::L2<float>::normType);
 	}
 	if (descriptorMatcher.empty()){
 		std::cout << "Matcher " << argv[3] << " not recognized. Check spelling!" << std::endl;
@@ -587,7 +596,8 @@ int main(int argc, char ** argv) {
 
 		// extract features
 		boost::mutex::scoped_lock l(sharedData.mutex);
-		detector->detect(currentImage->image,currentImage->keypoints);
+		//static_cast<cv::Ptr<brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator> > >
+		(detector)->detect(currentImage->image,currentImage->keypoints);
 		// get the descriptors
 		descriptorExtractor->compute(currentImage->image,currentImage->keypoints,currentImage->descriptors);
 
@@ -675,6 +685,9 @@ int main(int argc, char ** argv) {
 				}
 			}
 		}
+
+		// display timing
+		ROS_INFO_STREAM_THROTTLE(5, sm::timing::Timing::print());
 
 		// video writing?
 		if(videoOut&&writerIsOpen)
