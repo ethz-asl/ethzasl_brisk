@@ -33,7 +33,8 @@
 #define FALSECOLOR_H_
 
 #include <opencv2/core/core.hpp>
-
+#include <opencv2/contrib/retina.hpp>
+#include <boost/shared_ptr.hpp>
 
 class converter_16_8
 {
@@ -46,6 +47,7 @@ private:
   double min_;
   static converter_16_8* inst_;
   bool firstframe_;
+  boost::shared_ptr<cv::Retina> retina_;
 public:
   converter_16_8();
   ~converter_16_8();
@@ -60,6 +62,7 @@ public:
   double getMax();
   double getMin();
   void convert_to8bit(const cv::Mat& img16, cv::Mat& img8, bool doTempConversion);
+  void toneMapping(const cv::Mat& img16, cv::Mat& img8);
 };
 
 struct color

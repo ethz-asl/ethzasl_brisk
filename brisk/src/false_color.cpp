@@ -36,6 +36,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <boost/lexical_cast.hpp>
 #include <iomanip>
+#include "opencv2/contrib/retina.hpp"
+#include <ros/package.h>
 
 #define DEG2RAD 0.01745329
 palette GetPalette(palette::palettetypes pal)
@@ -321,6 +323,15 @@ double converter_16_8::getMin(){
 double converter_16_8::getMax(){
   return max_;
 }
+void converter_16_8::toneMapping(const cv::Mat& img16, cv::Mat& img8){
+  if(!retina_){
+    retina_.reset(new cv::Retina(img16.size(), false));
+    retina_->setup(ros::package::getPath("brisk") + "/include/flir/retina_params");
+  }
+  retina_->run(img16);
+  retina_->getParvo(img8);
+}
+
 void converter_16_8::convert_to8bit(const cv::Mat& img16, cv::Mat& img8, bool doTempConversion)
 {
   if(img8.empty()){ //make an image if the user has provided nothing
@@ -380,7 +391,7 @@ void converter_16_8::convert_to8bit(const cv::Mat& img16, cv::Mat& img8, bool do
     max_ = max;
   }
 
-//  std::cout<<"min: "<<min-273.15<<" max: "<<max-273.15<<" sm: min: "<<min_-273.15<<" max: "<<max_-273.15<<std::endl;
+  //  std::cout<<"min: "<<min-273.15<<" max: "<<max-273.15<<" sm: min: "<<min_-273.15<<" max: "<<max_-273.15<<std::endl;
 
   //exp smoothing
   double expsm = 0.95;

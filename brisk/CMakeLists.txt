@@ -47,3 +47,6 @@ target_link_libraries(benchdet ${PROJECT_NAME})
 
 rosbuild_add_executable(flir_node src/flir.cpp)
 target_link_libraries(flir_node ${PROJECT_NAME} false_color)
+
+rosbuild_add_executable(openexrdemo src/OpenEXRimages_HighDynamicRange_Retina_toneMapping.cpp)
+
