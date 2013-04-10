@@ -25,7 +25,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long )
+add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long -std=c++0x)
 
 #uncomment if you have defined messages
 #rosbuild_genmsg()
@@ -34,6 +34,7 @@ add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverlo
 
 #common commands for building c++ executables and libraries
 rosbuild_add_library(${PROJECT_NAME} src/brisk.cpp include/brisk/hammingsse.hpp src/harris.cpp src/HarrisScoreCalculator.cpp src/HarrisScoreCalculatorFloat.cpp)
+rosbuild_add_library(false_color src/false_color.cpp)
 #target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
@@ -45,4 +46,4 @@ rosbuild_add_executable(benchdet src/bench_det.cpp)
 target_link_libraries(benchdet ${PROJECT_NAME})
 
 rosbuild_add_executable(flir_node src/flir.cpp)
-target_link_libraries(flir_node ${PROJECT_NAME})
+target_link_libraries(flir_node ${PROJECT_NAME} false_color)
