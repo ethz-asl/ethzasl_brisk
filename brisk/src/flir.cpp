@@ -55,10 +55,10 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 #if ROS_VERSION_MINIMUM(1, 9, 44)
     cv_bridge::CvImagePtr ptr = cv_bridge::toCvCopy(msg, "mono16");
+    cv::Mat img = ptr->image;
 #else
     cv::Mat img=bridge.imgMsgToCv(msg, "mono16");
 #endif
-    cv::Mat img = ptr->image;
 
     // only at first call
     if (img_mono8Last.cols == 0)

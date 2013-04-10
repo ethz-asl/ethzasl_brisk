@@ -332,6 +332,14 @@ void converter_16_8::toneMapping(const cv::Mat& img16, cv::Mat& img8){
   retina_->getParvo(img8);
 }
 
+//adjustment -3 for slightly wrong fit
+double powerToK4(double power){
+  double slope = 2.58357167114001779457e-07;
+  double y_0 = 2.26799217314804718626e+03;
+return sqrt(sqrt(((double)power - y_0) / slope)) - 3;
+}
+
+
 void converter_16_8::convert_to8bit(const cv::Mat& img16, cv::Mat& img8, bool doTempConversion)
 {
   if(img8.empty()){ //make an image if the user has provided nothing
@@ -344,12 +352,6 @@ void converter_16_8::convert_to8bit(const cv::Mat& img16, cv::Mat& img8, bool do
   //make a histogram of intensities
   typedef std::map<double, int> hist_t;
   hist_t hist;
-
-  //values to convert power to temperature in K^4
-  double slope = 2.58357167114001779457e-07;
-  double y_0 = 2.26799217314804718626e+03;
-
-  auto powerToK4 = [slope, y_0] (double power) -> double { return sqrt(sqrt(((double)power - y_0) / slope)) - 3; }; //adjustment -3 for slightly wrong fit
 
   double bucketwidth = 2.; //bucketwidth in degrees K
 
