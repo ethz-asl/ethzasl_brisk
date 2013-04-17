@@ -8,7 +8,6 @@
 #include <sys/time.h>
 #include <ros/ros.h>
 #include <image_transport/image_transport.h>
-#include <cv_bridge/CvBridge.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -180,7 +179,6 @@ protected:
 	ros::NodeHandle n_;
 	image_transport::ImageTransport it_;
 	image_transport::Subscriber image_sub_;
-	sensor_msgs::CvBridge bridge_;
 
 	// frame rate and overrun detection
 	timeval tOld_, tNew_;
