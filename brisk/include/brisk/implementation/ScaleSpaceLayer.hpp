@@ -161,7 +161,9 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv:
 		//std::cout<<"passed keypoints"<<std::endl;
 		points.reserve(keypoints.size());
 		for(size_t k=0; k<keypoints.size(); ++k){
-			points.push_back(typename ScoreCalculator_t::PointWithScore(cv::Point2i(keypoints[k].pt.x,keypoints[k].pt.y),keypoints[k].response));
+			if(keypoints[k].response>1e5){
+				points.push_back(typename ScoreCalculator_t::PointWithScore(cv::Point2i(keypoints[k].pt.x,keypoints[k].pt.y),keypoints[k].response));
+			}
 		}
 	}
 	else{
