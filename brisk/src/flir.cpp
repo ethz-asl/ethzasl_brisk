@@ -104,8 +104,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     img_mono8_ir.create(img.rows, img.cols, CV_8UC1);
 
     bool doTempScaling = true;
-//    converter_16_8::Instance().convert_to8bit(img, img_mono8_ir, doTempScaling);
-    converter_16_8::Instance().toneMapping(img, img_mono8_ir);
+    converter_16_8::Instance().convert_to8bit(img, img_mono8_ir, doTempScaling);
+    //converter_16_8::Instance().toneMapping(img, img_mono8_ir);
 
 
 
