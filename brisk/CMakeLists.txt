@@ -25,7 +25,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long)
+add_definitions( -fPIC -msse2 -mssse3 -msse4 -march=nocona -Wextra -Winit-self -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo -Wno-long-long)
 
 #uncomment if you have defined messages
 #rosbuild_genmsg()
@@ -33,7 +33,7 @@ add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverlo
 #rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
-rosbuild_add_library(${PROJECT_NAME} src/brisk.cpp include/brisk/hammingsse.hpp src/harris.cpp src/HarrisScoreCalculator.cpp src/HarrisScoreCalculatorFloat.cpp)
+rosbuild_add_library(${PROJECT_NAME} src/brisk.cpp include/brisk/hammingsse.hpp src/harris.cpp src/HarrisScoreCalculator.cpp src/HarrisScoreCalculatorFloat.cpp src/harrisScores_sse_full.cpp src/rdtsc_wrapper.cpp)
 rosbuild_add_library(false_color src/false_color.cpp)
 #target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 #target_link_libraries(${PROJECT_NAME} another_library)

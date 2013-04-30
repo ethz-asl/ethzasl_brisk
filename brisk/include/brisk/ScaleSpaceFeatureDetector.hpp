@@ -12,11 +12,10 @@
 
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/core/core.hpp>
-
+#include <brisk/brisk.h>
 #include <brisk/ScoreCalculator.hpp>
 #include <brisk/ScaleSpaceLayer.hpp>
-
-#include <sm/timing/Timer.hpp>
+#include <brisk/rdtsc_wrapper.h>
 
 namespace brisk{
 
@@ -25,8 +24,10 @@ namespace brisk{
 template<class SCORE_CALCULTAOR_T>
 class ScaleSpaceFeatureDetector : public cv::FeatureDetector{
 public:
-	ScaleSpaceFeatureDetector(size_t octaves, double uniformityRadius, double absoluteThreshold=0):
-		_octaves(octaves),_uniformityRadius(uniformityRadius),_absoluteThreshold(absoluteThreshold){
+	ScaleSpaceFeatureDetector(size_t octaves, double uniformityRadius,
+			double absoluteThreshold=0,size_t maxNumKpt=std::numeric_limits<size_t>::max()):
+		_octaves(octaves),_uniformityRadius(uniformityRadius),
+		_absoluteThreshold(absoluteThreshold), _maxNumKpt(maxNumKpt){
 		scaleSpaceLayers.resize(
 				std::max(_octaves*2,size_t(1)));
 	}
@@ -54,16 +55,18 @@ protected:
 			keypoints.reserve(4000); // possibly speeds up things
 
 		// construct scale space layers
-		//struct timeval start, end;
+		struct timeval start, end;
 		//gettimeofday(&start, NULL);
 		scaleSpaceLayers[0].create(image,!usePassedKeypoints);
 		scaleSpaceLayers[0].setUniformityRadius(_uniformityRadius);
+		scaleSpaceLayers[0].setMaxNumKpt(_maxNumKpt);
 		scaleSpaceLayers[0].setAbsoluteThreshold(_absoluteThreshold);
 		for(size_t i=1; i<_octaves*2; ++i){
 			//struct timeval start, end;
 			//gettimeofday(&start, NULL);
 			scaleSpaceLayers[i].create(&scaleSpaceLayers[i-1],!usePassedKeypoints);
 			scaleSpaceLayers[i].setUniformityRadius(_uniformityRadius);
+			scaleSpaceLayers[i].setMaxNumKpt(_maxNumKpt);
 			scaleSpaceLayers[i].setAbsoluteThreshold(_absoluteThreshold);
 			//gettimeofday(&end, NULL);
 			//std::cout<<double(end.tv_sec-start.tv_sec)*1000.0+double(end.tv_usec-start.tv_usec)/1000.0<<std::endl;
@@ -71,7 +74,7 @@ protected:
 		//gettimeofday(&end, NULL);
 		//std::cout<<double(end.tv_sec-start.tv_sec)*1000.0+double(end.tv_usec-start.tv_usec)/1000.0<<std::endl;
 		// detect
-
+		//gettimeofday(&start, NULL);
 		for(size_t i=0; i<scaleSpaceLayers.size(); ++i){
 			scaleSpaceLayers[i].detectScaleSpaceMaxima(keypoints,
 					true,!usePassedKeypoints,usePassedKeypoints); // only do refinement, if no keypoints are passed
@@ -83,6 +86,7 @@ protected:
 	size_t _octaves;
 	double _uniformityRadius;
 	double _absoluteThreshold;
+	size_t _maxNumKpt;
 
 	mutable std::vector<brisk::ScaleSpaceLayer<ScoreCalculator_t> > scaleSpaceLayers;
 

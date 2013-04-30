@@ -12,11 +12,10 @@
 
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/core/core.hpp>
-#include <sm/timing/Timer.hpp>
+#include <brisk/brisk.h>
+#include <brisk/rdtsc_wrapper.h>
 
 namespace brisk{
-
-typedef sm::timing::DummyTimer TimerSwitchable;
 
 // abstract base class to provide an interface for score calculation of any sort.
 template<typename SCORE_TYPE>
@@ -25,12 +24,27 @@ public:
 	typedef SCORE_TYPE Score_t;
 
 	// helper struct for point storage
+#ifdef USE_SIMPLE_POINT_WITH_SCORE
 	struct PointWithScore{
+		PointWithScore():score(0),x(0),y(0){}
+				PointWithScore(Score_t score_, uint16_t x_, uint16_t y_):score(score_),x(x_),y(y_){}
+		uint16_t x,y;
+		Score_t score;
+		// this is so terrible. but so fast:
+		bool operator<(const PointWithScore& other) const {return score>other.score;}
+	};
+#else
+#error
+	struct PointWithScore{
+		PointWithScore():
+					pt(cv::Point2i(0,0)),score(0){}
 		PointWithScore(cv::Point2i pt_, Score_t score_):
 			pt(pt_),score(score_){}
 		cv::Point2i pt;
 		Score_t score;
+		inline bool operator<(const PointWithScore& other) const {return score>=other.score;}
 	};
+#endif
 
 	// constructor
 	ScoreCalculator(){}

@@ -6,6 +6,7 @@
  */
 
 #include <sys/time.h>
+#include <brisk/rdtsc_wrapper.h>
 
 template<class SCORE_CALCULTAOR_T>
 ScaleSpaceLayer<SCORE_CALCULTAOR_T>::ScaleSpaceLayer(const cv::Mat& img, bool initScores){
@@ -61,7 +62,7 @@ ScaleSpaceLayer<SCORE_CALCULTAOR_T>::ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalcul
 template<class SCORE_CALCULTAOR_T>
 void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::create(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores){
 	// for successive construction
-	sm::timing::Timer timerFancyOp0("0.0 BRISK Detection: Creation&Downsampling (per layer)");
+	rdtsc::timing::Timer timerFancyOp0("0.0 BRISK Detection: Creation&Downsampling (per layer)");
 	int type=layerBelow->_img.type();
 	if(layerBelow->_isOctave){
 		if(layerBelow->_layerNumber>=2){
@@ -143,15 +144,218 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::setUniformityRadius(double radius){
 		_radius=1;
 }
 
-// used for sorting
-template<class SCORE_CALCULTAOR_T>
-__inline__ bool compareKeypointScore (
-		typename SCORE_CALCULTAOR_T::PointWithScore kp_i,
-		typename SCORE_CALCULTAOR_T::PointWithScore kp_j) {
-	return (kp_i.score>kp_j.score);
-}
-
 // feature detection
+#ifdef USE_SIMPLE_POINT_WITH_SCORE
+template<class SCORE_CALCULTAOR_T>
+void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv::KeyPoint>& keypoints,
+		bool enforceUniformity, bool doRefinement, bool usePassedKeypoints){
+	// first get the maxima points inside this layer
+	std::vector<typename ScoreCalculator_t::PointWithScore> points;
+	if(usePassedKeypoints){
+		//std::cout<<"passed keypoints"<<std::endl;
+		points.reserve(keypoints.size());
+		for(size_t k=0; k<keypoints.size(); ++k){
+			if(keypoints[k].response>1e6){
+				points.push_back(typename ScoreCalculator_t::PointWithScore(keypoints[k].response,keypoints[k].pt.x,keypoints[k].pt.y));
+			}
+		}
+	}
+	else{
+		TimerSwitchable timerFancyOp1("0.2 BRISK Detection: 2d nonmax suppression (per layer)");
+		_scoreCalculator.get2dMaxima(points,_absoluteThreshold);
+		timerFancyOp1.stop();
+	}
+
+	// next check above and below. The code looks a bit stupid, but that's
+	// for speed. We don't want to make the distinction analyzing whether or
+	// not there is a layer above and below inside the loop.
+	if(!usePassedKeypoints){
+		if(_aboveLayer_ptr!=0&&_belowLayer_ptr!=0){
+			// check above and below
+			TimerSwitchable timerFancyOp2("0.3 BRISK Detection: 3d nonmax suppression (per layer)");
+			std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
+			pt_tmp.reserve(points.size());
+			const int one_over_scale_above = 1.0/_scale_above;
+			const int one_over_scale_below = 1.0/_scale_below;
+			for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=
+					points.begin(); it!=points.end(); ++it){
+				const typename ScoreCalculator_t::Score_t center=it->score;
+				const int x=it->x;
+				const int y=it->y;
+				if(center < (typename ScoreCalculator_t::Score_t)(_absoluteThreshold)) continue;
+				if(center<scoreAbove(x,y)) continue;
+				if(center<scoreAbove(x+one_over_scale_above,y)) continue;
+				if(center<scoreAbove(x-one_over_scale_above,y)) continue;
+				if(center<scoreAbove(x,y+one_over_scale_above)) continue;
+				if(center<scoreAbove(x,y-one_over_scale_above)) continue;
+				if(center<scoreAbove(x+one_over_scale_above,y+one_over_scale_above)) continue;
+				if(center<scoreAbove(x+one_over_scale_above,y-one_over_scale_above)) continue;
+				if(center<scoreAbove(x-one_over_scale_above,y+one_over_scale_above)) continue;
+				if(center<scoreAbove(x-one_over_scale_above,y-one_over_scale_above)) continue;
+				if(center<scoreBelow(x,y)) continue;
+				if(center<scoreBelow(x+one_over_scale_below,y)) continue;
+				if(center<scoreBelow(x-one_over_scale_below,y)) continue;
+				if(center<scoreBelow(x,y+one_over_scale_below)) continue;
+				if(center<scoreBelow(x,y-one_over_scale_below)) continue;
+				if(center<scoreBelow(x+one_over_scale_below,y+one_over_scale_below)) continue;
+				if(center<scoreBelow(x+one_over_scale_below,y-one_over_scale_below)) continue;
+				if(center<scoreBelow(x-one_over_scale_below,y+one_over_scale_below)) continue;
+				if(center<scoreBelow(x-one_over_scale_below,y-one_over_scale_below)) continue;
+				pt_tmp.push_back(*it);
+			}
+			points.assign(pt_tmp.begin(),pt_tmp.end());
+			timerFancyOp2.stop();
+		}
+		else if(_aboveLayer_ptr!=0){
+			// check above
+			TimerSwitchable timerFancyOp2("0.3 BRISK Detection: 3d nonmax suppression (per layer)");
+			std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
+			pt_tmp.reserve(points.size());
+			const int one_over_scale_above = 1.0/_scale_above;
+			for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=
+					points.begin(); it!=points.end(); ++it){
+				const typename ScoreCalculator_t::Score_t center=it->score;
+				if(center < (typename ScoreCalculator_t::Score_t)(_absoluteThreshold)) continue;
+				const int x=it->x;
+				const int y=it->y;
+				if(center<scoreAbove(x,y)) continue;
+				if(center<scoreAbove(x+one_over_scale_above,y)) continue;
+				if(center<scoreAbove(x-one_over_scale_above,y)) continue;
+				if(center<scoreAbove(x,y+one_over_scale_above)) continue;
+				if(center<scoreAbove(x,y-one_over_scale_above)) continue;
+				if(center<scoreAbove(x+one_over_scale_above,y+one_over_scale_above)) continue;
+				if(center<scoreAbove(x+one_over_scale_above,y-one_over_scale_above)) continue;
+				if(center<scoreAbove(x-one_over_scale_above,y+one_over_scale_above)) continue;
+				if(center<scoreAbove(x-one_over_scale_above,y-one_over_scale_above)) continue;
+				pt_tmp.push_back(*it);
+
+			}
+			points.assign(pt_tmp.begin(),pt_tmp.end());
+			timerFancyOp2.stop();
+		}
+		else if(_belowLayer_ptr!=0){
+			// check below
+			TimerSwitchable timerFancyOp2("0.3 BRISK Detection: 3d nonmax suppression (per layer)");
+			std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
+			pt_tmp.reserve(points.size());
+			const int one_over_scale_below = 1.0/_scale_below;
+			for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=
+					points.begin(); it!=points.end(); ++it){
+				const typename ScoreCalculator_t::Score_t center=it->score;
+				if(center < (typename ScoreCalculator_t::Score_t)(_absoluteThreshold)) continue;
+				const int x=it->x;
+				const int y=it->y;
+				if(center<scoreBelow(x,y)) continue;
+				if(center<scoreBelow(x+one_over_scale_below,y)) continue;
+				if(center<scoreBelow(x-one_over_scale_below,y)) continue;
+				if(center<scoreBelow(x,y+one_over_scale_below)) continue;
+				if(center<scoreBelow(x,y-one_over_scale_below)) continue;
+				if(center<scoreBelow(x+one_over_scale_below,y+one_over_scale_below)) continue;
+				if(center<scoreBelow(x+one_over_scale_below,y-one_over_scale_below)) continue;
+				if(center<scoreBelow(x-one_over_scale_below,y+one_over_scale_below)) continue;
+				if(center<scoreBelow(x-one_over_scale_below,y-one_over_scale_below)) continue;
+				pt_tmp.push_back(*it);
+			}
+			points.assign(pt_tmp.begin(),pt_tmp.end());
+			timerFancyOp2.stop();
+		}
+
+	}
+
+	// uniformity enforcement
+	if(points.size()==0) return;
+	if(enforceUniformity&&_radius>0.0){
+		//std::cout<<"number of keypoints before uniformity enforcement "<<points.size()<<std::endl;
+		TimerSwitchable timerFancyOp31("0.31 BRISK Detection: sort keypoint by score (per layer)");
+		std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
+
+		// sort
+		std::sort(points.begin(), points.end());
+		const float maxScore=points.front().score;
+		timerFancyOp31.stop();
+
+		pt_tmp.reserve(keypoints.size()+points.size()); // allow appending
+		keypoints.reserve(keypoints.size()+points.size()); // allow appending
+
+		// store occupancy
+		cv::Mat occupancy;
+		const float scaling=15.0/float(_radius);
+		occupancy=cv::Mat::zeros((_img.rows)*ceil(scaling)+32,(_img.cols)*ceil(scaling)+32,CV_8U);
+
+		TimerSwitchable timerFancyOp3("0.3 BRISK Detection: uniformity enforcement (per layer)");
+		// go through the sorted keypoints and reject too close ones
+		for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=points.begin();
+				it!=points.end(); ++it){
+
+			const int cy=(it->y*scaling+16);
+			//std::cout<<cy<<" "<<it->y<<std::endl;
+			const int cx=(it->x*scaling+16);
+
+			// check if this is a high enough score
+			const double s0=double(occupancy.at<uchar>(cy,cx));
+			//const double s1=s0*s0;
+			const float nsc1=sqrtf(sqrtf(it->score/maxScore))*255.0f;
+
+			if(nsc1<s0)
+				continue;
+
+			// masks
+			const float nsc=0.99*nsc1;
+			//std::cout<<it->score<<std::endl;
+
+			//std::cout<<nsc<<std::endl;
+			for(int y=0; y<2*16-1; ++y){
+				__m128i mem1=_mm_loadu_si128 ((__m128i*)&occupancy.at<uchar>(cy+y-15,cx-15));
+				__m128i mem2=_mm_loadu_si128 ((__m128i*)&occupancy.at<uchar>(cy+y-15,cx+1));
+				__m128i mask1 = _mm_set_epi8(ceil(_LUT.at<float>(y,15)*nsc),ceil(_LUT.at<float>(y,14)*nsc),ceil(_LUT.at<float>(y,13)*nsc),ceil(_LUT.at<float>(y,12)*nsc),ceil(_LUT.at<float>(y,11)*nsc),ceil(_LUT.at<float>(y,10)*nsc),ceil(_LUT.at<float>(y,9)*nsc),ceil(_LUT.at<float>(y,8)*nsc),ceil(_LUT.at<float>(y,7)*nsc),ceil(_LUT.at<float>(y,6)*nsc),ceil(_LUT.at<float>(y,5)*nsc),ceil(_LUT.at<float>(y,4)*nsc),ceil(_LUT.at<float>(y,3)*nsc),ceil(_LUT.at<float>(y,2)*nsc),ceil(_LUT.at<float>(y,1)*nsc),ceil(_LUT.at<float>(y,0)*nsc));
+				__m128i mask2 = _mm_set_epi8(0,ceil(_LUT.at<float>(y,30)*nsc),ceil(_LUT.at<float>(y,29)*nsc),ceil(_LUT.at<float>(y,28)*nsc),ceil(_LUT.at<float>(y,27)*nsc),ceil(_LUT.at<float>(y,26)*nsc),ceil(_LUT.at<float>(y,25)*nsc),ceil(_LUT.at<float>(y,24)*nsc),ceil(_LUT.at<float>(y,23)*nsc),ceil(_LUT.at<float>(y,22)*nsc),ceil(_LUT.at<float>(y,21)*nsc),ceil(_LUT.at<float>(y,20)*nsc),_LUT.at<float>(y,19)*nsc,ceil(_LUT.at<float>(y,18)*nsc),ceil(_LUT.at<float>(y,17)*nsc),ceil(_LUT.at<float>(y,16)*nsc));
+				_mm_storeu_si128((__m128i*)&occupancy.at<uchar>(cy+y-15,cx-15),
+						_mm_adds_epu8 (mem1, mask1));
+				_mm_storeu_si128((__m128i*)&occupancy.at<uchar>(cy+y-15,cx+1),
+						_mm_adds_epu8 (mem2, mask2));
+			}
+
+			// store
+			pt_tmp.push_back(*it);
+
+			if(pt_tmp.size()==_maxNumKpt) { break;} // limit the max number if necessary
+			//std::cout <<  it->pt << cv::Point2f(_scale*(float(it->x)+_offset),_scale*(float(it->y)+_offset))<<std::endl;
+		}
+		points.assign(pt_tmp.begin(),pt_tmp.end());
+		timerFancyOp3.stop();
+	}
+
+	// 3d(/2d) subpixel refinement!!
+	TimerSwitchable timerFancyOp4("0.4 BRISK Detection: subpixel(&scale) refinement (per layer)");
+	if(usePassedKeypoints)
+		keypoints.clear();
+	if(doRefinement){
+		for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=points.begin();
+						it!=points.end(); ++it){
+			const int u=it->x;
+			const int v=it->y;
+			float delta_x;
+			float delta_y;
+			subpixel2D(_scoreCalculator.score(u-1,v-1), _scoreCalculator.score(u,v-1), _scoreCalculator.score(u+1,v-1),
+					_scoreCalculator.score(u-1,v), _scoreCalculator.score(u,v), _scoreCalculator.score(u+1,v),
+					_scoreCalculator.score(u-1,v+1), _scoreCalculator.score(u,v+1), _scoreCalculator.score(u+1,v+1),
+					delta_x, delta_y);
+			// todo: 3d refinement
+			keypoints.push_back(cv::KeyPoint(cv::Point2f(_scale*((it->x+delta_x)+_offset),_scale*((it->y+delta_y)+_offset)),_scale*12.0, -1,
+					it->score, _layerNumber/2));
+		}
+	}
+	else{
+		for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=points.begin();
+								it!=points.end(); ++it){
+			keypoints.push_back(cv::KeyPoint(cv::Point2f(_scale*((it->x)+_offset),_scale*((it->y)+_offset)),_scale*12.0, -1,
+								it->score, _layerNumber/2));
+		}
+	}
+	timerFancyOp4.stop();
+}
+#else
+#error
 template<class SCORE_CALCULTAOR_T>
 void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv::KeyPoint>& keypoints,
 		bool enforceUniformity, bool doRefinement, bool usePassedKeypoints){
@@ -168,57 +372,58 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv:
 	}
 	else{
 		//std::cout<<"calc keypoints"<<std::endl;
+		TimerSwitchable timerFancyOp1("0.2 BRISK Detection: 2d nonmax suppression (per layer)");
 		_scoreCalculator.get2dMaxima(points,_absoluteThreshold);
+		timerFancyOp1.stop();
 	}
 
 	// next check above and below. The code looks a bit stupid, but that's
 	// for speed. We don't want to make the distinction analyzing whether or
 	// not there is a layer above and below inside the loop.
 	if(!usePassedKeypoints){
-
 		if(_aboveLayer_ptr!=0&&_belowLayer_ptr!=0){
 			// check above and below
+			TimerSwitchable timerFancyOp2("0.3 BRISK Detection: 3d nonmax suppression (per layer)");
 			std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
 			pt_tmp.reserve(points.size());
 			const int one_over_scale_above = 1.0/_scale_above;
 			const int one_over_scale_below = 1.0/_scale_below;
 			for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=
 					points.begin(); it!=points.end(); ++it){
-				TimerSwitchable timerFancyOp2("0.2 BRISK Detection: 3d nonmax suppression (per keypoint)");
 				const typename ScoreCalculator_t::Score_t center=it->score;
 				const cv::Point2i& pt=it->pt;
 				if(center < (typename ScoreCalculator_t::Score_t)(_absoluteThreshold)) continue;
 				if(center<scoreAbove(pt.x,pt.y)) continue;
-				if(center<scoreBelow(pt.x,pt.y)) continue;
 				if(center<scoreAbove(pt.x+one_over_scale_above,pt.y)) continue;
-				if(center<scoreBelow(pt.x+one_over_scale_below,pt.y)) continue;
 				if(center<scoreAbove(pt.x-one_over_scale_above,pt.y)) continue;
-				if(center<scoreBelow(pt.x-one_over_scale_below,pt.y)) continue;
 				if(center<scoreAbove(pt.x,pt.y+one_over_scale_above)) continue;
-				if(center<scoreBelow(pt.x,pt.y+one_over_scale_below)) continue;
 				if(center<scoreAbove(pt.x,pt.y-one_over_scale_above)) continue;
-				if(center<scoreBelow(pt.x,pt.y-one_over_scale_below)) continue;
 				if(center<scoreAbove(pt.x+one_over_scale_above,pt.y+one_over_scale_above)) continue;
-				if(center<scoreBelow(pt.x+one_over_scale_below,pt.y+one_over_scale_below)) continue;
 				if(center<scoreAbove(pt.x+one_over_scale_above,pt.y-one_over_scale_above)) continue;
-				if(center<scoreBelow(pt.x+one_over_scale_below,pt.y-one_over_scale_below)) continue;
 				if(center<scoreAbove(pt.x-one_over_scale_above,pt.y+one_over_scale_above)) continue;
-				if(center<scoreBelow(pt.x-one_over_scale_below,pt.y+one_over_scale_below)) continue;
 				if(center<scoreAbove(pt.x-one_over_scale_above,pt.y-one_over_scale_above)) continue;
+				if(center<scoreBelow(pt.x,pt.y)) continue;
+				if(center<scoreBelow(pt.x+one_over_scale_below,pt.y)) continue;
+				if(center<scoreBelow(pt.x-one_over_scale_below,pt.y)) continue;
+				if(center<scoreBelow(pt.x,pt.y+one_over_scale_below)) continue;
+				if(center<scoreBelow(pt.x,pt.y-one_over_scale_below)) continue;
+				if(center<scoreBelow(pt.x+one_over_scale_below,pt.y+one_over_scale_below)) continue;
+				if(center<scoreBelow(pt.x+one_over_scale_below,pt.y-one_over_scale_below)) continue;
+				if(center<scoreBelow(pt.x-one_over_scale_below,pt.y+one_over_scale_below)) continue;
 				if(center<scoreBelow(pt.x-one_over_scale_below,pt.y-one_over_scale_below)) continue;
 				pt_tmp.push_back(*it);
-				timerFancyOp2.stop();
 			}
 			points.assign(pt_tmp.begin(),pt_tmp.end());
+			timerFancyOp2.stop();
 		}
 		else if(_aboveLayer_ptr!=0){
 			// check above
+			TimerSwitchable timerFancyOp2("0.3 BRISK Detection: 3d nonmax suppression (per layer)");
 			std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
 			pt_tmp.reserve(points.size());
 			const int one_over_scale_above = 1.0/_scale_above;
 			for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=
 					points.begin(); it!=points.end(); ++it){
-				TimerSwitchable timerFancyOp2("0.2 BRISK Detection: 3d nonmax suppression (per keypoint)");
 				const typename ScoreCalculator_t::Score_t center=it->score;
 				if(center < (typename ScoreCalculator_t::Score_t)(_absoluteThreshold)) continue;
 				const cv::Point2i& pt=it->pt;
@@ -232,19 +437,19 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv:
 				if(center<scoreAbove(pt.x-one_over_scale_above,pt.y+one_over_scale_above)) continue;
 				if(center<scoreAbove(pt.x-one_over_scale_above,pt.y-one_over_scale_above)) continue;
 				pt_tmp.push_back(*it);
-				timerFancyOp2.stop();
+
 			}
 			points.assign(pt_tmp.begin(),pt_tmp.end());
-
+			timerFancyOp2.stop();
 		}
 		else if(_belowLayer_ptr!=0){
 			// check below
+			TimerSwitchable timerFancyOp2("0.3 BRISK Detection: 3d nonmax suppression (per layer)");
 			std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
 			pt_tmp.reserve(points.size());
 			const int one_over_scale_below = 1.0/_scale_below;
 			for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=
 					points.begin(); it!=points.end(); ++it){
-				TimerSwitchable timerFancyOp2("0.2 BRISK Detection: 3d nonmax suppression (per keypoint)");
 				const typename ScoreCalculator_t::Score_t center=it->score;
 				if(center < (typename ScoreCalculator_t::Score_t)(_absoluteThreshold)) continue;
 				const cv::Point2i& pt=it->pt;
@@ -258,9 +463,9 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv:
 				if(center<scoreBelow(pt.x-one_over_scale_below,pt.y+one_over_scale_below)) continue;
 				if(center<scoreBelow(pt.x-one_over_scale_below,pt.y-one_over_scale_below)) continue;
 				pt_tmp.push_back(*it);
-				timerFancyOp2.stop();
 			}
 			points.assign(pt_tmp.begin(),pt_tmp.end());
+			timerFancyOp2.stop();
 		}
 
 	}
@@ -268,13 +473,16 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv:
 	// uniformity enforcement
 	if(points.size()==0) return;
 	if(enforceUniformity&&_radius>0.0){
-
+		//std::cout<<"number of keypoints before uniformity enforcement "<<points.size()<<std::endl;
+		TimerSwitchable timerFancyOp31("0.31 BRISK Detection: sort keypoint by score (per layer)");
 		std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
 
 		// sort
-		std::sort(points.begin(), points.end(), compareKeypointScore<SCORE_CALCULTAOR_T>);
+		std::sort(points.begin(), points.end());
 		const float maxScore=points.front().score;
+		timerFancyOp31.stop();
 
+		pt_tmp.reserve(keypoints.size()+points.size()); // allow appending
 		keypoints.reserve(keypoints.size()+points.size()); // allow appending
 
 		// store occupancy
@@ -282,11 +490,11 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv:
 		const float scaling=15.0/float(_radius);
 		occupancy=cv::Mat::zeros((_img.rows)*ceil(scaling)+32,(_img.cols)*ceil(scaling)+32,CV_8U);
 
+		TimerSwitchable timerFancyOp3("0.3 BRISK Detection: uniformity enforcement (per layer)");
 		// go through the sorted keypoints and reject too close ones
+		for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_reverse_iterator it=points.rbegin();
+				it!=points.rend(); ++it){
 
-		for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=points.begin();
-				it!=points.end(); ++it){
-			TimerSwitchable timerFancyOp3("0.3 BRISK Detection: uniformity enforcement (per keypoint)");
 			const int cy=(it->pt.y*scaling+16);
 			//std::cout<<cy<<" "<<it->pt.y<<std::endl;
 			const int cx=(it->pt.x*scaling+16);
@@ -314,25 +522,24 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv:
 				_mm_storeu_si128((__m128i*)&occupancy.at<uchar>(cy+y-15,cx+1),
 						_mm_adds_epu8 (mem2, mask2));
 			}
-			timerFancyOp3.stop();
+
 			// store
 			pt_tmp.push_back(*it);
+
+			if(pt_tmp.size()==_maxNumKpt) { break;} // limit the max number if necessary
 			//std::cout <<  it->pt << cv::Point2f(_scale*(float(it->pt.x)+_offset),_scale*(float(it->pt.y)+_offset))<<std::endl;
 		}
 		points.assign(pt_tmp.begin(),pt_tmp.end());
-
-		//cv::imshow("Raw",occupancy);
-		//cv::waitKey();
+		timerFancyOp3.stop();
 	}
 
 	// 3d(/2d) subpixel refinement!!
-
+	TimerSwitchable timerFancyOp4("0.4 BRISK Detection: subpixel(&scale) refinement (per layer)");
 	if(usePassedKeypoints)
 		keypoints.clear();
 	if(doRefinement){
 		for(typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it=points.begin();
 						it!=points.end(); ++it){
-			TimerSwitchable timerFancyOp4("0.4 BRISK Detection: subpixel(&scale) refinement (per keypoint)");
 			const int u=it->pt.x;
 			const int v=it->pt.y;
 			//std::cout<<it->score<<std::endl;
@@ -345,7 +552,6 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv:
 			// todo: 3d refinement
 			keypoints.push_back(cv::KeyPoint(cv::Point2f(_scale*((it->pt.x+delta_x)+_offset),_scale*((it->pt.y+delta_y)+_offset)),_scale*12.0, -1,
 					it->score, _layerNumber/2));
-			timerFancyOp4.stop();
 		}
 	}
 	else{
@@ -355,8 +561,9 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(std::vector<cv:
 								it->score, _layerNumber/2));
 		}
 	}
-
+	timerFancyOp4.stop();
 }
+#endif
 
 // utilities
 template<class SCORE_CALCULTAOR_T>
