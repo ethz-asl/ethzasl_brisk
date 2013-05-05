@@ -33,7 +33,7 @@ void HarrisScoreCalculator::initializeScores(){
 	timerFancyOp3.stop();*/
 
 	TimerSwitchable timerFancyOp1("0.1 BRISK Detection: Harris score (per layer)");
-	harrisScores_sse_full(_img,_scores);
+	harrisScores_sse(_img,_scores);
 	timerFancyOp1.stop();
 }
 
