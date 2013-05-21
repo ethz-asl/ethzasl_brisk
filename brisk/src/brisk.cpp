@@ -38,9 +38,7 @@
 #include <tmmintrin.h>
 #include <sys/time.h>
 
-#include <sm/timing/Timer.hpp>
-
-typedef sm::timing::DummyTimer TimerSwitchable;
+#include <brisk/rdtsc_wrapper.h>
 
 using namespace cv;
 
@@ -557,7 +555,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
 
 	// first, calculate the integral image over the whole image:
 	// current integral image
-	TimerSwitchable timerFancyOp0("1.0 Brisk Extraction: integral computation");
+	brisk::TimerSwitchable timerFancyOp0("1.0 Brisk Extraction: integral computation");
 	cv::Mat _integral; // the integral image
 	cv::Mat imageScaled;
 	if(image.type()==CV_16UC1){
@@ -610,7 +608,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
 			}
 			else{
 				// get the gray values in the unrotated pattern
-				TimerSwitchable timerFancyOp11("1.1.1 Brisk Extraction: rotation determination: sample points (per keypoint)");
+				brisk::TimerSwitchable timerFancyOp11("1.1.1 Brisk Extraction: rotation determination: sample points (per keypoint)");
 				if(image.type()==CV_8UC1){
 					for(unsigned int i = 0; i<points_; i++){
 						*(pvalues++)=smoothedIntensity<uchar,int>(image, _integral, x,
@@ -629,7 +627,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
 				direction0=0;
 				direction1=0;
 				// now iterate through the long pairings
-				TimerSwitchable timerFancyOp12("1.1.2 Brisk Extraction: rotation determination: calculate gradient (per keypoint)");
+				brisk::TimerSwitchable timerFancyOp12("1.1.2 Brisk Extraction: rotation determination: calculate gradient (per keypoint)");
 				const BriskLongPair* max=longPairs_+noLongPairs_;
 				for(BriskLongPair* iter=longPairs_; iter<max; ++iter){
 					t1=*(_values+iter->i);
@@ -672,7 +670,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
 		//unsigned int mean=0;
 		pvalues =_values;
 		// get the gray values in the rotated pattern
-		TimerSwitchable timerFancyOp2("1.2 Brisk Extraction: sample points (per keypoint)");
+		brisk::TimerSwitchable timerFancyOp2("1.2 Brisk Extraction: sample points (per keypoint)");
 		if(image.type()==CV_8UC1){
 			for(unsigned int i = 0; i<points_; i++){
 				*(pvalues++)=smoothedIntensity<uchar,int>(image, _integral, x,
@@ -688,7 +686,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
 		timerFancyOp2.stop();
 
 		// now iterate through all the pairings
-		TimerSwitchable timerFancyOp3("1.3 Brisk Extraction: assemble bits (per keypoint)");
+		brisk::TimerSwitchable timerFancyOp3("1.3 Brisk Extraction: assemble bits (per keypoint)");
 		UINT32_ALIAS* ptr2=(UINT32_ALIAS*)ptr;
 		const BriskShortPair* max=shortPairs_+noShortPairs_;
 		for(BriskShortPair* iter=shortPairs_; iter<max;++iter){

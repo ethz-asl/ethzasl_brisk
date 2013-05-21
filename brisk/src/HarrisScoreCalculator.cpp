@@ -11,13 +11,12 @@
 #include <brisk/sseFilters.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <sys/time.h>
-
-
+#include <brisk/harrisScores.hpp>
 
 namespace brisk{
 
 void HarrisScoreCalculator::initializeScores(){
-	cv::Mat DxDx1,DyDy1,DxDy1;
+	/*cv::Mat DxDx1,DyDy1,DxDy1;
 	cv::Mat DxDx,DyDy,DxDy;
 
 	// pipeline
@@ -31,7 +30,11 @@ void HarrisScoreCalculator::initializeScores(){
 	timerFancyOp2.stop();
 	TimerSwitchable timerFancyOp3("0.1.2 BRISK Detection: Harris corner score image (per layer)");
 	cornerHarris(DxDx,DyDy,DxDy,_scores);
-	timerFancyOp3.stop();
+	timerFancyOp3.stop();*/
+
+	TimerSwitchable timerFancyOp1("0.1 BRISK Detection: Harris score (per layer)");
+	harrisScores_sse(_img,_scores);
+	timerFancyOp1.stop();
 }
 
 void HarrisScoreCalculator::get2dMaxima(std::vector<PointWithScore>& points, int absoluteThreshold){
@@ -40,29 +43,37 @@ void HarrisScoreCalculator::get2dMaxima(std::vector<PointWithScore>& points, int
 	//gettimeofday(&start, NULL);
 	const int stride=_scores.cols;
 	const int rows_end=_scores.rows-2;
+	points.reserve(4000);
 	for( int j = 2; j < rows_end ; ++j ){
-		const int* p=&_scores.at<int>(j,0);
+		const int* p=&_scores.at<int>(j,2);
 		const int* const p_begin=p;
 		const int* const p_end=&_scores.at<int>(j,stride-2);
 		bool last=false;
 		while(p<p_end){
-			const int* const center=p;
+			const int center=*p;
+			const int* const center_p=p;
 			++p;
 			if(last) {last=false; continue;}
 			//if(lastline.at<uchar>(0,i)) continue;
-			if(*center<absoluteThreshold) continue;
-			if(*(center+1)>*center) continue;
-			if(*(center-1)>*center) continue;
-			const int* const p1=(center+stride);
-			const int* const p2=(center-stride);
-			if(*p1>*center) continue;
-			if(*p2>*center) continue;
-			if(*(p1+1)>*center) continue;
-			if(*(p1-1)>*center) continue;
-			if(*(p2+1)>*center) continue;
-			if(*(p2-1)>*center) continue;
+			if(center<absoluteThreshold) continue;
+			if(*(center_p+1)>center) continue;
+			if(*(center_p-1)>center) continue;
+			const int* const p1=(center_p+stride);
+			if(*p1>center) continue;
+			const int* const p2=(center_p-stride);
+			if(*p2>center) continue;
+			if(*(p1+1)>center) continue;
+			if(*(p1-1)>center) continue;
+			if(*(p2+1)>center) continue;
+			if(*(p2-1)>center) continue;
 			const int i=p-p_begin-1;
-			points.push_back(PointWithScore(cv::Point2i(i,j),*center));
+
+#ifdef USE_SIMPLE_POINT_WITH_SCORE
+			points.push_back(PointWithScore(center,i,j));
+#else
+#error
+			points.push_back(PointWithScore(cv::Point2i(i,j),center));
+#endif
 		}
 	}
 	//gettimeofday(&end, NULL);

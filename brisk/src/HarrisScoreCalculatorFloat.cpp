@@ -55,7 +55,12 @@ void HarrisScoreCalculatorFloat::get2dMaxima(std::vector<PointWithScore>& points
 			if(*(p2+1)>*center) continue;
 			if(*(p2-1)>*center) continue;
 			const int i=p-p_begin-1;
+#ifdef USE_SIMPLE_POINT_WITH_SCORE
+			points.push_back(PointWithScore(*center,i,j));
+#else
+#error
 			points.push_back(PointWithScore(cv::Point2i(i,j),*center));
+#endif
 		}
 	}
 	//gettimeofday(&end, NULL);

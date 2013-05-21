@@ -33,10 +33,17 @@
 #include <agast/agast7_12s.h>
 #include <agast/agast5_8.h>
 #include <emmintrin.h>
+#include <brisk/rdtsc_wrapper.h>
 
 #ifndef M_PI
 	#define M_PI 3.141592653589793
 #endif
+
+#define USE_SIMPLE_POINT_WITH_SCORE
+
+namespace brisk{
+typedef rdtsc::timing::DummyTimer TimerSwitchable;
+}
 
 
 namespace cv{

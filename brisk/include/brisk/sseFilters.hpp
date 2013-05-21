@@ -8,6 +8,8 @@
 #ifndef SSEFILTERS_HPP_
 #define SSEFILTERS_HPP_
 
+#include <brisk/brisk.h>
+
 namespace brisk{
 
 // generic SSE-optimized 2D filter on CV_8U/CV_16S matrices. stores result in CV_16S matrix.

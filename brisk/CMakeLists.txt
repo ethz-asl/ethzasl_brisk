@@ -33,7 +33,7 @@ add_definitions( -fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self -Woverlo
 #rosbuild_gensrv()
 
 #common commands for building c++ executables and libraries
-rosbuild_add_library(${PROJECT_NAME} src/brisk.cpp include/brisk/hammingsse.hpp src/harris.cpp src/HarrisScoreCalculator.cpp src/HarrisScoreCalculatorFloat.cpp)
+rosbuild_add_library(${PROJECT_NAME} src/brisk.cpp include/brisk/hammingsse.hpp src/harris.cpp src/HarrisScoreCalculator.cpp src/HarrisScoreCalculatorFloat.cpp src/harrisScores_sse.cpp src/rdtsc_wrapper.cpp)
 rosbuild_add_library(false_color src/false_color.cpp)
 #target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 #target_link_libraries(${PROJECT_NAME} another_library)

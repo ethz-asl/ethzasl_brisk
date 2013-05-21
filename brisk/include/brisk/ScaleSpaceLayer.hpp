@@ -10,9 +10,8 @@
 
 
 #include <vector>
-
 #include <opencv2/opencv.hpp>
-
+#include <brisk/brisk.h>
 #include <brisk/ScoreCalculator.hpp>
 
 
@@ -31,6 +30,7 @@ public:
 	void create(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,bool initScores=true); // for successive construction
 
 	void setUniformityRadius(double radius);
+	void setMaxNumKpt(size_t maxNumKpt){_maxNumKpt=maxNumKpt;}
 	void setAbsoluteThreshold(double absoluteThreshold){
 		_absoluteThreshold=absoluteThreshold;
 	}
@@ -89,6 +89,7 @@ protected:
 
 	// uniformity enforcement related
 	double _radius;
+	size_t _maxNumKpt;
 	double _absoluteThreshold;
 	cv::Mat _LUT;
 };
