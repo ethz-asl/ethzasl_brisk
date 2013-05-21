@@ -39,17 +39,53 @@ cv::Mat descriptorsLast;
 std::vector<cv::KeyPoint> keypointsLast;
 cv::Mat img_mono8Last;
 
+class ImagePublisher {
+  ros::NodeHandle nh_;
+  image_transport::ImageTransport it_;
+  image_transport::Publisher image_pub_;
 
+  ImagePublisher():it_(nh_) {
+    std::cout<<"Advertised /flir_demo/image_out"<<std::endl;
+    image_pub_ = it_.advertise("/flir_demo/image_out", 10);
+    seq_ = 0;
+  }
+  ~ImagePublisher() {
+    delete inst_;
+    inst_ = NULL;
+  }
 
-void imageCallback(const sensor_msgs::ImageConstPtr& msg)
-{
+ public:
+  static ImagePublisher* Instance() {
+    if (inst_ == NULL) {
+      inst_ = new ImagePublisher();
+    }
+    assert(inst_);
+    return inst_;
+  }
+
+  void publish(cv::Mat image){
+    if(image_pub_.getNumSubscribers()){
+      cv_bridge::CvImagePtr cv_ptr(new cv_bridge::CvImage);
+      cv_ptr->encoding = "bgr8";
+      cv_ptr->header.seq = seq_++;
+      cv_ptr->header.stamp = ros::Time::now();
+      cv_ptr->image = image;
+      sensor_msgs::ImagePtr msg = cv_ptr->toImageMsg();
+      image_pub_.publish(msg);
+    }
+  }
+
+  static ImagePublisher* inst_;
+  int seq_;
+};
+
+void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
 #if ROS_VERSION_MINIMUM(1, 9, 44)
 #else
   sensor_msgs::CvBridge bridge;
 #endif
-  try
-  {
+  try {
 
     // get image
 
@@ -57,27 +93,16 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     cv_bridge::CvImagePtr ptr = cv_bridge::toCvCopy(msg, "mono16");
     cv::Mat img = ptr->image;
 #else
-    cv::Mat img=bridge.imgMsgToCv(msg, "mono16");
+    cv::Mat img = bridge.imgMsgToCv(msg, "mono16");
 #endif
 
     // only at first call
-    if (img_mono8Last.cols == 0)
-    {
+    if (img_mono8Last.cols == 0) {
       img_mono8Last = cv::Mat::zeros(img.rows, img.cols, CV_8UC1);
     }
 
     cv::Mat half_img(img.rows * 2 / 3, img.cols * 2 / 3, CV_16UC1);
-    //timeval start, end;
-    //gettimeofday(&start, NULL);
-    //for(int i=0; i<100; ++i)
-    //brisk::ScaleSpaceLayer<brisk::HarrisScoreCalculatorFloat>::twothirdsample16(img,half_img);
-    //gettimeofday(&end, NULL);
-    //double dt = ((end.tv_sec * 1000000 + end.tv_usec) - (start.tv_sec * 1000000 + start.tv_usec))/ 1000.;
-    //std::cout<<dt/100<<"ms mono16"<<std::endl;
 
-    //cv::Mat raw=bridge.imgMsgToCv(msg, "mono16");
-    //cv::Mat img;
-    //cv::medianBlur(raw,img, 3);
     cv::Mat img_mono32F;
     cv::Mat half_img_mono32F;
     img.convertTo(img_mono32F, CV_32F);
@@ -96,7 +121,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     std::vector<std::vector<cv::DMatch> > matches;
     matcher->radiusMatch(descriptorsLast, descriptors, matches, 50);
 
-
     //convert 8 bit and false color conversion
     static bool dofalsecolor = false;
 
@@ -107,20 +131,16 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
     converter_16_8::Instance().convert_to8bit(img, img_mono8_ir, doTempScaling);
     //converter_16_8::Instance().toneMapping(img, img_mono8_ir);
 
-
-
-    if (dofalsecolor)
-    {
-      convertFalseColor(img_mono8_ir, img_mono8, palette::False_color_palette4, doTempScaling, converter_16_8::Instance().getMin(), converter_16_8::Instance().getMax());
-    }
-    else
-    {
+    if (dofalsecolor) {
+      convertFalseColor(img_mono8_ir, img_mono8, palette::False_color_palette4, doTempScaling,
+                        converter_16_8::Instance().getMin(), converter_16_8::Instance().getMax());
+    } else {
       img_mono8 = img_mono8_ir;
     }
 
     // draw images
     cv::Mat drawing;
-    cv::drawKeypoints(img_mono8, keypoints, drawing, cv::Scalar(255, 0, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS); // blue,multisize
+    cv::drawKeypoints(img_mono8, keypoints, drawing, cv::Scalar(255, 0, 0), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);  // blue,multisize
 
     cv::Mat matchImg;
     cv::drawMatches(img_mono8Last, keypointsLast, img_mono8, keypoints, matches, matchImg, cv::Scalar(0, 255, 0),
@@ -128,14 +148,27 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
                     cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS | cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
     // display
-    cv::imshow("Raw", img_mono8);
-    cv::imshow("Matches", matchImg);
-    //cv::imshow("Half", half_img_mono8);
-    cv::imshow("Points", drawing);
+
+    cv::Mat fullImg(img.rows * 2, img.cols * 2, CV_8UC3);
+    cv::Mat dst_tl = fullImg(cv::Rect(0, 0, img.cols, img.rows));
+    cv::Mat img_monorgb;
+    if(img_mono8.type() == CV_8UC1){
+      cv::cvtColor(img_mono8, img_monorgb, CV_GRAY2BGR);
+      img_monorgb.copyTo(dst_tl);
+    }else{
+      img_mono8.copyTo(dst_tl);
+    }
+    cv::Mat dst_tr = fullImg(cv::Rect(img.cols, 0, img.cols, img.rows));
+    drawing.copyTo(dst_tr);
+    cv::Mat dst_bl = fullImg(cv::Rect(0, img.rows, img.cols * 2, img.rows));
+    matchImg.copyTo(dst_bl);
+
+    cv::imshow("Points", fullImg);
+
+    ImagePublisher::Instance()->publish(fullImg);
 
     char key = cv::waitKey(20);
-    if (key == 'c')
-    {
+    if (key == 'c') {
       dofalsecolor = !dofalsecolor;
     }
 
@@ -161,21 +194,18 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg)
   }
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   ros::init(argc, argv, "flir");
   std::string path = ros::package::getPath("brisk");
-  detector = new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculatorFloat>(2, 14, 80);
+  detector = new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculatorFloat>(2, 14, 50);
   extractor = new cv::BriskDescriptorExtractor(path + "/brisk.ptn", false, true);
   matcher = new cv::BruteForceMatcherSse();
 
+  ImagePublisher::Instance();
+
   ros::NodeHandle nh;
-  cvNamedWindow("Raw");
-  cvNamedWindow("Matches");
   cvNamedWindow("Points");
-  cvMoveWindow("Raw", 200, 50);
-  cvMoveWindow("Matches", 200, 350);
-  cvMoveWindow("Points", 550, 50);
+  cvMoveWindow("Points", 50, 50);
 
   cvStartWindowThread();
   image_transport::ImageTransport it(nh);
@@ -188,3 +218,4 @@ int main(int argc, char **argv)
   return 0;
 }
 
+ImagePublisher* ImagePublisher::inst_ = NULL;
