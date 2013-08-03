@@ -24,12 +24,16 @@
 #include <ros/package.h>
 #include <image_transport/image_transport.h>
 #include <opencv/highgui.h>
-#if ROS_VERSION_MINIMUM(1, 9, 44)
+#if ROS_VERSION_MINIMUM(1, 8, 16)
 #include <cv_bridge/cv_bridge.h>
 #else
 #include <cv_bridge/CvBridge.h>
 #endif
 #include <flir/falsecolor.h>
+
+#define ROS_MIN_MAJOR 1
+#define ROS_MIN_MINOR 8
+#define ROS_MIN_PATCH 16
 
 cv::Ptr<cv::FeatureDetector> detector;
 cv::Ptr<cv::DescriptorExtractor> extractor;
@@ -81,7 +85,7 @@ class ImagePublisher {
 
 void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
-#if ROS_VERSION_MINIMUM(1, 9, 44)
+#if ROS_VERSION_MINIMUM(ROS_MIN_MAJOR, ROS_MIN_MINOR, ROS_MIN_PATCH)
 #else
   sensor_msgs::CvBridge bridge;
 #endif
@@ -89,7 +93,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 
     // get image
 
-#if ROS_VERSION_MINIMUM(1, 9, 44)
+#if ROS_VERSION_MINIMUM(ROS_MIN_MAJOR, ROS_MIN_MINOR, ROS_MIN_PATCH)
     cv_bridge::CvImagePtr ptr = cv_bridge::toCvCopy(msg, "mono16");
     cv::Mat img = ptr->image;
 #else
@@ -184,7 +188,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
      std::cout<<dt/100<<"ms mono8"<<std::endl;*/
   }
 
-#if ROS_VERSION_MINIMUM(1, 9, 44)
+#if ROS_VERSION_MINIMUM(ROS_MIN_MAJOR, ROS_MIN_MINOR, ROS_MIN_PATCH)
   catch (cv_bridge::Exception& e)
 #else
   catch (sensor_msgs::CvBridgeException& e)
