@@ -24,16 +24,19 @@
 #include <ros/package.h>
 #include <image_transport/image_transport.h>
 #include <opencv/highgui.h>
-#if ROS_VERSION_MINIMUM(1, 8, 16)
+
+#define ROS_MIN_MAJOR 1
+#define ROS_MIN_MINOR 8
+#define ROS_MIN_PATCH 16
+
+
+#if ROS_VERSION_MINIMUM(ROS_MIN_MAJOR, ROS_MIN_MINOR, ROS_MIN_PATCH)
 #include <cv_bridge/cv_bridge.h>
 #else
 #include <cv_bridge/CvBridge.h>
 #endif
 #include <flir/falsecolor.h>
 
-#define ROS_MIN_MAJOR 1
-#define ROS_MIN_MINOR 8
-#define ROS_MIN_PATCH 16
 
 cv::Ptr<cv::FeatureDetector> detector;
 cv::Ptr<cv::DescriptorExtractor> extractor;
