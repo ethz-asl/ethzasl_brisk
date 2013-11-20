@@ -20,21 +20,22 @@ void HarrisScoreCalculator::initializeScores(){
 	cv::Mat DxDx,DyDy,DxDy;
 
 	// pipeline
-	TimerSwitchable timerFancyOp1("0.1.0 BRISK Detection: 2nd moment matrix images computation (per layer)");
+	//TimerSwitchable timerFancyOp1("0.1.0 BRISK Detection: 2nd moment matrix images computation (per layer)");
 	getCovarEntries(_img, DxDx1,DyDy1,DxDy1);
-	timerFancyOp1.stop();
-	TimerSwitchable timerFancyOp2("0.1.1 BRISK Detection: 3 times Gaussian filter of 2nd mom. mat. (per layer)");
+	//timerFancyOp1.stop();
+	//TimerSwitchable timerFancyOp2("0.1.1 BRISK Detection: 3 times Gaussian filter of 2nd mom. mat. (per layer)");
 	filterGauss3by316S(DxDx1, DxDx);
 	filterGauss3by316S(DyDy1, DyDy);
 	filterGauss3by316S(DxDy1, DxDy);
-	timerFancyOp2.stop();
-	TimerSwitchable timerFancyOp3("0.1.2 BRISK Detection: Harris corner score image (per layer)");
+	//timerFancyOp2.stop();
+	//TimerSwitchable timerFancyOp3("0.1.2 BRISK Detection: Harris corner score image (per layer)");
 	cornerHarris(DxDx,DyDy,DxDy,_scores);
-	timerFancyOp3.stop();*/
+	//timerFancyOp3.stop();*/
 
-	TimerSwitchable timerFancyOp1("0.1 BRISK Detection: Harris score (per layer)");
+	//TimerSwitchable timerFancyOp1("0.1 BRISK Detection: Harris score (per layer)");
 	harrisScores_sse(_img,_scores);
-	timerFancyOp1.stop();
+	//cv::imshow("sometest",_scores);
+	//timerFancyOp1.stop();
 }
 
 void HarrisScoreCalculator::get2dMaxima(std::vector<PointWithScore>& points, int absoluteThreshold){
@@ -66,7 +67,7 @@ void HarrisScoreCalculator::get2dMaxima(std::vector<PointWithScore>& points, int
 			if(*(p1-1)>center) continue;
 			if(*(p2+1)>center) continue;
 			if(*(p2-1)>center) continue;
-			const int i=p-p_begin-1;
+			const int i=center_p-p_begin+2;
 
 #ifdef USE_SIMPLE_POINT_WITH_SCORE
 			points.push_back(PointWithScore(center,i,j));
