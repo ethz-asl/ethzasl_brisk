@@ -44,7 +44,7 @@ std::string Timing::getTag(size_t handle) {
   std::string tag;
   bool found = false;
 
-  // Perform a linear search for the tag
+  // Perform a linear search for the tag.
   map_t::iterator i = instance().m_tagMap.begin();
   for (; i != instance().m_tagMap.end(); i++) {
     if (i->second == handle) {
@@ -66,28 +66,24 @@ void Timing::addCycles(size_t handle, double cycles) {
 }
 
 double Timing::getTotalSeconds(size_t handle) {
-//  SM_ASSERT_LT(TimerException, handle, instance().m_timers.size(), "Handle is out of range: " << handle << ", number of timers: " << instance().m_timers.size());
   return boost::accumulators::extract::sum(instance().m_timers[handle].m_acc);
 }
 double Timing::getTotalSeconds(std::string const & tag) {
   return getTotalSeconds(getHandle(tag));
 }
 double Timing::getMeanSeconds(size_t handle) {
-//  SM_ASSERT_LT(TimerException, handle, instance().m_timers.size(), "Handle is out of range: " << handle << ", number of timers: " << instance().m_timers.size());
   return boost::accumulators::extract::mean(instance().m_timers[handle].m_acc);
 }
 double Timing::getMeanSeconds(std::string const & tag) {
   return getMeanSeconds(getHandle(tag));
 }
 size_t Timing::getNumSamples(size_t handle) {
-//  SM_ASSERT_LT(TimerException, handle , instance().m_timers.size(), "Handle is out of range: " << handle << ", number of timers: " << instance().m_timers.size());
   return boost::accumulators::extract::count(instance().m_timers[handle].m_acc);
 }
 size_t Timing::getNumSamples(std::string const & tag) {
   return getNumSamples(getHandle(tag));
 }
 double Timing::getVarianceSeconds(size_t handle) {
-//  SM_ASSERT_LT(TimerException, handle, instance().m_timers.size(), "Handle is out of range: " << handle << ", number of timers: " << instance().m_timers.size());
   return boost::accumulators::extract::variance(
       instance().m_timers[handle].m_acc);
 }
@@ -95,14 +91,12 @@ double Timing::getVarianceSeconds(std::string const & tag) {
   return getVarianceSeconds(getHandle(tag));
 }
 double Timing::getMinSeconds(size_t handle) {
-//  SM_ASSERT_LT(TimerException, handle, instance().m_timers.size(), "Handle is out of range: " << handle << ", number of timers: " << instance().m_timers.size());
   return boost::accumulators::extract::min(instance().m_timers[handle].m_acc);
 }
 double Timing::getMinSeconds(std::string const & tag) {
   return getMinSeconds(getHandle(tag));
 }
 double Timing::getMaxSeconds(size_t handle) {
-//  SM_ASSERT_LT(TimerException, handle, instance().m_timers.size(), "Handle is out of range: " << handle << ", number of timers: " << instance().m_timers.size());
   return boost::accumulators::extract::max(instance().m_timers[handle].m_acc);
 }
 double Timing::getMaxSeconds(std::string const & tag) {
@@ -110,7 +104,6 @@ double Timing::getMaxSeconds(std::string const & tag) {
 }
 
 double Timing::getHz(size_t handle) {
-//  SM_ASSERT_LT(TimerException, handle, instance().m_timers.size(), "Handle is out of range: " << handle << ", number of timers: " << instance().m_timers.size());
   return 1.0
       / boost::accumulators::extract::rolling_mean(
           instance().m_timers[handle].m_acc);
@@ -138,7 +131,6 @@ std::string Timing::secondsToTimeString(double seconds) {
 
 void Timing::print(std::ostream & out) {
   map_t & tagMap = instance().m_tagMap;
-  //list_t & timers = instance().m_timers;
 
 #ifdef USE_RDTSC
   out << "SM Timing - RDTSC cycles\n";
@@ -158,7 +150,7 @@ void Timing::print(std::ostream & out) {
     out << getNumSamples(i) << "\t";
     if (getNumSamples(i) > 0) {
 #ifdef USE_RDTSC
-      //the same functions just that they return cycles
+      // The same functions just that they return cycles.
       out << getTotalSeconds(i) << "\t";
       double meansec = getMeanSeconds(i);
       double stddev = sqrt(getVarianceSeconds(i));
