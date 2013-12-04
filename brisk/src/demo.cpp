@@ -32,9 +32,9 @@
 #include <list>
 #include <iomanip>
 
-//standard configuration for the case of no file given
+// Standard configuration for the case of no file given.
 const int n = 12;
-const float r = 2.5;  // found 8-9-11, r=3.6, exponent 1.5
+const float r = 2.5;  // Found 8-9-11, r=3.6, exponent 1.5.
 
 void help(char** argv) {
   std::cout << "This command line tool lets you evaluate different keypoint "
@@ -66,23 +66,20 @@ void help(char** argv) {
 }
 
 int main(int argc, char ** argv) {
-
-  //std::cout<<sizeof(cv::Point2i)<<" "<<sizeof(CvPoint)<<std::endl;
-
-  // process command line args
+  // Process command line args.
   if (argc != 5 && argc != 7 && argc != 1) {
     help(argv);
     return 1;
   }
 
-  // names of the two image files
+  // Names of the two image files.
   std::string fname1;
   std::string fname2;
   cv::Mat imgRGB1;
   cv::Mat imgRGB2;
   cv::Mat imgRGB3;
   bool do_rot = false;
-  // standard file extensions
+  // Standard file extensions.
   std::vector < std::string > fextensions;
   fextensions.push_back(".bmp");
   fextensions.push_back(".jpeg");
@@ -97,7 +94,7 @@ int main(int argc, char ** argv) {
   fextensions.push_back(".tiff");
   fextensions.push_back(".tif");
 
-  // if no arguments are passed:
+  // If no arguments are passed:
   if (argc == 1) {
     int i = 0;
     int fextensions_size = fextensions.size();
@@ -150,7 +147,6 @@ int main(int argc, char ** argv) {
         return 2;
       }
     }
-    //unsigned int N=atoi(argv[3]);
     if (imgRGB1.empty()) {
       fname1 = std::string(argv[1] + 4) + "/img1.pgm";
       imgRGB1 = cv::imread(fname1);
@@ -161,7 +157,7 @@ int main(int argc, char ** argv) {
     }
   }
 
-  // convert to grayscale
+  // Convert to grayscale.
   cv::Mat imgGray1;
   cv::cvtColor(imgRGB1, imgGray1, CV_BGR2GRAY);
   cv::Mat imgGray2;
@@ -169,11 +165,11 @@ int main(int argc, char ** argv) {
     cv::cvtColor(imgRGB2, imgGray2, CV_BGR2GRAY);
   }
 
-  // run FAST in first image
+  // Run FAST in first image.
   std::vector<cv::KeyPoint> keypoints, keypoints2;
   int threshold;
 
-  // create the detector:
+  // Create the detector:
   cv::Ptr < cv::FeatureDetector > detector;
   if (argc == 1) {
     detector = new cv::BriskFeatureDetector(60, 4);
@@ -218,9 +214,9 @@ int main(int argc, char ** argv) {
     }
   }
 
-  // run the detector:
+  // Run the detector:
   if (argc == 7) {
-    // try to read descriptor files
+    // Try to read descriptor files.
     std::string desc1 = std::string(argv[5]);
     std::string desc2 = std::string(argv[6]);
     std::ifstream descf1(desc1.c_str());
@@ -234,7 +230,7 @@ int main(int argc, char ** argv) {
       return 3;
     }
 
-    // fill the keypoints
+    // Fill the keypoints.
     std::string str1;
     std::stringstream strstrm1;
     std::getline(descf1, str1);
@@ -264,7 +260,7 @@ int main(int argc, char ** argv) {
       keypoints2.push_back(cv::KeyPoint(x, y, 4.0 * r));
     }
 
-    // clean up
+    // Clean up.
     descf1.close();
     descf2.close();
   } else {
@@ -273,10 +269,10 @@ int main(int argc, char ** argv) {
     detector->detect(imgGray2, keypoints2);
   }
 
-  // now the extractor:
+  // Now the extractor:
   bool hamming = true;
   cv::Ptr < cv::DescriptorExtractor > descriptorExtractor;
-  // now the extractor:
+  // Now the extractor:
   if (argc == 1) {
     descriptorExtractor = new cv::BriskDescriptorExtractor();
   } else {
@@ -297,7 +293,7 @@ int main(int argc, char ** argv) {
     } else if (std::string(argv[4]) == "ORB") {
       descriptorExtractor = new cv::OrbDescriptorExtractor();
     } else if (std::string(argv[4]) == "SURF") {
-      descriptorExtractor = cv::DescriptorExtractor::create("SURF")
+      descriptorExtractor = cv::DescriptorExtractor::create("SURF");
       hamming = false;
     } else if (std::string(argv[4]) == "SIFT") {
       descriptorExtractor = cv::DescriptorExtractor::create("SIFT");
@@ -313,15 +309,15 @@ int main(int argc, char ** argv) {
     }
   }
 
-  // get the descriptors
+  // Get the descriptors.
   cv::Mat descriptors, descriptors2;
   std::vector < cv::DMatch > indices;
   int testits = 100;
-  // first image
+  // First image.
   descriptorExtractor->compute(imgGray2, keypoints2, descriptors2);
   double tt = cv::getTickCount();
   for (int i = 0; i < testits; ++i) {
-    // and the second one
+    // And the second one.
     descriptorExtractor->compute(imgGray1, keypoints, descriptors);
   }
   tt = cv::getTickCount() - tt;
@@ -332,7 +328,7 @@ int main(int argc, char ** argv) {
       << tt / ((double) cv::getTickFrequency() * testits * (keypoints.size()))
           * 1000 << "ms " << std::endl;
 
-  // matching
+  // Matching.
   std::vector < std::vector<cv::DMatch> > matches;
   cv::Ptr < cv::DescriptorMatcher > descriptorMatcher;
   if (hamming)
@@ -345,7 +341,7 @@ int main(int argc, char ** argv) {
     descriptorMatcher->radiusMatch(descriptors2, descriptors, matches, 0.21);
   cv::Mat outimg;
 
-  // drawing
+  // Drawing.
   drawMatches(imgRGB2, keypoints2, imgRGB1, keypoints, matches, outimg,
               cv::Scalar(0, 255, 0), cv::Scalar(0, 0, 255),
               std::vector<std::vector<char> >(),
