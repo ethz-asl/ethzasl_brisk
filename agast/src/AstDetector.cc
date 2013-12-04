@@ -19,8 +19,7 @@
 #include <agast/AstDetector.h>
 #include <agast/cvWrapper.h>
 
-using namespace std;
-using namespace agast;
+namespace agast {
 
 void AstDetector::score(const unsigned char* i,
                         const std::vector<CvPoint>& corners_all) {
@@ -50,3 +49,4 @@ void AstDetector::nms(const unsigned char* im,
   score(im, corners_all);
   nonMaximumSuppression(corners_all, corners_nms);
 }
+}  // namespace agast

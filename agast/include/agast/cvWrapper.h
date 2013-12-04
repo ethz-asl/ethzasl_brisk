@@ -19,7 +19,7 @@
 #ifndef CVWRAPPER_H_
 #define CVWRAPPER_H_
 
-#define HAVE_OPENCV  //we normally do have opencv
+#define HAVE_OPENCV
 
 #ifdef HAVE_OPENCV
 #include <opencv2/opencv.hpp>
@@ -31,4 +31,4 @@ typedef struct CvPoint {
 CvPoint;
 #endif
 
-#endif /* CVWRAPPER_H_ */
+#endif  // CVWRAPPER_H_
