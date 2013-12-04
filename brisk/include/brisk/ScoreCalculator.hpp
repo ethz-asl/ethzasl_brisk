@@ -17,13 +17,13 @@
 
 namespace brisk {
 
-// abstract base class to provide an interface for score calculation of any sort.
+// Abstract base class to provide an interface for score calculation of any sort.
 template<typename SCORE_TYPE>
 class ScoreCalculator {
  public:
   typedef SCORE_TYPE Score_t;
 
-  // helper struct for point storage
+  // Helper struct for point storage.
 #ifdef USE_SIMPLE_POINT_WITH_SCORE
   struct PointWithScore {
     PointWithScore()
@@ -38,7 +38,9 @@ class ScoreCalculator {
     }
     Score_t score;
     uint16_t x, y;
-    // this is so terrible. but so fast:
+    // This is so terrible. but so fast:
+    // TODO(slynen) Fix this: The operator says smaller than, but returns
+    // larger than.
     bool operator<(const PointWithScore& other) const {
       return score > other.score;
     }
@@ -56,33 +58,29 @@ class ScoreCalculator {
   };
 #endif
 
-  // constructor
-  ScoreCalculator() {
-  }
-  // destructor
-  virtual ~ScoreCalculator() {
-  }
+  // Constructor.
+  ScoreCalculator() { }
+  // Destructor.
+  virtual ~ScoreCalculator() { }
 
-  // set image
+  // Set image.
   void setImage(const cv::Mat& img, bool initScores = true) {
     _img = img;
     if (initScores)
       initializeScores();
   }
 
-  // calculate/get score - implement floating point and integer access
+  // Calculate/get score - implement floating point and integer access.
   virtual inline double score(double u, double v)=0;
   virtual inline Score_t score(int u, int v)=0;
 
-  // 2d maximum query
+  // 2d maximum query.
   virtual void get2dMaxima(std::vector<PointWithScore>& points,
-                           Score_t absoluteThreshold = 0)=0;
+                           Score_t absoluteThreshold = 0) = 0;
  protected:
-  cv::Mat _img;  // the image we operate on
-  cv::Mat _scores;  // store calculated scores
-  virtual void initializeScores()=0;
+  cv::Mat _img;  // The image we operate on.
+  cv::Mat _scores;  // Store calculated scores.
+  virtual void initializeScores() = 0;
 };
-
 } // namespace brisk
-
 #endif /* SCORECALCULATOR_HPP_ */
