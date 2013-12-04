@@ -25,45 +25,47 @@
 
 struct CvPoint;
 
-namespace agast{
+namespace agast {
 
-class AgastDetector5_8 : public AstDetector
-{
-	public:
-		AgastDetector5_8():AstDetector(){;}
-		AgastDetector5_8(int width, int height, int thr):AstDetector(width, height, thr){init_pattern();};
-		~AgastDetector5_8(){}
-		void detect(const unsigned char* im,
-				std::vector<CvPoint>& keypoints, const cv::Mat* thrmap);
-		void nms(const unsigned char* im,
-				const std::vector<CvPoint>& keypoints, std::vector<CvPoint>& keypoints_nms);
-		int get_borderWidth(){return borderWidth;}
-		int cornerScore(const unsigned char* p);
+class AgastDetector5_8 : public AstDetector {
+ public:
+  AgastDetector5_8() : AstDetector() { }
+  AgastDetector5_8(int width, int height, int thr)
+      : AstDetector(width, height, thr) {
+    init_pattern();
+  }
+  ~AgastDetector5_8() { }
+  void detect(const unsigned char* im, std::vector<CvPoint>& keypoints,
+              const cv::Mat* thrmap);
+  void nms(const unsigned char* im, const std::vector<CvPoint>& keypoints,
+           std::vector<CvPoint>& keypoints_nms);
+  int get_borderWidth() {
+    return borderWidth;
+  }
+  int cornerScore(const unsigned char* p);
 
-	private:
-		static const int borderWidth=1;
-		int_fast16_t s_offset0;
-		int_fast16_t s_offset1;
-		int_fast16_t s_offset2;
-		int_fast16_t s_offset3;
-		int_fast16_t s_offset4;
-		int_fast16_t s_offset5;
-		int_fast16_t s_offset6;
-		int_fast16_t s_offset7;
+ private:
+  static const int borderWidth = 1;
+  int_fast16_t s_offset0;
+  int_fast16_t s_offset1;
+  int_fast16_t s_offset2;
+  int_fast16_t s_offset3;
+  int_fast16_t s_offset4;
+  int_fast16_t s_offset5;
+  int_fast16_t s_offset6;
+  int_fast16_t s_offset7;
 
-		void init_pattern()
-		{
-			s_offset0=(-1)+(0)*xsize;
-			s_offset1=(-1)+(-1)*xsize;
-			s_offset2=(0)+(-1)*xsize;
-			s_offset3=(1)+(-1)*xsize;
-			s_offset4=(1)+(0)*xsize;
-			s_offset5=(1)+(1)*xsize;
-			s_offset6=(0)+(1)*xsize;
-			s_offset7=(-1)+(1)*xsize;
-		}
+  void init_pattern() {
+    s_offset0 = (-1) + (0) * xsize;
+    s_offset1 = (-1) + (-1) * xsize;
+    s_offset2 = (0) + (-1) * xsize;
+    s_offset3 = (1) + (-1) * xsize;
+    s_offset4 = (1) + (0) * xsize;
+    s_offset5 = (1) + (1) * xsize;
+    s_offset6 = (0) + (1) * xsize;
+    s_offset7 = (-1) + (1) * xsize;
+  }
 };
-
-}
+}  // namespace agast
 
 #endif /* AGAST5_8_H */

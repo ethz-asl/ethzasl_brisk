@@ -10,20 +10,13 @@
   <url>http://ros.org/wiki/brisk</url>
 
   <depend package="roscpp"/>
-  <depend package="cv_bridge"/>
-  <depend package="image_transport"/>
-  <depend package="sensor_msgs"/>
   <depend package="agast"/>
-  <depend package="dynamic_reconfigure"/>
   <depend package="opencv2"/>
   <depend package="sm_timing"/>
 
   <export>
-    <cpp cflags="-I${prefix}/include" lflags=" -L${prefix}/lib -lbrisk -lfalse_color"/>
+    <cpp cflags="-I${prefix}/include" lflags=" -L${prefix}/lib -lbrisk"/>
   </export>
-  <platform os="ubuntu" version="9.04"/>
-  <platform os="ubuntu" version="9.10"/>
-  <platform os="ubuntu" version="10.04"/>
 
 </package>
 

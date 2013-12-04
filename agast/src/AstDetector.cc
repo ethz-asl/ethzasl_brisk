@@ -22,35 +22,31 @@
 using namespace std;
 using namespace agast;
 
-void AstDetector::score(const unsigned char* i, const std::vector<CvPoint>& corners_all)
-{
-	unsigned int n=0;
-    unsigned int num_corners=corners_all.size();
+void AstDetector::score(const unsigned char* i,
+                        const std::vector<CvPoint>& corners_all) {
+  unsigned int n = 0;
+  unsigned int num_corners = corners_all.size();
 
-	if(num_corners > scores.capacity())
-	{
-		if(scores.capacity()==0)
-		{
-			scores.reserve(512 > num_corners ? 512 : num_corners);
-		}
-		else
-		{
-			unsigned int nScores = scores.capacity()*2;
-			if(num_corners > nScores)
-				nScores = num_corners;
-			scores.reserve(nScores);
-		}
-	}
+  if (num_corners > scores.capacity()) {
+    if (scores.capacity() == 0) {
+      scores.reserve(512 > num_corners ? 512 : num_corners);
+    } else {
+      unsigned int nScores = scores.capacity() * 2;
+      if (num_corners > nScores)
+        nScores = num_corners;
+      scores.reserve(nScores);
+    }
+  }
 
-    scores.resize(num_corners);
+  scores.resize(num_corners);
 
-    for(; n < num_corners; n++)
-        scores[n] = cornerScore(i + corners_all[n].y*xsize + corners_all[n].x);
+  for (; n < num_corners; n++)
+    scores[n] = cornerScore(i + corners_all[n].y * xsize + corners_all[n].x);
 }
 
-void AstDetector::nms(const unsigned char* im, const std::vector<CvPoint>& corners_all,
-		std::vector<CvPoint>& corners_nms)
-{
-	score(im,corners_all);
-	nonMaximumSuppression(corners_all, corners_nms);
+void AstDetector::nms(const unsigned char* im,
+                      const std::vector<CvPoint>& corners_all,
+                      std::vector<CvPoint>& corners_nms) {
+  score(im, corners_all);
+  nonMaximumSuppression(corners_all, corners_nms);
 }
