@@ -10,7 +10,7 @@
 
 #include <brisk/brisk.h>
 
-namespace brisk{
+namespace brisk {
 
 // generic SSE-optimized 2D filter on CV_8U/CV_16S matrices. stores result in CV_16S matrix.
 template<int X, int Y>
@@ -35,7 +35,6 @@ __inline__ void filterGauss3by332F(cv::Mat& src, cv::Mat& dst);
 
 #include "implementation/sseFilters.hpp"
 
-}
-
+}  // namespace brisk
 
 #endif /* SSEFILTERS_HPP_ */
