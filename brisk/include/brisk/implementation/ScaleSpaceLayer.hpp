@@ -669,7 +669,7 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::detectScaleSpaceMaxima(
                                      ceil(_LUT.at<float>(y, 22) * nsc),
                                      ceil(_LUT.at<float>(y, 21) * nsc),
                                      ceil(_LUT.at<float>(y, 20) * nsc),
-                                     _LUT.at<float>(y, 19) * nsc,
+                                     ceil(_LUT.at<float>(y, 19) * nsc),
                                      ceil(_LUT.at<float>(y, 18) * nsc),
                                      ceil(_LUT.at<float>(y, 17) * nsc),
                                      ceil(_LUT.at<float>(y, 16) * nsc));
