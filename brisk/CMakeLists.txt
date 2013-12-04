@@ -16,9 +16,9 @@ rosbuild_init()
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-add_definitions(-fPIC -msse2 -mssse3 -march=nocona -Wextra -Winit-self 
-                -Woverloaded-virtual -Wnon-virtual-dtor -Wsign-promo 
-                -Wno-long-long)
+add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall
+                -Wno-overloaded-virtual -Wno-non-virtual-dtor #OpenCV
+                )
 
 rosbuild_add_library(${PROJECT_NAME} src/brisk.cpp
                                      src/harris.cpp 
@@ -26,4 +26,3 @@ rosbuild_add_library(${PROJECT_NAME} src/brisk.cpp
                                      src/HarrisScoreCalculatorFloat.cpp 
                                      src/harrisScores_sse.cpp 
                                      src/rdtsc_wrapper.cpp)
-
