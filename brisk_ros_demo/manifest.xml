@@ -1,0 +1,20 @@
+<package>
+  <description brief="brisk_ros_demo">
+
+     brisk_ros_demo
+
+  </description>
+  <author>ASL</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/brisk_ros_demo</url>
+
+  <depend package="cv_bridge"/>
+  <depend package="image_transport"/>
+  <depend package="sensor_msgs"/>
+  <depend package="brisk"/>
+  <depend package="dynamic_reconfigure"/>
+
+</package>
+
+

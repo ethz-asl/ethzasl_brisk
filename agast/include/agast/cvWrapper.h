@@ -22,14 +22,13 @@
 #define HAVE_OPENCV  //we normally do have opencv
 
 #ifdef HAVE_OPENCV
-	#include <opencv2/opencv.hpp>
+#include <opencv2/opencv.hpp>
 #else
-	typedef struct CvPoint
-	{
-		int x;
-		int y;
-	}
-	CvPoint;
+typedef struct CvPoint {
+  int x;
+  int y;
+}
+CvPoint;
 #endif
 
 #endif /* CVWRAPPER_H_ */

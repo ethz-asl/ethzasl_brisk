@@ -11,7 +11,7 @@
 #include <opencv2/opencv.hpp>
 #include <brisk/brisk.h>
 
-namespace brisk{
+namespace brisk {
 
 // this is a straightforward harris corner implementation
 // this is REALLY bad, it performs so many passes through the data...
@@ -28,9 +28,5 @@ void harrisScores_sse_full(const cv::Mat& src, cv::Mat& scores);
 
 // this is slightly better, only one pass TODO: fix me... verification fails. and it's slow.
 void harrisScores_basic2(const cv::Mat& src, cv::Mat& scores);
-
-
-}
-
-
+}  // namespace brisk
 #endif /* HARRISSCORES_HPP_ */
