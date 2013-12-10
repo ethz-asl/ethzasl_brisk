@@ -28,8 +28,8 @@ public:
 	struct PointWithScore{
 		PointWithScore():score(0),x(0),y(0){}
 				PointWithScore(Score_t score_, uint16_t x_, uint16_t y_):score(score_),x(x_),y(y_){}
-		uint16_t x,y;
 		Score_t score;
+		uint16_t x,y;
 		// this is so terrible. but so fast:
 		bool operator<(const PointWithScore& other) const {return score>other.score;}
 	};

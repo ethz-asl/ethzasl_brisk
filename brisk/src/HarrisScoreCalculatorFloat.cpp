@@ -73,7 +73,7 @@ void HarrisScoreCalculatorFloat::getCovarEntries(
 //inline void getCovarEntriesLestefan(cv::Mat& src, cv::Mat& dx, cv::Mat& dy, cv::Mat& kernel){
 	// sanity check
 
-	int jump; // number of bytes
+	int jump=0; // number of bytes
 	if(src.type()==CV_8U)
 		jump=1;
 	else if(src.type()==CV_16U)

@@ -55,8 +55,8 @@ std::string Timing::getTag(size_t handle){
       break;
     }
   }
-
-//  SM_ASSERT_TRUE(TimerException,found,"Unable to find the tag associated with handle " << handle);
+  if (!found)
+    assert(found && "Unable to find the tag for a given handle.");
   return tag;
 }
 

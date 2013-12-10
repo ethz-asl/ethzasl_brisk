@@ -140,16 +140,16 @@ public:
 
 		// current image buffer
 		DescribedImage* currentImage;
-		std::vector<std::vector<std::vector<cv::DMatch> > > * currentMatches;
+//		std::vector<std::vector<std::vector<cv::DMatch> > > * currentMatches;
 		//std::vector<std::vector<cv::DMatch> > * pmatch;
 		if(sharedData.frameID%2==0){
 			currentImage=&sharedData.image1;
-			currentMatches=&sharedData.matches1;
+//			currentMatches=&sharedData.matches1;
 			//pmatch=&matchesdbg1;
 		}
 		else{
 			currentImage=&sharedData.image2;
-			currentMatches=&sharedData.matches2;
+//			currentMatches=&sharedData.matches2;
 			//pmatch=&matchesdbg2;
 		}
 
