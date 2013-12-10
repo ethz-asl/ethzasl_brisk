@@ -17,24 +17,22 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//machine generated code
-//probability of an equal pixel on the Bresenham's circle: 0.33 and 0.1
-//number of equal pixels to switch: 2
-//number of unequal pixels to switch: 9
-//memory costs: cache=0.2
-//              same line=1
-//              memory=4
+// Machine generated code.
+// Probability of an equal pixel on the Bresenham's circle: 0.33 and 0.1.
+// Number of equal pixels to switch: 2.
+// Number of unequal pixels to switch: 9.
+// Memory costs: cache = 0.2.
+//               same line = 1.
+//               memory = 4.
 
 #include <stdint.h>																			
 #include <stdlib.h>
 #include <agast/cvWrapper.h>
 #include <agast/agast7_12d.h>
 
-using namespace std;
-using namespace agast;
-
+namespace agast {
 void AgastDetector7_12d::detect(const unsigned char* im,
-                                vector<CvPoint>& corners_all,
+                                std::vector<CvPoint>& corners_all,
                                 const cv::Mat* thrmap) {
   int total = 0;
   int nExpectedCorners = corners_all.capacity();
@@ -2214,5 +2212,4 @@ void AgastDetector7_12d::detect(const unsigned char* im,
     }
   }
 }
-
-//end of file
+}  // namespace agast

@@ -22,11 +22,10 @@
 #include <agast/cvWrapper.h>
 #include <agast/agast7_12s.h>
 
-using namespace std;
-using namespace agast;
+namespace agast {
 
-//using also bisection as propsed by Edward Rosten in FAST,
-//but it is based on the OAST
+// Using also bisection as propsed by Edward Rosten in FAST,
+// But it is based on the OAST.
 int AgastDetector7_12s::cornerScore(const unsigned char* p) {
   int bmin = b;
   int bmax = 255;
@@ -5009,4 +5008,4 @@ int AgastDetector7_12s::cornerScore(const unsigned char* p) {
     b_test = (bmin + bmax) / 2;
   }
 }
-
+}  // namespace agast

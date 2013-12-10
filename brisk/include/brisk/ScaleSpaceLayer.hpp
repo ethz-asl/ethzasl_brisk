@@ -15,20 +15,20 @@
 
 namespace brisk {
 
-// a generic layer to be used within the ScaleSpace class
+// A generic layer to be used within the ScaleSpace class.
 template<class SCORE_CALCULTAOR_T>
 class ScaleSpaceLayer {
  public:
   typedef SCORE_CALCULTAOR_T ScoreCalculator_t;
   ScaleSpaceLayer() {
   }
-  ScaleSpaceLayer(const cv::Mat& img, bool initScores = true);  // octave 0
+  ScaleSpaceLayer(const cv::Mat& img, bool initScores = true);  // Octave 0.
   ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
-                  bool initScores = true);  // for successive construction
+                  bool initScores = true);  // For successive construction.
 
-  void create(const cv::Mat& img, bool initScores = true);  // octave 0
+  void create(const cv::Mat& img, bool initScores = true);  // Octave 0.
   void create(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores =
-                  true);  // for successive construction
+                  true);  // For successive construction.
 
   void setUniformityRadius(double radius);
   void setMaxNumKpt(size_t maxNumKpt) {
@@ -38,31 +38,35 @@ class ScaleSpaceLayer {
     _absoluteThreshold = absoluteThreshold;
   }
 
-  // feature detection
+  // Feature detection.
   void detectScaleSpaceMaxima(std::vector<cv::KeyPoint>& keypoints,
                               bool enforceUniformity = true, bool doRefinement =
                                   true,
                               bool usePassedKeypoints = false);
 
-  // subsampling
-  // half sampling
+  // Subsampling.
+  // Half sampling.
   static inline bool halfsample(const cv::Mat& srcimg, cv::Mat& dstimg);
-  static inline void halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg);  // 8 bit
-  static inline void halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);  // for 16 bit input images
-  // two third sampling
+  // 8 bit.
+  static inline void halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
+  // for 16 bit input images.
+  static inline void halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
+  // Two third sampling.
   static inline bool twothirdsample(const cv::Mat& srcimg, cv::Mat& dstimg);
-  static inline void twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);  // 8 bit
-  static inline void twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);  // for 16 bit input images
+  // 8 bit.
+  static inline void twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
+  // for 16 bit input images.
+  static inline void twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
  protected:
-  // utilities
+  // Utilities.
   inline double scoreAbove(double u, double v);
   inline double scoreBelow(double u, double v);
 
-  // 1d (scale) refinement
+  // 1d (scale) refinement.
   __inline__ float refine1D(const float s_05, const float s0, const float s05,
-                            float& max);  // around octave
+                            float& max);  // Around octave.
   __inline__ float refine1D_1(const float s_05, const float s0, const float s05,
-                              float& max);  // around intra
+                              float& max);  // Around intra.
 
   // 2D maximum refinement:
   __inline__ float subpixel2D(const double s_0_0, const double s_0_1,
@@ -72,27 +76,27 @@ class ScaleSpaceLayer {
                               const double s_2_2, float& delta_x,
                               float& delta_y);
 
-  // layer properties
+  // Layer properties.
   bool _isOctave;
   int _layerNumber;
 
-  // have a reference to the image for convenience:
+  // Have a reference to the image for convenience:
   cv::Mat _img;
 
-  // the score calculation
+  // The score calculation.
   ScoreCalculator_t _scoreCalculator;
 
-  // remember next and previous layer
+  // Remember next and previous layer.
   ScaleSpaceLayer* _aboveLayer_ptr;
   ScaleSpaceLayer* _belowLayer_ptr;
 
-  // for coordinate transformations:
+  // For coordinate transformations:
   double _offset_above, _offset_below;
   double _scale_above, _scale_below;
   double _scale;
   double _offset;
 
-  // uniformity enforcement related
+  // Uniformity enforcement related.
   double _radius;
   size_t _maxNumKpt;
   double _absoluteThreshold;

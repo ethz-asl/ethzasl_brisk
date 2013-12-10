@@ -22,14 +22,12 @@
 #include <agast/cvWrapper.h>
 #include <agast/oast9_16.h>
 
-using namespace std;
-using namespace agast;
+namespace agast {
 
-//using also bisection as propsed by Edward Rosten in FAST,
-//but it is based on the OAST
+// Using also bisection as propsed by Edward Rosten in FAST,
+// but it is based on the OAST.
 int OastDetector9_16::cornerScore(const unsigned char* p) {
   int bmin = b;
-  //std::cout <<int(b)<<":";
   int bmax = 255;
   int b_test = (bmax + bmin) / 2;
 
@@ -3919,7 +3917,7 @@ unsigned char Oast9_16_PatternAccessor::operator()(unsigned int index) {
   const int& imagecols = image.cols;
 
   // get the sigma_half:
-  const float sigma_half = max(0.5, scale_ / 2.0);
+  const float sigma_half = std::max(0.5, scale_ / 2.0);
   const float area = 4.0 * sigma_half * sigma_half;
   // calculate output:
   int ret_val;
@@ -3990,3 +3988,4 @@ unsigned char Oast9_16_PatternAccessor::operator()(unsigned int index) {
 
   return 0xFF & ((ret_val + scaling2 / 2) / scaling2 / 1024);
 }
+}  // namespace agast

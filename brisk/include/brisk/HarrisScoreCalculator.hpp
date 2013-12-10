@@ -15,14 +15,14 @@
 
 namespace brisk {
 
-// Harris score manager
+// Harris score manager.
 class HarrisScoreCalculator : public ScoreCalculator<int> {
  public:
   typedef ScoreCalculator<int> Base_t;
 
-  // provide accessor implementations here in order to enable inlining
+  // Provide accessor implementations here in order to enable inlining.
   inline double score(double u, double v) {
-    // simple bilinear interpolation - no checking (for speed)
+    // Simple bilinear interpolation - no checking (for speed).
     const int u_int = int(u);
     const int v_int = int(v);
     if (u_int + 1 >= _scores.cols || v_int + 1 >= _scores.rows || u_int < 0
@@ -45,10 +45,10 @@ class HarrisScoreCalculator : public ScoreCalculator<int> {
   virtual void get2dMaxima(std::vector<PointWithScore>& points,
                            int absoluteThreshold = 0);
  protected:
-  // calculates the Harris scores
+  // Calculates the Harris scores.
   virtual void initializeScores();
 
-  // Harris specific
+  // Harris specific.
   static void getCovarEntries(const cv::Mat& src, cv::Mat& dxdx, cv::Mat& dydy,
                               cv::Mat& dxdy);
   static void cornerHarris(const cv::Mat& dxdxSmooth, const cv::Mat& dydySmooth,

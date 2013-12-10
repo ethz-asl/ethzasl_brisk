@@ -27,7 +27,7 @@ struct CvPoint;
 
 namespace agast {
 
-class Oast9_16_PatternAccessor {  // lestefan
+class Oast9_16_PatternAccessor {
  public:
   Oast9_16_PatternAccessor(cv::Mat& img) {
     img_ = &img;
@@ -39,13 +39,11 @@ class Oast9_16_PatternAccessor {  // lestefan
   }
   unsigned char operator()(unsigned int index);
  private:
-  // image
   cv::Mat* img_;
-  // center & scale
   float x_c_;
   float y_c_;
   float scale_;
-  // the (unscaled) pattern
+  // The (unscaled) pattern.
   static const int pattern_x[17];
   static const int pattern_y[17];
 };
@@ -67,7 +65,8 @@ class OastDetector9_16 : public AstDetector {
     return borderWidth;
   }
   int cornerScore(const unsigned char* p);
-  int cornerScore(cv::Mat& img, float x, float y, float scale);  // lestefan: re-centering and re-scaling the FAST mask
+  // Re-centering and re-scaling the FAST mask.
+  int cornerScore(cv::Mat& img, float x, float y, float scale);
 
  private:
   static const int borderWidth = 3;
@@ -109,4 +108,4 @@ class OastDetector9_16 : public AstDetector {
 };
 }  // namespace agast
 
-#endif /* OAST9_16_H */
+#endif  // OAST9_16_H

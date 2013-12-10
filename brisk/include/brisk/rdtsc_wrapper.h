@@ -27,8 +27,6 @@
 namespace rdtsc {
 namespace timing {
 
-//SM_DEFINE_EXCEPTION(TimerException, std::runtime_error);
-
 struct TimerMapValue {
   // Initialize the window size for the rolling mean.
   TimerMapValue()
@@ -51,13 +49,10 @@ class DummyTimer {
   }
   DummyTimer(std::string const & tag, bool constructStopped = false) {
   }
-  ~DummyTimer() {
-  }
+  ~DummyTimer() { }
 
-  void start() {
-  }
-  void stop() {
-  }
+  void start() { }
+  void stop() { }
   bool isTiming() {
     return false;
   }
@@ -68,7 +63,7 @@ class Timer;
 class Timing {
  public:
   friend class Timer;
-  // Static funcitons to query the timers:
+  // Static functions to query the timers:
   static size_t getHandle(std::string const & tag);
   static std::string getTag(size_t handle);
   static double getTotalSeconds(size_t handle);
@@ -93,20 +88,19 @@ class Timing {
  private:
   static Timing & instance();
 
-  // Singleton design pattern
+  // Singleton design pattern.
   Timing();
   ~Timing();
 
   typedef std::map<std::string, size_t> map_t;
   typedef std::vector<TimerMapValue> list_t;
 
-  // Static members
+  // Static members.
   list_t m_timers;
   map_t m_tagMap;
   size_t m_maxTagLength;
 
 };
-// end class timer
 
 class Timer {
  public:
@@ -115,7 +109,6 @@ class Timer {
         m_handle(handle)
 
   {
-//    SM_ASSERT_LT(TimerException,handle, Timing::instance().m_timers.size(),"The handle is invalid. Handle: " << handle << ", number of timers: " << Timing::instance().m_timers.size());
     if (!constructStopped)
       start();
   }
@@ -131,7 +124,6 @@ class Timer {
   }
 
   inline void start() {
-//    SM_ASSERT_TRUE(TimerException,!m_timing,"The timer " + Timing::getTag(m_handle) + " is already running");
     m_timing = true;
 #ifdef SM_USE_HIGH_PERF_TIMER
     QueryPerformanceCounter(&m_time);
@@ -185,4 +177,4 @@ class Timer {
 }  // namespace timing
 }  // namespace sm
 
-#endif /* RTDSC_WRAPPER_H_ */
+#endif  // RTDSC_WRAPPER_H_

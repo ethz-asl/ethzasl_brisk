@@ -17,22 +17,21 @@
 //    You should have received a copy of the GNU General Public License
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-//machine generated code
-//probability of an equal pixel on the Bresenham's circle: 0.33
-//memory costs: cache=0.2
-//              same line=1
-//              memory=4
+// Machine generated code.
+// Probability of an equal pixel on the Bresenham's circle: 0.33.
+// Memory costs: cache = 0.2.
+//               same line = 1.
+//               memory = 4.
 
 #include <stdint.h>																			
 #include <stdlib.h>
 #include <agast/cvWrapper.h>
 #include <agast/oast9_16.h>
 
-using namespace std;
-using namespace agast;
+namespace agast {
 
 void OastDetector9_16::detect(const unsigned char* im,
-                              vector<CvPoint>& corners_all,
+                              std::vector<CvPoint>& corners_all,
                               const cv::Mat* thrmap) {
   int total = 0;
   int nExpectedCorners = corners_all.capacity();
@@ -75,8 +74,6 @@ void OastDetector9_16::detect(const unsigned char* im,
         break;
       else {
         if (thrmap != 0) {
-          /*b2=int(*(thrmap->data+x+y*width));
-           if(b2==0) continue;*/
           int thrmapvalue = int(*(thrmap->data + x + y * width));
           if (thrmapvalue < cmpThreshold_)
             continue;
@@ -1850,5 +1847,4 @@ void OastDetector9_16::detect(const unsigned char* im,
     }
   }
 }
-
-//end of file
+}  // namespace agast

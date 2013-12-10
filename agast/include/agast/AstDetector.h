@@ -79,4 +79,4 @@ class AstDetector {
 };
 }  // namespace agast
 
-#endif /* AGASTDETECTOR_H */
+#endif  // AGASTDETECTOR_H

@@ -18,8 +18,7 @@ namespace brisk {
 void HarrisScoreCalculatorFloat::initializeScores() {
   cv::Mat DxDx1, DyDy1, DxDy1;
   cv::Mat DxDx, DyDy, DxDy;
-
-  // pipeline
+  // Pipeline.
   getCovarEntries(_img, DxDx1, DyDy1, DxDy1);
   filterGauss3by332F(DxDx1, DxDx);
   filterGauss3by332F(DyDy1, DyDy);
@@ -29,9 +28,7 @@ void HarrisScoreCalculatorFloat::initializeScores() {
 
 void HarrisScoreCalculatorFloat::get2dMaxima(
     std::vector<PointWithScore>& points, float absoluteThreshold) {
-  // do the 8-neighbor nonmax suppression
-  //struct timeval start, end;
-  //gettimeofday(&start, NULL);
+  // Do the 8-neighbor nonmax suppression.
   const int stride = _scores.cols;
   const int rows_end = _scores.rows - 2;
   for (int j = 2; j < rows_end; ++j) {
@@ -46,7 +43,6 @@ void HarrisScoreCalculatorFloat::get2dMaxima(
         last = false;
         continue;
       }
-      //if(lastline.at<uchar>(0,i)) continue;
       if (*center < absoluteThreshold)
         continue;
       if (*(center + 1) > *center)
@@ -76,18 +72,13 @@ void HarrisScoreCalculatorFloat::get2dMaxima(
 #endif
     }
   }
-  //gettimeofday(&end, NULL);
-  //std::cout<<double(end.tv_sec-start.tv_sec)*1000.0+double(end.tv_usec-start.tv_usec)/1000.0<<std::endl;
 }
 
-// X and Y denote the size of the mask
+// X and Y denote the size of the mask.
 void HarrisScoreCalculatorFloat::getCovarEntries(const cv::Mat& src,
                                                  cv::Mat& dxdx, cv::Mat& dydy,
                                                  cv::Mat& dxdy) {
-//inline void getCovarEntriesLestefan(cv::Mat& src, cv::Mat& dx, cv::Mat& dy, cv::Mat& kernel){
-  // sanity check
-
-  int jump = 0;  // number of bytes
+  int jump = 0;  // Number of bytes.
   if (src.type() == CV_8U)
     jump = 1;
   else if (src.type() == CV_16U)
@@ -106,13 +97,10 @@ void HarrisScoreCalculatorFloat::getCovarEntries(const cv::Mat& src,
   const unsigned int X = 3;
   const unsigned int Y = 3;
 
-  // dest will be floats
+  // Dest will be floats.
   dxdx = cv::Mat::zeros(src.rows, src.cols, CV_32F);
   dydy = cv::Mat::zeros(src.rows, src.cols, CV_32F);
   dxdy = cv::Mat::zeros(src.rows, src.cols, CV_32F);
-
-  //dx=cv::Mat::zeros(src.rows,src.cols,CV_16S);
-  //dy=cv::Mat::zeros(src.rows,src.cols,CV_16S);
 
   const unsigned int maxJ = ((src.cols - 2) / 4) * 4;
   const unsigned int maxI = src.rows - 2;
@@ -121,21 +109,17 @@ void HarrisScoreCalculatorFloat::getCovarEntries(const cv::Mat& src,
   for (unsigned int i = 0; i < maxI; ++i) {
     bool end = false;
     for (unsigned int j = 0; j < maxJ;) {
-      //__m128i result = _mm_set_epi16 ( -127,-127,-127,-127,-127,-127,-127,-127,-127,-127);
       __m128 zeros;
       zeros = _mm_setr_ps(0.0, 0.0, 0.0, 0.0);
       __m128 result_dx = zeros;
       __m128 result_dy = zeros;
-      // enter convolution with kernel
+      // Enter convolution with kernel.
       for (unsigned int x = 0; x < X; ++x) {
-        //if(dx&&x==1)continue; // jump, 0 kernel
         for (unsigned int y = 0; y < Y; ++y) {
-          //if(!dx&&y==1)continue; // jump, 0 kernel
           const float m_dx = kernel.at<float>(y, x);
           const float m_dy = kernel.at<float>(x, y);
           __m128 mult_dx = _mm_setr_ps(m_dx, m_dx, m_dx, m_dx);
           __m128 mult_dy = _mm_setr_ps(m_dy, m_dy, m_dy, m_dy);
-          //uchar* p=(src.data+(stride*(i+y))+x+j);
           __m128 i0;
           if (jump == 1) {
             const uchar* p = &src.at < uchar > (i + y, x + j);
@@ -159,17 +143,18 @@ void HarrisScoreCalculatorFloat::getCovarEntries(const cv::Mat& src,
         }
       }
 
-      // calculate covariance entries - remove precision (ends up being 4 bit), then remove 4 more bits
+      // Calculate covariance entries - remove precision (ends up being 4 bit),
+      // then remove 4 more bits.
       __m128 i_dx_dx = _mm_mul_ps(result_dx, result_dx);
       __m128 i_dx_dy = _mm_mul_ps(result_dy, result_dx);
       __m128 i_dy_dy = _mm_mul_ps(result_dy, result_dy);
 
-      // store
+      // Store.
       _mm_storeu_ps(&dxdx.at<float>(i, j + 1), i_dx_dx);
       _mm_storeu_ps(&dxdy.at<float>(i, j + 1), i_dx_dy);
       _mm_storeu_ps(&dydy.at<float>(i, j + 1), i_dy_dy);
 
-      // take care about end
+      // Take care about end.
       j += 4;
       if (j >= maxJ && !end) {
         j = stride - 2 - 4;
@@ -177,12 +162,6 @@ void HarrisScoreCalculatorFloat::getCovarEntries(const cv::Mat& src,
       }
     }
   }
-
-  //cv::imshow("dxdx", (dxdx)*(1.0/512.0)+0.5);
-  //cv::imshow("dxdx",dxdx);
-  //cv::imshow("dydy",dydy*(1.0/512.0)+0.5);
-  //cv::imshow("dxdy",dxdy*(1/255)+1);
-  //cv::waitKey();
 }
 
 void HarrisScoreCalculatorFloat::cornerHarris(const cv::Mat& dxdxSmooth,
@@ -190,7 +169,7 @@ void HarrisScoreCalculatorFloat::cornerHarris(const cv::Mat& dxdxSmooth,
                                               const cv::Mat& dxdySmooth,
                                               cv::Mat& dst) {
 
-  // dest will be float
+  // Dest will be float.
   dst = cv::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32F);
   const unsigned int maxJ = ((dxdxSmooth.cols - 2) / 8) * 8;
   const unsigned int maxI = dxdxSmooth.rows - 2;
@@ -203,26 +182,26 @@ void HarrisScoreCalculatorFloat::cornerHarris(const cv::Mat& dxdxSmooth,
       __m128 dydy = _mm_loadu_ps(&dydySmooth.at<float>(i, j));
       __m128 dxdy = _mm_loadu_ps(&dxdySmooth.at<float>(i, j));
 
-      // determinant terms
+      // Determinant terms.
       __m128 prod1 = _mm_mul_ps(dxdx, dydy);
       __m128 prod2 = _mm_mul_ps(dxdy, dxdy);
 
-      // calculate the determinant
+      // Calculate the determinant.
       __m128 det = _mm_sub_ps(prod1, prod2);
 
-      // trace - uses kappa=1/16
+      // Trace - uses kappa = 1 / 16.
       __m128 trace = _mm_add_ps(dxdx, dydy);
       __m128 trace_sq = _mm_mul_ps(trace, trace);
       __m128 trace_sq_00625 = _mm_mul_ps(
           trace_sq, _mm_setr_ps(0.0625, 0.0625, 0.0625, 0.0625));
 
-      // form score
+      // Form score.
       __m128 score = _mm_sub_ps(det, trace_sq_00625);
 
-      // store
+      // Store.
       _mm_storeu_ps(&dst.at<float>(i, j), score);
 
-      // take care about end
+      // Take care about end.
       j += 4;
       if (j >= maxJ && !end) {
         j = stride - 2 - 4;
@@ -230,13 +209,5 @@ void HarrisScoreCalculatorFloat::cornerHarris(const cv::Mat& dxdxSmooth,
       }
     }
   }
-
-  //double max;
-  //double min;
-  //cv::minMaxIdx(dst, &min,&max);
-  //cv::imshow("view", (dst-min)*(1/(max-min)));
-  //cv::waitKey();
-
 }
-
 }

@@ -26,7 +26,6 @@
 struct CvPoint;
 
 namespace agast {
-
 class AgastDetector7_12s : public AstDetector {
  public:
   AgastDetector7_12s() : AstDetector() { }
@@ -76,4 +75,4 @@ class AgastDetector7_12s : public AstDetector {
 };
 }  // namespace agast
 
-#endif /* AGAST7_12S_H */
+#endif  // AGAST7_12S_H

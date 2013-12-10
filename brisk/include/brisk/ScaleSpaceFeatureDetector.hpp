@@ -19,8 +19,8 @@
 
 namespace brisk {
 
-// uses the common feature interface to construct a generic
-// scale space detector from a given ScoreCalculator
+// Uses the common feature interface to construct a generic
+// scale space detector from a given ScoreCalculator.
 template<class SCORE_CALCULTAOR_T>
 class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
  public:
@@ -50,50 +50,38 @@ class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
                           std::vector<cv::KeyPoint>& keypoints,
                           const cv::Mat& mask = cv::Mat()) const {
 
-    // find out, if we should use the provided keypoints
+    // Find out, if we should use the provided keypoints.
     bool usePassedKeypoints = false;
-    //std::cout<<keypoints.size()<<std::endl;
     if (keypoints.size() > 0)
       usePassedKeypoints = true;
     else
-      keypoints.reserve(4000);  // possibly speeds up things
+      keypoints.reserve(4000);  // Possibly speeds up things.
 
-    // construct scale space layers
-    //gettimeofday(&start, NULL);
+    // Construct scale space layers.
     scaleSpaceLayers[0].create(image, !usePassedKeypoints);
     scaleSpaceLayers[0].setUniformityRadius(_uniformityRadius);
     scaleSpaceLayers[0].setMaxNumKpt(_maxNumKpt);
     scaleSpaceLayers[0].setAbsoluteThreshold(_absoluteThreshold);
     for (size_t i = 1; i < _octaves * 2; ++i) {
-      //struct timeval start, end;
-      //gettimeofday(&start, NULL);
       scaleSpaceLayers[i].create(&scaleSpaceLayers[i - 1], !usePassedKeypoints);
       scaleSpaceLayers[i].setUniformityRadius(_uniformityRadius);
       scaleSpaceLayers[i].setMaxNumKpt(_maxNumKpt);
       scaleSpaceLayers[i].setAbsoluteThreshold(_absoluteThreshold);
-      //gettimeofday(&end, NULL);
-      //std::cout<<double(end.tv_sec-start.tv_sec)*1000.0+double(end.tv_usec-start.tv_usec)/1000.0<<std::endl;
     }
-    //gettimeofday(&end, NULL);
-    //std::cout<<double(end.tv_sec-start.tv_sec)*1000.0+double(end.tv_usec-start.tv_usec)/1000.0<<std::endl;
-    // detect
-    //gettimeofday(&start, NULL);
     for (size_t i = 0; i < scaleSpaceLayers.size(); ++i) {
+      // Only do refinement, if no keypoints are passed.
       scaleSpaceLayers[i].detectScaleSpaceMaxima(keypoints, true,
                                                  !usePassedKeypoints,
-                                                 usePassedKeypoints);  // only do refinement, if no keypoints are passed
+                                                 usePassedKeypoints);
     }
-    //gettimeofday(&end, NULL);
-    //std::cout<<double(end.tv_sec-start.tv_sec)*1000.0+double(end.tv_usec-start.tv_usec)/1000.0<<std::endl;
   }
 
   size_t _octaves;
   double _uniformityRadius;
   double _absoluteThreshold;
   size_t _maxNumKpt;
-
-  mutable std::vector<brisk::ScaleSpaceLayer<ScoreCalculator_t> > scaleSpaceLayers;
-
+  mutable std::vector<brisk::ScaleSpaceLayer<ScoreCalculator_t> >
+      scaleSpaceLayers;
 };
 
 }  // namespace brisk

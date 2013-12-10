@@ -23,17 +23,16 @@
 #include <agast/cvWrapper.h>
 #include <agast/AstDetector.h>
 
-using namespace std;
-using namespace agast;
+namespace agast {
 
 void AstDetector::nonMaximumSuppression(const std::vector<CvPoint>& corners_all,
                                         std::vector<CvPoint>& corners_nms) {
   int currCorner_ind;
   int lastRow = 0, next_lastRow = 0;
-  vector<CvPoint>::const_iterator currCorner;
+  std::vector<CvPoint>::const_iterator currCorner;
   int lastRowCorner_ind = 0, next_lastRowCorner_ind = 0;
-  vector<int>::iterator nmsFlags_p;
-  vector<CvPoint>::iterator currCorner_nms;
+  std::vector<int>::iterator nmsFlags_p;
+  std::vector<CvPoint>::iterator currCorner_nms;
   int j;
   int numCorners_all = corners_all.size();
   int nMaxCorners = corners_nms.capacity();
@@ -59,7 +58,7 @@ void AstDetector::nonMaximumSuppression(const std::vector<CvPoint>& corners_all,
   nmsFlags_p = nmsFlags.begin();
   currCorner_nms = corners_nms.begin();
 
-  //set all flags to MAXIMUM
+  // Set all flags to MAXIMUM.
   for (j = numCorners_all; j > 0; j--)
     *nmsFlags_p++ = -1;
   nmsFlags_p = nmsFlags.begin();
@@ -67,7 +66,7 @@ void AstDetector::nonMaximumSuppression(const std::vector<CvPoint>& corners_all,
   for (currCorner_ind = 0; currCorner_ind < numCorners_all; currCorner_ind++) {
     int t;
 
-    //check above
+    // Check above.
     if (lastRow + 1 < currCorner->y) {
       lastRow = next_lastRow;
       lastRowCorner_ind = next_lastRowCorner_ind;
@@ -77,7 +76,7 @@ void AstDetector::nonMaximumSuppression(const std::vector<CvPoint>& corners_all,
       next_lastRowCorner_ind = currCorner_ind;
     }
     if (lastRow + 1 == currCorner->y) {
-      //find the corner above the current one
+      // Find the corner above the current one.
       while ((corners_all[lastRowCorner_ind].x < currCorner->x)
           && (corners_all[lastRowCorner_ind].y == lastRow))
         lastRowCorner_ind++;
@@ -85,7 +84,7 @@ void AstDetector::nonMaximumSuppression(const std::vector<CvPoint>& corners_all,
       if ((corners_all[lastRowCorner_ind].x == currCorner->x)
           && (lastRowCorner_ind != currCorner_ind)) {
         int t = lastRowCorner_ind;
-        while (nmsFlags[t] != -1)  //find the maximum in this block
+        while (nmsFlags[t] != -1)  // Find the maximum in this block.
           t = nmsFlags[t];
 
         if (scores[currCorner_ind] < scores[t]) {
@@ -95,16 +94,16 @@ void AstDetector::nonMaximumSuppression(const std::vector<CvPoint>& corners_all,
       }
     }
 
-    //check left
+    // Check left.
     t = currCorner_ind - 1;
     if ((currCorner_ind != 0) && (corners_all[t].y == currCorner->y)
         && (corners_all[t].x + 1 == currCorner->x)) {
       int currCornerMaxAbove_ind = nmsFlags[currCorner_ind];
 
-      while (nmsFlags[t] != -1)  //find the maximum in that area
+      while (nmsFlags[t] != -1)  // Find the maximum in that area.
         t = nmsFlags[t];
 
-      if (currCornerMaxAbove_ind == -1)  //no maximum above
+      if (currCornerMaxAbove_ind == -1)  // No maximum above.
           {
         if (t != currCorner_ind) {
           if (scores[currCorner_ind] < scores[t])
@@ -112,7 +111,7 @@ void AstDetector::nonMaximumSuppression(const std::vector<CvPoint>& corners_all,
           else
             nmsFlags[t] = currCorner_ind;
         }
-      } else	//maximum above
+      } else	// Maximum above.
       {
         if (t != currCornerMaxAbove_ind) {
           if (scores[currCornerMaxAbove_ind] < scores[t]) {
@@ -129,11 +128,11 @@ void AstDetector::nonMaximumSuppression(const std::vector<CvPoint>& corners_all,
     currCorner++;
   }
 
-  //collecting maximum corners
+  // Collecting maximum corners.
   corners_nms.resize(0);
   for (currCorner_ind = 0; currCorner_ind < numCorners_all; currCorner_ind++) {
     if (*nmsFlags_p++ == -1)
       corners_nms.push_back(corners_all[currCorner_ind]);
   }
 }
-
+}  // namespace agast
