@@ -42,7 +42,7 @@
 #define BRISK_INTERNAL_SSE_FILTERS_INL_H_
 
 template<int X, int Y>
-__inline__ void filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {
+__inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {
   // Sanity check.
   assert(kernel.type() == CV_16S);
   assert(Y == kernel.rows);
@@ -89,7 +89,7 @@ __inline__ void filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {
 }
 
 template<int X, int Y>
-__inline__ void filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {
+__inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {
   // Sanity check.
   assert(kernel.type() == CV_8S);
   assert(Y == kernel.rows);
@@ -155,11 +155,11 @@ __inline__ void filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {
 
 // X and Y denote the size of the mask.
 template<int X, int Y>
-__inline__ void filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {
+__inline__ void Filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {
   if (src.type() == CV_8U)
-    filter2D8U<X, Y>(src, dst, kernel);
+    Filter2D8U<X, Y>(src, dst, kernel);
   else if (src.type() == CV_16S)
-    filter2D16S<X, Y>(src, dst, kernel);
+    Filter2D16S<X, Y>(src, dst, kernel);
   else
     assert(0 && "Only CV_8U and CV_16S are supported src matrix types.");
 }

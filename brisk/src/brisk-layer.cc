@@ -58,7 +58,7 @@ BriskLayer::BriskLayer(const cv::Mat& img, uchar upperThreshold,
   agastDetector_5_8_.reset(new agast::AgastDetector5_8(img.cols, img.rows, 0));
 
   // Calculate threshold map.
-  calculateThresholdMap();
+  CalculateThresholdMap();
 }
 // Derive a layer.
 BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
@@ -68,12 +68,12 @@ BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
 
   if (mode == CommonParams::HALFSAMPLE) {
     img_.create(layer.img().rows / 2, layer.img().cols / 2, CV_8U);
-    halfsample(layer.img(), img_);
+    HalfSample(layer.img(), img_);
     scale_ = layer.scale() * 2;
     offset_ = 0.5 * scale_ - 0.5;
   } else {
     img_.create(2 * (layer.img().rows / 3), 2 * (layer.img().cols / 3), CV_8U);
-    twothirdsample(layer.img(), img_);
+    TwoThirdSample(layer.img(), img_);
     scale_ = layer.scale() * 1.5;
     offset_ = 0.5 * scale_ - 0.5;
   }
@@ -82,12 +82,12 @@ BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
   agastDetector_5_8_.reset(new agast::AgastDetector5_8(img_.cols, img_.rows, 0));
 
   // Calculate threshold map.
-  calculateThresholdMap();
+  CalculateThresholdMap();
 }
 
 // Fast/Agast.
 // Wraps the agast class.
-void BriskLayer::getAgastPoints(uint8_t threshold,
+void BriskLayer::GetAgastPoints(uint8_t threshold,
                                 std::vector<CvPoint>& keypoints) {
   oastDetector_->set_threshold(threshold, upperThreshold_, lowerThreshold_);
   oastDetector_->detect(img_.data, keypoints, &thrmap_);
@@ -103,7 +103,7 @@ void BriskLayer::getAgastPoints(uint8_t threshold,
     *(scores_.data + offs) = oastDetector_->cornerScore(img_.data + offs);
   }
 }
-uint8_t BriskLayer::getAgastScore(int x, int y, uint8_t threshold) {
+uint8_t BriskLayer::GetAgastScore(int x, int y, uint8_t threshold) {
   if (x < 3 || y < 3)
     return 0;
   if (x >= img_.cols - 3 || y >= img_.rows - 3)
@@ -119,7 +119,7 @@ uint8_t BriskLayer::getAgastScore(int x, int y, uint8_t threshold) {
   return score;
 }
 
-uint8_t BriskLayer::getAgastScore_5_8(int x, int y, uint8_t threshold) {
+uint8_t BriskLayer::GetAgastScore_5_8(int x, int y, uint8_t threshold) {
   if (x < 2 || y < 2)
     return 0;
   if (x >= img_.cols - 2 || y >= img_.rows - 2)
@@ -132,7 +132,7 @@ uint8_t BriskLayer::getAgastScore_5_8(int x, int y, uint8_t threshold) {
   return score;
 }
 
-uint8_t BriskLayer::getAgastScore(float xf, float yf, uint8_t threshold,
+uint8_t BriskLayer::GetAgastScore(float xf, float yf, uint8_t threshold,
                                          float scale) {
   if (scale <= 1.0f) {
     // Just do an interpolation inside the layer.
@@ -143,26 +143,26 @@ uint8_t BriskLayer::getAgastScore(float xf, float yf, uint8_t threshold,
     const float ry1 = yf - float(y);
     const float ry = 1.0f - ry1;
 
-    return rx * ry * getAgastScore(x, y, threshold)
-        + rx1 * ry * getAgastScore(x + 1, y, threshold)
-        + rx * ry1 * getAgastScore(x, y + 1, threshold)
-        + rx1 * ry1 * getAgastScore(x + 1, y + 1, threshold);
+    return rx * ry * GetAgastScore(x, y, threshold)
+        + rx1 * ry * GetAgastScore(x + 1, y, threshold)
+        + rx * ry1 * GetAgastScore(x, y + 1, threshold)
+        + rx1 * ry1 * GetAgastScore(x + 1, y + 1, threshold);
   } else {
     // This means we overlap area smoothing.
     const float halfscale = scale / 2.0f;
     // Get the scores first:
     for (int x = int(xf - halfscale); x <= int(xf + halfscale + 1.0f); x++) {
       for (int y = int(yf - halfscale); y <= int(yf + halfscale + 1.0f); y++) {
-        getAgastScore(x, y, threshold);
+        GetAgastScore(x, y, threshold);
       }
     }
     // Get the smoothed value.
-    return value(scores_, xf, yf, scale);
+    return Value(scores_, xf, yf, scale);
   }
 }
 
 // Access gray values (smoothed/interpolated).
-uint8_t BriskLayer::value(const cv::Mat& mat, float xf, float yf,
+uint8_t BriskLayer::Value(const cv::Mat& mat, float xf, float yf,
                                      float scale) {
   assert(!mat.empty());
   // Get the position.
@@ -262,7 +262,7 @@ uint8_t BriskLayer::value(const cv::Mat& mat, float xf, float yf,
 }
 
 // Threshold map.
-void BriskLayer::calculateThresholdMap() {
+void BriskLayer::CalculateThresholdMap() {
 
   // Allocate threshold map.
   cv::Mat tmpmax = cv::Mat::zeros(img_.rows, img_.cols, CV_8U);
@@ -487,7 +487,7 @@ void BriskLayer::calculateThresholdMap() {
   }
 }
 
-void BriskLayer::halfsample(const cv::Mat& srcimg, cv::Mat& dstimg) {
+void BriskLayer::HalfSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
   // Take care with border...
   const unsigned short leftoverCols = ((srcimg.cols % 16) / 2);
   // Note: leftoverCols can be zero but this still false...
@@ -618,7 +618,7 @@ void BriskLayer::halfsample(const cv::Mat& srcimg, cv::Mat& dstimg) {
   }
 }
 
-void BriskLayer::twothirdsample(const cv::Mat& srcimg, cv::Mat& dstimg) {
+void BriskLayer::TwoThirdSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
   const unsigned short leftoverCols = ((srcimg.cols / 3) * 3) % 15; // take care with border...
 
   // Make sure the destination image is of the right size:

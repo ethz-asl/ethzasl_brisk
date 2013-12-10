@@ -86,19 +86,19 @@ class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
       keypoints.reserve(4000);  // Possibly speeds up things.
 
     // Construct scale space layers.
-    scaleSpaceLayers[0].create(image, !usePassedKeypoints);
-    scaleSpaceLayers[0].setUniformityRadius(_uniformityRadius);
-    scaleSpaceLayers[0].setMaxNumKpt(_maxNumKpt);
-    scaleSpaceLayers[0].setAbsoluteThreshold(_absoluteThreshold);
+    scaleSpaceLayers[0].Create(image, !usePassedKeypoints);
+    scaleSpaceLayers[0].SetUniformityRadius(_uniformityRadius);
+    scaleSpaceLayers[0].SetMaxNumKpt(_maxNumKpt);
+    scaleSpaceLayers[0].SetAbsoluteThreshold(_absoluteThreshold);
     for (size_t i = 1; i < _octaves * 2; ++i) {
-      scaleSpaceLayers[i].create(&scaleSpaceLayers[i - 1], !usePassedKeypoints);
-      scaleSpaceLayers[i].setUniformityRadius(_uniformityRadius);
-      scaleSpaceLayers[i].setMaxNumKpt(_maxNumKpt);
-      scaleSpaceLayers[i].setAbsoluteThreshold(_absoluteThreshold);
+      scaleSpaceLayers[i].Create(&scaleSpaceLayers[i - 1], !usePassedKeypoints);
+      scaleSpaceLayers[i].SetUniformityRadius(_uniformityRadius);
+      scaleSpaceLayers[i].SetMaxNumKpt(_maxNumKpt);
+      scaleSpaceLayers[i].SetAbsoluteThreshold(_absoluteThreshold);
     }
     for (size_t i = 0; i < scaleSpaceLayers.size(); ++i) {
       // Only do refinement, if no keypoints are passed.
-      scaleSpaceLayers[i].detectScaleSpaceMaxima(keypoints, true,
+      scaleSpaceLayers[i].DetectScaleSpaceMaxima(keypoints, true,
                                                  !usePassedKeypoints,
                                                  usePassedKeypoints);
     }

@@ -51,6 +51,8 @@
 
 #define USE_SIMPLE_POINT_WITH_SCORE
 
+#include <stdint.h>
+
 namespace rdtsc {
 namespace timing {
 class DummyTimer;

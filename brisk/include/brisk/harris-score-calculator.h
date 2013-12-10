@@ -51,7 +51,7 @@ class HarrisScoreCalculator : public ScoreCalculator<int> {
   typedef ScoreCalculator<int> Base_t;
 
   // Provide accessor implementations here in order to enable inlining.
-  inline double score(double u, double v) {
+  inline double Score(double u, double v) {
     // Simple bilinear interpolation - no checking (for speed).
     const int u_int = int(u);
     const int v_int = int(v);
@@ -69,19 +69,19 @@ class HarrisScoreCalculator : public ScoreCalculator<int> {
             * (oneMinus_ru * _scores.at<int>(v_int + 1, u_int)
                 + ru * _scores.at<int>(v_int + 1, u_int + 1));
   }
-  inline Base_t::Score_t score(int u, int v) {
+  inline Base_t::Score_t Score(int u, int v) {
     return _scores.at<int>(v, u);
   }
-  virtual void get2dMaxima(std::vector<PointWithScore>& points,
+  virtual void Get2dMaxima(std::vector<PointWithScore>& points,
                            int absoluteThreshold = 0);
  protected:
   // Calculates the Harris scores.
-  virtual void initializeScores();
+  virtual void InitializeScores();
 
   // Harris specific.
-  static void getCovarEntries(const cv::Mat& src, cv::Mat& dxdx, cv::Mat& dydy,
+  static void GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx, cv::Mat& dydy,
                               cv::Mat& dxdy);
-  static void cornerHarris(const cv::Mat& dxdxSmooth, const cv::Mat& dydySmooth,
+  static void CornerHarris(const cv::Mat& dxdxSmooth, const cv::Mat& dydySmooth,
                            const cv::Mat& dxdySmooth, cv::Mat& score);
 };
 }  // namespace brisk

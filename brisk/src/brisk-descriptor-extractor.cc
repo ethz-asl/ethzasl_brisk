@@ -79,8 +79,7 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
 
   rotationInvariance = rotationInvariant;
   scaleInvariance = scaleInvariant;
-  generateKernel(rList, nList, 5.85 * patternScale, 8.2 * patternScale);
-
+  GenerateKernel(rList, nList, 5.85 * patternScale, 8.2 * patternScale);
 }
 BriskDescriptorExtractor::BriskDescriptorExtractor(
     std::vector<float> &radiusList, std::vector<int> &numberList,
@@ -88,7 +87,7 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(
     std::vector<int> indexChange) {
   rotationInvariance = rotationInvariant;
   scaleInvariance = scaleInvariant;
-  generateKernel(radiusList, numberList, dMax, dMin, indexChange);
+  GenerateKernel(radiusList, numberList, dMax, dMin, indexChange);
 }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
@@ -199,7 +198,7 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
   myfile.close();
 }
 
-void BriskDescriptorExtractor::generateKernel(std::vector<float> &radiusList,
+void BriskDescriptorExtractor::GenerateKernel(std::vector<float> &radiusList,
                                               std::vector<int> &numberList,
                                               float dMax, float dMin,
                                               std::vector<int> indexChange) {
@@ -317,7 +316,7 @@ void BriskDescriptorExtractor::generateKernel(std::vector<float> &radiusList,
 
 // Simple alternative:
 template<typename ImgPixel_T, typename IntegralPixel_T>
-__inline__ IntegralPixel_T BriskDescriptorExtractor::smoothedIntensity(
+__inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
     const cv::Mat& image, const cv::Mat& integral, const float key_x,
     const float key_y, const unsigned int scale, const unsigned int rot,
     const unsigned int point) const {
@@ -591,15 +590,15 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
             "1.1.1 Brisk Extraction: rotation determination: sample points (per keypoint)");
         if (image.type() == CV_8UC1) {
           for (unsigned int i = 0; i < points_; i++) {
-            *(pvalues++) = smoothedIntensity<uchar, int>(image, _integral, x, y,
+            *(pvalues++) = SmoothedIntensity<uchar, int>(image, _integral, x, y,
                                                          scale, 0, i);
           }
         } else {
           for (unsigned int i = 0; i < points_; i++) {
-            *(pvalues++) = int(
-                65536.0
-                    * smoothedIntensity<float, float>(imageScaled, _integral, x,
-                                                      y, scale, 0, i));
+            *(pvalues++) =
+                int(65536.0 * SmoothedIntensity<float, float>(imageScaled,
+                                                              _integral, x,
+                                                              y, scale, 0, i));
           }
         }
         timerFancyOp11.stop();
@@ -649,15 +648,15 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
         "1.2 Brisk Extraction: sample points (per keypoint)");
     if (image.type() == CV_8UC1) {
       for (unsigned int i = 0; i < points_; i++) {
-        *(pvalues++) = smoothedIntensity<uchar, int>(image, _integral, x, y,
+        *(pvalues++) = SmoothedIntensity<uchar, int>(image, _integral, x, y,
                                                      scale, theta, i);
       }
     } else {
       for (unsigned int i = 0; i < points_; i++) {
-        *(pvalues++) = int(
-            65536.0
-                * smoothedIntensity<float, float>(imageScaled, _integral, x, y,
-                                                  scale, theta, i));
+        *(pvalues++) =
+            int(65536.0 * SmoothedIntensity<float, float>(imageScaled,
+                                                          _integral, x, y,
+                                                          scale, theta, i));
       }
     }
     timerFancyOp2.stop();

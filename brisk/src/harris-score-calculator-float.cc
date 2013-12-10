@@ -43,18 +43,18 @@
 
 namespace brisk {
 
-void HarrisScoreCalculatorFloat::initializeScores() {
+void HarrisScoreCalculatorFloat::InitializeScores() {
   cv::Mat DxDx1, DyDy1, DxDy1;
   cv::Mat DxDx, DyDy, DxDy;
   // Pipeline.
-  getCovarEntries(_img, DxDx1, DyDy1, DxDy1);
-  filterGauss3by332F(DxDx1, DxDx);
-  filterGauss3by332F(DyDy1, DyDy);
-  filterGauss3by332F(DxDy1, DxDy);
-  cornerHarris(DxDx, DyDy, DxDy, _scores);
+  GetCovarEntries(_img, DxDx1, DyDy1, DxDy1);
+  FilterGauss3by332F(DxDx1, DxDx);
+  FilterGauss3by332F(DyDy1, DyDy);
+  FilterGauss3by332F(DxDy1, DxDy);
+  CornerHarris(DxDx, DyDy, DxDy, _scores);
 }
 
-void HarrisScoreCalculatorFloat::get2dMaxima(
+void HarrisScoreCalculatorFloat::Get2dMaxima(
     std::vector<PointWithScore>& points, float absoluteThreshold) {
   // Do the 8-neighbor nonmax suppression.
   const int stride = _scores.cols;
@@ -103,7 +103,7 @@ void HarrisScoreCalculatorFloat::get2dMaxima(
 }
 
 // X and Y denote the size of the mask.
-void HarrisScoreCalculatorFloat::getCovarEntries(const cv::Mat& src,
+void HarrisScoreCalculatorFloat::GetCovarEntries(const cv::Mat& src,
                                                  cv::Mat& dxdx, cv::Mat& dydy,
                                                  cv::Mat& dxdy) {
   int jump = 0;  // Number of bytes.
@@ -192,7 +192,7 @@ void HarrisScoreCalculatorFloat::getCovarEntries(const cv::Mat& src,
   }
 }
 
-void HarrisScoreCalculatorFloat::cornerHarris(const cv::Mat& dxdxSmooth,
+void HarrisScoreCalculatorFloat::CornerHarris(const cv::Mat& dxdxSmooth,
                                               const cv::Mat& dydySmooth,
                                               const cv::Mat& dxdySmooth,
                                               cv::Mat& dst) {

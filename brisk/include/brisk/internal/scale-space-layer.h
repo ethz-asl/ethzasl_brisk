@@ -59,50 +59,50 @@ class ScaleSpaceLayer {
   ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
                   bool initScores = true);  // For successive construction.
 
-  void create(const cv::Mat& img, bool initScores = true);  // Octave 0.
-  void create(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores =
-                  true);  // For successive construction.
+  void Create(const cv::Mat& img, bool initScores = true);  // Octave 0.
+  void Create(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
+              bool initScores = true);  // For successive construction.
 
-  void setUniformityRadius(double radius);
-  void setMaxNumKpt(size_t maxNumKpt) {
+  void SetUniformityRadius(double radius);
+  void SetMaxNumKpt(size_t maxNumKpt) {
     _maxNumKpt = maxNumKpt;
   }
-  void setAbsoluteThreshold(double absoluteThreshold) {
+  void SetAbsoluteThreshold(double absoluteThreshold) {
     _absoluteThreshold = absoluteThreshold;
   }
 
   // Feature detection.
-  void detectScaleSpaceMaxima(std::vector<cv::KeyPoint>& keypoints,
+  void DetectScaleSpaceMaxima(std::vector<cv::KeyPoint>& keypoints,
                               bool enforceUniformity = true, bool doRefinement =
                                   true,
                               bool usePassedKeypoints = false);
 
   // Subsampling.
   // Half sampling.
-  static inline bool halfsample(const cv::Mat& srcimg, cv::Mat& dstimg);
+  static inline bool Halfsample(const cv::Mat& srcimg, cv::Mat& dstimg);
   // 8 bit.
-  static inline void halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
+  static inline void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
   // for 16 bit input images.
-  static inline void halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
+  static inline void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
   // Two third sampling.
-  static inline bool twothirdsample(const cv::Mat& srcimg, cv::Mat& dstimg);
+  static inline bool Twothirdsample(const cv::Mat& srcimg, cv::Mat& dstimg);
   // 8 bit.
-  static inline void twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
+  static inline void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
   // for 16 bit input images.
-  static inline void twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
+  static inline void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
  protected:
   // Utilities.
-  inline double scoreAbove(double u, double v);
-  inline double scoreBelow(double u, double v);
+  inline double ScoreAbove(double u, double v);
+  inline double ScoreBelow(double u, double v);
 
   // 1d (scale) refinement.
-  __inline__ float refine1D(const float s_05, const float s0, const float s05,
+  __inline__ float Refine1D(const float s_05, const float s0, const float s05,
                             float& max);  // Around octave.
-  __inline__ float refine1D_1(const float s_05, const float s0, const float s05,
+  __inline__ float Refine1D_1(const float s_05, const float s0, const float s05,
                               float& max);  // Around intra.
 
   // 2D maximum refinement:
-  __inline__ float subpixel2D(const double s_0_0, const double s_0_1,
+  __inline__ float Subpixel2D(const double s_0_0, const double s_0_1,
                               const double s_0_2, const double s_1_0,
                               const double s_1_1, const double s_1_2,
                               const double s_2_0, const double s_2_1,

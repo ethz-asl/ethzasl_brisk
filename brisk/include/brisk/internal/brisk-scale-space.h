@@ -53,44 +53,44 @@ public:
   ~BriskScaleSpace();
 
   // Construct the image pyramids.
-  void constructPyramid(const cv::Mat& image, uchar _threshold);
+  void ConstructPyramid(const cv::Mat& image, uchar _threshold);
 
   // Get Keypoints.
-  void getKeypoints(std::vector<cv::KeyPoint>& keypoints);
+  void GetKeypoints(std::vector<cv::KeyPoint>& keypoints);
 
 protected:
   // Nonmax suppression:
-  __inline__ bool isMax2D(const uint8_t layer,
+  __inline__ bool IsMax2D(const uint8_t layer,
       const int x_layer, const int y_layer);
   // 1D (scale axis) refinement:
-  __inline__ float refine1D(const float s_05,
+  __inline__ float Refine1D(const float s_05,
       const float s0, const float s05, float& max);  // Around octave.
-  __inline__ float refine1D_1(const float s_05,
+  __inline__ float Refine1D_1(const float s_05,
       const float s0, const float s05, float& max);  // Around intra.
-  __inline__ float refine1D_2(const float s_05,
+  __inline__ float Refine1D_2(const float s_05,
       const float s0, const float s05, float& max);  // Around octave 0 only.
   // 2D maximum refinement:
-  __inline__ float subpixel2D(const int s_0_0, const int s_0_1, const int s_0_2,
+  __inline__ float Subpixel2D(const int s_0_0, const int s_0_1, const int s_0_2,
       const int s_1_0, const int s_1_1, const int s_1_2,
       const int s_2_0, const int s_2_1, const int s_2_2,
       float& delta_x, float& delta_y);
   // 3D maximum refinement centered around (x_layer,y_layer).
-  __inline__ float refine3D(const uint8_t layer,
+  __inline__ float Refine3D(const uint8_t layer,
       const int x_layer, const int y_layer,
       float& x, float& y, float& scale, bool& ismax);
 
   // Interpolated score access with recalculation when needed:
-  __inline__ int getScoreAbove(const uint8_t layer,
+  __inline__ int GetScoreAbove(const uint8_t layer,
       const int x_layer, const int y_layer);
-  __inline__ int getScoreBelow(const uint8_t layer,
+  __inline__ int GetScoreBelow(const uint8_t layer,
       const int x_layer, const int y_layer);
 
   // Teturn the maximum of score patches above or below.
-  __inline__ float getScoreMaxAbove(const uint8_t layer,
+  __inline__ float GetScoreMaxAbove(const uint8_t layer,
       const int x_layer, const int y_layer,
       const int threshold, bool& ismax,
       float& dx, float& dy);
-  __inline__ float getScoreMaxBelow(const uint8_t layer,
+  __inline__ float GetScoreMaxBelow(const uint8_t layer,
       const int x_layer, const int y_layer,
       const int threshold, bool& ismax,
       float& dx, float& dy);

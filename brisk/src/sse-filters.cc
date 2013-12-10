@@ -41,7 +41,7 @@
 #include <brisk/internal/sse-filters.h>
 
 namespace brisk {
-void filterGauss3by316S(cv::Mat& src, cv::Mat& dst) {
+void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst) {
   // Sanity check.
   const unsigned int X = 3;
   const unsigned int Y = 3;
@@ -101,7 +101,7 @@ void filterGauss3by316S(cv::Mat& src, cv::Mat& dst) {
 }
 
 
-void filterGauss3by332F(cv::Mat& src, cv::Mat& dst) {
+void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst) {
   // Sanity check.
   static const unsigned int X = 3;
   static const unsigned int Y = 3;
@@ -154,7 +154,7 @@ void filterGauss3by332F(cv::Mat& src, cv::Mat& dst) {
   }
 }
 
-void filterBox3by316S(cv::Mat& src, cv::Mat& dst) {
+void FilterBox3by316S(cv::Mat& src, cv::Mat& dst) {
   // Sanity check.
   const unsigned int X = 3;
   const unsigned int Y = 3;

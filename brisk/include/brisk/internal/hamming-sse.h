@@ -52,7 +52,7 @@ public:
   HammingSse() { };
 
   // SSSE3 - even faster!
-  static __inline__ uint32_t ssse3_popcntofXORed(const __m128i* signature1,
+  static __inline__ uint32_t SSSE3PopcntofXORed(const __m128i* signature1,
       const __m128i* signature2, const int numberOf128BitWords);
 
   typedef unsigned char ValueType;
@@ -65,7 +65,7 @@ public:
   ResultType operator()(const unsigned char* a,
                         const unsigned char* b,
                         const int size) const {
-    return ssse3_popcntofXORed(
+    return SSSE3PopcntofXORed(
         (const __m128i*)(a),
         (const __m128i*)(b),
         size / 16);

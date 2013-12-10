@@ -69,7 +69,7 @@ class CV_EXPORTS BriskDescriptorExtractor : public cv::DescriptorExtractor {
   // Call this to generate the kernel:
   // Circle of radius r (pixels), with n points;
   // Short pairings with dMax, long pairings with dMin.
-  void generateKernel(std::vector<float> &radiusList,
+  void GenerateKernel(std::vector<float> &radiusList,
                       std::vector<int> &numberList,
                       float dMax = 5.85f,
                       float dMin = 8.2f,
@@ -97,7 +97,7 @@ class CV_EXPORTS BriskDescriptorExtractor : public cv::DescriptorExtractor {
 
  protected:
   template<typename ImgPixel_T, typename IntegralPixel_T>
-  __inline__ IntegralPixel_T smoothedIntensity(const cv::Mat& image,
+  __inline__ IntegralPixel_T SmoothedIntensity(const cv::Mat& image,
                                                const cv::Mat& integral,
                                                const float key_x,
                                                const float key_y,

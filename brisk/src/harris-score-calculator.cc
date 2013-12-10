@@ -43,11 +43,11 @@
 
 namespace brisk {
 
-void HarrisScoreCalculator::initializeScores() {
-  harrisScores_sse(_img, _scores);
+void HarrisScoreCalculator::InitializeScores() {
+  HarrisScoresSSE(_img, _scores);
  }
 
-void HarrisScoreCalculator::get2dMaxima(std::vector<PointWithScore>& points,
+void HarrisScoreCalculator::Get2dMaxima(std::vector<PointWithScore>& points,
                                         int absoluteThreshold) {
   // Do the 8-neighbor nonmax suppression.
   const int stride = _scores.cols;
@@ -99,7 +99,7 @@ void HarrisScoreCalculator::get2dMaxima(std::vector<PointWithScore>& points,
 }
 
 // X and Y denote the size of the mask.
-void HarrisScoreCalculator::getCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
+void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
                                             cv::Mat& dydy, cv::Mat& dxdy) {
   // Sanity check.
   assert(src.type() == CV_8U);
@@ -219,7 +219,7 @@ void HarrisScoreCalculator::getCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
   }
 }
 
-void HarrisScoreCalculator::cornerHarris(const cv::Mat& dxdxSmooth,
+void HarrisScoreCalculator::CornerHarris(const cv::Mat& dxdxSmooth,
                                          const cv::Mat& dydySmooth,
                                          const cv::Mat& dxdySmooth,
                                          cv::Mat& dst) {

@@ -80,12 +80,12 @@ class ScoreCalculator {
 #error
   struct PointWithScore {
     PointWithScore():
-    pt(cv::Point2i(0,0)),score(0) {}
+    pt(cv::Point2i(0,0)),Score(0) {}
     PointWithScore(cv::Point2i pt_, Score_t score_):
-    pt(pt_),score(score_) {}
+    pt(pt_),Score(score_) {}
     cv::Point2i pt;
-    Score_t score;
-    inline bool operator<(const PointWithScore& other) const {return score>=other.score;}
+    Score_t Score;
+    inline bool operator<(const PointWithScore& other) const {return Score>=other.Score;}
   };
 #endif
 
@@ -95,23 +95,23 @@ class ScoreCalculator {
   virtual ~ScoreCalculator() { }
 
   // Set image.
-  void setImage(const cv::Mat& img, bool initScores = true) {
+  void SetImage(const cv::Mat& img, bool initScores = true) {
     _img = img;
     if (initScores)
-      initializeScores();
+      InitializeScores();
   }
 
   // Calculate/get score - implement floating point and integer access.
-  virtual inline double score(double u, double v)=0;
-  virtual inline Score_t score(int u, int v)=0;
+  virtual inline double Score(double u, double v)=0;
+  virtual inline Score_t Score(int u, int v)=0;
 
   // 2d maximum query.
-  virtual void get2dMaxima(std::vector<PointWithScore>& points,
+  virtual void Get2dMaxima(std::vector<PointWithScore>& points,
                            Score_t absoluteThreshold = 0) = 0;
  protected:
   cv::Mat _img;  // The image we operate on.
   cv::Mat _scores;  // Store calculated scores.
-  virtual void initializeScores() = 0;
+  virtual void InitializeScores() = 0;
 };
 } // namespace brisk
 #endif  // BRISK_INTERNAL_SCORE_CALCULATOR_H_

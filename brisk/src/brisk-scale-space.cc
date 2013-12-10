@@ -63,7 +63,7 @@ BriskScaleSpace::~BriskScaleSpace() {
 
 }
 // Construct the image pyramids.
-void BriskScaleSpace::constructPyramid(const cv::Mat& image, uchar threshold) {
+void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold) {
   // Set correct size:
   pyramid_.clear();
 
@@ -90,7 +90,7 @@ void BriskScaleSpace::constructPyramid(const cv::Mat& image, uchar threshold) {
   }
 }
 
-void BriskScaleSpace::getKeypoints(std::vector<cv::KeyPoint>& keypoints) {
+void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
   // Make sure keypoints is empty.
   keypoints.resize(0);
   keypoints.reserve(2000);
@@ -102,7 +102,7 @@ void BriskScaleSpace::getKeypoints(std::vector<cv::KeyPoint>& keypoints) {
   for (uint8_t i = 0; i < layers_; i++) {
     // Call OAST16_9 without non-max-suppression.
     brisk::BriskLayer& l = pyramid_[i];
-    l.getAgastPoints(threshold_, agastPoints[i]);
+    l.GetAgastPoints(threshold_, agastPoints[i]);
   }
 
   if (!m_suppressScaleNonmaxima) {
@@ -112,22 +112,22 @@ void BriskScaleSpace::getKeypoints(std::vector<cv::KeyPoint>& keypoints) {
       for (int n = 0; n < num; n++) {
         const CvPoint& point = agastPoints.at(0)[n];
         // First check if it is a maximum:
-        if (!isMax2D(i, point.x, point.y))
+        if (!IsMax2D(i, point.x, point.y))
           continue;
 
         // Let's do the subpixel and float scale refinement:
         brisk::BriskLayer& l = pyramid_[i];
-        register int s_0_0 = l.getAgastScore(point.x - 1, point.y - 1, 1);
-        register int s_1_0 = l.getAgastScore(point.x, point.y - 1, 1);
-        register int s_2_0 = l.getAgastScore(point.x + 1, point.y - 1, 1);
-        register int s_2_1 = l.getAgastScore(point.x + 1, point.y, 1);
-        register int s_1_1 = l.getAgastScore(point.x, point.y, 1);
-        register int s_0_1 = l.getAgastScore(point.x - 1, point.y, 1);
-        register int s_0_2 = l.getAgastScore(point.x - 1, point.y + 1, 1);
-        register int s_1_2 = l.getAgastScore(point.x, point.y + 1, 1);
-        register int s_2_2 = l.getAgastScore(point.x + 1, point.y + 1, 1);
+        register int s_0_0 = l.GetAgastScore(point.x - 1, point.y - 1, 1);
+        register int s_1_0 = l.GetAgastScore(point.x, point.y - 1, 1);
+        register int s_2_0 = l.GetAgastScore(point.x + 1, point.y - 1, 1);
+        register int s_2_1 = l.GetAgastScore(point.x + 1, point.y, 1);
+        register int s_1_1 = l.GetAgastScore(point.x, point.y, 1);
+        register int s_0_1 = l.GetAgastScore(point.x - 1, point.y, 1);
+        register int s_0_2 = l.GetAgastScore(point.x - 1, point.y + 1, 1);
+        register int s_1_2 = l.GetAgastScore(point.x, point.y + 1, 1);
+        register int s_2_2 = l.GetAgastScore(point.x + 1, point.y + 1, 1);
         float delta_x, delta_y;
-        float max = subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
+        float max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
                                s_2_1, s_2_2, delta_x, delta_y);
 
         // Store:
@@ -145,22 +145,22 @@ void BriskScaleSpace::getKeypoints(std::vector<cv::KeyPoint>& keypoints) {
     for (int n = 0; n < num; n++) {
       const CvPoint& point = agastPoints.at(0)[n];
       // First check if it is a maximum:
-      if (!isMax2D(0, point.x, point.y))
+      if (!IsMax2D(0, point.x, point.y))
         continue;
 
       // Let's do the subpixel and float scale refinement:
       brisk::BriskLayer& l = pyramid_[0];
-      register int s_0_0 = l.getAgastScore(point.x - 1, point.y - 1, 1);
-      register int s_1_0 = l.getAgastScore(point.x, point.y - 1, 1);
-      register int s_2_0 = l.getAgastScore(point.x + 1, point.y - 1, 1);
-      register int s_2_1 = l.getAgastScore(point.x + 1, point.y, 1);
-      register int s_1_1 = l.getAgastScore(point.x, point.y, 1);
-      register int s_0_1 = l.getAgastScore(point.x - 1, point.y, 1);
-      register int s_0_2 = l.getAgastScore(point.x - 1, point.y + 1, 1);
-      register int s_1_2 = l.getAgastScore(point.x, point.y + 1, 1);
-      register int s_2_2 = l.getAgastScore(point.x + 1, point.y + 1, 1);
+      register int s_0_0 = l.GetAgastScore(point.x - 1, point.y - 1, 1);
+      register int s_1_0 = l.GetAgastScore(point.x, point.y - 1, 1);
+      register int s_2_0 = l.GetAgastScore(point.x + 1, point.y - 1, 1);
+      register int s_2_1 = l.GetAgastScore(point.x + 1, point.y, 1);
+      register int s_1_1 = l.GetAgastScore(point.x, point.y, 1);
+      register int s_0_1 = l.GetAgastScore(point.x - 1, point.y, 1);
+      register int s_0_2 = l.GetAgastScore(point.x - 1, point.y + 1, 1);
+      register int s_1_2 = l.GetAgastScore(point.x, point.y + 1, 1);
+      register int s_2_2 = l.GetAgastScore(point.x + 1, point.y + 1, 1);
       float delta_x, delta_y;
-      float max = subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
+      float max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
                              s_2_1, s_2_2, delta_x, delta_y);
       // Store:
       keypoints.push_back(
@@ -178,28 +178,28 @@ void BriskScaleSpace::getKeypoints(std::vector<cv::KeyPoint>& keypoints) {
       for (int n = 0; n < num; n++) {
         const CvPoint& point = agastPoints.at(i)[n];
         // Consider only 2D maxima...
-        if (!isMax2D(i, point.x, point.y))
+        if (!IsMax2D(i, point.x, point.y))
           continue;
 
         bool ismax;
         float dx, dy;
-        getScoreMaxBelow(i, point.x, point.y,
-                         l.getAgastScore(point.x, point.y, 1), ismax, dx, dy);
+        GetScoreMaxBelow(i, point.x, point.y,
+                         l.GetAgastScore(point.x, point.y, 1), ismax, dx, dy);
         if (!ismax)
           continue;
 
         // Get the patch on this layer:
-        register int s_0_0 = l.getAgastScore(point.x - 1, point.y - 1, 1);
-        register int s_1_0 = l.getAgastScore(point.x, point.y - 1, 1);
-        register int s_2_0 = l.getAgastScore(point.x + 1, point.y - 1, 1);
-        register int s_2_1 = l.getAgastScore(point.x + 1, point.y, 1);
-        register int s_1_1 = l.getAgastScore(point.x, point.y, 1);
-        register int s_0_1 = l.getAgastScore(point.x - 1, point.y, 1);
-        register int s_0_2 = l.getAgastScore(point.x - 1, point.y + 1, 1);
-        register int s_1_2 = l.getAgastScore(point.x, point.y + 1, 1);
-        register int s_2_2 = l.getAgastScore(point.x + 1, point.y + 1, 1);
+        register int s_0_0 = l.GetAgastScore(point.x - 1, point.y - 1, 1);
+        register int s_1_0 = l.GetAgastScore(point.x, point.y - 1, 1);
+        register int s_2_0 = l.GetAgastScore(point.x + 1, point.y - 1, 1);
+        register int s_2_1 = l.GetAgastScore(point.x + 1, point.y, 1);
+        register int s_1_1 = l.GetAgastScore(point.x, point.y, 1);
+        register int s_0_1 = l.GetAgastScore(point.x - 1, point.y, 1);
+        register int s_0_2 = l.GetAgastScore(point.x - 1, point.y + 1, 1);
+        register int s_1_2 = l.GetAgastScore(point.x, point.y + 1, 1);
+        register int s_2_2 = l.GetAgastScore(point.x + 1, point.y + 1, 1);
         float delta_x, delta_y;
-        float max = subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
+        float max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
                                s_2_1, s_2_2, delta_x, delta_y);
 
         // Store:
@@ -214,12 +214,12 @@ void BriskScaleSpace::getKeypoints(std::vector<cv::KeyPoint>& keypoints) {
         const CvPoint& point = agastPoints.at(i)[n];
 
         // First check if it is a maximum:
-        if (!isMax2D(i, point.x, point.y))
+        if (!IsMax2D(i, point.x, point.y))
           continue;
 
         // Let's do the subpixel and float scale refinement:
         bool ismax;
-        score = refine3D(i, point.x, point.y, x, y, scale, ismax);
+        score = Refine3D(i, point.x, point.y, x, y, scale, ismax);
         if (!ismax) {
           continue;
         }
@@ -233,7 +233,7 @@ void BriskScaleSpace::getKeypoints(std::vector<cv::KeyPoint>& keypoints) {
 }
 
 // Interpolated score access with recalculation when needed:
-__inline__ int BriskScaleSpace::getScoreAbove(const uint8_t layer,
+__inline__ int BriskScaleSpace::GetScoreAbove(const uint8_t layer,
                                               const int x_layer,
                                               const int y_layer) {
   assert(layer < layers_ - 1);
@@ -248,10 +248,10 @@ __inline__ int BriskScaleSpace::getScoreAbove(const uint8_t layer,
     const int r_y = (sixths_y % 6);
     const int r_y_1 = 6 - r_y;
     uint8_t score = 0xFF
-        & ((r_x_1 * r_y_1 * l.getAgastScore(x_above, y_above, 1)
-            + r_x * r_y_1 * l.getAgastScore(x_above + 1, y_above, 1)
-            + r_x_1 * r_y * l.getAgastScore(x_above, y_above + 1, 1)
-            + r_x * r_y * l.getAgastScore(x_above + 1, y_above + 1, 1) + 18)
+        & ((r_x_1 * r_y_1 * l.GetAgastScore(x_above, y_above, 1)
+            + r_x * r_y_1 * l.GetAgastScore(x_above + 1, y_above, 1)
+            + r_x_1 * r_y * l.GetAgastScore(x_above, y_above + 1, 1)
+            + r_x * r_y * l.GetAgastScore(x_above + 1, y_above + 1, 1) + 18)
             / 36);
 
     return score;
@@ -265,15 +265,15 @@ __inline__ int BriskScaleSpace::getScoreAbove(const uint8_t layer,
     const int r_y = (eighths_y % 8);
     const int r_y_1 = 8 - r_y;
     uint8_t score = 0xFF
-        & ((r_x_1 * r_y_1 * l.getAgastScore(x_above, y_above, 1)
-            + r_x * r_y_1 * l.getAgastScore(x_above + 1, y_above, 1)
-            + r_x_1 * r_y * l.getAgastScore(x_above, y_above + 1, 1)
-            + r_x * r_y * l.getAgastScore(x_above + 1, y_above + 1, 1) + 32)
+        & ((r_x_1 * r_y_1 * l.GetAgastScore(x_above, y_above, 1)
+            + r_x * r_y_1 * l.GetAgastScore(x_above + 1, y_above, 1)
+            + r_x_1 * r_y * l.GetAgastScore(x_above, y_above + 1, 1)
+            + r_x * r_y * l.GetAgastScore(x_above + 1, y_above + 1, 1) + 32)
             / 64);
     return score;
   }
 }
-__inline__ int BriskScaleSpace::getScoreBelow(const uint8_t layer,
+__inline__ int BriskScaleSpace::GetScoreBelow(const uint8_t layer,
                                               const int x_layer,
                                               const int y_layer) {
   assert(layer);
@@ -343,31 +343,31 @@ __inline__ int BriskScaleSpace::getScoreBelow(const uint8_t layer,
   const int r_y1_i = r_y1 * scaling;
 
   // First row:
-  int ret_val = A * int(l.getAgastScore(x_left, y_top, 1));
+  int ret_val = A * int(l.GetAgastScore(x_left, y_top, 1));
   for (int X = 1; X <= dx; X++) {
-    ret_val += r_y_1_i * int(l.getAgastScore(x_left + X, y_top, 1));
+    ret_val += r_y_1_i * int(l.GetAgastScore(x_left + X, y_top, 1));
   }
-  ret_val += B * int(l.getAgastScore(x_left + dx + 1, y_top, 1));
+  ret_val += B * int(l.GetAgastScore(x_left + dx + 1, y_top, 1));
   // Middle ones:
   for (int Y = 1; Y <= dy; Y++) {
-    ret_val += r_x_1_i * int(l.getAgastScore(x_left, y_top + Y, 1));
+    ret_val += r_x_1_i * int(l.GetAgastScore(x_left, y_top + Y, 1));
 
     for (int X = 1; X <= dx; X++) {
-      ret_val += int(l.getAgastScore(x_left + X, y_top + Y, 1)) * scaling;
+      ret_val += int(l.GetAgastScore(x_left + X, y_top + Y, 1)) * scaling;
     }
-    ret_val += r_x1_i * int(l.getAgastScore(x_left + dx + 1, y_top + Y, 1));
+    ret_val += r_x1_i * int(l.GetAgastScore(x_left + dx + 1, y_top + Y, 1));
   }
   // Last row:
-  ret_val += D * int(l.getAgastScore(x_left, y_top + dy + 1, 1));
+  ret_val += D * int(l.GetAgastScore(x_left, y_top + dy + 1, 1));
   for (int X = 1; X <= dx; X++) {
-    ret_val += r_y1_i * int(l.getAgastScore(x_left + X, y_top + dy + 1, 1));
+    ret_val += r_y1_i * int(l.GetAgastScore(x_left + X, y_top + dy + 1, 1));
   }
-  ret_val += C * int(l.getAgastScore(x_left + dx + 1, y_top + dy + 1, 1));
+  ret_val += C * int(l.GetAgastScore(x_left + dx + 1, y_top + dy + 1, 1));
 
   return ((ret_val + scaling2 / 2) / scaling2);
 }
 
-__inline__ bool BriskScaleSpace::isMax2D(const uint8_t layer, const int x_layer,
+__inline__ bool BriskScaleSpace::IsMax2D(const uint8_t layer, const int x_layer,
                                          const int y_layer) {
   const cv::Mat& scores = pyramid_[layer].scores();
   brisk::BriskLayer& l = pyramid_[layer];
@@ -376,29 +376,29 @@ __inline__ bool BriskScaleSpace::isMax2D(const uint8_t layer, const int x_layer,
   // Decision tree:
   const uchar center = (*data);
 
-  const uchar s_10 = l.getAgastScore(x_layer - 1, y_layer, center);
+  const uchar s_10 = l.GetAgastScore(x_layer - 1, y_layer, center);
   if (center < s_10)
     return false;
-  const uchar s10 = l.getAgastScore(x_layer + 1, y_layer, center);
+  const uchar s10 = l.GetAgastScore(x_layer + 1, y_layer, center);
   if (center < s10)
     return false;
-  const uchar s0_1 = l.getAgastScore(x_layer, y_layer - 1, center);
+  const uchar s0_1 = l.GetAgastScore(x_layer, y_layer - 1, center);
   if (center < s0_1)
     return false;
-  const uchar s01 = l.getAgastScore(x_layer, y_layer + 1, center);
+  const uchar s01 = l.GetAgastScore(x_layer, y_layer + 1, center);
   if (center < s01)
     return false;
-  const uchar s_11 = l.getAgastScore(x_layer - 1, y_layer + 1, center);
+  const uchar s_11 = l.GetAgastScore(x_layer - 1, y_layer + 1, center);
   if (center < s_11)
     return false;
-  const uchar s11 = l.getAgastScore(x_layer + 1, y_layer + 1, center);
+  const uchar s11 = l.GetAgastScore(x_layer + 1, y_layer + 1, center);
   if (center < s11)
     return false;
-  const uchar s1_1 = l.getAgastScore(x_layer + 1, y_layer - 1, center);
+  const uchar s1_1 = l.GetAgastScore(x_layer + 1, y_layer - 1, center);
   ;
   if (center < s1_1)
     return false;
-  const uchar s_1_1 = l.getAgastScore(x_layer - 1, y_layer - 1, center);
+  const uchar s_1_1 = l.GetAgastScore(x_layer - 1, y_layer - 1, center);
   ;
   if (center < s_1_1)
     return false;
@@ -473,17 +473,17 @@ __inline__ bool BriskScaleSpace::isMax2D(const uint8_t layer, const int x_layer,
 }
 
 // 3D maximum refinement centered around (x_layer,y_layer).
-__inline__ float BriskScaleSpace::refine3D(const uint8_t layer,
+__inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
                                            const int x_layer, const int y_layer,
                                            float& x, float& y, float& scale,
                                            bool& ismax) {
   ismax = true;
   brisk::BriskLayer& thisLayer = pyramid_[layer];
-  const int center = thisLayer.getAgastScore(x_layer, y_layer, 1);
+  const int center = thisLayer.GetAgastScore(x_layer, y_layer, 1);
 
   // Check and get above maximum:
   float delta_x_above, delta_y_above;
-  float max_above = getScoreMaxAbove(layer, x_layer, y_layer, center, ismax,
+  float max_above = GetScoreMaxAbove(layer, x_layer, y_layer, center, ismax,
                                      delta_x_above, delta_y_above);
 
   if (!ismax)
@@ -500,54 +500,54 @@ __inline__ float BriskScaleSpace::refine3D(const uint8_t layer,
     if (layer == 0) {
       // Guess the lower intra octave...
       BriskLayer& l = pyramid_[0];
-      register int s_0_0 = l.getAgastScore_5_8(x_layer - 1, y_layer - 1, 1);
+      register int s_0_0 = l.GetAgastScore_5_8(x_layer - 1, y_layer - 1, 1);
       max_below_uchar = s_0_0;
-      register int s_1_0 = l.getAgastScore_5_8(x_layer, y_layer - 1, 1);
+      register int s_1_0 = l.GetAgastScore_5_8(x_layer, y_layer - 1, 1);
       if (s_1_0 > max_below_uchar)
         max_below_uchar = s_1_0;
-      register int s_2_0 = l.getAgastScore_5_8(x_layer + 1, y_layer - 1, 1);
+      register int s_2_0 = l.GetAgastScore_5_8(x_layer + 1, y_layer - 1, 1);
       if (s_2_0 > max_below_uchar)
         max_below_uchar = s_2_0;
-      register int s_2_1 = l.getAgastScore_5_8(x_layer + 1, y_layer, 1);
+      register int s_2_1 = l.GetAgastScore_5_8(x_layer + 1, y_layer, 1);
       if (s_2_1 > max_below_uchar)
         max_below_uchar = s_2_1;
-      register int s_1_1 = l.getAgastScore_5_8(x_layer, y_layer, 1);
+      register int s_1_1 = l.GetAgastScore_5_8(x_layer, y_layer, 1);
       if (s_1_1 > max_below_uchar)
         max_below_uchar = s_1_1;
-      register int s_0_1 = l.getAgastScore_5_8(x_layer - 1, y_layer, 1);
+      register int s_0_1 = l.GetAgastScore_5_8(x_layer - 1, y_layer, 1);
       if (s_0_1 > max_below_uchar)
         max_below_uchar = s_0_1;
-      register int s_0_2 = l.getAgastScore_5_8(x_layer - 1, y_layer + 1, 1);
+      register int s_0_2 = l.GetAgastScore_5_8(x_layer - 1, y_layer + 1, 1);
       if (s_0_2 > max_below_uchar)
         max_below_uchar = s_0_2;
-      register int s_1_2 = l.getAgastScore_5_8(x_layer, y_layer + 1, 1);
+      register int s_1_2 = l.GetAgastScore_5_8(x_layer, y_layer + 1, 1);
       if (s_1_2 > max_below_uchar)
         max_below_uchar = s_1_2;
-      register int s_2_2 = l.getAgastScore_5_8(x_layer + 1, y_layer + 1, 1);
+      register int s_2_2 = l.GetAgastScore_5_8(x_layer + 1, y_layer + 1, 1);
       if (s_2_2 > max_below_uchar)
         max_below_uchar = s_2_2;
 
-      max_below_float = subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
+      max_below_float = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
                                    s_2_0, s_2_1, s_2_2, delta_x_below,
                                    delta_y_below);
       max_below_float = max_below_uchar;
     } else {
-      max_below_float = getScoreMaxBelow(layer, x_layer, y_layer, center, ismax,
+      max_below_float = GetScoreMaxBelow(layer, x_layer, y_layer, center, ismax,
                                          delta_x_below, delta_y_below);
       if (!ismax)
         return 0;
     }
 
     // Get the patch on this layer:
-    register int s_0_0 = thisLayer.getAgastScore(x_layer - 1, y_layer - 1, 1);
-    register int s_1_0 = thisLayer.getAgastScore(x_layer, y_layer - 1, 1);
-    register int s_2_0 = thisLayer.getAgastScore(x_layer + 1, y_layer - 1, 1);
-    register int s_2_1 = thisLayer.getAgastScore(x_layer + 1, y_layer, 1);
-    register int s_1_1 = thisLayer.getAgastScore(x_layer, y_layer, 1);
-    register int s_0_1 = thisLayer.getAgastScore(x_layer - 1, y_layer, 1);
-    register int s_0_2 = thisLayer.getAgastScore(x_layer - 1, y_layer + 1, 1);
-    register int s_1_2 = thisLayer.getAgastScore(x_layer, y_layer + 1, 1);
-    register int s_2_2 = thisLayer.getAgastScore(x_layer + 1, y_layer + 1, 1);
+    register int s_0_0 = thisLayer.GetAgastScore(x_layer - 1, y_layer - 1, 1);
+    register int s_1_0 = thisLayer.GetAgastScore(x_layer, y_layer - 1, 1);
+    register int s_2_0 = thisLayer.GetAgastScore(x_layer + 1, y_layer - 1, 1);
+    register int s_2_1 = thisLayer.GetAgastScore(x_layer + 1, y_layer, 1);
+    register int s_1_1 = thisLayer.GetAgastScore(x_layer, y_layer, 1);
+    register int s_0_1 = thisLayer.GetAgastScore(x_layer - 1, y_layer, 1);
+    register int s_0_2 = thisLayer.GetAgastScore(x_layer - 1, y_layer + 1, 1);
+    register int s_1_2 = thisLayer.GetAgastScore(x_layer, y_layer + 1, 1);
+    register int s_2_2 = thisLayer.GetAgastScore(x_layer + 1, y_layer + 1, 1);
 
     // Second derivative needs to be sufficiently large.
     if (layer == 0) {
@@ -570,17 +570,17 @@ __inline__ float BriskScaleSpace::refine3D(const uint8_t layer,
     }
 
     float delta_x_layer, delta_y_layer;
-    float max_layer = subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
+    float max_layer = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
                                  s_2_0, s_2_1, s_2_2, delta_x_layer,
                                  delta_y_layer);
 
     // Calculate the relative scale (1D maximum):
     if (doScaleRefinement) {
       if (layer == 0) {
-        scale = refine1D_2(max_below_float, std::max(float(center), max_layer),
+        scale = Refine1D_2(max_below_float, std::max(float(center), max_layer),
                            max_above, max);
       } else {
-        scale = refine1D(max_below_float, std::max(float(center), max_layer),
+        scale = Refine1D(max_below_float, std::max(float(center), max_layer),
                          max_above, max);
       }
     } else {
@@ -617,21 +617,21 @@ __inline__ float BriskScaleSpace::refine3D(const uint8_t layer,
     // On intra.
     // check the patch below:
     float delta_x_below, delta_y_below;
-    float max_below = getScoreMaxBelow(layer, x_layer, y_layer, center, ismax,
+    float max_below = GetScoreMaxBelow(layer, x_layer, y_layer, center, ismax,
                                        delta_x_below, delta_y_below);
     if (!ismax)
       return 0.0;
 
     // Get the patch on this layer:
-    register int s_0_0 = thisLayer.getAgastScore(x_layer - 1, y_layer - 1, 1);
-    register int s_1_0 = thisLayer.getAgastScore(x_layer, y_layer - 1, 1);
-    register int s_2_0 = thisLayer.getAgastScore(x_layer + 1, y_layer - 1, 1);
-    register int s_2_1 = thisLayer.getAgastScore(x_layer + 1, y_layer, 1);
-    register int s_1_1 = thisLayer.getAgastScore(x_layer, y_layer, 1);
-    register int s_0_1 = thisLayer.getAgastScore(x_layer - 1, y_layer, 1);
-    register int s_0_2 = thisLayer.getAgastScore(x_layer - 1, y_layer + 1, 1);
-    register int s_1_2 = thisLayer.getAgastScore(x_layer, y_layer + 1, 1);
-    register int s_2_2 = thisLayer.getAgastScore(x_layer + 1, y_layer + 1, 1);
+    register int s_0_0 = thisLayer.GetAgastScore(x_layer - 1, y_layer - 1, 1);
+    register int s_1_0 = thisLayer.GetAgastScore(x_layer, y_layer - 1, 1);
+    register int s_2_0 = thisLayer.GetAgastScore(x_layer + 1, y_layer - 1, 1);
+    register int s_2_1 = thisLayer.GetAgastScore(x_layer + 1, y_layer, 1);
+    register int s_1_1 = thisLayer.GetAgastScore(x_layer, y_layer, 1);
+    register int s_0_1 = thisLayer.GetAgastScore(x_layer - 1, y_layer, 1);
+    register int s_0_2 = thisLayer.GetAgastScore(x_layer - 1, y_layer + 1, 1);
+    register int s_1_2 = thisLayer.GetAgastScore(x_layer, y_layer + 1, 1);
+    register int s_2_2 = thisLayer.GetAgastScore(x_layer + 1, y_layer + 1, 1);
 
     // Second derivative needs to be sufficiently large.
     if ((s_1_1 - maxThreshold_ < (max_above))
@@ -648,13 +648,13 @@ __inline__ float BriskScaleSpace::refine3D(const uint8_t layer,
     }
 
     float delta_x_layer, delta_y_layer;
-    float max_layer = subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
+    float max_layer = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
                                  s_2_0, s_2_1, s_2_2, delta_x_layer,
                                  delta_y_layer);
 
     if (doScaleRefinement) {
       // Calculate the relative scale (1D maximum):
-      scale = refine1D_1(max_below, std::max(float(center), max_layer),
+      scale = Refine1D_1(max_below, std::max(float(center), max_layer),
                          max_above, max);
     } else {
       scale = 1.0;
@@ -688,7 +688,7 @@ __inline__ float BriskScaleSpace::refine3D(const uint8_t layer,
 }
 
 // Return the maximum of score patches above or below.
-__inline__ float BriskScaleSpace::getScoreMaxAbove(const uint8_t layer,
+__inline__ float BriskScaleSpace::GetScoreMaxAbove(const uint8_t layer,
                                                    const int x_layer,
                                                    const int y_layer,
                                                    const int thr, bool& ismax,
@@ -725,11 +725,11 @@ __inline__ float BriskScaleSpace::getScoreMaxAbove(const uint8_t layer,
   int max_x = x_1 + 1;
   int max_y = y_1 + 1;
   float tmp_max;
-  float max = layerAbove.getAgastScore(x_1, y_1, 1);
+  float max = layerAbove.GetAgastScore(x_1, y_1, 1);
   if (max > threshold)
     return 0;
   for (int x = x_1 + 1; x <= int(x1); x++) {
-    tmp_max = layerAbove.getAgastScore(float(x), y_1, 1);
+    tmp_max = layerAbove.GetAgastScore(float(x), y_1, 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
@@ -737,7 +737,7 @@ __inline__ float BriskScaleSpace::getScoreMaxAbove(const uint8_t layer,
       max_x = x;
     }
   }
-  tmp_max = layerAbove.getAgastScore(x1, y_1, 1);
+  tmp_max = layerAbove.GetAgastScore(x1, y_1, 1);
   if (tmp_max > threshold)
     return 0;
   if (tmp_max > max) {
@@ -747,7 +747,7 @@ __inline__ float BriskScaleSpace::getScoreMaxAbove(const uint8_t layer,
 
   // Middle rows.
   for (int y = y_1 + 1; y <= int(y1); y++) {
-    tmp_max = layerAbove.getAgastScore(x_1, float(y), 1);
+    tmp_max = layerAbove.GetAgastScore(x_1, float(y), 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
@@ -756,7 +756,7 @@ __inline__ float BriskScaleSpace::getScoreMaxAbove(const uint8_t layer,
       max_y = y;
     }
     for (int x = x_1 + 1; x <= int(x1); x++) {
-      tmp_max = layerAbove.getAgastScore(x, y, 1);
+      tmp_max = layerAbove.GetAgastScore(x, y, 1);
       if (tmp_max > threshold)
         return 0;
       if (tmp_max > max) {
@@ -765,7 +765,7 @@ __inline__ float BriskScaleSpace::getScoreMaxAbove(const uint8_t layer,
         max_y = y;
       }
     }
-    tmp_max = layerAbove.getAgastScore(x1, float(y), 1);
+    tmp_max = layerAbove.GetAgastScore(x1, float(y), 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
@@ -776,21 +776,21 @@ __inline__ float BriskScaleSpace::getScoreMaxAbove(const uint8_t layer,
   }
 
   // Bottom row.
-  tmp_max = layerAbove.getAgastScore(x_1, y1, 1);
+  tmp_max = layerAbove.GetAgastScore(x_1, y1, 1);
   if (tmp_max > max) {
     max = tmp_max;
     max_x = int(x_1 + 1);
     max_y = int(y1);
   }
   for (int x = x_1 + 1; x <= int(x1); x++) {
-    tmp_max = layerAbove.getAgastScore(float(x), y1, 1);
+    tmp_max = layerAbove.GetAgastScore(float(x), y1, 1);
     if (tmp_max > max) {
       max = tmp_max;
       max_x = x;
       max_y = int(y1);
     }
   }
-  tmp_max = layerAbove.getAgastScore(x1, y1, 1);
+  tmp_max = layerAbove.GetAgastScore(x1, y1, 1);
   if (tmp_max > max) {
     max = tmp_max;
     max_x = int(x1);
@@ -798,17 +798,17 @@ __inline__ float BriskScaleSpace::getScoreMaxAbove(const uint8_t layer,
   }
 
   // Find dx / dy:
-  register int s_0_0 = layerAbove.getAgastScore(max_x - 1, max_y - 1, 1);
-  register int s_1_0 = layerAbove.getAgastScore(max_x, max_y - 1, 1);
-  register int s_2_0 = layerAbove.getAgastScore(max_x + 1, max_y - 1, 1);
-  register int s_2_1 = layerAbove.getAgastScore(max_x + 1, max_y, 1);
-  register int s_1_1 = layerAbove.getAgastScore(max_x, max_y, 1);
-  register int s_0_1 = layerAbove.getAgastScore(max_x - 1, max_y, 1);
-  register int s_0_2 = layerAbove.getAgastScore(max_x - 1, max_y + 1, 1);
-  register int s_1_2 = layerAbove.getAgastScore(max_x, max_y + 1, 1);
-  register int s_2_2 = layerAbove.getAgastScore(max_x + 1, max_y + 1, 1);
+  register int s_0_0 = layerAbove.GetAgastScore(max_x - 1, max_y - 1, 1);
+  register int s_1_0 = layerAbove.GetAgastScore(max_x, max_y - 1, 1);
+  register int s_2_0 = layerAbove.GetAgastScore(max_x + 1, max_y - 1, 1);
+  register int s_2_1 = layerAbove.GetAgastScore(max_x + 1, max_y, 1);
+  register int s_1_1 = layerAbove.GetAgastScore(max_x, max_y, 1);
+  register int s_0_1 = layerAbove.GetAgastScore(max_x - 1, max_y, 1);
+  register int s_0_2 = layerAbove.GetAgastScore(max_x - 1, max_y + 1, 1);
+  register int s_1_2 = layerAbove.GetAgastScore(max_x, max_y + 1, 1);
+  register int s_2_2 = layerAbove.GetAgastScore(max_x + 1, max_y + 1, 1);
   float dx_1, dy_1;
-  float refined_max = subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
+  float refined_max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
                                  s_2_0, s_2_1, s_2_2, dx_1, dy_1);
 
   // Calculate dx / dy in above coordinates.
@@ -849,7 +849,7 @@ __inline__ float BriskScaleSpace::getScoreMaxAbove(const uint8_t layer,
   return max;
 }
 
-__inline__ float BriskScaleSpace::getScoreMaxBelow(const uint8_t layer,
+__inline__ float BriskScaleSpace::GetScoreMaxBelow(const uint8_t layer,
                                                    const int x_layer,
                                                    const int y_layer,
                                                    const int thr, bool& ismax,
@@ -885,11 +885,11 @@ __inline__ float BriskScaleSpace::getScoreMaxBelow(const uint8_t layer,
   int max_x = x_1 + 1;
   int max_y = y_1 + 1;
   float tmp_max;
-  float max = layerBelow.getAgastScore(x_1, y_1, 1);
+  float max = layerBelow.GetAgastScore(x_1, y_1, 1);
   if (max > threshold)
     return 0;
   for (int x = x_1 + 1; x <= int(x1); x++) {
-    tmp_max = layerBelow.getAgastScore(float(x), y_1, 1);
+    tmp_max = layerBelow.GetAgastScore(float(x), y_1, 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
@@ -897,7 +897,7 @@ __inline__ float BriskScaleSpace::getScoreMaxBelow(const uint8_t layer,
       max_x = x;
     }
   }
-  tmp_max = layerBelow.getAgastScore(x1, y_1, 1);
+  tmp_max = layerBelow.GetAgastScore(x1, y_1, 1);
   if (tmp_max > threshold)
     return 0;
   if (tmp_max > max) {
@@ -907,7 +907,7 @@ __inline__ float BriskScaleSpace::getScoreMaxBelow(const uint8_t layer,
 
   // Middle rows.
   for (int y = y_1 + 1; y <= int(y1); y++) {
-    tmp_max = layerBelow.getAgastScore(x_1, float(y), 1);
+    tmp_max = layerBelow.GetAgastScore(x_1, float(y), 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
@@ -916,28 +916,28 @@ __inline__ float BriskScaleSpace::getScoreMaxBelow(const uint8_t layer,
       max_y = y;
     }
     for (int x = x_1 + 1; x <= int(x1); x++) {
-      tmp_max = layerBelow.getAgastScore(x, y, 1);
+      tmp_max = layerBelow.GetAgastScore(x, y, 1);
       if (tmp_max > threshold)
         return 0;
       if (tmp_max == max) {
         const int t1 = 2
-            * (layerBelow.getAgastScore(x - 1, y, 1)
-                + layerBelow.getAgastScore(x + 1, y, 1)
-                + layerBelow.getAgastScore(x, y + 1, 1)
-                + layerBelow.getAgastScore(x, y - 1, 1))
-            + (layerBelow.getAgastScore(x + 1, y + 1, 1)
-                + layerBelow.getAgastScore(x - 1, y + 1, 1)
-                + layerBelow.getAgastScore(x + 1, y - 1, 1)
-                + layerBelow.getAgastScore(x - 1, y - 1, 1));
+            * (layerBelow.GetAgastScore(x - 1, y, 1)
+                + layerBelow.GetAgastScore(x + 1, y, 1)
+                + layerBelow.GetAgastScore(x, y + 1, 1)
+                + layerBelow.GetAgastScore(x, y - 1, 1))
+            + (layerBelow.GetAgastScore(x + 1, y + 1, 1)
+                + layerBelow.GetAgastScore(x - 1, y + 1, 1)
+                + layerBelow.GetAgastScore(x + 1, y - 1, 1)
+                + layerBelow.GetAgastScore(x - 1, y - 1, 1));
         const int t2 = 2
-            * (layerBelow.getAgastScore(max_x - 1, max_y, 1)
-                + layerBelow.getAgastScore(max_x + 1, max_y, 1)
-                + layerBelow.getAgastScore(max_x, max_y + 1, 1)
-                + layerBelow.getAgastScore(max_x, max_y - 1, 1))
-            + (layerBelow.getAgastScore(max_x + 1, max_y + 1, 1)
-                + layerBelow.getAgastScore(max_x - 1, max_y + 1, 1)
-                + layerBelow.getAgastScore(max_x + 1, max_y - 1, 1)
-                + layerBelow.getAgastScore(max_x - 1, max_y - 1, 1));
+            * (layerBelow.GetAgastScore(max_x - 1, max_y, 1)
+                + layerBelow.GetAgastScore(max_x + 1, max_y, 1)
+                + layerBelow.GetAgastScore(max_x, max_y + 1, 1)
+                + layerBelow.GetAgastScore(max_x, max_y - 1, 1))
+            + (layerBelow.GetAgastScore(max_x + 1, max_y + 1, 1)
+                + layerBelow.GetAgastScore(max_x - 1, max_y + 1, 1)
+                + layerBelow.GetAgastScore(max_x + 1, max_y - 1, 1)
+                + layerBelow.GetAgastScore(max_x - 1, max_y - 1, 1));
         if (t1 > t2) {
           max_x = x;
           max_y = y;
@@ -949,7 +949,7 @@ __inline__ float BriskScaleSpace::getScoreMaxBelow(const uint8_t layer,
         max_y = y;
       }
     }
-    tmp_max = layerBelow.getAgastScore(x1, float(y), 1);
+    tmp_max = layerBelow.GetAgastScore(x1, float(y), 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
@@ -960,21 +960,21 @@ __inline__ float BriskScaleSpace::getScoreMaxBelow(const uint8_t layer,
   }
 
   // Bottom row.
-  tmp_max = layerBelow.getAgastScore(x_1, y1, 1);
+  tmp_max = layerBelow.GetAgastScore(x_1, y1, 1);
   if (tmp_max > max) {
     max = tmp_max;
     max_x = int(x_1 + 1);
     max_y = int(y1);
   }
   for (int x = x_1 + 1; x <= int(x1); x++) {
-    tmp_max = layerBelow.getAgastScore(float(x), y1, 1);
+    tmp_max = layerBelow.GetAgastScore(float(x), y1, 1);
     if (tmp_max > max) {
       max = tmp_max;
       max_x = x;
       max_y = int(y1);
     }
   }
-  tmp_max = layerBelow.getAgastScore(x1, y1, 1);
+  tmp_max = layerBelow.GetAgastScore(x1, y1, 1);
   if (tmp_max > max) {
     max = tmp_max;
     max_x = int(x1);
@@ -982,17 +982,17 @@ __inline__ float BriskScaleSpace::getScoreMaxBelow(const uint8_t layer,
   }
 
   // Find dx/dy:
-  register int s_0_0 = layerBelow.getAgastScore(max_x - 1, max_y - 1, 1);
-  register int s_1_0 = layerBelow.getAgastScore(max_x, max_y - 1, 1);
-  register int s_2_0 = layerBelow.getAgastScore(max_x + 1, max_y - 1, 1);
-  register int s_2_1 = layerBelow.getAgastScore(max_x + 1, max_y, 1);
-  register int s_1_1 = layerBelow.getAgastScore(max_x, max_y, 1);
-  register int s_0_1 = layerBelow.getAgastScore(max_x - 1, max_y, 1);
-  register int s_0_2 = layerBelow.getAgastScore(max_x - 1, max_y + 1, 1);
-  register int s_1_2 = layerBelow.getAgastScore(max_x, max_y + 1, 1);
-  register int s_2_2 = layerBelow.getAgastScore(max_x + 1, max_y + 1, 1);
+  register int s_0_0 = layerBelow.GetAgastScore(max_x - 1, max_y - 1, 1);
+  register int s_1_0 = layerBelow.GetAgastScore(max_x, max_y - 1, 1);
+  register int s_2_0 = layerBelow.GetAgastScore(max_x + 1, max_y - 1, 1);
+  register int s_2_1 = layerBelow.GetAgastScore(max_x + 1, max_y, 1);
+  register int s_1_1 = layerBelow.GetAgastScore(max_x, max_y, 1);
+  register int s_0_1 = layerBelow.GetAgastScore(max_x - 1, max_y, 1);
+  register int s_0_2 = layerBelow.GetAgastScore(max_x - 1, max_y + 1, 1);
+  register int s_1_2 = layerBelow.GetAgastScore(max_x, max_y + 1, 1);
+  register int s_2_2 = layerBelow.GetAgastScore(max_x + 1, max_y + 1, 1);
   float dx_1, dy_1;
-  float refined_max = subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
+  float refined_max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
                                  s_2_0, s_2_1, s_2_2, dx_1, dy_1);
 
   // Calculate dx/dy in above coordinates.
@@ -1033,7 +1033,7 @@ __inline__ float BriskScaleSpace::getScoreMaxBelow(const uint8_t layer,
   return max;
 }
 
-__inline__ float BriskScaleSpace::refine1D(const float s_05, const float s0,
+__inline__ float BriskScaleSpace::Refine1D(const float s_05, const float s0,
                                            const float s05, float& max) {
   int i_05 = int(1024.0 * s_05 + 0.5);
   int i0 = int(1024.0 * s0 + 0.5);
@@ -1075,7 +1075,7 @@ __inline__ float BriskScaleSpace::refine1D(const float s_05, const float s0,
   return ret_val;
 }
 
-__inline__ float BriskScaleSpace::refine1D_1(const float s_05, const float s0,
+__inline__ float BriskScaleSpace::Refine1D_1(const float s_05, const float s0,
                                              const float s05, float& max) {
   int i_05 = int(1024.0 * s_05 + 0.5);
   int i0 = int(1024.0 * s0 + 0.5);
@@ -1117,7 +1117,7 @@ __inline__ float BriskScaleSpace::refine1D_1(const float s_05, const float s0,
   return ret_val;
 }
 
-__inline__ float BriskScaleSpace::refine1D_2(const float s_05, const float s0,
+__inline__ float BriskScaleSpace::Refine1D_2(const float s_05, const float s0,
                                              const float s05, float& max) {
   int i_05 = int(1024.0 * s_05 + 0.5);
   int i0 = int(1024.0 * s0 + 0.5);
@@ -1158,7 +1158,7 @@ __inline__ float BriskScaleSpace::refine1D_2(const float s_05, const float s0,
   return ret_val;
 }
 
-__inline__ float BriskScaleSpace::subpixel2D(const int s_0_0, const int s_0_1,
+__inline__ float BriskScaleSpace::Subpixel2D(const int s_0_0, const int s_0_1,
                                              const int s_0_2, const int s_1_0,
                                              const int s_1_1, const int s_1_2,
                                              const int s_2_0, const int s_2_1,

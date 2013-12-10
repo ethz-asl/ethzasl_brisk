@@ -50,9 +50,9 @@ __inline__ bool compareKeypointScore(cv::KeyPoint kp_i, cv::KeyPoint kp_j) {
 }
 
 HarrisFeatureDetector::HarrisFeatureDetector(double radius) {
-  setRadius(radius);
+  SetRadius(radius);
 }
-void HarrisFeatureDetector::setRadius(double radius) {
+void HarrisFeatureDetector::SetRadius(double radius) {
   _radius = radius;
 
   // Generic mask.
@@ -71,7 +71,7 @@ void HarrisFeatureDetector::setRadius(double radius) {
 }
 
 // X and Y denote the size of the mask.
-__inline__ void HarrisFeatureDetector::getCovarEntries(const cv::Mat& src,
+__inline__ void HarrisFeatureDetector::GetCovarEntries(const cv::Mat& src,
                                                        cv::Mat& dxdx,
                                                        cv::Mat& dydy,
                                                        cv::Mat& dxdy) {
@@ -190,7 +190,7 @@ __inline__ void HarrisFeatureDetector::getCovarEntries(const cv::Mat& src,
   }
 }
 
-__inline__ void HarrisFeatureDetector::cornerHarris(const cv::Mat& dxdxSmooth,
+__inline__ void HarrisFeatureDetector::CornerHarris(const cv::Mat& dxdxSmooth,
                                                     const cv::Mat& dydySmooth,
                                                     const cv::Mat& dxdySmooth,
                                                     cv::Mat& dst) {
@@ -249,7 +249,7 @@ __inline__ void HarrisFeatureDetector::cornerHarris(const cv::Mat& dxdxSmooth,
   }
 }
 
-inline void HarrisFeatureDetector::nonmaxSuppress(
+inline void HarrisFeatureDetector::NonmaxSuppress(
     const cv::Mat& scores, std::vector<cv::KeyPoint>& keypoints) {
   // First do the 8-neighbor nonmax suppression.
   const int stride = scores.cols;
@@ -293,7 +293,7 @@ inline void HarrisFeatureDetector::nonmaxSuppress(
   }
 }
 
-__inline__ void HarrisFeatureDetector::enforceUniformity(
+__inline__ void HarrisFeatureDetector::EnforceUniformity(
     const cv::Mat& scores, std::vector<cv::KeyPoint>& keypoints) const {
   // Sort.
   std::sort(keypoints.begin(), keypoints.end(), compareKeypointScore);
@@ -378,13 +378,13 @@ void HarrisFeatureDetector::detectImpl(const cv::Mat& image,
   cv::Mat DxDx, DyDy, DxDy;
 
   // Pipeline.
-  getCovarEntries(image, DxDx1, DyDy1, DxDy1);
-  filterGauss3by316S(DxDx1, DxDx);
-  filterGauss3by316S(DyDy1, DyDy);
-  filterGauss3by316S(DxDy1, DxDy);
-  cornerHarris(DxDx, DyDy, DxDy, scores);
-  nonmaxSuppress(scores, keypoints);
-  enforceUniformity(scores, keypoints);
+  GetCovarEntries(image, DxDx1, DyDy1, DxDy1);
+  FilterGauss3by316S(DxDx1, DxDx);
+  FilterGauss3by316S(DyDy1, DyDy);
+  FilterGauss3by316S(DxDy1, DxDy);
+  CornerHarris(DxDx, DyDy, DxDy, scores);
+  NonmaxSuppress(scores, keypoints);
+  EnforceUniformity(scores, keypoints);
 }
 
 }  //namespace brisk
