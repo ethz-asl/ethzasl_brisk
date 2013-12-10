@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,8 +38,10 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_INTERNAL_RTDSC_WRAPPER_H_
-#define BRISK_INTERNAL_RTDSC_WRAPPER_H_
+#ifndef INTERNAL_RDTSC_WRAPPER_H_
+#define INTERNAL_RDTSC_WRAPPER_H_
+
+#include <string>
 
 #ifdef USE_RDTSC
 #include <brisk/rdtsc.h>
@@ -89,10 +91,13 @@ class DummyTimer {
   }
   DummyTimer(std::string const & tag, bool constructStopped = false) {
   }
-  ~DummyTimer() { }
+  ~DummyTimer() {
+  }
 
-  void start() { }
-  void stop() { }
+  void start() {
+  }
+  void stop() {
+  }
   bool isTiming() {
     return false;
   }
@@ -125,6 +130,7 @@ class Timing {
   static std::string secondsToTimeString(double seconds);
   void addTime(size_t handle, double seconds);
   void addCycles(size_t handle, double cycles);
+
  private:
   static Timing & instance();
 
@@ -139,16 +145,13 @@ class Timing {
   list_t m_timers;
   map_t m_tagMap;
   size_t m_maxTagLength;
-
 };
 
 class Timer {
  public:
   Timer(size_t handle, bool constructStopped = false)
       : m_timing(false),
-        m_handle(handle)
-
-  {
+        m_handle(handle) {
     if (!constructStopped)
       start();
   }
@@ -183,18 +186,19 @@ class Timer {
     double dt;
     LARGE_INTEGER end;
     QueryPerformanceCounter(&end);
-    dt = (double)(end.QuadPart - m_time.QuadPart)*Timing::instance().m_clockPeriod;
+    dt = static_cast<double>(end.QuadPart - m_time.QuadPart) *
+        Timing::instance().m_clockPeriod;
     Timing::instance().addTime(m_handle, dt);
 #elif USE_RDTSC
     RDTSC(end_); CPUID();
-    double cycles = ((double)COUNTER_DIFF(end_, start_));
+    double cycles = (static_cast<double>(COUNTER_DIFF(end_, start_)));
     Timing::instance().addCycles(m_handle, cycles);
 #else
     double dt;
     boost::posix_time::ptime now =
         boost::posix_time::microsec_clock::local_time();
     boost::posix_time::time_duration t = now - m_time;
-    dt = ((double) t.total_nanoseconds() * 1e-9);
+    dt = (static_cast<double>(t.total_nanoseconds() * 1e-9));
     Timing::instance().addTime(m_handle, dt);
 #endif
     m_timing = false;
@@ -202,6 +206,7 @@ class Timer {
   inline bool isTiming() {
     return m_timing;
   }
+
  private:
 #ifdef SM_USE_HIGH_PERF_TIMER
   LARGE_INTEGER m_time;
@@ -215,6 +220,6 @@ class Timer {
 };
 
 }  // namespace timing
-}  // namespace sm
+}  // namespace rdtsc
 
-#endif  // BRISK_INTERNAL_RTDSC_WRAPPER_H_
+#endif  // INTERNAL_RDTSC_WRAPPER_H_

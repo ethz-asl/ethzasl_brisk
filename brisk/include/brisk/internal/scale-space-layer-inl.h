@@ -916,8 +916,8 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample16(
       // Store.
       assert(x_store + 7 < dstimg.cols);
       assert(y / 2 < dstimg.rows);
-      _mm_storeu_si128((__m128i *) &(dstimg.at < uint16_t > (y / 2, x_store)),
-                       result);
+      _mm_storeu_si128(reinterpret_cast<__m128i*>(
+          &(dstimg.at<uint16_t>(y / 2, x_store))), result);
 
       x_store += 8;
 
@@ -937,7 +937,7 @@ template<class SCORE_CALCULTAOR_T>
 inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample8(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
   // Take care with border...
-  const unsigned short leftoverCols = ((srcimg.cols % 16) / 2);
+  const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
   // Note: leftoverCols can be zero but this still false...
   const bool noleftover = (srcimg.cols % 16) == 0;
 
@@ -1053,7 +1053,7 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample8(
       const unsigned char* p1_src_char = (unsigned char*) (p1);
       const unsigned char* p2_src_char = (unsigned char*) (p2);
       for (unsigned int k = 0; k < leftoverCols; k++) {
-        unsigned short tmp = p1_src_char[k] + p1_src_char[k + 1]
+        uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
             + p2_src_char[k] + p2_src_char[k + 1];
         *(p_dest_char++) = (unsigned char) (tmp / 4);
       }
@@ -1106,33 +1106,33 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample16(
 
       // Assemble epi32 registers.
       // Top row.
-      __m128i i0_corners = _mm_set_epi32(srcimg.at < uint16_t > (y, x + 5),
-                                         srcimg.at < uint16_t > (y, x + 3),
-                                         srcimg.at < uint16_t > (y, x + 2),
-                                         srcimg.at < uint16_t > (y, x));
+      __m128i i0_corners = _mm_set_epi32(srcimg.at<uint16_t>(y, x + 5),
+                                         srcimg.at<uint16_t>(y, x + 3),
+                                         srcimg.at<uint16_t>(y, x + 2),
+                                         srcimg.at<uint16_t>(y, x));
       i0_corners = _mm_slli_epi32(i0_corners, 2);  // * 4.
-      const uint32_t m01 = srcimg.at < uint16_t > (y, x + 1) << 1;  // * 2.
-      const uint32_t m04 = srcimg.at < uint16_t > (y, x + 4) << 1;  // * 2.
+      const uint32_t m01 = srcimg.at<uint16_t>(y, x + 1) << 1;  // * 2.
+      const uint32_t m04 = srcimg.at<uint16_t>(y, x + 4) << 1;  // * 2.
       __m128i i0_middle = _mm_set_epi32(m04, m04, m01, m01);
 
       // Middle row.
-      __m128i i1_leftright = _mm_set_epi32(srcimg.at < uint16_t > (y1, x + 5),
-                                           srcimg.at < uint16_t > (y1, x + 3),
-                                           srcimg.at < uint16_t > (y1, x + 2),
-                                           srcimg.at < uint16_t > (y1, x));
+      __m128i i1_leftright = _mm_set_epi32(srcimg.at<uint16_t>(y1, x + 5),
+                                           srcimg.at<uint16_t>(y1, x + 3),
+                                           srcimg.at<uint16_t>(y1, x + 2),
+                                           srcimg.at<uint16_t>(y1, x));
       i1_leftright = _mm_slli_epi32(i1_leftright, 1);  // * 2.
-      const uint32_t m11 = srcimg.at < uint16_t > (y1, x + 1);
-      const uint32_t m14 = srcimg.at < uint16_t > (y1, x + 4);
+      const uint32_t m11 = srcimg.at<uint16_t>(y1, x + 1);
+      const uint32_t m14 = srcimg.at<uint16_t>(y1, x + 4);
       __m128i i1_middle = _mm_set_epi32(m14, m14, m11, m11);
 
       // Bottom row.
-      __m128i i2_corners = _mm_set_epi32(srcimg.at < uint16_t > (y2, x + 5),
-                                         srcimg.at < uint16_t > (y2, x + 3),
-                                         srcimg.at < uint16_t > (y2, x + 2),
-                                         srcimg.at < uint16_t > (y2, x));
-      i2_corners = _mm_slli_epi32(i2_corners, 2);  //*4
-      const uint32_t m21 = srcimg.at < uint16_t > (y2, x + 1) << 1;  //*2
-      const uint32_t m24 = srcimg.at < uint16_t > (y2, x + 4) << 1;  //*2
+      __m128i i2_corners = _mm_set_epi32(srcimg.at<uint16_t>(y2, x + 5),
+                                         srcimg.at<uint16_t>(y2, x + 3),
+                                         srcimg.at<uint16_t>(y2, x + 2),
+                                         srcimg.at<uint16_t>(y2, x));
+      i2_corners = _mm_slli_epi32(i2_corners, 2);  // *4
+      const uint32_t m21 = srcimg.at<uint16_t>(y2, x + 1) << 1;  // *2
+      const uint32_t m24 = srcimg.at<uint16_t>(y2, x + 4) << 1;  // *2
       __m128i i2_middle = _mm_set_epi32(m24, m24, m21, m21);
 
       // Average.
@@ -1148,33 +1148,33 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample16(
       // Assemble epi32 registers---right blocks.
       const int xp = x + 6;
       // Top row.
-      i0_corners = _mm_set_epi32(srcimg.at < uint16_t > (y, xp + 5),
-                                 srcimg.at < uint16_t > (y, xp + 3),
-                                 srcimg.at < uint16_t > (y, xp + 2),
-                                 srcimg.at < uint16_t > (y, xp));
-      i0_corners = _mm_slli_epi32(i0_corners, 2);  //*4
-      const uint32_t m01p = srcimg.at < uint16_t > (y, xp + 1) << 1;  //*2
-      const uint32_t m04p = srcimg.at < uint16_t > (y, xp + 4) << 1;  //*2
+      i0_corners = _mm_set_epi32(srcimg.at<uint16_t>(y, xp + 5),
+                                 srcimg.at<uint16_t>(y, xp + 3),
+                                 srcimg.at<uint16_t>(y, xp + 2),
+                                 srcimg.at<uint16_t>(y, xp));
+      i0_corners = _mm_slli_epi32(i0_corners, 2);  // *4
+      const uint32_t m01p = srcimg.at<uint16_t>(y, xp + 1) << 1;  // *2
+      const uint32_t m04p = srcimg.at<uint16_t>(y, xp + 4) << 1;  // *2
       i0_middle = _mm_set_epi32(m04p, m04p, m01p, m01p);
 
       // Middle row.
-      i1_leftright = _mm_set_epi32(srcimg.at < uint16_t > (y1, xp + 5),
-                                   srcimg.at < uint16_t > (y1, xp + 3),
-                                   srcimg.at < uint16_t > (y1, xp + 2),
-                                   srcimg.at < uint16_t > (y1, xp));
-      i1_leftright = _mm_slli_epi32(i1_leftright, 1);  //*2
-      const uint32_t m11p = srcimg.at < uint16_t > (y1, xp + 1);
-      const uint32_t m14p = srcimg.at < uint16_t > (y1, xp + 4);
+      i1_leftright = _mm_set_epi32(srcimg.at<uint16_t>(y1, xp + 5),
+                                   srcimg.at<uint16_t>(y1, xp + 3),
+                                   srcimg.at<uint16_t>(y1, xp + 2),
+                                   srcimg.at<uint16_t>(y1, xp));
+      i1_leftright = _mm_slli_epi32(i1_leftright, 1);  // *2
+      const uint32_t m11p = srcimg.at<uint16_t>(y1, xp + 1);
+      const uint32_t m14p = srcimg.at<uint16_t>(y1, xp + 4);
       i1_middle = _mm_set_epi32(m14p, m14p, m11p, m11p);
 
       // Bottom row.
-      i2_corners = _mm_set_epi32(srcimg.at < uint16_t > (y2, xp + 5),
-                                 srcimg.at < uint16_t > (y2, xp + 3),
-                                 srcimg.at < uint16_t > (y2, xp + 2),
-                                 srcimg.at < uint16_t > (y2, xp));
-      i2_corners = _mm_slli_epi32(i2_corners, 2);  //*4
-      const uint32_t m21p = srcimg.at < uint16_t > (y2, xp + 1) << 1;  //*2
-      const uint32_t m24p = srcimg.at < uint16_t > (y2, xp + 4) << 1;  //*2
+      i2_corners = _mm_set_epi32(srcimg.at<uint16_t>(y2, xp + 5),
+                                 srcimg.at<uint16_t>(y2, xp + 3),
+                                 srcimg.at<uint16_t>(y2, xp + 2),
+                                 srcimg.at<uint16_t>(y2, xp));
+      i2_corners = _mm_slli_epi32(i2_corners, 2);  // *4
+      const uint32_t m21p = srcimg.at<uint16_t>(y2, xp + 1) << 1;  // *2
+      const uint32_t m24p = srcimg.at<uint16_t>(y2, xp + 4) << 1;  // *2
       i2_middle = _mm_set_epi32(m24p, m24p, m21p, m21p);
 
       // Average.
@@ -1188,22 +1188,22 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample16(
       result2p = _mm_add_epi32(result2p, result1);
 
       // Divide by 9 - not sure if this is very safe...
-      ((int*) &result0p)[0] /= 9;
-      ((int*) &result0p)[1] /= 9;
-      ((int*) &result0p)[2] /= 9;
-      ((int*) &result0p)[3] /= 9;
-      ((int*) &result2p)[0] /= 9;
-      ((int*) &result2p)[1] /= 9;
-      ((int*) &result2p)[2] /= 9;
-      ((int*) &result2p)[3] /= 9;
-      ((int*) &result0)[0] /= 9;
-      ((int*) &result0)[1] /= 9;
-      ((int*) &result0)[2] /= 9;
-      ((int*) &result0)[3] /= 9;
-      ((int*) &result2)[0] /= 9;
-      ((int*) &result2)[1] /= 9;
-      ((int*) &result2)[2] /= 9;
-      ((int*) &result2)[3] /= 9;
+      (reinterpret_cast<int*>(&result0p))[0] /= 9;
+      (reinterpret_cast<int*>(&result0p))[1] /= 9;
+      (reinterpret_cast<int*>(&result0p))[2] /= 9;
+      (reinterpret_cast<int*>(&result0p))[3] /= 9;
+      (reinterpret_cast<int*>(&result2p))[0] /= 9;
+      (reinterpret_cast<int*>(&result2p))[1] /= 9;
+      (reinterpret_cast<int*>(&result2p))[2] /= 9;
+      (reinterpret_cast<int*>(&result2p))[3] /= 9;
+      (reinterpret_cast<int*>(&result0))[0] /= 9;
+      (reinterpret_cast<int*>(&result0))[1] /= 9;
+      (reinterpret_cast<int*>(&result0))[2] /= 9;
+      (reinterpret_cast<int*>(&result0))[3] /= 9;
+      (reinterpret_cast<int*>(&result2))[0] /= 9;
+      (reinterpret_cast<int*>(&result2))[1] /= 9;
+      (reinterpret_cast<int*>(&result2))[2] /= 9;
+      (reinterpret_cast<int*>(&result2))[3] /= 9;
 
       // Pack.
       __m128i store0 = _mm_packs_epi32(result0, result0p);
@@ -1214,10 +1214,11 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample16(
       assert(y / 3 * 2 < dstimg.rows);
       assert(y / 3 * 2 + 1 < dstimg.rows);
       _mm_storeu_si128(
-          (__m128i *) &(dstimg.at < uint16_t > (y / 3 * 2, x_store)), store0);
+          reinterpret_cast<__m128i*>(
+              &(dstimg.at<uint16_t>(y / 3 * 2, x_store))), store0);
       _mm_storeu_si128(
-          (__m128i *) &(dstimg.at < uint16_t > (y / 3 * 2 + 1, x_store)),
-          store2);
+          reinterpret_cast<__m128i*>(
+              &(dstimg.at<uint16_t>(y / 3 * 2 + 1, x_store))), store2);
 
       x_store += 8;
 
@@ -1228,7 +1229,6 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample16(
         x_store = dstimg.cols - 8;
         end = true;
       }
-
     }
   }
 }
@@ -1237,7 +1237,7 @@ template<class SCORE_CALCULTAOR_T>
 inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample8(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
   // Take care with border...
-  const unsigned short leftoverCols = ((srcimg.cols / 3) * 3) % 15;
+  const uint16_t leftoverCols = ((srcimg.cols / 3) * 3) % 15;
 
   // Make sure the destination image is of the right size:
   assert((srcimg.cols / 3) * 2 == dstimg.cols);
@@ -1270,9 +1270,9 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample8(
   while (p3 < p_end) {
     for (int i = 0; i < hsize; i++) {
       // Load three rows
-      __m128i first = _mm_loadu_si128((__m128i *) p1);
-      __m128i second = _mm_loadu_si128((__m128i *) p2);
-      __m128i third = _mm_loadu_si128((__m128i *) p3);
+      __m128i first = _mm_loadu_si128(reinterpret_cast<__m128i *>(p1));
+      __m128i second = _mm_loadu_si128(reinterpret_cast<__m128i *>(p2));
+      __m128i third = _mm_loadu_si128(reinterpret_cast<__m128i *>(p3));
 
       // Upper row:
       __m128i upper = _mm_avg_epu8(_mm_avg_epu8(first, second), first);
@@ -1295,8 +1295,8 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample8(
         _mm_maskmoveu_si128(result_upper, store_mask, (char*) p_dest1);
         _mm_maskmoveu_si128(result_lower, store_mask, (char*) p_dest2);
       } else {
-        _mm_storeu_si128((__m128i *) p_dest1, result_upper);
-        _mm_storeu_si128((__m128i *) p_dest2, result_lower);
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(p_dest1), result_upper);
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(p_dest2), result_lower);
       }
 
       // Shift pointers:
@@ -1309,15 +1309,15 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample8(
 
     // Fill the remainder:
     for (unsigned int j = 0; j < leftoverCols; j += 3) {
-      const unsigned short A1 = *(p1++);
-      const unsigned short A2 = *(p1++);
-      const unsigned short A3 = *(p1++);
-      const unsigned short B1 = *(p2++);
-      const unsigned short B2 = *(p2++);
-      const unsigned short B3 = *(p2++);
-      const unsigned short C1 = *(p3++);
-      const unsigned short C2 = *(p3++);
-      const unsigned short C3 = *(p3++);
+      const uint16_t A1 = *(p1++);
+      const uint16_t A2 = *(p1++);
+      const uint16_t A3 = *(p1++);
+      const uint16_t B1 = *(p2++);
+      const uint16_t B2 = *(p2++);
+      const uint16_t B3 = *(p2++);
+      const uint16_t C1 = *(p3++);
+      const uint16_t C2 = *(p3++);
+      const uint16_t C3 = *(p3++);
 
       *(p_dest1++) = (unsigned char) (((4 * A1 + 2 * (A2 + B1) + B2) / 9)
           & 0x00FF);
@@ -1374,15 +1374,16 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Refine1D(const float s_05,
 
   int three_b = -40 * i_05 + 54 * i0 - 14 * i05;
   // Calculate max location:
-  float ret_val = -float(three_b) / float(2 * three_a);
+  float ret_val = -static_cast<float>(three_b) /
+      static_cast<float>(2 * three_a);
   // Saturate and return
   if (ret_val < 0.75)
     ret_val = 0.75;
   else if (ret_val > 1.5)
     ret_val = 1.5;  // Allow to be slightly off bounds ...?
   int three_c = +24 * i_05 - 27 * i0 + 6 * i05;
-  max = float(three_c) + float(three_a) * ret_val * ret_val
-      + float(three_b) * ret_val;
+  max = static_cast<float>(three_c) + static_cast<float>(three_a) *
+      ret_val * ret_val + static_cast<float>(three_b) * ret_val;
   max /= 3072.0;
   return ret_val;
 }
@@ -1417,15 +1418,15 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Refine1D_1(
 
   int two_b = -21 * i_05 + 36 * i0 - 15 * i05;
   // calculate max location:
-  float ret_val = -float(two_b) / float(2 * two_a);
+  float ret_val = -static_cast<float>(two_b) / static_cast<float>(2 * two_a);
   // saturate and return
   if (ret_val < 0.6666666666666666666666666667)
     ret_val = 0.666666666666666666666666667;
   else if (ret_val > 1.33333333333333333333333333)
     ret_val = 1.333333333333333333333333333;
   int two_c = +12 * i_05 - 16 * i0 + 6 * i05;
-  max = float(two_c) + float(two_a) * ret_val * ret_val
-      + float(two_b) * ret_val;
+  max = static_cast<float>(two_c) + static_cast<float>(two_a) * ret_val * ret_val
+      + static_cast<float>(two_b) * ret_val;
   max /= 2048.0;
   return ret_val;
 }
@@ -1456,7 +1457,7 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Subpixel2D(
   if (H_det == 0) {
     delta_x = 0.0;
     delta_y = 0.0;
-    return float(coeff6) / 18.0;
+    return static_cast<float>(coeff6) / 18.0;
   }
 
   if (!(H_det > 0 && coeff1 < 0)) {
@@ -1483,12 +1484,14 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Subpixel2D(
       delta_x = -1.0;
       delta_y = -1.0;
     }
-    return float(tmp_max + coeff1 + coeff2 + coeff6) / 18.0;
+    return static_cast<float>(tmp_max + coeff1 + coeff2 + coeff6) / 18.0;
   }
 
   // This is hopefully the normal outcome of the Hessian test.
-  delta_x = float(2 * coeff2 * coeff3 - coeff4 * coeff5) / float(-H_det);
-  delta_y = float(2 * coeff1 * coeff4 - coeff3 * coeff5) / float(-H_det);
+  delta_x = static_cast<float>(2 * coeff2 * coeff3 - coeff4 * coeff5) /
+      static_cast<float>(-H_det);
+  delta_y = static_cast<float>(2 * coeff1 * coeff4 - coeff3 * coeff5) /
+      static_cast<float>(-H_det);
   // TODO (lestefan): this is not correct, but easy, so perform a real boundary
   // maximum search:
   bool tx = false;
@@ -1509,14 +1512,16 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Subpixel2D(
     float delta_x1 = 0.0, delta_x2 = 0.0, delta_y1 = 0.0, delta_y2 = 0.0;
     if (tx) {
       delta_x1 = 1.0;
-      delta_y1 = -float(coeff4 + coeff5) / float(2 * coeff2);
+      delta_y1 = -static_cast<float>(coeff4 + coeff5) /
+          static_cast<float>(2 * coeff2);
       if (delta_y1 > 1.0)
         delta_y1 = 1.0;
       else if (delta_y1 < -1.0)
         delta_y1 = -1.0;
     } else if (tx_) {
       delta_x1 = -1.0;
-      delta_y1 = -float(coeff4 - coeff5) / float(2 * coeff2);
+      delta_y1 = -static_cast<float>(coeff4 - coeff5) /
+          static_cast<float>(2 * coeff2);
       if (delta_y1 > 1.0)
         delta_y1 = 1.0;
       else if (delta_y1 < -1.0)
@@ -1524,14 +1529,16 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Subpixel2D(
     }
     if (ty) {
       delta_y2 = 1.0;
-      delta_x2 = -float(coeff3 + coeff5) / float(2 * coeff1);
+      delta_x2 = -static_cast<float>(coeff3 + coeff5) /
+          static_cast<float>(2 * coeff1);
       if (delta_x2 > 1.0)
         delta_x2 = 1.0;
       else if (delta_x2 < -1.0)
         delta_x2 = -1.0;
     } else if (ty_) {
       delta_y2 = -1.0;
-      delta_x2 = -float(coeff3 - coeff5) / float(2 * coeff1);
+      delta_x2 = -static_cast<float>(coeff3 - coeff5) /
+          static_cast<float>(2 * coeff1);
       if (delta_x2 > 1.0)
         delta_x2 = 1.0;
       else if (delta_x2 < -1.0)

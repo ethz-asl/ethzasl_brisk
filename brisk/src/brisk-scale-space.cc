@@ -90,19 +90,19 @@ void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold) {
   }
 }
 
-void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
+void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
   // Make sure keypoints is empty.
-  keypoints.resize(0);
-  keypoints.reserve(2000);
+  keypoints->resize(0);
+  keypoints->reserve(1000);
 
-  std::vector < std::vector<CvPoint> > agastPoints;
+  std::vector<std::vector<CvPoint> > agastPoints;
   agastPoints.resize(layers_);
 
   // Go through the octaves and intra layers and calculate fast corner scores:
   for (uint8_t i = 0; i < layers_; i++) {
     // Call OAST16_9 without non-max-suppression.
     brisk::BriskLayer& l = pyramid_[i];
-    l.GetAgastPoints(threshold_, agastPoints[i]);
+    l.GetAgastPoints(threshold_, &agastPoints[i]);
   }
 
   if (!m_suppressScaleNonmaxima) {
@@ -131,7 +131,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
                                s_2_1, s_2_2, delta_x, delta_y);
 
         // Store:
-        keypoints.push_back(
+        keypoints->push_back(
             cv::KeyPoint(float(point.x) + delta_x, float(point.y) + delta_y,
                          basicSize_ * l.scale(), -1, max, 0));
       }
@@ -163,7 +163,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
       float max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
                              s_2_1, s_2_2, delta_x, delta_y);
       // Store:
-      keypoints.push_back(
+      keypoints->push_back(
           cv::KeyPoint(float(point.x) + delta_x, float(point.y) + delta_y,
                        basicSize_, -1, max, 0));
     }
@@ -203,7 +203,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
                                s_2_1, s_2_2, delta_x, delta_y);
 
         // Store:
-        keypoints.push_back(
+        keypoints->push_back(
             cv::KeyPoint((float(point.x) + delta_x) * l.scale() + l.offset(),
                          (float(point.y) + delta_y) * l.scale() + l.offset(),
                          basicSize_ * l.scale(), -1, max, i));
@@ -225,7 +225,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
         }
 
         // Finally store the detected keypoint:
-        keypoints.push_back(
+        keypoints->push_back(
             cv::KeyPoint(x, y, basicSize_ * scale, -1, score, i));
       }
     }

@@ -41,6 +41,8 @@
 #ifndef BRISK_HARRIS_FEATURE_DETECTOR_H_
 #define BRISK_HARRIS_FEATURE_DETECTOR_H_
 
+#include <vector>
+
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/sse-filters.h>
@@ -49,7 +51,7 @@ namespace brisk {
 
 class HarrisFeatureDetector : public cv::FeatureDetector {
  public:
-  HarrisFeatureDetector(double radius);
+  explicit HarrisFeatureDetector(double radius);
   void SetRadius(double radius);
 
  protected:

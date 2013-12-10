@@ -41,6 +41,9 @@
 #ifndef BRISK_BRISK_DESCRIPTOR_EXTRACTOR_H_
 #define BRISK_BRISK_DESCRIPTOR_EXTRACTOR_H_
 
+#include <string>
+#include <vector>
+
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/helper-structures.h>
@@ -57,8 +60,8 @@ class CV_EXPORTS BriskDescriptorExtractor : public cv::DescriptorExtractor {
                            bool rotationInvariant = true,
                            bool scaleInvariant = true);
   // Custom setup.
-  BriskDescriptorExtractor(std::vector<float> &radiusList,
-                           std::vector<int> &numberList,
+  BriskDescriptorExtractor(const std::vector<float>& radiusList,
+                           const std::vector<int>& numberList,
                            bool rotationInvariant = true,
                            bool scaleInvariant = true,
                            float dMax = 5.85f,
@@ -69,8 +72,8 @@ class CV_EXPORTS BriskDescriptorExtractor : public cv::DescriptorExtractor {
   // Call this to generate the kernel:
   // Circle of radius r (pixels), with n points;
   // Short pairings with dMax, long pairings with dMin.
-  void GenerateKernel(std::vector<float> &radiusList,
-                      std::vector<int> &numberList,
+  void GenerateKernel(const std::vector<float>& radiusList,
+                      const std::vector<int>& numberList,
                       float dMax = 5.85f,
                       float dMin = 8.2f,
                       std::vector<int> indexChange = std::vector<int>());

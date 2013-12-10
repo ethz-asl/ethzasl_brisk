@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,26 +38,26 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_INTERNAL_HAMMING_SSE_H_
-#define BRISK_INTERNAL_HAMMING_SSE_H_
+#ifndef INTERNAL_HAMMING_SSE_H_
+#define INTERNAL_HAMMING_SSE_H_
 
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
-/// Faster Hamming distance functor - uses SSE
-/// bit count of A exclusive XOR'ed with B.
+// Faster Hamming distance functor - uses SSE
+// bit count of A exclusive XOR'ed with B.
 class CV_EXPORTS HammingSse {
-public:
-  HammingSse() { };
+ public:
+  HammingSse() { }
 
   // SSSE3 - even faster!
   static __inline__ uint32_t SSSE3PopcntofXORed(const __m128i* signature1,
-      const __m128i* signature2, const int numberOf128BitWords);
+  const __m128i* signature2, const int numberOf128BitWords);
 
   typedef unsigned char ValueType;
 
-  //! Important that this is signed as weird behavior happens in BruteForce if
+  // Important that this is signed as weird behavior happens in BruteForce if
   // not.
   typedef int ResultType;
 
@@ -65,13 +65,12 @@ public:
   ResultType operator()(const unsigned char* a,
                         const unsigned char* b,
                         const int size) const {
-    return SSSE3PopcntofXORed(
-        (const __m128i*)(a),
-        (const __m128i*)(b),
-        size / 16);
+    return SSSE3PopcntofXORed(reinterpret_cast<const __m128i*>(a),
+                              reinterpret_cast<const __m128i*>(b),
+                              size / 16);
   }
 };
 }  // namespace brisk
 #include <brisk/internal/hamming-sse-inl.h>
-#endif  // BRISK_INTERNAL_HAMMING_SSE_H_
+#endif  // INTERNAL_HAMMING_SSE_H_
 

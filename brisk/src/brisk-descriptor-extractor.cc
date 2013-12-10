@@ -82,7 +82,7 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
   GenerateKernel(rList, nList, 5.85 * patternScale, 8.2 * patternScale);
 }
 BriskDescriptorExtractor::BriskDescriptorExtractor(
-    std::vector<float> &radiusList, std::vector<int> &numberList,
+    const std::vector<float> &radiusList, const std::vector<int> &numberList,
     bool rotationInvariant, bool scaleInvariant, float dMax, float dMin,
     std::vector<int> indexChange) {
   rotationInvariance = rotationInvariant;
@@ -198,10 +198,9 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
   myfile.close();
 }
 
-void BriskDescriptorExtractor::GenerateKernel(std::vector<float> &radiusList,
-                                              std::vector<int> &numberList,
-                                              float dMax, float dMin,
-                                              std::vector<int> indexChange) {
+void BriskDescriptorExtractor::GenerateKernel(
+    const std::vector<float> &radiusList, const std::vector<int> &numberList,
+    float dMax, float dMin, std::vector<int> indexChange) {
   dMax_ = dMax;
   dMin_ = dMin;
 

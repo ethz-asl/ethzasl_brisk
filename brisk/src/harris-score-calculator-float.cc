@@ -55,7 +55,7 @@ void HarrisScoreCalculatorFloat::InitializeScores() {
 }
 
 void HarrisScoreCalculatorFloat::Get2dMaxima(
-    std::vector<PointWithScore>& points, float absoluteThreshold) {
+    float absoluteThreshold, std::vector<PointWithScore>* points) {
   // Do the 8-neighbor nonmax suppression.
   const int stride = _scores.cols;
   const int rows_end = _scores.rows - 2;
@@ -93,10 +93,10 @@ void HarrisScoreCalculatorFloat::Get2dMaxima(
         continue;
       const int i = p - p_begin - 1;
 #ifdef USE_SIMPLE_POINT_WITH_SCORE
-      points.push_back(PointWithScore(*center, i, j));
+      points->push_back(PointWithScore(*center, i, j));
 #else
 #error
-      points.push_back(PointWithScore(cv::Point2i(i,j),*center));
+      points->push_back(PointWithScore(cv::Point2i(i, j), *center));
 #endif
     }
   }
