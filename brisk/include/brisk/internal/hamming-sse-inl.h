@@ -87,7 +87,7 @@ const int numberOf128BitWords) {
   const __m128i* end = signature1 + numberOf128BitWords;
 
   // __asm__ volatile("movdqa %xmm5, %xmm4"); // xmm4 -- local accumulator.
-  xmm4 = xmm5;// _mm_load_si128(&xmm5);
+  xmm4 = xmm5;  // _mm_load_si128(&xmm5);
 
   // for(n=0; n < numberOf128BitWords; n++) {
   do {
@@ -97,7 +97,7 @@ const int numberOf128BitWords) {
     // "pxor  (%0), %%xmm0  \n"
     xmm0 = _mm_xor_si128(*signature1++, *signature2++);
     //  "movdqu  %%xmm0, %%xmm1 \n"
-    xmm1 = xmm0;// _mm_loadu_si128(&xmm0);
+    xmm1 = xmm0;  // _mm_loadu_si128(&xmm0);
     //  "psrlw     $4, %%xmm1 \n"
     xmm1 = _mm_srl_epi16(xmm1, shiftval);
     //  "pand   %%xmm6, %%xmm0 \n" // xmm0 := lower nibbles.
@@ -105,9 +105,9 @@ const int numberOf128BitWords) {
     //  "pand   %%xmm6, %%xmm1 \n" // xmm1 := higher nibbles.
     xmm1 = _mm_and_si128(xmm1, xmm6);
     //  "movdqu  %%xmm7, %%xmm2 \n"
-    xmm2 = xmm7;// _mm_loadu_si128(&xmm7);
+    xmm2 = xmm7;  // _mm_loadu_si128(&xmm7);
     //  "movdqu  %%xmm7, %%xmm3 \n" // Get popcount.
-    xmm3 = xmm7;// _mm_loadu_si128(&xmm7);
+    xmm3 = xmm7;  // _mm_loadu_si128(&xmm7);
     //  "pshufb  %%xmm0, %%xmm2 \n" // For all nibbles.
     xmm2 = _mm_shuffle_epi8(xmm2, xmm0);
     //  "pshufb  %%xmm1, %%xmm3 \n" // Using PSHUFB.
@@ -146,6 +146,5 @@ const int numberOf128BitWords) {
   // );
   return result;
 }
-}
-// namespace brisk
+}  // namespace brisk
 #endif  // INTERNAL_HAMMING_SSE_INL_H_

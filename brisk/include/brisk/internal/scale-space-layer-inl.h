@@ -38,8 +38,11 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_INTERNAL_SCALE_SPACE_LAYER_INL_H_
-#define BRISK_INTERNAL_SCALE_SPACE_LAYER_INL_H_
+#ifndef INTERNAL_SCALE_SPACE_LAYER_INL_H_
+#define INTERNAL_SCALE_SPACE_LAYER_INL_H_
+
+#include <algorithm>
+#include <vector>
 
 #include <brisk/internal/rdtsc-wrapper.h>
 
@@ -53,19 +56,19 @@ ScaleSpaceLayer<SCORE_CALCULTAOR_T>::ScaleSpaceLayer(const cv::Mat& img,
 template<class SCORE_CALCULTAOR_T>
 void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(const cv::Mat& img,
                                                  bool initScores) {
-  // Octave 0.
+  // Octave 0.
   _isOctave = true;
   _layerNumber = 0;
 
-  // No adjacent layers (yet).
+  // No adjacent layers (yet).
   _belowLayer_ptr = 0;
   _aboveLayer_ptr = 0;
 
-  // Pass image and initialize score calculation.
+  // Pass image and initialize score calculation.
   _scoreCalculator.SetImage(img, initScores);
   _img = img;
 
-  // Scales and offsets.
+  // Scales and offsets.
   _offset_above = -0.25;
   _offset_below = 1.0 / 6.0;
   _scale_above = 2.0 / 3.0;
@@ -84,13 +87,11 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(const cv::Mat& img,
   for (int x = 0; x < 2 * 16 - 1; ++x) {
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       _LUT.at<float>(y, x) = std::max(
-          1
-              - double((15 - x) * (15 - x) + (15 - y) * (15 - y))
-                  / double(15 * 15),
+          1 - static_cast<double>((15 - x) * (15 - x) + (15 - y) * (15 - y))
+                  / static_cast<double>(15 * 15),
           0.0);
     }
   }
-
 }
 
 template<class SCORE_CALCULTAOR_T>
@@ -108,7 +109,7 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(
   int type = layerBelow->_img.type();
   if (layerBelow->_isOctave) {
     if (layerBelow->_layerNumber >= 2) {
-      // We can do the (cheaper) halfsampling.
+      // We can do the (cheaper) halfsampling.
       _img.create(layerBelow->_belowLayer_ptr->_img.rows / 2,
                   layerBelow->_belowLayer_ptr->_img.cols / 2, type);
       Halfsample(layerBelow->_belowLayer_ptr->_img, _img);
@@ -122,7 +123,7 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(
     // Keep track of where in the pyramid we are.
     _isOctave = false;
   } else {
-    // We can do the (cheaper) halfsampling.
+    // We can do the (cheaper) halfsampling.
     _img.create(layerBelow->_belowLayer_ptr->_img.rows / 2,
                 layerBelow->_belowLayer_ptr->_img.cols / 2, type);
     Halfsample(layerBelow->_belowLayer_ptr->_img, _img);
@@ -135,20 +136,20 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(
   _belowLayer_ptr = layerBelow;
   layerBelow->_aboveLayer_ptr = this;
 
-  // Calculate coordinate transformation parameters.
+  // Calculate coordinate transformation parameters.
   if (_isOctave) {
     _offset_above = -0.25;
     _offset_below = 1.0 / 6.0;
     _scale_above = 2.0 / 3.0;
     _scale_below = 4.0 / 3.0;
-    _scale = pow(2.0, double(_layerNumber / 2));
+    _scale = pow(2.0, static_cast<double>(_layerNumber / 2));
     _offset = _scale * 0.5 - 0.5;
   } else {
     _offset_above = -1.0 / 6.0;
     _offset_below = 0.125;
     _scale_above = 0.75;
     _scale_below = 1.5;
-    _scale = pow(2.0, double(_layerNumber / 2)) * 1.5;
+    _scale = pow(2.0, static_cast<double>(_layerNumber / 2)) * 1.5;
     _offset = _scale * 0.5 - 0.5;
   }
   timerDownsample.stop();
@@ -159,10 +160,10 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(
   // Abs. threshold (for noise rejection).
   _absoluteThreshold = 0;
 
-  // Initialize the score calculation.
+  // Initialize the score calculation.
   _scoreCalculator.SetImage(_img, initScores);
 
-  // The above layer is undefined:
+  // The above layer is undefined:
   _aboveLayer_ptr = 0;
 
   // Generic mask.
@@ -170,9 +171,8 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(
   for (int x = 0; x < 2 * 16 - 1; ++x) {
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       _LUT.at<float>(y, x) = std::max(
-          1
-              - double((15 - x) * (15 - x) + (15 - y) * (15 - y))
-                  / double(15 * 15),
+          1 - static_cast<double>((15 - x) * (15 - x) + (15 - y) * (15 - y))
+                  / static_cast<double>(15 * 15),
           0.0);
     }
   }
@@ -185,7 +185,7 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::SetUniformityRadius(double radius) {
     _radius = 1;
 }
 
-// Feature detection.
+// Feature detection.
 #ifdef USE_SIMPLE_POINT_WITH_SCORE
 template<class SCORE_CALCULATOR_T>
 void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
@@ -210,8 +210,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
     timerNonMaxSuppression2d.stop();
   }
   // Next check above and below. The code looks a bit stupid, but that's
-  // for speed. We don't want to make the distinction analyzing whether or
-  // not there is a layer above and below inside the loop.
+  // for speed. We don't want to make the distinction analyzing whether or
+  // not there is a layer above and below inside the loop.
   if (!usePassedKeypoints) {
     if (_aboveLayer_ptr != 0 && _belowLayer_ptr != 0) {
       // Check above and below
@@ -221,7 +221,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       pt_tmp.reserve(points.size());
       const int one_over_scale_above = 1.0 / _scale_above;
       const int one_over_scale_below = 1.0 / _scale_below;
-      for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+      for (typename std::vector<
+          typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
         const typename ScoreCalculator_t::Score_t center = it->score;
         const int x = it->x;
@@ -283,7 +284,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
       const int one_over_scale_above = 1.0 / _scale_above;
-      for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+      for (typename std::vector<
+          typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
         const typename ScoreCalculator_t::Score_t center = it->score;
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
@@ -313,7 +315,6 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
             < ScoreAbove(x - one_over_scale_above, y - one_over_scale_above))
           continue;
         pt_tmp.push_back(*it);
-
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
       timerNonMaxSuppression3d.stop();
@@ -324,7 +325,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
       const int one_over_scale_below = 1.0 / _scale_below;
-      for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+      for (typename std::vector<
+          typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
         const typename ScoreCalculator_t::Score_t center = it->score;
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
@@ -358,10 +360,9 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       points.assign(pt_tmp.begin(), pt_tmp.end());
       timerNonMaxSuppression3d.stop();
     }
-
   }
 
-  // Uniformity enforcement.
+  // Uniformity enforcement.
   if (points.size() == 0)
     return;
   if (enforceUniformity && _radius > 0.0) {
@@ -374,27 +375,27 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
     const float maxScore = points.front().score;
     timer_sort_keypoints.stop();
 
-    pt_tmp.reserve(keypoints.size() + points.size());  // Allow appending.
-    keypoints.reserve(keypoints.size() + points.size());  // Allow appending.
+    pt_tmp.reserve(keypoints.size() + points.size());  // Allow appending.
+    keypoints.reserve(keypoints.size() + points.size());  // Allow appending.
 
         // Store occupancy.
     cv::Mat occupancy;
-    const float scaling = 15.0 / float(_radius);
+    const float scaling = 15.0 / static_cast<float>(_radius);
     occupancy = cv::Mat::zeros((_img.rows) * ceil(scaling) + 32,
                                (_img.cols) * ceil(scaling) + 32, CV_8U);
 
     TimerSwitchable timer_uniformity_enforcement(
         "0.3 BRISK Detection: "
         "uniformity enforcement (per layer)");
-    // Go through the sorted keypoints and reject too close ones.
-    for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+    // Go through the sorted keypoints and reject too close ones.
+    for (typename std::vector<
+        typename ScoreCalculator_t::PointWithScore>::const_iterator it =
         points.begin(); it != points.end(); ++it) {
-
       const int cy = (it->y * scaling + 16);
       const int cx = (it->x * scaling + 16);
 
-      // Check if this is a high enough score.
-      const double s0 = double(occupancy.at < uchar > (cy, cx));
+      // Check if this is a high enough score.
+      const double s0 = static_cast<double>(occupancy.at<uchar>(cy, cx));
       const float nsc1 = sqrtf(sqrtf(it->score / maxScore)) * 255.0f;
 
       if (nsc1 < s0)
@@ -404,9 +405,11 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       const float nsc = 0.99 * nsc1;
       for (int y = 0; y < 2 * 16 - 1; ++y) {
         __m128i mem1 = _mm_loadu_si128(
-            (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx - 15));
+            reinterpret_cast<__m128i *>(
+                &occupancy.at<uchar>(cy + y - 15, cx - 15)));
         __m128i mem2 = _mm_loadu_si128(
-            (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx + 1));
+            reinterpret_cast<__m128i *>(
+                &occupancy.at<uchar>(cy + y - 15, cx + 1)));
         __m128i mask1 = _mm_set_epi8(ceil(_LUT.at<float>(y, 15) * nsc),
                                      ceil(_LUT.at<float>(y, 14) * nsc),
                                      ceil(_LUT.at<float>(y, 13) * nsc),
@@ -439,14 +442,16 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
                                      ceil(_LUT.at<float>(y, 17) * nsc),
                                      ceil(_LUT.at<float>(y, 16) * nsc));
         _mm_storeu_si128(
-            (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx - 15),
+            reinterpret_cast<__m128i *>(
+                &occupancy.at<uchar>(cy + y - 15, cx - 15)),
             _mm_adds_epu8(mem1, mask1));
         _mm_storeu_si128(
-            (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx + 1),
+            reinterpret_cast<__m128i *>(
+                &occupancy.at<uchar>(cy + y - 15, cx + 1)),
             _mm_adds_epu8(mem2, mask2));
       }
 
-      // Store.
+      // Store.
       pt_tmp.push_back(*it);
 
       if (pt_tmp.size() == _maxNumKpt) {
@@ -464,7 +469,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (usePassedKeypoints)
     keypoints.clear();
   if (doRefinement) {
-    for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+    for (typename std::vector<
+        typename ScoreCalculator_t::PointWithScore>::const_iterator it =
         points.begin(); it != points.end(); ++it) {
       const int u = it->x;
       const int v = it->y;
@@ -479,7 +485,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
                  _scoreCalculator.Score(u - 1, v + 1),
                  _scoreCalculator.Score(u, v + 1),
                  _scoreCalculator.Score(u + 1, v + 1), delta_x, delta_y);
-      // TODO(lestefan): 3d refinement.
+      // TODO(lestefan): 3d refinement.
       keypoints.push_back(
           cv::KeyPoint(
               cv::Point2f(_scale * ((it->x + delta_x) + _offset),
@@ -487,7 +493,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
               _scale * 12.0, -1, it->score, _layerNumber / 2));
     }
   } else {
-    for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+    for (typename std::vector<
+        typename ScoreCalculator_t::PointWithScore>::const_iterator it =
         points.begin(); it != points.end(); ++it) {
       keypoints.push_back(
           cv::KeyPoint(
@@ -524,8 +531,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
   }
 
   // Next check above and below. The code looks a bit stupid, but that's
-  // for speed. We don't want to make the distinction analyzing whether or
-  // not there is a layer above and below inside the loop.
+  // for speed. We don't want to make the distinction analyzing whether or
+  // not there is a layer above and below inside the loop.
   if (!usePassedKeypoints) {
     if (_aboveLayer_ptr != 0 && _belowLayer_ptr != 0) {
       // Check above and below.
@@ -535,7 +542,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
       pt_tmp.reserve(points.size());
       const int one_over_scale_above = 1.0 / _scale_above;
       const int one_over_scale_below = 1.0 / _scale_below;
-      for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+      for (typename std::vector<
+          typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
         const typename ScoreCalculator_t::Score_t center = it->score;
         const cv::Point2i& pt = it->pt;
@@ -604,7 +612,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
       const int one_over_scale_above = 1.0 / _scale_above;
-      for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+      for (typename std::vector<
+          typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
         const typename ScoreCalculator_t::Score_t center = it->score;
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
@@ -647,7 +656,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
       const int one_over_scale_below = 1.0 / _scale_below;
-      for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+      for (typename std::vector<
+          typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
         const typename ScoreCalculator_t::Score_t center = it->score;
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
@@ -684,10 +694,9 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
       points.assign(pt_tmp.begin(), pt_tmp.end());
       timer_3d_nonmax.stop();
     }
-
   }
 
-  // Uniformity enforcement.
+  // Uniformity enforcement.
   if (points.size() == 0)
     return;
   if (enforceUniformity && _radius > 0.0) {
@@ -700,26 +709,26 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
     const float maxScore = points.front().score;
     timerFancyOp31.stop();
 
-    pt_tmp.reserve(keypoints.size() + points.size());  // Allow appending.
-    keypoints.reserve(keypoints.size() + points.size());  // Allow appending.
+    pt_tmp.reserve(keypoints.size() + points.size());  // Allow appending.
+    keypoints.reserve(keypoints.size() + points.size());  // Allow appending.
 
         // Store occupancy.
     cv::Mat occupancy;
-    const float scaling = 15.0 / float(_radius);
+    const float scaling = 15.0 / static_cast<float>(_radius);
     occupancy = cv::Mat::zeros((_img.rows) * ceil(scaling) + 32,
                                (_img.cols) * ceil(scaling) + 32, CV_8U);
 
     TimerSwitchable timerFancyOp3(
         "0.3 BRISK Detection: uniformity enforcement (per layer)");
-    // Go through the sorted keypoints and reject too close ones.
-    for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_reverse_iterator it =
+    // Go through the sorted keypoints and reject too close ones.
+    for (typename std::vector<
+        typename ScoreCalculator_t::PointWithScore>::const_reverse_iterator it =
         points.rbegin(); it != points.rend(); ++it) {
-
       const int cy = (it->pt.y * scaling + 16);
       const int cx = (it->pt.x * scaling + 16);
 
-      // Check if this is a high enough score.
-      const double s0 = double(occupancy.at < uchar > (cy, cx));
+      // Check if this is a high enough score.
+      const double s0 = static_cast<double>(occupancy.at<uchar>(cy, cx));
       const float nsc1 = sqrtf(sqrtf(it->score / maxScore)) * 255.0f;
 
       if (nsc1 < s0)
@@ -730,9 +739,11 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
 
       for (int y = 0; y < 2 * 16 - 1; ++y) {
         __m128i mem1 = _mm_loadu_si128(
-            (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx - 15));
+            reinterpret_cast<__m128i *>(
+                &occupancy.at<uchar>(cy + y - 15, cx - 15)));
         __m128i mem2 = _mm_loadu_si128(
-            (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx + 1));
+            reinterpret_cast<__m128i *>(
+                &occupancy.at<uchar>(cy + y - 15, cx + 1)));
         __m128i mask1 = _mm_set_epi8(ceil(_LUT.at<float>(y, 15) * nsc),
                                      ceil(_LUT.at<float>(y, 14) * nsc),
                                      ceil(_LUT.at<float>(y, 13) * nsc),
@@ -765,14 +776,16 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
                                      ceil(_LUT.at<float>(y, 17) * nsc),
                                      ceil(_LUT.at<float>(y, 16) * nsc));
         _mm_storeu_si128(
-            (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx - 15),
+            reinterpret_cast<__m128i *>(
+                &occupancy.at<uchar>(cy + y - 15, cx - 15)),
             _mm_adds_epu8(mem1, mask1));
         _mm_storeu_si128(
-            (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx + 1),
+            reinterpret_cast<__m128i *>(
+                &occupancy.at<uchar>(cy + y - 15, cx + 1)),
             _mm_adds_epu8(mem2, mask2));
       }
 
-      // Store.
+      // Store.
       pt_tmp.push_back(*it);
 
       if (pt_tmp.size() == _maxNumKpt) {
@@ -789,7 +802,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
   if (usePassedKeypoints)
     keypoints.clear();
   if (doRefinement) {
-    for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+    for (typename std::vector<
+        typename ScoreCalculator_t::PointWithScore>::const_iterator it =
         points.begin(); it != points.end(); ++it) {
       const int u = it->pt.x;
       const int v = it->pt.y;
@@ -803,7 +817,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
                  _scoreCalculator.score(u - 1, v + 1),
                  _scoreCalculator.score(u, v + 1),
                  _scoreCalculator.score(u + 1, v + 1), delta_x, delta_y);
-      // TODO(lestefan): 3d refinement.
+      // TODO(lestefan): 3d refinement.
       keypoints.push_back(
           cv::KeyPoint(
               cv::Point2f(_scale * ((it->pt.x + delta_x) + _offset),
@@ -811,7 +825,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
               _scale * 12.0, -1, it->score, _layerNumber / 2));
     }
   } else {
-    for (typename std::vector<typename ScoreCalculator_t::PointWithScore>::const_iterator it =
+    for (typename std::vector<
+        typename ScoreCalculator_t::PointWithScore>::const_iterator it =
         points.begin(); it != points.end(); ++it) {
       keypoints.push_back(
           cv::KeyPoint(
@@ -824,7 +839,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
 }
 #endif
 
-// Utilities.
+// Utilities.
 template<class SCORE_CALCULTAOR_T>
 inline double ScaleSpaceLayer<SCORE_CALCULTAOR_T>::ScoreAbove(double u,
                                                               double v) {
@@ -859,15 +874,15 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample16(
   assert(srcimg.rows / 2 == dstimg.rows);
   assert(srcimg.type() == CV_16UC1);
 
+  register const __m128i ones = _mm_set_epi16(1, 1, 1, 1, 1, 1, 1, 1);
+
   const int colsMax = (srcimg.cols / 2) * 2 - 16;
   const int rows = (srcimg.rows / 2) * 2 - 1;
 
-  const register __m128i ones = _mm_set_epi16(1, 1, 1, 1, 1, 1, 1, 1);
   for (int y = 0; y < rows; y += 2) {
     bool end = false;
     int x_store = 0;
     for (int x = 0; x <= colsMax; x += 16) {
-
       assert(x + 15 < srcimg.cols);
       assert(y + 1 < srcimg.rows);
       // Load block of four.
@@ -953,15 +968,15 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample8(
                                        1, 1);
 
   // Data pointers:
-  __m128i* p1=(__m128i*)srcimg.data;
-  __m128i* p2=(__m128i*)(srcimg.data+srcimg.cols);
-  __m128i* p_dest=(__m128i*)dstimg.data;
+  __m128i* p1 = reinterpret_cast<__m128i*>(srcimg.data);
+  __m128i* p2 = reinterpret_cast<__m128i*>(srcimg.data+srcimg.cols);
+  __m128i* p_dest = reinterpret_cast<__m128i*>(dstimg.data);
   unsigned char* p_dest_char;
 
   // Size:
   const unsigned int size = (srcimg.cols * srcimg.rows) / 16;
   const unsigned int hsize = srcimg.cols / 16;
-  __m128i* p_end=p1+size;
+  __m128i* p_end = p1+size;
   unsigned int row = 0;
   const unsigned int end = hsize / 2;
   bool half_end;
@@ -1035,33 +1050,34 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample8(
       p2++;
 
       // Compute horizontal pairwise average and store.
-      p_dest_char = (unsigned char*) p_dest;
-      const uchar* result = (uchar*) &result1;
+      p_dest_char = static_cast<unsigned char*>(p_dest);
+      const uchar* result = static_cast<unsigned char*>(&result1);
       for (unsigned int j = 0; j < 8; j++) {
         *(p_dest_char++) = (*(result + 2 * j) + *(result + 2 * j + 1)) / 2;
       }
     } else {
-      p_dest_char = (unsigned char*) p_dest;
+      p_dest_char = static_cast<unsigned char*>(p_dest);
     }
 
     if (noleftover) {
       row++;
-      p_dest = (__m128i *) (dstimg.data + row * dstimg.cols);
-      p1 = (__m128i *) (srcimg.data + 2 * row * srcimg.cols);
+      p_dest = reinterpret_cast<__m128i*>(dstimg.data + row * dstimg.cols);
+      p1 = reinterpret_cast<__m128i*>(srcimg.data + 2 * row * srcimg.cols);
       p2 = p1 + hsize;
     } else {
-      const unsigned char* p1_src_char = (unsigned char*) (p1);
-      const unsigned char* p2_src_char = (unsigned char*) (p2);
+      const unsigned char* p1_src_char = static_cast<unsigned char*>(p1);
+      const unsigned char* p2_src_char = static_cast<unsigned char*>(p2);
       for (unsigned int k = 0; k < leftoverCols; k++) {
         uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
             + p2_src_char[k] + p2_src_char[k + 1];
-        *(p_dest_char++) = (unsigned char) (tmp / 4);
+        *(p_dest_char++) = static_cast<unsigned char>(tmp / 4);
       }
       // Done with the two rows:
       row++;
-      p_dest = (__m128i *) (dstimg.data + row * dstimg.cols);
-      p1 = (__m128i *) (srcimg.data + 2 * row * srcimg.cols);
-      p2 = (__m128i *) (srcimg.data + (2 * row + 1) * srcimg.cols);
+      p_dest = reinterpret_cast<__m128i*>(dstimg.data + row * dstimg.cols);
+      p1 = reinterpret_cast<__m128i*>(srcimg.data + 2 * row * srcimg.cols);
+      p2 = reinterpret_cast<__m128i*>(
+          srcimg.data + (2 * row + 1) * srcimg.cols);
     }
   }
 }
@@ -1096,7 +1112,6 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample16(
     bool end = false;
     int x_store = 0;
     for (int x = 0; x <= colsMax; x += 12) {
-
       assert(x + 11 < srcimg.cols);
       assert(y + 2 < srcimg.rows);
 
@@ -1292,8 +1307,10 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample8(
 
       // Store:
       if (i * 10 + 16 > dstimg.cols) {
-        _mm_maskmoveu_si128(result_upper, store_mask, (char*) p_dest1);
-        _mm_maskmoveu_si128(result_lower, store_mask, (char*) p_dest2);
+        _mm_maskmoveu_si128(result_upper, store_mask,
+                            static_cast<unsigned char*>(p_dest1));
+        _mm_maskmoveu_si128(result_lower, store_mask,
+                            static_cast<unsigned char*>(p_dest2));
       } else {
         _mm_storeu_si128(reinterpret_cast<__m128i *>(p_dest1), result_upper);
         _mm_storeu_si128(reinterpret_cast<__m128i *>(p_dest2), result_lower);
@@ -1319,14 +1336,14 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample8(
       const uint16_t C2 = *(p3++);
       const uint16_t C3 = *(p3++);
 
-      *(p_dest1++) = (unsigned char) (((4 * A1 + 2 * (A2 + B1) + B2) / 9)
-          & 0x00FF);
-      *(p_dest1++) = (unsigned char) (((4 * A3 + 2 * (A2 + B3) + B2) / 9)
-          & 0x00FF);
-      *(p_dest2++) = (unsigned char) (((4 * C1 + 2 * (C2 + B1) + B2) / 9)
-          & 0x00FF);
-      *(p_dest2++) = (unsigned char) (((4 * C3 + 2 * (C2 + B3) + B2) / 9)
-          & 0x00FF);
+      *(p_dest1++) = static_cast<unsigned char>(((4 * A1 + 2 * (A2 + B1) + B2)
+          / 9) & 0x00FF);
+      *(p_dest1++) = static_cast<unsigned char>(((4 * A3 + 2 * (A2 + B3) + B2)
+          / 9) & 0x00FF);
+      *(p_dest2++) = static_cast<unsigned char>(((4 * C1 + 2 * (C2 + B1) + B2)
+          / 9) & 0x00FF);
+      *(p_dest2++) = static_cast<unsigned char>(((4 * C3 + 2 * (C2 + B3) + B2)
+          / 9) & 0x00FF);
     }
 
     // Increment row counter:
@@ -1347,9 +1364,9 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Refine1D(const float s_05,
                                                                const float s0,
                                                                const float s05,
                                                                float& max) {
-  int i_05 = int(1024.0 * s_05 + 0.5);
-  int i0 = int(1024.0 * s0 + 0.5);
-  int i05 = int(1024.0 * s05 + 0.5);
+  int i_05 = static_cast<int>(1024.0 * s_05 + 0.5);
+  int i0 = static_cast<int>(1024.0 * s0 + 0.5);
+  int i05 = static_cast<int>(1024.0 * s05 + 0.5);
 
   //   16.0000  -24.0000    8.0000
   //  -40.0000   54.0000  -14.0000
@@ -1391,16 +1408,16 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Refine1D(const float s_05,
 template<class SCORE_CALCULTAOR_T>
 __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Refine1D_1(
     const float s_05, const float s0, const float s05, float& max) {
-  int i_05 = int(1024.0 * s_05 + 0.5);
-  int i0 = int(1024.0 * s0 + 0.5);
-  int i05 = int(1024.0 * s05 + 0.5);
+  int i_05 = static_cast<int>(1024.0 * s_05 + 0.5);
+  int i0 = static_cast<int>(1024.0 * s0 + 0.5);
+  int i05 = static_cast<int>(1024.0 * s05 + 0.5);
 
   //  4.5000   -9.0000    4.5000
-  //-10.5000   18.0000   -7.5000
+  // -10.5000   18.0000   -7.5000
   //  6.0000   -8.0000    3.0000
 
   int two_a = 9 * i_05 - 18 * i0 + 9 * i05;
-  // second derivative must be negative:
+  // Second derivative must be negative:
   if (two_a >= 0) {
     if (s0 >= s_05 && s0 >= s05) {
       max = s0;
@@ -1425,8 +1442,8 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Refine1D_1(
   else if (ret_val > 1.33333333333333333333333333)
     ret_val = 1.333333333333333333333333333;
   int two_c = +12 * i_05 - 16 * i0 + 6 * i05;
-  max = static_cast<float>(two_c) + static_cast<float>(two_a) * ret_val * ret_val
-      + static_cast<float>(two_b) * ret_val;
+  max = static_cast<float>(two_c) + static_cast<float>(two_a) * ret_val *
+      ret_val + static_cast<float>(two_b) * ret_val;
   max /= 2048.0;
   return ret_val;
 }
@@ -1492,7 +1509,7 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Subpixel2D(
       static_cast<float>(-H_det);
   delta_y = static_cast<float>(2 * coeff1 * coeff4 - coeff3 * coeff5) /
       static_cast<float>(-H_det);
-  // TODO (lestefan): this is not correct, but easy, so perform a real boundary
+  // TODO(lestefan): this is not correct, but easy, so perform a real boundary
   // maximum search:
   bool tx = false;
   bool tx_ = false;
@@ -1567,4 +1584,4 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Subpixel2D(
       + coeff6) / 18.0;
 }
 }  // namespace brisk
-#endif  // BRISK_INTERNAL_SCALE_SPACE_LAYER_INL_H_
+#endif  // INTERNAL_SCALE_SPACE_LAYER_INL_H_
