@@ -25,46 +25,58 @@
 
 struct CvPoint;
 
-namespace agast{
+namespace agast {
 
-	class AstDetector
-	{
-		public:
-			AstDetector():xsize(0),ysize(0),b(-1) {}
-			AstDetector(int width, int height, int thr):xsize(width),ysize(height),b(thr) {}
-			virtual ~AstDetector(){;}
-			virtual void detect(const unsigned char* im, std::vector<CvPoint>& corners_all, const cv::Mat* thrmap=0)=0;
-			virtual int get_borderWidth()=0;
-			void nms(const unsigned char* im,
-					const std::vector<CvPoint>& corners_all, std::vector<CvPoint>& corners_nms);
-			void processImage(const unsigned char* im,
-					std::vector<CvPoint>& keypoints_nms) {
-				std::vector<CvPoint> keypoints;
-				detect(im,keypoints,0);
-				nms(im,keypoints,keypoints_nms);}
-			void set_threshold(int b_, int upperThreshold=120, int lowerThreshold=50){
-				b=b_;
-				upperThreshold_=upperThreshold;
-				lowerThreshold_=lowerThreshold;
-				cmpThreshold_= (b*lowerThreshold_)/100;
-			}
-			void set_imageSize(int xsize_, int ysize_){xsize=xsize_; ysize=ysize_; init_pattern();}
-			virtual int cornerScore(const unsigned char* p)=0;
+class AstDetector {
+ public:
+  AstDetector()
+      : xsize(0),
+        ysize(0),
+        b(-1) { }
+  AstDetector(int width, int height, int thr)
+      : xsize(width),
+        ysize(height),
+        b(thr) { }
+  virtual ~AstDetector() { }
+  virtual void detect(const unsigned char* im,
+                      std::vector<CvPoint>& corners_all,
+                      const cv::Mat* thrmap = 0) = 0;
+  virtual int get_borderWidth() = 0;
+  void nms(const unsigned char* im, const std::vector<CvPoint>& corners_all,
+           std::vector<CvPoint>& corners_nms);
+  void processImage(const unsigned char* im,
+                    std::vector<CvPoint>& keypoints_nms) {
+    std::vector<CvPoint> keypoints;
+    detect(im, keypoints, 0);
+    nms(im, keypoints, keypoints_nms);
+  }
+  void set_threshold(int b_, int upperThreshold = 120,
+                     int lowerThreshold = 50) {
+    b = b_;
+    upperThreshold_ = upperThreshold;
+    lowerThreshold_ = lowerThreshold;
+    cmpThreshold_ = (b * lowerThreshold_) / 100;
+  }
+  void set_imageSize(int xsize_, int ysize_) {
+    xsize = xsize_;
+    ysize = ysize_;
+    init_pattern();
+  }
+  virtual int cornerScore(const unsigned char* p) = 0;
 
-		protected:
-			virtual void init_pattern()=0;
-			void score(const unsigned char* i, const std::vector<CvPoint>& corners_all);
-			void nonMaximumSuppression(const std::vector<CvPoint>& corners_all,
-					std::vector<CvPoint>& corners_nms);
-			std::vector<int> scores;
-			std::vector<int> nmsFlags;
-			int xsize, ysize;
-			int b;
-			int upperThreshold_;
-			int lowerThreshold_;
-			int cmpThreshold_; //b*lowerThreshold_)/100, for speed
-	};
+ protected:
+  virtual void init_pattern()=0;
+  void score(const unsigned char* i, const std::vector<CvPoint>& corners_all);
+  void nonMaximumSuppression(const std::vector<CvPoint>& corners_all,
+                             std::vector<CvPoint>& corners_nms);
+  std::vector<int> scores;
+  std::vector<int> nmsFlags;
+  int xsize, ysize;
+  int b;
+  int upperThreshold_;
+  int lowerThreshold_;
+  int cmpThreshold_;  //b*lowerThreshold_)/100, for speed
+};
+}  // namespace agast
 
-}
-
-#endif /* AGASTDETECTOR_H */
+#endif  // AGASTDETECTOR_H
