@@ -55,7 +55,6 @@ protected:
 			keypoints.reserve(4000); // possibly speeds up things
 
 		// construct scale space layers
-		struct timeval start, end;
 		//gettimeofday(&start, NULL);
 		scaleSpaceLayers[0].create(image,!usePassedKeypoints);
 		scaleSpaceLayers[0].setUniformityRadius(_uniformityRadius);
