@@ -38,13 +38,41 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_H_
-#define BRISK_BRISK_H_
+#ifndef BRISK_INTERNAL_MACROS_H_
+#define BRISK_INTERNAL_MACROS_H_
 
-#include <brisk/brisk-descriptor-extractor.h>
-#include <brisk/brisk-feature-detector.h>
-#include <brisk/harris-feature-detector.h>
-#include <brisk/harris-score-calculator.h>
-#include <brisk/scale-space-feature-detector.h>
+#ifndef CV_EXPORTS
+#define CV_EXPORTS
+#endif  // CV_EXPORTS
 
-#endif  //BRISK_BRISK_H_
+#ifndef M_PI
+#define M_PI 3.141592653589793
+#endif
+
+#define USE_SIMPLE_POINT_WITH_SCORE
+
+namespace rdtsc {
+namespace timing {
+class DummyTimer;
+}  // namespace timing
+}  // namespace rdtsc
+
+namespace brisk {
+typedef rdtsc::timing::DummyTimer TimerSwitchable;
+// This is needed to avoid aliasing issues with the __m128i data type:
+#ifdef __GNUC__
+typedef unsigned char __attribute__ ((__may_alias__)) UCHAR_ALIAS;
+typedef unsigned short __attribute__ ((__may_alias__)) UINT16_ALIAS;
+typedef unsigned int __attribute__ ((__may_alias__)) UINT32_ALIAS;
+typedef unsigned long int __attribute__ ((__may_alias__)) UINT64_ALIAS;
+typedef int __attribute__ ((__may_alias__)) INT32_ALIAS;
+typedef uint8_t __attribute__ ((__may_alias__)) U_INT8T_ALIAS;
+#endif
+#ifdef _MSC_VER
+// TODO(lestefan): Find the equivalent to may_alias.
+#define UCHAR_ALIAS unsigned char //__declspec(noalias)
+#define UINT32_ALIAS unsigned int //__declspec(noalias)
+#define __inline__ __forceinline
+#endif
+}  // namespace brisk
+#endif  // BRISK_INTERNAL_MACROS_H_

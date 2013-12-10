@@ -38,13 +38,40 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_H_
-#define BRISK_BRISK_H_
+#ifndef BRISK_INTERNAL_HAMMING_SSE_H_
+#define BRISK_INTERNAL_HAMMING_SSE_H_
 
-#include <brisk/brisk-descriptor-extractor.h>
-#include <brisk/brisk-feature-detector.h>
-#include <brisk/harris-feature-detector.h>
-#include <brisk/harris-score-calculator.h>
-#include <brisk/scale-space-feature-detector.h>
+#include <brisk/brisk-opencv.h>
+#include <brisk/internal/macros.h>
 
-#endif  //BRISK_BRISK_H_
+namespace brisk {
+/// Faster Hamming distance functor - uses SSE
+/// bit count of A exclusive XOR'ed with B.
+class CV_EXPORTS HammingSse {
+public:
+  HammingSse() { };
+
+  // SSSE3 - even faster!
+  static __inline__ uint32_t ssse3_popcntofXORed(const __m128i* signature1,
+      const __m128i* signature2, const int numberOf128BitWords);
+
+  typedef unsigned char ValueType;
+
+  //! Important that this is signed as weird behavior happens in BruteForce if
+  // not.
+  typedef int ResultType;
+
+  // This will count the bits in a ^ b.
+  ResultType operator()(const unsigned char* a,
+                        const unsigned char* b,
+                        const int size) const {
+    return ssse3_popcntofXORed(
+        (const __m128i*)(a),
+        (const __m128i*)(b),
+        size / 16);
+  }
+};
+}  // namespace brisk
+#include <brisk/internal/hamming-sse-inl.h>
+#endif  // BRISK_INTERNAL_HAMMING_SSE_H_
+

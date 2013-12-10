@@ -1,0 +1,120 @@
+/*
+ Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
+ Stefan Leutenegger, Simon Lynen and Margarita Chli.
+
+ Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
+ Stefan Leutenegger and Simon Lynen.
+
+ BRISK - Binary Robust Invariant Scalable Keypoints
+ Reference implementation of
+ [1] Stefan Leutenegger,Margarita Chli and Roland Siegwart, BRISK:
+ Binary Robust Invariant Scalable Keypoints, in Proceedings of
+ the IEEE International Conference on Computer Vision (ICCV2011).
+
+ This file is part of BRISK.
+
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+     * Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+     * Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+     * Neither the name of the <organization> nor the
+       names of its contributors may be used to endorse or promote products
+       derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+#ifndef BRISK_INTERNAL_SCALE_SPACE_H_
+#define BRISK_INTERNAL_SCALE_SPACE_H_
+
+#include <brisk/brisk-opencv.h>
+#include <brisk/internal/brisk-layer.h>
+#include <brisk/internal/macros.h>
+
+namespace brisk {
+class CV_EXPORTS BriskScaleSpace {
+public:
+  // Construct telling the octaves number:
+  BriskScaleSpace(uint8_t _octaves=3, bool suppressScaleNonmaxima=true);
+  ~BriskScaleSpace();
+
+  // Construct the image pyramids.
+  void constructPyramid(const cv::Mat& image, uchar _threshold);
+
+  // Get Keypoints.
+  void getKeypoints(std::vector<cv::KeyPoint>& keypoints);
+
+protected:
+  // Nonmax suppression:
+  __inline__ bool isMax2D(const uint8_t layer,
+      const int x_layer, const int y_layer);
+  // 1D (scale axis) refinement:
+  __inline__ float refine1D(const float s_05,
+      const float s0, const float s05, float& max);  // Around octave.
+  __inline__ float refine1D_1(const float s_05,
+      const float s0, const float s05, float& max);  // Around intra.
+  __inline__ float refine1D_2(const float s_05,
+      const float s0, const float s05, float& max);  // Around octave 0 only.
+  // 2D maximum refinement:
+  __inline__ float subpixel2D(const int s_0_0, const int s_0_1, const int s_0_2,
+      const int s_1_0, const int s_1_1, const int s_1_2,
+      const int s_2_0, const int s_2_1, const int s_2_2,
+      float& delta_x, float& delta_y);
+  // 3D maximum refinement centered around (x_layer,y_layer).
+  __inline__ float refine3D(const uint8_t layer,
+      const int x_layer, const int y_layer,
+      float& x, float& y, float& scale, bool& ismax);
+
+  // Interpolated score access with recalculation when needed:
+  __inline__ int getScoreAbove(const uint8_t layer,
+      const int x_layer, const int y_layer);
+  __inline__ int getScoreBelow(const uint8_t layer,
+      const int x_layer, const int y_layer);
+
+  // Teturn the maximum of score patches above or below.
+  __inline__ float getScoreMaxAbove(const uint8_t layer,
+      const int x_layer, const int y_layer,
+      const int threshold, bool& ismax,
+      float& dx, float& dy);
+  __inline__ float getScoreMaxBelow(const uint8_t layer,
+      const int x_layer, const int y_layer,
+      const int threshold, bool& ismax,
+      float& dx, float& dy);
+
+  // The image pyramids:
+  uint8_t layers_;
+  std::vector<brisk::BriskLayer> pyramid_;
+
+  // Agast:
+  uint8_t threshold_;
+
+  // Some constant parameters:
+  static const float basicSize_;
+
+  // Thresholds for the scale determination.
+  static const int dropThreshold_;
+  static const int maxThreshold_;
+  static const int minDrop_;
+
+  // Detection thresholds: upper and lower bounds.
+  static const uchar defaultUpperThreshold;
+  static const uchar defaultLowerThreshold;
+
+  bool m_suppressScaleNonmaxima;
+};
+}  // namespace brisk
+#endif  // BRISK_BRISK_SCALE_SPACE_H_
