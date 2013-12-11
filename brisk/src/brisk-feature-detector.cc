@@ -55,7 +55,7 @@ void BriskFeatureDetector::detectImpl(const cv::Mat& image,
                                       const cv::Mat& mask) const {
   brisk::BriskScaleSpace briskScaleSpace(octaves, m_suppressScaleNonmaxima);
   briskScaleSpace.ConstructPyramid(image, threshold);
-  briskScaleSpace.GetKeypoints(keypoints);
+  briskScaleSpace.GetKeypoints(&keypoints);
 
   // Remove invalid points.
   removeInvalidPoints(mask, keypoints);

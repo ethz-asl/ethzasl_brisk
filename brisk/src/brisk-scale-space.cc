@@ -59,9 +59,7 @@ BriskScaleSpace::BriskScaleSpace(uint8_t _octaves,
   else
     layers_ = 2 * _octaves;
 }
-BriskScaleSpace::~BriskScaleSpace() {
-
-}
+BriskScaleSpace::~BriskScaleSpace() { }
 // Construct the image pyramids.
 void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold) {
   // Set correct size:
@@ -90,19 +88,19 @@ void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold) {
   }
 }
 
-void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
+void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
   // Make sure keypoints is empty.
-  keypoints.resize(0);
-  keypoints.reserve(2000);
+  keypoints->resize(0);
+  keypoints->reserve(1000);
 
-  std::vector < std::vector<CvPoint> > agastPoints;
+  std::vector<std::vector<CvPoint> > agastPoints;
   agastPoints.resize(layers_);
 
   // Go through the octaves and intra layers and calculate fast corner scores:
   for (uint8_t i = 0; i < layers_; i++) {
     // Call OAST16_9 without non-max-suppression.
     brisk::BriskLayer& l = pyramid_[i];
-    l.GetAgastPoints(threshold_, agastPoints[i]);
+    l.GetAgastPoints(threshold_, &agastPoints[i]);
   }
 
   if (!m_suppressScaleNonmaxima) {
@@ -131,8 +129,9 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
                                s_2_1, s_2_2, delta_x, delta_y);
 
         // Store:
-        keypoints.push_back(
-            cv::KeyPoint(float(point.x) + delta_x, float(point.y) + delta_y,
+        keypoints->push_back(
+            cv::KeyPoint(static_cast<float>(point.x) + delta_x,
+                         static_cast<float>(point.y) + delta_y,
                          basicSize_ * l.scale(), -1, max, 0));
       }
     }
@@ -163,8 +162,9 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
       float max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
                              s_2_1, s_2_2, delta_x, delta_y);
       // Store:
-      keypoints.push_back(
-          cv::KeyPoint(float(point.x) + delta_x, float(point.y) + delta_y,
+      keypoints->push_back(
+          cv::KeyPoint(static_cast<float>(point.x) + delta_x,
+                       static_cast<float>(point.y) + delta_y,
                        basicSize_, -1, max, 0));
     }
     return;
@@ -203,9 +203,11 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
                                s_2_1, s_2_2, delta_x, delta_y);
 
         // Store:
-        keypoints.push_back(
-            cv::KeyPoint((float(point.x) + delta_x) * l.scale() + l.offset(),
-                         (float(point.y) + delta_y) * l.scale() + l.offset(),
+        keypoints->push_back(
+            cv::KeyPoint((static_cast<float>(point.x) + delta_x) *
+                         l.scale() + l.offset(),
+                         (static_cast<float>(point.y) + delta_y) *
+                         l.scale() + l.offset(),
                          basicSize_ * l.scale(), -1, max, i));
       }
     } else {
@@ -225,7 +227,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>& keypoints) {
         }
 
         // Finally store the detected keypoint:
-        keypoints.push_back(
+        keypoints->push_back(
             cv::KeyPoint(x, y, basicSize_ * scale, -1, score, i));
       }
     }
@@ -293,26 +295,26 @@ __inline__ int BriskScaleSpace::GetScoreBelow(const uint8_t layer,
 
   if (layer % 2 == 0) {  // Octave.
     sixth_x = 8 * x_layer + 1;
-    xf = float(sixth_x) / 6.0;
+    xf = static_cast<float>(sixth_x) / 6.0;
     sixth_y = 8 * y_layer + 1;
-    yf = float(sixth_y) / 6.0;
+    yf = static_cast<float>(sixth_y) / 6.0;
 
     // Scaling:
     offs = 3.0 / 4.0;
     area = 4.0 * offs * offs;
     scaling = 4194304.0 / area;
-    scaling2 = float(scaling) * area;
+    scaling2 = static_cast<float>(scaling) * area;
   } else {
     quarter_x = 6 * x_layer + 1;
-    xf = float(quarter_x) / 4.0;
+    xf = static_cast<float>(quarter_x) / 4.0;
     quarter_y = 6 * y_layer + 1;
-    yf = float(quarter_y) / 4.0;
+    yf = static_cast<float>(quarter_y) / 4.0;
 
     // Scaling:
     offs = 2.0 / 3.0;
     area = 4.0 * offs * offs;
     scaling = 4194304.0 / area;
-    scaling2 = float(scaling) * area;
+    scaling2 = static_cast<float>(scaling) * area;
   }
 
   // Calculate borders.
@@ -321,16 +323,16 @@ __inline__ int BriskScaleSpace::GetScoreBelow(const uint8_t layer,
   const float y_1 = yf - offs;
   const float y1 = yf + offs;
 
-  const int x_left = int(x_1 + 0.5);
-  const int y_top = int(y_1 + 0.5);
-  const int x_right = int(x1 + 0.5);
-  const int y_bottom = int(y1 + 0.5);
+  const int x_left = static_cast<int>(x_1 + 0.5);
+  const int y_top = static_cast<int>(y_1 + 0.5);
+  const int x_right = static_cast<int>(x1 + 0.5);
+  const int y_bottom = static_cast<int>(y1 + 0.5);
 
   // Overlap area - multiplication factors:
-  const float r_x_1 = float(x_left) - x_1 + 0.5;
-  const float r_y_1 = float(y_top) - y_1 + 0.5;
-  const float r_x1 = x1 - float(x_right) + 0.5;
-  const float r_y1 = y1 - float(y_bottom) + 0.5;
+  const float r_x_1 = static_cast<float>(x_left) - x_1 + 0.5;
+  const float r_y_1 = static_cast<float>(y_top) - y_1 + 0.5;
+  const float r_x1 = x1 - static_cast<float>(x_right) + 0.5;
+  const float r_y1 = y1 - static_cast<float>(y_bottom) + 0.5;
   const int dx = x_right - x_left - 1;
   const int dy = y_bottom - y_top - 1;
   const int A = (r_x_1 * r_y_1) * scaling;
@@ -343,26 +345,32 @@ __inline__ int BriskScaleSpace::GetScoreBelow(const uint8_t layer,
   const int r_y1_i = r_y1 * scaling;
 
   // First row:
-  int ret_val = A * int(l.GetAgastScore(x_left, y_top, 1));
+  int ret_val = A * static_cast<int>(l.GetAgastScore(x_left, y_top, 1));
   for (int X = 1; X <= dx; X++) {
-    ret_val += r_y_1_i * int(l.GetAgastScore(x_left + X, y_top, 1));
+    ret_val += r_y_1_i *
+        static_cast<int>(l.GetAgastScore(x_left + X, y_top, 1));
   }
-  ret_val += B * int(l.GetAgastScore(x_left + dx + 1, y_top, 1));
+  ret_val += B * static_cast<int>(l.GetAgastScore(x_left + dx + 1, y_top, 1));
   // Middle ones:
   for (int Y = 1; Y <= dy; Y++) {
-    ret_val += r_x_1_i * int(l.GetAgastScore(x_left, y_top + Y, 1));
+    ret_val += r_x_1_i *
+        static_cast<int>(l.GetAgastScore(x_left, y_top + Y, 1));
 
     for (int X = 1; X <= dx; X++) {
-      ret_val += int(l.GetAgastScore(x_left + X, y_top + Y, 1)) * scaling;
+      ret_val += static_cast<int>(l.GetAgastScore(x_left + X, y_top + Y, 1)) *
+          scaling;
     }
-    ret_val += r_x1_i * int(l.GetAgastScore(x_left + dx + 1, y_top + Y, 1));
+    ret_val += r_x1_i *
+        static_cast<int>(l.GetAgastScore(x_left + dx + 1, y_top + Y, 1));
   }
   // Last row:
-  ret_val += D * int(l.GetAgastScore(x_left, y_top + dy + 1, 1));
+  ret_val += D * static_cast<int>(l.GetAgastScore(x_left, y_top + dy + 1, 1));
   for (int X = 1; X <= dx; X++) {
-    ret_val += r_y1_i * int(l.GetAgastScore(x_left + X, y_top + dy + 1, 1));
+    ret_val += r_y1_i *
+        static_cast<int>(l.GetAgastScore(x_left + X, y_top + dy + 1, 1));
   }
-  ret_val += C * int(l.GetAgastScore(x_left + dx + 1, y_top + dy + 1, 1));
+  ret_val += C *
+      static_cast<int>(l.GetAgastScore(x_left + dx + 1, y_top + dy + 1, 1));
 
   return ((ret_val + scaling2 / 2) / scaling2);
 }
@@ -395,11 +403,9 @@ __inline__ bool BriskScaleSpace::IsMax2D(const uint8_t layer, const int x_layer,
   if (center < s11)
     return false;
   const uchar s1_1 = l.GetAgastScore(x_layer + 1, y_layer - 1, center);
-  ;
   if (center < s1_1)
     return false;
   const uchar s_1_1 = l.GetAgastScore(x_layer - 1, y_layer - 1, center);
-  ;
   if (center < s_1_1)
     return false;
 
@@ -551,7 +557,7 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
 
     // Second derivative needs to be sufficiently large.
     if (layer == 0) {
-      if (s_1_1 - maxThreshold_ <= int(max_above)) {
+      if (s_1_1 - maxThreshold_ <= static_cast<int>(max_above)) {
         doScaleRefinement = false;
       }
     } else {
@@ -577,10 +583,12 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
     // Calculate the relative scale (1D maximum):
     if (doScaleRefinement) {
       if (layer == 0) {
-        scale = Refine1D_2(max_below_float, std::max(float(center), max_layer),
+        scale = Refine1D_2(max_below_float,
+                           std::max(static_cast<float>(center), max_layer),
                            max_above, max);
       } else {
-        scale = Refine1D(max_below_float, std::max(float(center), max_layer),
+        scale = Refine1D(max_below_float,
+                         std::max(static_cast<float>(center), max_layer),
                          max_above, max);
       }
     } else {
@@ -592,24 +600,28 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
       // Interpolate the position:
       const float r0 = (1.5 - scale) / .5;
       const float r1 = 1.0 - r0;
-      x = (r0 * delta_x_layer + r1 * delta_x_above + float(x_layer))
-          * thisLayer.scale() + thisLayer.offset();
-      y = (r0 * delta_y_layer + r1 * delta_y_above + float(y_layer))
-          * thisLayer.scale() + thisLayer.offset();
+      x = (r0 * delta_x_layer + r1 * delta_x_above +
+          static_cast<float>(x_layer)) * thisLayer.scale() + thisLayer.offset();
+      y = (r0 * delta_y_layer + r1 * delta_y_above +
+          static_cast<float>(y_layer)) * thisLayer.scale() + thisLayer.offset();
     } else {
       if (layer == 0) {
         // Interpolate the position:
         const float r0 = (scale - 0.5) / 0.5;
         const float r_1 = 1.0 - r0;
-        x = r0 * delta_x_layer + r_1 * delta_x_below + float(x_layer);
-        y = r0 * delta_y_layer + r_1 * delta_y_below + float(y_layer);
+        x = r0 * delta_x_layer + r_1 * delta_x_below +
+            static_cast<float>(x_layer);
+        y = r0 * delta_y_layer + r_1 * delta_y_below +
+            static_cast<float>(y_layer);
       } else {
         // Interpolate the position:
         const float r0 = (scale - 0.75) / 0.25;
         const float r_1 = 1.0 - r0;
-        x = (r0 * delta_x_layer + r_1 * delta_x_below + float(x_layer))
+        x = (r0 * delta_x_layer + r_1 * delta_x_below +
+            static_cast<float>(x_layer))
             * thisLayer.scale() + thisLayer.offset();
-        y = (r0 * delta_y_layer + r_1 * delta_y_below + float(y_layer))
+        y = (r0 * delta_y_layer + r_1 * delta_y_below +
+            static_cast<float>(y_layer))
             * thisLayer.scale() + thisLayer.offset();
       }
     }
@@ -654,7 +666,8 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
 
     if (doScaleRefinement) {
       // Calculate the relative scale (1D maximum):
-      scale = Refine1D_1(max_below, std::max(float(center), max_layer),
+      scale = Refine1D_1(max_below, std::max(static_cast<float>(center),
+                                             max_layer),
                          max_above, max);
     } else {
       scale = 1.0;
@@ -665,18 +678,18 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
       // Interpolate the position:
       const float r0 = 4.0 - scale * 3.0;
       const float r1 = 1.0 - r0;
-      x = (r0 * delta_x_layer + r1 * delta_x_above + float(x_layer))
-          * thisLayer.scale() + thisLayer.offset();
-      y = (r0 * delta_y_layer + r1 * delta_y_above + float(y_layer))
-          * thisLayer.scale() + thisLayer.offset();
+      x = (r0 * delta_x_layer + r1 * delta_x_above +
+          static_cast<float>(x_layer)) * thisLayer.scale() + thisLayer.offset();
+      y = (r0 * delta_y_layer + r1 * delta_y_above +
+          static_cast<float>(y_layer)) * thisLayer.scale() + thisLayer.offset();
     } else {
       // Interpolate the position:
       const float r0 = scale * 3.0 - 2.0;
       const float r_1 = 1.0 - r0;
-      x = (r0 * delta_x_layer + r_1 * delta_x_below + float(x_layer))
-          * thisLayer.scale() + thisLayer.offset();
-      y = (r0 * delta_y_layer + r_1 * delta_y_below + float(y_layer))
-          * thisLayer.scale() + thisLayer.offset();
+      x = (r0 * delta_x_layer + r_1 * delta_x_below +
+          static_cast<float>(x_layer)) * thisLayer.scale() + thisLayer.offset();
+      y = (r0 * delta_y_layer + r_1 * delta_y_below +
+          static_cast<float>(y_layer)) * thisLayer.scale() + thisLayer.offset();
     }
   }
 
@@ -693,7 +706,6 @@ __inline__ float BriskScaleSpace::GetScoreMaxAbove(const uint8_t layer,
                                                    const int y_layer,
                                                    const int thr, bool& ismax,
                                                    float& dx, float& dy) {
-
   int threshold = thr + dropThreshold_;
 
   ismax = false;
@@ -709,16 +721,16 @@ __inline__ float BriskScaleSpace::GetScoreMaxAbove(const uint8_t layer,
 
   if (layer % 2 == 0) {
     // Octave.
-    x_1 = float(4 * (x_layer) - 1 - 2) / 6.0;
-    x1 = float(4 * (x_layer) - 1 + 2) / 6.0;
-    y_1 = float(4 * (y_layer) - 1 - 2) / 6.0;
-    y1 = float(4 * (y_layer) - 1 + 2) / 6.0;
+    x_1 = static_cast<float>(4 * (x_layer) - 1 - 2) / 6.0;
+    x1 = static_cast<float>(4 * (x_layer) - 1 + 2) / 6.0;
+    y_1 = static_cast<float>(4 * (y_layer) - 1 - 2) / 6.0;
+    y1 = static_cast<float>(4 * (y_layer) - 1 + 2) / 6.0;
   } else {
     // Intra.
-    x_1 = float(6 * (x_layer) - 1 - 3) / 8.0f;
-    x1 = float(6 * (x_layer) - 1 + 3) / 8.0f;
-    y_1 = float(6 * (y_layer) - 1 - 3) / 8.0f;
-    y1 = float(6 * (y_layer) - 1 + 3) / 8.0f;
+    x_1 = static_cast<float>(6 * (x_layer) - 1 - 3) / 8.0f;
+    x1 = static_cast<float>(6 * (x_layer) - 1 + 3) / 8.0f;
+    y_1 = static_cast<float>(6 * (y_layer) - 1 - 3) / 8.0f;
+    y1 = static_cast<float>(6 * (y_layer) - 1 + 3) / 8.0f;
   }
 
   // Check the first row.
@@ -728,8 +740,8 @@ __inline__ float BriskScaleSpace::GetScoreMaxAbove(const uint8_t layer,
   float max = layerAbove.GetAgastScore(x_1, y_1, 1);
   if (max > threshold)
     return 0;
-  for (int x = x_1 + 1; x <= int(x1); x++) {
-    tmp_max = layerAbove.GetAgastScore(float(x), y_1, 1);
+  for (int x = x_1 + 1; x <= static_cast<int>(x1); x++) {
+    tmp_max = layerAbove.GetAgastScore(static_cast<float>(x), y_1, 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
@@ -742,20 +754,20 @@ __inline__ float BriskScaleSpace::GetScoreMaxAbove(const uint8_t layer,
     return 0;
   if (tmp_max > max) {
     max = tmp_max;
-    max_x = int(x1);
+    max_x = static_cast<int>(x1);
   }
 
   // Middle rows.
-  for (int y = y_1 + 1; y <= int(y1); y++) {
-    tmp_max = layerAbove.GetAgastScore(x_1, float(y), 1);
+  for (int y = y_1 + 1; y <= static_cast<int>(y1); y++) {
+    tmp_max = layerAbove.GetAgastScore(x_1, static_cast<float>(y), 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
       max = tmp_max;
-      max_x = int(x_1 + 1);
+      max_x = static_cast<int>(x_1 + 1);
       max_y = y;
     }
-    for (int x = x_1 + 1; x <= int(x1); x++) {
+    for (int x = x_1 + 1; x <= static_cast<int>(x1); x++) {
       tmp_max = layerAbove.GetAgastScore(x, y, 1);
       if (tmp_max > threshold)
         return 0;
@@ -765,12 +777,12 @@ __inline__ float BriskScaleSpace::GetScoreMaxAbove(const uint8_t layer,
         max_y = y;
       }
     }
-    tmp_max = layerAbove.GetAgastScore(x1, float(y), 1);
+    tmp_max = layerAbove.GetAgastScore(x1, static_cast<float>(y), 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
       max = tmp_max;
-      max_x = int(x1);
+      max_x = static_cast<int>(x1);
       max_y = y;
     }
   }
@@ -779,22 +791,22 @@ __inline__ float BriskScaleSpace::GetScoreMaxAbove(const uint8_t layer,
   tmp_max = layerAbove.GetAgastScore(x_1, y1, 1);
   if (tmp_max > max) {
     max = tmp_max;
-    max_x = int(x_1 + 1);
-    max_y = int(y1);
+    max_x = static_cast<int>(x_1 + 1);
+    max_y = static_cast<int>(y1);
   }
-  for (int x = x_1 + 1; x <= int(x1); x++) {
-    tmp_max = layerAbove.GetAgastScore(float(x), y1, 1);
+  for (int x = x_1 + 1; x <= static_cast<int>(x1); x++) {
+    tmp_max = layerAbove.GetAgastScore(static_cast<float>(x), y1, 1);
     if (tmp_max > max) {
       max = tmp_max;
       max_x = x;
-      max_y = int(y1);
+      max_y = static_cast<int>(y1);
     }
   }
   tmp_max = layerAbove.GetAgastScore(x1, y1, 1);
   if (tmp_max > max) {
     max = tmp_max;
-    max_x = int(x1);
-    max_y = int(y1);
+    max_x = static_cast<int>(x1);
+    max_y = static_cast<int>(y1);
   }
 
   // Find dx / dy:
@@ -812,15 +824,15 @@ __inline__ float BriskScaleSpace::GetScoreMaxAbove(const uint8_t layer,
                                  s_2_0, s_2_1, s_2_2, dx_1, dy_1);
 
   // Calculate dx / dy in above coordinates.
-  float real_x = float(max_x) + dx_1;
-  float real_y = float(max_y) + dy_1;
+  float real_x = static_cast<float>(max_x) + dx_1;
+  float real_y = static_cast<float>(max_y) + dy_1;
   bool returnrefined = true;
   if (layer % 2 == 0) {
-    dx = (real_x * 6.0f + 1.0f) / 4.0f - float(x_layer);
-    dy = (real_y * 6.0f + 1.0f) / 4.0f - float(y_layer);
+    dx = (real_x * 6.0f + 1.0f) / 4.0f - static_cast<float>(x_layer);
+    dy = (real_y * 6.0f + 1.0f) / 4.0f - static_cast<float>(y_layer);
   } else {
-    dx = (real_x * 8.0 + 1.0) / 6.0 - float(x_layer);
-    dy = (real_y * 8.0 + 1.0) / 6.0 - float(y_layer);
+    dx = (real_x * 8.0 + 1.0) / 6.0 - static_cast<float>(x_layer);
+    dy = (real_y * 8.0 + 1.0) / 6.0 - static_cast<float>(y_layer);
   }
 
   // Saturate.
@@ -866,15 +878,15 @@ __inline__ float BriskScaleSpace::GetScoreMaxBelow(const uint8_t layer,
 
   if (layer % 2 == 0) {
     // Octave.
-    x_1 = float(8 * (x_layer) + 1 - 4) / 6.0;
-    x1 = float(8 * (x_layer) + 1 + 4) / 6.0;
-    y_1 = float(8 * (y_layer) + 1 - 4) / 6.0;
-    y1 = float(8 * (y_layer) + 1 + 4) / 6.0;
+    x_1 = static_cast<float>(8 * (x_layer) + 1 - 4) / 6.0;
+    x1 = static_cast<float>(8 * (x_layer) + 1 + 4) / 6.0;
+    y_1 = static_cast<float>(8 * (y_layer) + 1 - 4) / 6.0;
+    y1 = static_cast<float>(8 * (y_layer) + 1 + 4) / 6.0;
   } else {
-    x_1 = float(6 * (x_layer) + 1 - 3) / 4.0;
-    x1 = float(6 * (x_layer) + 1 + 3) / 4.0;
-    y_1 = float(6 * (y_layer) + 1 - 3) / 4.0;
-    y1 = float(6 * (y_layer) + 1 + 3) / 4.0;
+    x_1 = static_cast<float>(6 * (x_layer) + 1 - 3) / 4.0;
+    x1 = static_cast<float>(6 * (x_layer) + 1 + 3) / 4.0;
+    y_1 = static_cast<float>(6 * (y_layer) + 1 - 3) / 4.0;
+    y1 = static_cast<float>(6 * (y_layer) + 1 + 3) / 4.0;
   }
 
   // The layer below.
@@ -888,8 +900,8 @@ __inline__ float BriskScaleSpace::GetScoreMaxBelow(const uint8_t layer,
   float max = layerBelow.GetAgastScore(x_1, y_1, 1);
   if (max > threshold)
     return 0;
-  for (int x = x_1 + 1; x <= int(x1); x++) {
-    tmp_max = layerBelow.GetAgastScore(float(x), y_1, 1);
+  for (int x = x_1 + 1; x <= static_cast<int>(x1); x++) {
+    tmp_max = layerBelow.GetAgastScore(static_cast<float>(x), y_1, 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
@@ -902,20 +914,20 @@ __inline__ float BriskScaleSpace::GetScoreMaxBelow(const uint8_t layer,
     return 0;
   if (tmp_max > max) {
     max = tmp_max;
-    max_x = int(x1);
+    max_x = static_cast<int>(x1);
   }
 
   // Middle rows.
-  for (int y = y_1 + 1; y <= int(y1); y++) {
-    tmp_max = layerBelow.GetAgastScore(x_1, float(y), 1);
+  for (int y = y_1 + 1; y <= static_cast<int>(y1); y++) {
+    tmp_max = layerBelow.GetAgastScore(x_1, static_cast<float>(y), 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
       max = tmp_max;
-      max_x = int(x_1 + 1);
+      max_x = static_cast<int>(x_1 + 1);
       max_y = y;
     }
-    for (int x = x_1 + 1; x <= int(x1); x++) {
+    for (int x = x_1 + 1; x <= static_cast<int>(x1); x++) {
       tmp_max = layerBelow.GetAgastScore(x, y, 1);
       if (tmp_max > threshold)
         return 0;
@@ -949,12 +961,12 @@ __inline__ float BriskScaleSpace::GetScoreMaxBelow(const uint8_t layer,
         max_y = y;
       }
     }
-    tmp_max = layerBelow.GetAgastScore(x1, float(y), 1);
+    tmp_max = layerBelow.GetAgastScore(x1, static_cast<float>(y), 1);
     if (tmp_max > threshold)
       return 0;
     if (tmp_max > max) {
       max = tmp_max;
-      max_x = int(x1);
+      max_x = static_cast<int>(x1);
       max_y = y;
     }
   }
@@ -963,22 +975,22 @@ __inline__ float BriskScaleSpace::GetScoreMaxBelow(const uint8_t layer,
   tmp_max = layerBelow.GetAgastScore(x_1, y1, 1);
   if (tmp_max > max) {
     max = tmp_max;
-    max_x = int(x_1 + 1);
-    max_y = int(y1);
+    max_x = static_cast<int>(x_1 + 1);
+    max_y = static_cast<int>(y1);
   }
-  for (int x = x_1 + 1; x <= int(x1); x++) {
-    tmp_max = layerBelow.GetAgastScore(float(x), y1, 1);
+  for (int x = x_1 + 1; x <= static_cast<int>(x1); x++) {
+    tmp_max = layerBelow.GetAgastScore(static_cast<float>(x), y1, 1);
     if (tmp_max > max) {
       max = tmp_max;
       max_x = x;
-      max_y = int(y1);
+      max_y = static_cast<int>(y1);
     }
   }
   tmp_max = layerBelow.GetAgastScore(x1, y1, 1);
   if (tmp_max > max) {
     max = tmp_max;
-    max_x = int(x1);
-    max_y = int(y1);
+    max_x = static_cast<int>(x1);
+    max_y = static_cast<int>(y1);
   }
 
   // Find dx/dy:
@@ -996,15 +1008,15 @@ __inline__ float BriskScaleSpace::GetScoreMaxBelow(const uint8_t layer,
                                  s_2_0, s_2_1, s_2_2, dx_1, dy_1);
 
   // Calculate dx/dy in above coordinates.
-  float real_x = float(max_x) + dx_1;
-  float real_y = float(max_y) + dy_1;
+  float real_x = static_cast<float>(max_x) + dx_1;
+  float real_y = static_cast<float>(max_y) + dy_1;
   bool returnrefined = true;
   if (layer % 2 == 0) {
-    dx = (real_x * 6.0 + 1.0) / 8.0 - float(x_layer);
-    dy = (real_y * 6.0 + 1.0) / 8.0 - float(y_layer);
+    dx = (real_x * 6.0 + 1.0) / 8.0 - static_cast<float>(x_layer);
+    dy = (real_y * 6.0 + 1.0) / 8.0 - static_cast<float>(y_layer);
   } else {
-    dx = (real_x * 4.0 - 1.0) / 6.0 - float(x_layer);
-    dy = (real_y * 4.0 - 1.0) / 6.0 - float(y_layer);
+    dx = (real_x * 4.0 - 1.0) / 6.0 - static_cast<float>(x_layer);
+    dy = (real_y * 4.0 - 1.0) / 6.0 - static_cast<float>(y_layer);
   }
 
   // Saturate.
@@ -1035,9 +1047,9 @@ __inline__ float BriskScaleSpace::GetScoreMaxBelow(const uint8_t layer,
 
 __inline__ float BriskScaleSpace::Refine1D(const float s_05, const float s0,
                                            const float s05, float& max) {
-  int i_05 = int(1024.0 * s_05 + 0.5);
-  int i0 = int(1024.0 * s0 + 0.5);
-  int i05 = int(1024.0 * s05 + 0.5);
+  int i_05 = static_cast<int>(1024.0 * s_05 + 0.5);
+  int i0 = static_cast<int>(1024.0 * s0 + 0.5);
+  int i05 = static_cast<int>(1024.0 * s05 + 0.5);
 
   //   16.0000  -24.0000    8.0000
   //  -40.0000   54.0000  -14.0000
@@ -1062,27 +1074,29 @@ __inline__ float BriskScaleSpace::Refine1D(const float s_05, const float s0,
 
   int three_b = -40 * i_05 + 54 * i0 - 14 * i05;
   // Calculate max location:
-  float ret_val = -float(three_b) / float(2 * three_a);
+  float ret_val = -static_cast<float>(three_b) /
+      static_cast<float>(2 * three_a);
   // Saturate and return.
   if (ret_val < 0.75)
     ret_val = 0.75;
   else if (ret_val > 1.5)
     ret_val = 1.5;  // Allow to be slightly off bounds ...?
   int three_c = +24 * i_05 - 27 * i0 + 6 * i05;
-  max = float(three_c) + float(three_a) * ret_val * ret_val
-      + float(three_b) * ret_val;
+  max = static_cast<float>(three_c) +
+      static_cast<float>(three_a) * ret_val * ret_val
+      + static_cast<float>(three_b) * ret_val;
   max /= 3072.0;
   return ret_val;
 }
 
 __inline__ float BriskScaleSpace::Refine1D_1(const float s_05, const float s0,
                                              const float s05, float& max) {
-  int i_05 = int(1024.0 * s_05 + 0.5);
-  int i0 = int(1024.0 * s0 + 0.5);
-  int i05 = int(1024.0 * s05 + 0.5);
+  int i_05 = static_cast<int>(1024.0 * s_05 + 0.5);
+  int i0 = static_cast<int>(1024.0 * s0 + 0.5);
+  int i05 = static_cast<int>(1024.0 * s05 + 0.5);
 
   //  4.5000   -9.0000    4.5000
-  //-10.5000   18.0000   -7.5000
+  // -10.5000   18.0000   -7.5000
   //  6.0000   -8.0000    3.0000
 
   int two_a = 9 * i_05 - 18 * i0 + 9 * i05;
@@ -1104,24 +1118,25 @@ __inline__ float BriskScaleSpace::Refine1D_1(const float s_05, const float s0,
 
   int two_b = -21 * i_05 + 36 * i0 - 15 * i05;
   // Calculate max location:
-  float ret_val = -float(two_b) / float(2 * two_a);
+  float ret_val = -static_cast<float>(two_b) / static_cast<float>(2 * two_a);
   // Saturate and return.
   if (ret_val < 0.6666666666666666666666666667)
     ret_val = 0.666666666666666666666666667;
   else if (ret_val > 1.33333333333333333333333333)
     ret_val = 1.333333333333333333333333333;
   int two_c = +12 * i_05 - 16 * i0 + 6 * i05;
-  max = float(two_c) + float(two_a) * ret_val * ret_val
-      + float(two_b) * ret_val;
+  max = static_cast<float>(two_c) +
+      static_cast<float>(two_a) * ret_val * ret_val +
+      static_cast<float>(two_b) * ret_val;
   max /= 2048.0;
   return ret_val;
 }
 
 __inline__ float BriskScaleSpace::Refine1D_2(const float s_05, const float s0,
                                              const float s05, float& max) {
-  int i_05 = int(1024.0 * s_05 + 0.5);
-  int i0 = int(1024.0 * s0 + 0.5);
-  int i05 = int(1024.0 * s05 + 0.5);
+  int i_05 = static_cast<int>(1024.0 * s_05 + 0.5);
+  int i0 = static_cast<int>(1024.0 * s0 + 0.5);
+  int i05 = static_cast<int>(1024.0 * s05 + 0.5);
 
   //   18.0000  -30.0000   12.0000
   //  -45.0000   65.0000  -20.0000
@@ -1146,14 +1161,15 @@ __inline__ float BriskScaleSpace::Refine1D_2(const float s_05, const float s0,
 
   int b = -5 * i_05 + 8 * i0 - 3 * i05;
   // Calculate max location:
-  float ret_val = -float(b) / float(2 * a);
+  float ret_val = -static_cast<float>(b) / static_cast<float>(2 * a);
   // Saturate and return.
   if (ret_val < 0.7)
     ret_val = 0.7;
   else if (ret_val > 1.5)
     ret_val = 1.5;  // Allow to be slightly off bounds ...?
   int c = +3 * i_05 - 3 * i0 + 1 * i05;
-  max = float(c) + float(a) * ret_val * ret_val + float(b) * ret_val;
+  max = static_cast<float>(c) + static_cast<float>(a) * ret_val * ret_val +
+      static_cast<float>(b) * ret_val;
   max /= 1024;
   return ret_val;
 }
@@ -1164,7 +1180,6 @@ __inline__ float BriskScaleSpace::Subpixel2D(const int s_0_0, const int s_0_1,
                                              const int s_2_0, const int s_2_1,
                                              const int s_2_2, float& delta_x,
                                              float& delta_y) {
-
   // The coefficients of the 2d quadratic function least-squares fit:
   register int tmp1 = s_0_0 + s_0_2 - 2 * s_1_1 + s_2_0 + s_2_2;
   register int coeff1 = 3 * (tmp1 + s_0_1 - ((s_1_0 + s_1_2) << 1) + s_2_1);
@@ -1184,7 +1199,7 @@ __inline__ float BriskScaleSpace::Subpixel2D(const int s_0_0, const int s_0_1,
   if (H_det == 0) {
     delta_x = 0.0;
     delta_y = 0.0;
-    return float(coeff6) / 18.0;
+    return static_cast<float>(coeff6) / 18.0;
   }
 
   if (!(H_det > 0 && coeff1 < 0)) {
@@ -1211,13 +1226,15 @@ __inline__ float BriskScaleSpace::Subpixel2D(const int s_0_0, const int s_0_1,
       delta_x = -1.0;
       delta_y = -1.0;
     }
-    return float(tmp_max + coeff1 + coeff2 + coeff6) / 18.0;
+    return static_cast<float>(tmp_max + coeff1 + coeff2 + coeff6) / 18.0;
   }
 
   // This is hopefully the normal outcome of the Hessian test.
-  delta_x = float(2 * coeff2 * coeff3 - coeff4 * coeff5) / float(-H_det);
-  delta_y = float(2 * coeff1 * coeff4 - coeff3 * coeff5) / float(-H_det);
-  // TODO (lestefan): this is not correct, but easy, so perform a real boundary
+  delta_x = static_cast<float>(2 * coeff2 * coeff3 - coeff4 * coeff5) /
+      static_cast<float>(-H_det);
+  delta_y = static_cast<float>(2 * coeff1 * coeff4 - coeff3 * coeff5) /
+      static_cast<float>(-H_det);
+  // TODO(lestefan): this is not correct, but easy, so perform a real boundary
   // maximum search:
   bool tx = false;
   bool tx_ = false;
@@ -1237,14 +1254,16 @@ __inline__ float BriskScaleSpace::Subpixel2D(const int s_0_0, const int s_0_1,
     float delta_x1 = 0.0, delta_x2 = 0.0, delta_y1 = 0.0, delta_y2 = 0.0;
     if (tx) {
       delta_x1 = 1.0;
-      delta_y1 = -float(coeff4 + coeff5) / float(2 * coeff2);
+      delta_y1 = -static_cast<float>(coeff4 + coeff5) /
+          static_cast<float>(2 * coeff2);
       if (delta_y1 > 1.0)
         delta_y1 = 1.0;
       else if (delta_y1 < -1.0)
         delta_y1 = -1.0;
     } else if (tx_) {
       delta_x1 = -1.0;
-      delta_y1 = -float(coeff4 - coeff5) / float(2 * coeff2);
+      delta_y1 = -static_cast<float>(coeff4 - coeff5) /
+          static_cast<float>(2 * coeff2);
       if (delta_y1 > 1.0)
         delta_y1 = 1.0;
       else if (delta_y1 < -1.0)
@@ -1252,14 +1271,16 @@ __inline__ float BriskScaleSpace::Subpixel2D(const int s_0_0, const int s_0_1,
     }
     if (ty) {
       delta_y2 = 1.0;
-      delta_x2 = -float(coeff3 + coeff5) / float(2 * coeff1);
+      delta_x2 = -static_cast<float>(coeff3 + coeff5) /
+          static_cast<float>(2 * coeff1);
       if (delta_x2 > 1.0)
         delta_x2 = 1.0;
       else if (delta_x2 < -1.0)
         delta_x2 = -1.0;
     } else if (ty_) {
       delta_y2 = -1.0;
-      delta_x2 = -float(coeff3 - coeff5) / float(2 * coeff1);
+      delta_x2 = -static_cast<float>(coeff3 - coeff5) /
+          static_cast<float>(2 * coeff1);
       if (delta_x2 > 1.0)
         delta_x2 = 1.0;
       else if (delta_x2 < -1.0)

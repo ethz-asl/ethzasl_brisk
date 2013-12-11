@@ -38,11 +38,11 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_OPENCV_H_
-#define BRISK_OPENCV_H_
+#ifndef BRISK_BRISK_OPENCV_H_
+#define BRISK_BRISK_OPENCV_H_
 
 #include <opencv2/core/core.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-#endif  // BRISK_OPENCV_H_
+#endif  // BRISK_BRISK_OPENCV_H_

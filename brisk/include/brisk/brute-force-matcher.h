@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -41,39 +41,47 @@
 #ifndef BRISK_BRUTE_FORCE_MATCHER_H_
 #define BRISK_BRUTE_FORCE_MATCHER_H_
 
+#include <vector>
+
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/hamming-sse.h>
 #include <brisk/internal/macros.h>
 
 namespace cv {
 class CV_EXPORTS BruteForceMatcherSse : public DescriptorMatcher {
-public:
-  BruteForceMatcherSse(
-      const brisk::HammingSse& distance = brisk::HammingSse()) :
-        distance_(distance) { }
+ public:
+  BruteForceMatcherSse(const brisk::HammingSse& distance = brisk::HammingSse())
+      : distance_(distance) { }
   virtual ~BruteForceMatcherSse() { }
-  virtual bool isMaskSupported() const { return true; }
-  virtual cv::Ptr<DescriptorMatcher> clone(bool emptyTrainData = false ) const;
+  virtual bool isMaskSupported() const {
+    return true;
+  }
+  virtual cv::Ptr<DescriptorMatcher> clone(bool emptyTrainData = false) const;
 
-protected:
+ protected:
   virtual void knnMatchImpl(const Mat& queryDescriptors,
                             vector<vector<DMatch> >& matches, int k,
-      const vector<Mat>& masks=vector<Mat>(), bool compactResult = false );
+                            const vector<Mat>& masks = vector<Mat>(),
+                            bool compactResult = false);
   virtual void radiusMatchImpl(const Mat& queryDescriptors,
                                vector<vector<DMatch> >& matches,
-                               float maxDistance,
-      const vector<Mat>& masks = vector<Mat>(), bool compactResult = false );
+                               float maxDistance, const vector<Mat>& masks =
+                                   vector<Mat>(),
+                               bool compactResult = false);
 
   brisk::HammingSse distance_;
 
-private:
+ private:
   //  Next two methods are used to implement specialization.
-  static void commonKnnMatchImpl( BruteForceMatcherSse& matcher,
-      const Mat& queryDescriptors, vector<vector<DMatch> >& matches, int k,
-      const vector<Mat>& masks, bool compactResult );
-  static void commonRadiusMatchImpl( BruteForceMatcherSse& matcher,
-      const Mat& queryDescriptors, vector<vector<DMatch> >& matches,
-      float maxDistance, const vector<Mat>& masks, bool compactResult );
+  static void commonKnnMatchImpl(BruteForceMatcherSse& matcher,  // NOLINT
+                                 const Mat& queryDescriptors,
+                                 vector<vector<DMatch> >& matches, int k,
+                                 const vector<Mat>& masks, bool compactResult);
+  static void commonRadiusMatchImpl(BruteForceMatcherSse& matcher,  // NOLINT
+                                    const Mat& queryDescriptors,
+                                    vector<vector<DMatch> >& matches,
+                                    float maxDistance, const vector<Mat>& masks,
+                                    bool compactResult);
 };
 }  // namespace cv
 #endif  // BRISK_BRUTE_FORCE_MATCHER_H_

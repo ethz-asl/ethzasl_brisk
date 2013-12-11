@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -43,7 +43,6 @@ namespace brisk {
 // Construct a layer.
 BriskLayer::BriskLayer(const cv::Mat& img, uchar upperThreshold,
                        uchar lowerThreshold, float scale, float offset) {
-
   upperThreshold_ = upperThreshold;
   lowerThreshold_ = lowerThreshold;
 
@@ -79,7 +78,8 @@ BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
   }
   scores_ = cv::Mat::zeros(img_.rows, img_.cols, CV_8U);
   oastDetector_.reset(new agast::OastDetector9_16(img_.cols, img_.rows, 0));
-  agastDetector_5_8_.reset(new agast::AgastDetector5_8(img_.cols, img_.rows, 0));
+  agastDetector_5_8_.reset(
+      new agast::AgastDetector5_8(img_.cols, img_.rows, 0));
 
   // Calculate threshold map.
   CalculateThresholdMap();
@@ -88,16 +88,16 @@ BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
 // Fast/Agast.
 // Wraps the agast class.
 void BriskLayer::GetAgastPoints(uint8_t threshold,
-                                std::vector<CvPoint>& keypoints) {
+                                std::vector<CvPoint>* keypoints) {
   oastDetector_->set_threshold(threshold, upperThreshold_, lowerThreshold_);
-  oastDetector_->detect(img_.data, keypoints, &thrmap_);
+  oastDetector_->detect(img_.data, *keypoints, &thrmap_);
 
   // Also write scores.
-  const int num = keypoints.size();
+  const int num = keypoints->size();
   const int imcols = img_.cols;
 
   for (int i = 0; i < num; i++) {
-    const int offs = keypoints[i].x + keypoints[i].y * imcols;
+    const int offs = (*keypoints)[i].x + (*keypoints)[i].y * imcols;
     int thr = *(thrmap_.data + offs);
     oastDetector_->set_threshold(thr);
     *(scores_.data + offs) = oastDetector_->cornerScore(img_.data + offs);
@@ -133,14 +133,14 @@ uint8_t BriskLayer::GetAgastScore_5_8(int x, int y, uint8_t threshold) {
 }
 
 uint8_t BriskLayer::GetAgastScore(float xf, float yf, uint8_t threshold,
-                                         float scale) {
+                                  float scale) {
   if (scale <= 1.0f) {
     // Just do an interpolation inside the layer.
-    const int x = int(xf);
-    const float rx1 = xf - float(x);
+    const int x = static_cast<int>(xf);
+    const float rx1 = xf - static_cast<float>(x);
     const float rx = 1.0f - rx1;
-    const int y = int(yf);
-    const float ry1 = yf - float(y);
+    const int y = static_cast<int>(yf);
+    const float ry1 = yf - static_cast<float>(y);
     const float ry = 1.0f - ry1;
 
     return rx * ry * GetAgastScore(x, y, threshold)
@@ -151,8 +151,10 @@ uint8_t BriskLayer::GetAgastScore(float xf, float yf, uint8_t threshold,
     // This means we overlap area smoothing.
     const float halfscale = scale / 2.0f;
     // Get the scores first:
-    for (int x = int(xf - halfscale); x <= int(xf + halfscale + 1.0f); x++) {
-      for (int y = int(yf - halfscale); y <= int(yf + halfscale + 1.0f); y++) {
+    for (int x = static_cast<int>(xf - halfscale);
+        x <= static_cast<int>(xf + halfscale + 1.0f); x++) {
+      for (int y = static_cast<int>(yf - halfscale);
+          y <= static_cast<int>(yf + halfscale + 1.0f); y++) {
         GetAgastScore(x, y, threshold);
       }
     }
@@ -162,8 +164,7 @@ uint8_t BriskLayer::GetAgastScore(float xf, float yf, uint8_t threshold,
 }
 
 // Access gray values (smoothed/interpolated).
-uint8_t BriskLayer::Value(const cv::Mat& mat, float xf, float yf,
-                                     float scale) {
+uint8_t BriskLayer::Value(const cv::Mat& mat, float xf, float yf, float scale) {
   assert(!mat.empty());
   // Get the position.
   const int x = floor(xf);
@@ -184,13 +185,13 @@ uint8_t BriskLayer::Value(const cv::Mat& mat, float xf, float yf,
     const int r_y_1 = (1024 - r_y);
     uchar* ptr = image.data + x + y * imagecols;
     // Just interpolate:
-    ret_val = (r_x_1 * r_y_1 * int(*ptr));
+    ret_val = (r_x_1 * r_y_1 * static_cast<int>(*ptr));
     ptr++;
-    ret_val += (r_x * r_y_1 * int(*ptr));
+    ret_val += (r_x * r_y_1 * static_cast<int>(*ptr));
     ptr += imagecols;
-    ret_val += (r_x * r_y * int(*ptr));
+    ret_val += (r_x * r_y * static_cast<int>(*ptr));
     ptr--;
-    ret_val += (r_x_1 * r_y * int(*ptr));
+    ret_val += (r_x_1 * r_y * static_cast<int>(*ptr));
     return 0xFF & ((ret_val + 512) / 1024 / 1024);
   }
 
@@ -198,7 +199,7 @@ uint8_t BriskLayer::Value(const cv::Mat& mat, float xf, float yf,
 
   // Scaling:
   const int scaling = 4194304.0 / area;
-  const int scaling2 = float(scaling) * area / 1024.0;
+  const int scaling2 = static_cast<float>(scaling) * area / 1024.0;
 
   // Calculate borders.
   const float x_1 = xf - sigma_half;
@@ -206,16 +207,16 @@ uint8_t BriskLayer::Value(const cv::Mat& mat, float xf, float yf,
   const float y_1 = yf - sigma_half;
   const float y1 = yf + sigma_half;
 
-  const int x_left = int(x_1 + 0.5);
-  const int y_top = int(y_1 + 0.5);
-  const int x_right = int(x1 + 0.5);
-  const int y_bottom = int(y1 + 0.5);
+  const int x_left = static_cast<int>(x_1 + 0.5);
+  const int y_top = static_cast<int>(y_1 + 0.5);
+  const int x_right = static_cast<int>(x1 + 0.5);
+  const int y_bottom = static_cast<int>(y1 + 0.5);
 
   // Overlap area - multiplication factors:
-  const float r_x_1 = float(x_left) - x_1 + 0.5;
-  const float r_y_1 = float(y_top) - y_1 + 0.5;
-  const float r_x1 = x1 - float(x_right) + 0.5;
-  const float r_y1 = y1 - float(y_bottom) + 0.5;
+  const float r_x_1 = static_cast<float>(x_left) - x_1 + 0.5;
+  const float r_y_1 = static_cast<float>(y_top) - y_1 + 0.5;
+  const float r_x1 = x1 - static_cast<float>(x_right) + 0.5;
+  const float r_y1 = y1 - static_cast<float>(y_bottom) + 0.5;
   const int dx = x_right - x_left - 1;
   const int dy = y_bottom - y_top - 1;
   const int A = (r_x_1 * r_y_1) * scaling;
@@ -230,40 +231,39 @@ uint8_t BriskLayer::Value(const cv::Mat& mat, float xf, float yf,
   // Now the calculation:
   uchar* ptr = image.data + x_left + imagecols * y_top;
   // First row:
-  ret_val = A * int(*ptr);
+  ret_val = A * static_cast<int>(*ptr);
   ptr++;
   const uchar* end1 = ptr + dx;
   for (; ptr < end1; ptr++) {
-    ret_val += r_y_1_i * int(*ptr);
+    ret_val += r_y_1_i * static_cast<int>(*ptr);
   }
-  ret_val += B * int(*ptr);
+  ret_val += B * static_cast<int>(*ptr);
   // Middle ones:
   ptr += imagecols - dx - 1;
   uchar* end_j = ptr + dy * imagecols;
   for (; ptr < end_j; ptr += imagecols - dx - 1) {
-    ret_val += r_x_1_i * int(*ptr);
+    ret_val += r_x_1_i * static_cast<int>(*ptr);
     ptr++;
     const uchar* end2 = ptr + dx;
     for (; ptr < end2; ptr++) {
-      ret_val += int(*ptr) * scaling;
+      ret_val += static_cast<int>(*ptr) * scaling;
     }
-    ret_val += r_x1_i * int(*ptr);
+    ret_val += r_x1_i * static_cast<int>(*ptr);
   }
   // Last row:
-  ret_val += D * int(*ptr);
+  ret_val += D * static_cast<int>(*ptr);
   ptr++;
   const uchar* end3 = ptr + dx;
   for (; ptr < end3; ptr++) {
-    ret_val += r_y1_i * int(*ptr);
+    ret_val += r_y1_i * static_cast<int>(*ptr);
   }
-  ret_val += C * int(*ptr);
+  ret_val += C * static_cast<int>(*ptr);
 
   return 0xFF & ((ret_val + scaling2 / 2) / scaling2 / 1024);
 }
 
 // Threshold map.
 void BriskLayer::CalculateThresholdMap() {
-
   // Allocate threshold map.
   cv::Mat tmpmax = cv::Mat::zeros(img_.rows, img_.cols, CV_8U);
   cv::Mat tmpmin = cv::Mat::zeros(img_.rows, img_.cols, CV_8U);
@@ -278,23 +278,23 @@ void BriskLayer::CalculateThresholdMap() {
     while (x + 16 < img_.cols - 1) {
       // Access.
       uchar* p = img_.data + x - 1 + (y - 1) * rowstride;
-      __m128i v_1_1 = _mm_loadu_si128((__m128i *) p);
+      __m128i v_1_1 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p++;
-      __m128i v0_1 = _mm_loadu_si128((__m128i *) p);
+      __m128i v0_1 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p++;
-      __m128i v1_1 = _mm_loadu_si128((__m128i *) p);
+      __m128i v1_1 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p += rowstride;
-      __m128i v10 = _mm_loadu_si128((__m128i *) p);
+      __m128i v10 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p--;
-      __m128i v00 = _mm_loadu_si128((__m128i *) p);
+      __m128i v00 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p--;
-      __m128i v_10 = _mm_loadu_si128((__m128i *) p);
+      __m128i v_10 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p += rowstride;
-      __m128i v_11 = _mm_loadu_si128((__m128i *) p);
+      __m128i v_11 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p++;
-      __m128i v01 = _mm_loadu_si128((__m128i *) p);
+      __m128i v01 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p++;
-      __m128i v11 = _mm_loadu_si128((__m128i *) p);
+      __m128i v11 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
 
       // Min/max calc.
       __m128i max = _mm_max_epu8(v_1_1, v0_1);
@@ -315,8 +315,10 @@ void BriskLayer::CalculateThresholdMap() {
       min = _mm_min_epu8(min, v11);
 
       // Store.
-      _mm_storeu_si128((__m128i *) (tmpmax.data + x + y * rowstride), max);
-      _mm_storeu_si128((__m128i *) (tmpmin.data + x + y * rowstride), min);
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(tmpmax.data + x +
+          y * rowstride), max);
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(tmpmin.data + x +
+          y * rowstride), min);
 
       // Next block.
       x += 16;
@@ -328,33 +330,33 @@ void BriskLayer::CalculateThresholdMap() {
     while (x + 16 < img_.cols - 3) {
       // Access.
       uchar* p = img_.data + x + y * rowstride;
-      __m128i v00 = _mm_loadu_si128((__m128i *) p);
+      __m128i v00 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p -= 2 + 2 * rowstride;
-      __m128i v_2_2 = _mm_loadu_si128((__m128i *) p);
+      __m128i v_2_2 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p += 4;
-      __m128i v2_2 = _mm_loadu_si128((__m128i *) p);
+      __m128i v2_2 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p += 4 * rowstride;
-      __m128i v22 = _mm_loadu_si128((__m128i *) p);
+      __m128i v22 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p -= 4;
-      __m128i v_22 = _mm_loadu_si128((__m128i *) p);
+      __m128i v_22 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
 
       p = tmpmax.data + x + (y - 2) * rowstride;
-      __m128i max0_2 = _mm_loadu_si128((__m128i *) p);
+      __m128i max0_2 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p += 4 * rowstride;
-      __m128i max02 = _mm_loadu_si128((__m128i *) p);
+      __m128i max02 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p -= 2 * rowstride + 2;
-      __m128i max_20 = _mm_loadu_si128((__m128i *) p);
+      __m128i max_20 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p += 4;
-      __m128i max20 = _mm_loadu_si128((__m128i *) p);
+      __m128i max20 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
 
       p = tmpmin.data + x + (y - 2) * rowstride;
-      __m128i min0_2 = _mm_loadu_si128((__m128i *) p);
+      __m128i min0_2 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p += 4 * rowstride;
-      __m128i min02 = _mm_loadu_si128((__m128i *) p);
+      __m128i min02 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p -= 2 * rowstride + 2;
-      __m128i min_20 = _mm_loadu_si128((__m128i *) p);
+      __m128i min_20 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p += 4;
-      __m128i min20 = _mm_loadu_si128((__m128i *) p);
+      __m128i min20 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
 
       // Min / max.
       __m128i max = _mm_max_epu8(v00, v_2_2);
@@ -376,7 +378,8 @@ void BriskLayer::CalculateThresholdMap() {
 
       // Store.
       __m128i diff = _mm_sub_epi8(max, min);
-      _mm_storeu_si128((__m128i *) (thrmap_.data + x + y * rowstride), diff);
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(thrmap_.data + x +
+          y * rowstride), diff);
 
       // Next block.
       x += 16;
@@ -489,7 +492,7 @@ void BriskLayer::CalculateThresholdMap() {
 
 void BriskLayer::HalfSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
   // Take care with border...
-  const unsigned short leftoverCols = ((srcimg.cols % 16) / 2);
+  const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
   // Note: leftoverCols can be zero but this still false...
   const bool noleftover = (srcimg.cols % 16) == 0;
 
@@ -505,15 +508,15 @@ void BriskLayer::HalfSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
                                        1, 1);
 
   // Data pointers:
-  __m128i* p1=(__m128i*)srcimg.data;
-  __m128i* p2=(__m128i*)(srcimg.data+srcimg.cols);
-  __m128i* p_dest=(__m128i*)dstimg.data;
+  __m128i* p1 = reinterpret_cast<__m128i *>(srcimg.data);
+  __m128i* p2 = reinterpret_cast<__m128i *>(srcimg.data+srcimg.cols);
+  __m128i* p_dest = reinterpret_cast<__m128i *>(dstimg.data);
   unsigned char* p_dest_char;
 
   // Size:
   const unsigned int size = (srcimg.cols * srcimg.rows) / 16;
   const unsigned int hsize = srcimg.cols / 16;
-  __m128i* p_end=p1+size;
+  __m128i* p_end = p1 + size;
   unsigned int row = 0;
   const unsigned int end = hsize / 2;
   bool half_end;
@@ -587,39 +590,41 @@ void BriskLayer::HalfSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
       p2++;
 
       // Compute horizontal pairwise average and store.
-      p_dest_char = (unsigned char*) p_dest;
-      const UCHAR_ALIAS* result = (UCHAR_ALIAS*) &result1;
+      p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
+      const UCHAR_ALIAS* result = reinterpret_cast<UCHAR_ALIAS*>(&result1);
       for (unsigned int j = 0; j < 8; j++) {
         *(p_dest_char++) = (*(result + 2 * j) + *(result + 2 * j + 1)) / 2;
       }
     } else {
-      p_dest_char = (unsigned char*) p_dest;
+      p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
     }
 
     if (noleftover) {
       row++;
-      p_dest = (__m128i *) (dstimg.data + row * dstimg.cols);
-      p1 = (__m128i *) (srcimg.data + 2 * row * srcimg.cols);
+      p_dest = reinterpret_cast<__m128i*>(dstimg.data + row * dstimg.cols);
+      p1 = reinterpret_cast<__m128i*>(srcimg.data + 2 * row * srcimg.cols);
       p2 = p1 + hsize;
     } else {
-      const unsigned char* p1_src_char = (unsigned char*) (p1);
-      const unsigned char* p2_src_char = (unsigned char*) (p2);
+      const unsigned char* p1_src_char = reinterpret_cast<unsigned char*>(p1);
+      const unsigned char* p2_src_char = reinterpret_cast<unsigned char*>(p2);
       for (unsigned int k = 0; k < leftoverCols; k++) {
-        unsigned short tmp = p1_src_char[k] + p1_src_char[k + 1]
+        uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
             + p2_src_char[k] + p2_src_char[k + 1];
-        *(p_dest_char++) = (unsigned char) (tmp / 4);
+        *(p_dest_char++) = static_cast<unsigned char>(tmp / 4);
       }
       // Done with the two rows:
       row++;
-      p_dest = (__m128i *) (dstimg.data + row * dstimg.cols);
-      p1 = (__m128i *) (srcimg.data + 2 * row * srcimg.cols);
-      p2 = (__m128i *) (srcimg.data + (2 * row + 1) * srcimg.cols);
+      p_dest = reinterpret_cast<__m128i *>(dstimg.data + row * dstimg.cols);
+      p1 = reinterpret_cast<__m128i *>(srcimg.data + 2 * row * srcimg.cols);
+      p2 = reinterpret_cast<__m128i *>(srcimg.data + (2 * row + 1) *
+          srcimg.cols);
     }
   }
 }
 
 void BriskLayer::TwoThirdSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
-  const unsigned short leftoverCols = ((srcimg.cols / 3) * 3) % 15; // take care with border...
+  // Take care with the border...
+  const uint16_t leftoverCols = ((srcimg.cols / 3) * 3) % 15;
 
   // Make sure the destination image is of the right size:
   assert((srcimg.cols / 3) * 2 == dstimg.cols);
@@ -652,9 +657,9 @@ void BriskLayer::TwoThirdSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
   while (p3 < p_end) {
     for (int i = 0; i < hsize; i++) {
       // Load three rows.
-      __m128i first = _mm_loadu_si128((__m128i *) p1);
-      __m128i second = _mm_loadu_si128((__m128i *) p2);
-      __m128i third = _mm_loadu_si128((__m128i *) p3);
+      __m128i first = _mm_loadu_si128(reinterpret_cast<__m128i *>(p1));
+      __m128i second = _mm_loadu_si128(reinterpret_cast<__m128i *>(p2));
+      __m128i third = _mm_loadu_si128(reinterpret_cast<__m128i *>(p3));
 
       // Upper row:
       __m128i upper = _mm_avg_epu8(_mm_avg_epu8(first, second), first);
@@ -674,11 +679,13 @@ void BriskLayer::TwoThirdSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
       // Store:
       if (i * 10 + 16 > dstimg.cols) {
-        _mm_maskmoveu_si128(result_upper, store_mask, (char*) p_dest1);
-        _mm_maskmoveu_si128(result_lower, store_mask, (char*) p_dest2);
+        _mm_maskmoveu_si128(result_upper, store_mask,
+                            reinterpret_cast<char*>(p_dest1));
+        _mm_maskmoveu_si128(result_lower, store_mask,
+                            reinterpret_cast<char*>(p_dest2));
       } else {
-        _mm_storeu_si128((__m128i *) p_dest1, result_upper);
-        _mm_storeu_si128((__m128i *) p_dest2, result_lower);
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(p_dest1), result_upper);
+        _mm_storeu_si128(reinterpret_cast<__m128i *>(p_dest2), result_lower);
       }
 
       // Shift pointers:
@@ -691,24 +698,24 @@ void BriskLayer::TwoThirdSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
     // Fill the remainder:
     for (unsigned int j = 0; j < leftoverCols; j += 3) {
-      const unsigned short A1 = *(p1++);
-      const unsigned short A2 = *(p1++);
-      const unsigned short A3 = *(p1++);
-      const unsigned short B1 = *(p2++);
-      const unsigned short B2 = *(p2++);
-      const unsigned short B3 = *(p2++);
-      const unsigned short C1 = *(p3++);
-      const unsigned short C2 = *(p3++);
-      const unsigned short C3 = *(p3++);
+      const uint16_t A1 = *(p1++);
+      const uint16_t A2 = *(p1++);
+      const uint16_t A3 = *(p1++);
+      const uint16_t B1 = *(p2++);
+      const uint16_t B2 = *(p2++);
+      const uint16_t B3 = *(p2++);
+      const uint16_t C1 = *(p3++);
+      const uint16_t C2 = *(p3++);
+      const uint16_t C3 = *(p3++);
 
-      *(p_dest1++) = (unsigned char) (((4 * A1 + 2 * (A2 + B1) + B2) / 9)
-          & 0x00FF);
-      *(p_dest1++) = (unsigned char) (((4 * A3 + 2 * (A2 + B3) + B2) / 9)
-          & 0x00FF);
-      *(p_dest2++) = (unsigned char) (((4 * C1 + 2 * (C2 + B1) + B2) / 9)
-          & 0x00FF);
-      *(p_dest2++) = (unsigned char) (((4 * C3 + 2 * (C2 + B3) + B2) / 9)
-          & 0x00FF);
+      *(p_dest1++) = static_cast<unsigned char>(((4 * A1 + 2 * (A2 + B1) + B2)
+          / 9) & 0x00FF);
+      *(p_dest1++) = static_cast<unsigned char>(((4 * A3 + 2 * (A2 + B3) + B2)
+          / 9) & 0x00FF);
+      *(p_dest2++) = static_cast<unsigned char>(((4 * C1 + 2 * (C2 + B1) + B2)
+          / 9) & 0x00FF);
+      *(p_dest2++) = static_cast<unsigned char>(((4 * C3 + 2 * (C2 + B3) + B2)
+          / 9) & 0x00FF);
     }
 
     // Increment row counter:

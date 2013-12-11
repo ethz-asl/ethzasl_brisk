@@ -47,4 +47,4 @@
 #include <brisk/harris-score-calculator.h>
 #include <brisk/scale-space-feature-detector.h>
 
-#endif  //BRISK_BRISK_H_
+#endif  // BRISK_BRISK_H_

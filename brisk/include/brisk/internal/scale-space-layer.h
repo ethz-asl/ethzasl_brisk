@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,8 +38,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_INTERNAL_SCALE_SPACE_LAYER_H_
-#define BRISK_INTERNAL_SCALE_SPACE_LAYER_H_
+#ifndef INTERNAL_SCALE_SPACE_LAYER_H_
+#define INTERNAL_SCALE_SPACE_LAYER_H_
 
 #include <vector>
 
@@ -55,13 +55,13 @@ class ScaleSpaceLayer {
   typedef SCORE_CALCULTAOR_T ScoreCalculator_t;
   ScaleSpaceLayer() {
   }
-  ScaleSpaceLayer(const cv::Mat& img, bool initScores = true);  // Octave 0.
+  ScaleSpaceLayer(const cv::Mat& img, bool initScores = true);  // Octave 0.
   ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
                   bool initScores = true);  // For successive construction.
 
-  void Create(const cv::Mat& img, bool initScores = true);  // Octave 0.
-  void Create(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
-              bool initScores = true);  // For successive construction.
+  void Create(const cv::Mat& img, bool initScores = true);  // Octave 0.
+  void Create(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores =
+                  true);  // For successive construction.
 
   void SetUniformityRadius(double radius);
   void SetMaxNumKpt(size_t maxNumKpt) {
@@ -71,8 +71,8 @@ class ScaleSpaceLayer {
     _absoluteThreshold = absoluteThreshold;
   }
 
-  // Feature detection.
-  void DetectScaleSpaceMaxima(std::vector<cv::KeyPoint>& keypoints,
+  // Feature detection.
+  void DetectScaleSpaceMaxima(std::vector<cv::KeyPoint>& keypoints,  // NOLINT
                               bool enforceUniformity = true, bool doRefinement =
                                   true,
                               bool usePassedKeypoints = false);
@@ -90,12 +90,13 @@ class ScaleSpaceLayer {
   static inline void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
   // for 16 bit input images.
   static inline void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
+
  protected:
-  // Utilities.
+  // Utilities.
   inline double ScoreAbove(double u, double v);
   inline double ScoreBelow(double u, double v);
 
-  // 1d (scale) refinement.
+  // 1d (scale) refinement.
   __inline__ float Refine1D(const float s_05, const float s0, const float s05,
                             float& max);  // Around octave.
   __inline__ float Refine1D_1(const float s_05, const float s0, const float s05,
@@ -109,11 +110,11 @@ class ScaleSpaceLayer {
                               const double s_2_2, float& delta_x,
                               float& delta_y);
 
-  // Layer properties.
+  // Layer properties.
   bool _isOctave;
   int _layerNumber;
 
-  // Have a reference to the image for convenience:
+  // Have a reference to the image for convenience:
   cv::Mat _img;
 
   // The score calculation.
@@ -139,4 +140,4 @@ class ScaleSpaceLayer {
 
 #include "./scale-space-layer-inl.h"
 
-#endif  // BRISK_INTERNAL_SCALE_SPACE_LAYER_H_
+#endif  // INTERNAL_SCALE_SPACE_LAYER_H_
