@@ -1050,13 +1050,13 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample8(
       p2++;
 
       // Compute horizontal pairwise average and store.
-      p_dest_char = static_cast<unsigned char*>(p_dest);
-      const uchar* result = static_cast<unsigned char*>(&result1);
+      p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
+      const uchar* result = reinterpret_cast<unsigned char*>(&result1);
       for (unsigned int j = 0; j < 8; j++) {
         *(p_dest_char++) = (*(result + 2 * j) + *(result + 2 * j + 1)) / 2;
       }
     } else {
-      p_dest_char = static_cast<unsigned char*>(p_dest);
+      p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
     }
 
     if (noleftover) {
@@ -1065,8 +1065,8 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample8(
       p1 = reinterpret_cast<__m128i*>(srcimg.data + 2 * row * srcimg.cols);
       p2 = p1 + hsize;
     } else {
-      const unsigned char* p1_src_char = static_cast<unsigned char*>(p1);
-      const unsigned char* p2_src_char = static_cast<unsigned char*>(p2);
+      const unsigned char* p1_src_char = reinterpret_cast<unsigned char*>(p1);
+      const unsigned char* p2_src_char = reinterpret_cast<unsigned char*>(p2);
       for (unsigned int k = 0; k < leftoverCols; k++) {
         uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
             + p2_src_char[k] + p2_src_char[k + 1];
@@ -1308,9 +1308,9 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample8(
       // Store:
       if (i * 10 + 16 > dstimg.cols) {
         _mm_maskmoveu_si128(result_upper, store_mask,
-                            static_cast<unsigned char*>(p_dest1));
+                            reinterpret_cast<char*>(p_dest1));
         _mm_maskmoveu_si128(result_lower, store_mask,
-                            static_cast<unsigned char*>(p_dest2));
+                            reinterpret_cast<char*>(p_dest2));
       } else {
         _mm_storeu_si128(reinterpret_cast<__m128i *>(p_dest1), result_upper);
         _mm_storeu_si128(reinterpret_cast<__m128i *>(p_dest2), result_lower);
