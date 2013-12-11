@@ -78,8 +78,8 @@ __inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // N
         }
       }
       // Store
-      _mm_storeu_si128(
-          reinterpret_cast<__m128i *>(&dst.at<int16_t>(i + cy, j + cx)), result);
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(
+          &dst.at<int16_t>(i + cy, j + cx)), result);
 
       // Take care of end.
       j += 8;

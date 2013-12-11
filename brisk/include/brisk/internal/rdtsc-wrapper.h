@@ -49,10 +49,10 @@
 
 #ifndef BOOST_DATE_TIME_NO_LOCALE
 #define BOOST_DATE_TIME_NO_LOCALE
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>  // NOLINT
 #undef BOOST_DATE_TIME_NO_LOCALE
 #else
-#include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/date_time/posix_time/posix_time.hpp>  // NOLINT
 #endif
 
 #include <boost/accumulators/accumulators.hpp>

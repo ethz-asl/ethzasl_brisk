@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,6 +38,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <stdint.h>
 #include <brisk/internal/harris-scores-sse.h>
 
 namespace brisk {
@@ -51,11 +52,11 @@ void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
   const int maxJ = cols - 1 - 16;
 
   // Allocate stuff.
-  short *DxDx1, *DyDy1, *DxDy1;
+  int16_t *DxDx1, *DyDy1, *DxDy1;
   scores = cv::Mat::zeros(rows, cols, CV_32S);
-  DxDx1 = new short[rows * cols];
-  DxDy1 = new short[rows * cols];
-  DyDy1 = new short[rows * cols];
+  DxDx1 = new int16_t[rows * cols];
+  DxDy1 = new int16_t[rows * cols];
+  DyDy1 = new int16_t[rows * cols];
 
   // Masks.
   __m128i mask_lo = _mm_set_epi8(0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
@@ -76,21 +77,21 @@ void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
     for (int j = 1; j < cols - 1;) {
       // Load.
       const __m128i src_m1_m1 = _mm_loadu_si128(
-          (__m128i *) (data + (i - 1) * stride + j - 1));
+          reinterpret_cast<const __m128i *>(data + (i - 1) * stride + j - 1));
       const __m128i src_m1_0 = _mm_loadu_si128(
-          (__m128i *) (data + (i - 1) * stride + j));
+          reinterpret_cast<const __m128i *>(data + (i - 1) * stride + j));
       const __m128i src_m1_p1 = _mm_loadu_si128(
-          (__m128i *) (data + (i - 1) * stride + j + 1));
+          reinterpret_cast<const __m128i *>(data + (i - 1) * stride + j + 1));
       const __m128i src_0_m1 = _mm_loadu_si128(
-          (__m128i *) (data + (i) * stride + j - 1));
+          reinterpret_cast<const __m128i *>(data + (i) * stride + j - 1));
       const __m128i src_0_p1 = _mm_loadu_si128(
-          (__m128i *) (data + (i) * stride + j + 1));
+          reinterpret_cast<const __m128i *>(data + (i) * stride + j + 1));
       const __m128i src_p1_m1 = _mm_loadu_si128(
-          (__m128i *) (data + (i + 1) * stride + j - 1));
+          reinterpret_cast<const __m128i *>(data + (i + 1) * stride + j - 1));
       const __m128i src_p1_0 = _mm_loadu_si128(
-          (__m128i *) (data + (i + 1) * stride + j));
+          reinterpret_cast<const __m128i *>(data + (i + 1) * stride + j));
       const __m128i src_p1_p1 = _mm_loadu_si128(
-          (__m128i *) (data + (i + 1) * stride + j + 1));
+          reinterpret_cast<const __m128i *>(data + (i + 1) * stride + j + 1));
 
       // Scharr x.
       const __m128i dx_lo = _mm_slli_epi16(
@@ -178,17 +179,17 @@ void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
       const __m128i i_hi_dx_dy = _mm_mulhi_epi16(dx_hi, dy_hi);
 
       // Unpack - interleave, store.
-      _mm_storeu_si128((__m128i *) (DxDx1 + i * cols + j),
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(DxDx1 + i * cols + j),
                        _mm_unpacklo_epi16(i_lo_dx_dx, i_hi_dx_dx));
-      _mm_storeu_si128((__m128i *) (DxDx1 + i * cols + j + 8),
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(DxDx1 + i * cols + j + 8),
                        _mm_unpackhi_epi16(i_lo_dx_dx, i_hi_dx_dx));
-      _mm_storeu_si128((__m128i *) (DxDy1 + i * cols + j),
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(DxDy1 + i * cols + j),
                        _mm_unpacklo_epi16(i_lo_dx_dy, i_hi_dx_dy));
-      _mm_storeu_si128((__m128i *) (DxDy1 + i * cols + j + 8),
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(DxDy1 + i * cols + j + 8),
                        _mm_unpackhi_epi16(i_lo_dx_dy, i_hi_dx_dy));
-      _mm_storeu_si128((__m128i *) (DyDy1 + i * cols + j),
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(DyDy1 + i * cols + j),
                        _mm_unpacklo_epi16(i_lo_dy_dy, i_hi_dy_dy));
-      _mm_storeu_si128((__m128i *) (DyDy1 + i * cols + j + 8),
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(DyDy1 + i * cols + j + 8),
                        _mm_unpackhi_epi16(i_lo_dy_dy, i_hi_dy_dy));
 
       j += 16;
@@ -204,65 +205,65 @@ void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
     for (int j = 2; j < cols - 2; j++) {
       // Load.
       // Calculate dxdx.
-      const short dxdx_m1_m1 = DxDx1[(i - 1) * cols + j - 1];
-      const short dxdx_m1_0 = DxDx1[(i - 1) * cols + j];
-      const short dxdx_m1_p1 = DxDx1[(i - 1) * cols + j + 1];
-      const short dxdx_0_m1 = DxDx1[(i) * cols + j - 1];
-      const short dxdx_0_0 = DxDx1[(i) * cols + j];
-      const short dxdx_0_p1 = DxDx1[(i) * cols + j + 1];
-      const short dxdx_p1_m1 = DxDx1[(i + 1) * cols + j - 1];
-      const short dxdx_p1_0 = DxDx1[(i + 1) * cols + j];
-      const short dxdx_p1_p1 = DxDx1[(i + 1) * cols + j + 1];
+      const int16_t dxdx_m1_m1 = DxDx1[(i - 1) * cols + j - 1];
+      const int16_t dxdx_m1_0 = DxDx1[(i - 1) * cols + j];
+      const int16_t dxdx_m1_p1 = DxDx1[(i - 1) * cols + j + 1];
+      const int16_t dxdx_0_m1 = DxDx1[(i) * cols + j - 1];
+      const int16_t dxdx_0_0 = DxDx1[(i) * cols + j];
+      const int16_t dxdx_0_p1 = DxDx1[(i) * cols + j + 1];
+      const int16_t dxdx_p1_m1 = DxDx1[(i + 1) * cols + j - 1];
+      const int16_t dxdx_p1_0 = DxDx1[(i + 1) * cols + j];
+      const int16_t dxdx_p1_p1 = DxDx1[(i + 1) * cols + j + 1];
 
       // Gaussian smoothing.
-      int dxdx = ((4 * int(dxdx_0_0)
-          + 2
-              * (int(dxdx_m1_0) + int(dxdx_p1_0) + int(dxdx_0_m1)
-                  + int(dxdx_0_p1))
-          + (int(dxdx_m1_m1) + int(dxdx_m1_p1) + int(dxdx_p1_m1)
-              + int(dxdx_p1_p1))) >> 4);
+      int dxdx = ((4 * static_cast<int>(dxdx_0_0)
+          + 2 * (static_cast<int>(dxdx_m1_0) + static_cast<int>(dxdx_p1_0) +
+              static_cast<int>(dxdx_0_m1) + static_cast<int>(dxdx_0_p1)) +
+              (static_cast<int>(dxdx_m1_m1) + static_cast<int>(dxdx_m1_p1) +
+                  static_cast<int>(dxdx_p1_m1) + static_cast<int>(dxdx_p1_p1)))
+          >> 4);
 
       // Calculate dxdy.
-      const short dxdy_m1_m1 = DxDy1[(i - 1) * cols + j - 1];
-      const short dxdy_m1_0 = DxDy1[(i - 1) * cols + j];
-      const short dxdy_m1_p1 = DxDy1[(i - 1) * cols + j + 1];
-      const short dxdy_0_m1 = DxDy1[(i) * cols + j - 1];
-      const short dxdy_0_0 = DxDy1[(i) * cols + j];
-      const short dxdy_0_p1 = DxDy1[(i) * cols + j + 1];
-      const short dxdy_p1_m1 = DxDy1[(i + 1) * cols + j - 1];
-      const short dxdy_p1_0 = DxDy1[(i + 1) * cols + j];
-      const short dxdy_p1_p1 = DxDy1[(i + 1) * cols + j + 1];
+      const int16_t dxdy_m1_m1 = DxDy1[(i - 1) * cols + j - 1];
+      const int16_t dxdy_m1_0 = DxDy1[(i - 1) * cols + j];
+      const int16_t dxdy_m1_p1 = DxDy1[(i - 1) * cols + j + 1];
+      const int16_t dxdy_0_m1 = DxDy1[(i) * cols + j - 1];
+      const int16_t dxdy_0_0 = DxDy1[(i) * cols + j];
+      const int16_t dxdy_0_p1 = DxDy1[(i) * cols + j + 1];
+      const int16_t dxdy_p1_m1 = DxDy1[(i + 1) * cols + j - 1];
+      const int16_t dxdy_p1_0 = DxDy1[(i + 1) * cols + j];
+      const int16_t dxdy_p1_p1 = DxDy1[(i + 1) * cols + j + 1];
 
       // Gaussian smoothing.
-      int dxdy = ((4 * int(dxdy_0_0)
-          + 2
-              * (int(dxdy_m1_0) + int(dxdy_p1_0) + int(dxdy_0_m1)
-                  + int(dxdy_0_p1))
-          + (int(dxdy_m1_m1) + int(dxdy_m1_p1) + int(dxdy_p1_m1)
-              + int(dxdy_p1_p1))) >> 4);
+      int dxdy = ((4 * static_cast<int>(dxdy_0_0)
+          + 2 * (static_cast<int>(dxdy_m1_0) + static_cast<int>(dxdy_p1_0) +
+                  static_cast<int>(dxdy_0_m1) + static_cast<int>(dxdy_0_p1)) +
+                  (static_cast<int>(dxdy_m1_m1) + static_cast<int>(dxdy_m1_p1) +
+                      static_cast<int>(dxdy_p1_m1) +
+                      static_cast<int>(dxdy_p1_p1))) >> 4);
 
       // Calculate dydy.
-      const short dydy_m1_m1 = DyDy1[(i - 1) * cols + j - 1];
-      const short dydy_m1_0 = DyDy1[(i - 1) * cols + j];
-      const short dydy_m1_p1 = DyDy1[(i - 1) * cols + j + 1];
-      const short dydy_0_m1 = DyDy1[(i) * cols + j - 1];
-      const short dydy_0_0 = DyDy1[(i) * cols + j];
-      const short dydy_0_p1 = DyDy1[(i) * cols + j + 1];
-      const short dydy_p1_m1 = DyDy1[(i + 1) * cols + j - 1];
-      const short dydy_p1_0 = DyDy1[(i + 1) * cols + j];
-      const short dydy_p1_p1 = DyDy1[(i + 1) * cols + j + 1];
+      const int16_t dydy_m1_m1 = DyDy1[(i - 1) * cols + j - 1];
+      const int16_t dydy_m1_0 = DyDy1[(i - 1) * cols + j];
+      const int16_t dydy_m1_p1 = DyDy1[(i - 1) * cols + j + 1];
+      const int16_t dydy_0_m1 = DyDy1[(i) * cols + j - 1];
+      const int16_t dydy_0_0 = DyDy1[(i) * cols + j];
+      const int16_t dydy_0_p1 = DyDy1[(i) * cols + j + 1];
+      const int16_t dydy_p1_m1 = DyDy1[(i + 1) * cols + j - 1];
+      const int16_t dydy_p1_0 = DyDy1[(i + 1) * cols + j];
+      const int16_t dydy_p1_p1 = DyDy1[(i + 1) * cols + j + 1];
 
       // Gaussian smoothing.
-      int dydy = ((4 * int(dydy_0_0)
-          + 2
-              * (int(dydy_m1_0) + int(dydy_p1_0) + int(dydy_0_m1)
-                  + int(dydy_0_p1))
-          + (int(dydy_m1_m1) + int(dydy_m1_p1) + int(dydy_p1_m1)
-              + int(dydy_p1_p1))) >> 4);
+      int dydy = ((4 * static_cast<int>(dydy_0_0)
+          + 2 * (static_cast<int>(dydy_m1_0) + static_cast<int>(dydy_p1_0) +
+                  static_cast<int>(dydy_0_m1) + static_cast<int>(dydy_0_p1))
+          + (static_cast<int>(dydy_m1_m1) + static_cast<int>(dydy_m1_p1) +
+              static_cast<int>(dydy_p1_m1) + static_cast<int>(dydy_p1_p1)))
+          >> 4);
 
       int trace_div_by_2 = ((dxdx) + (dydy)) >> 1;
-      *((int*) scores.data + i * stride + j) = ((((dxdx) * (dydy)))
-          - (((dxdy) * (dxdy))))
+      *(reinterpret_cast<int*>(scores.data) + i * stride + j) =
+          ((((dxdx) * (dydy))) - (((dxdy) * (dxdy))))
           - ((((trace_div_by_2)) * ((trace_div_by_2)) >> 2));
     }
   }
