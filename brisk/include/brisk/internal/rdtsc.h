@@ -1,4 +1,5 @@
-/* This is the RDTSC timer.
+/* Copyright ETH Zurich.
+ * This is the RDTSC timer.
  * RDTSC is an instruction on several Intel and compatible CPUs that Reads the
  * Time Stamp Counter. The Intel manuals contain more information.
  */

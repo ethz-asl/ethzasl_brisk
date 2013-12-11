@@ -38,13 +38,26 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_H_
-#define BRISK_BRISK_H_
+#ifndef BRISK_BRISK_FEATURE_DETECTOR_H_
+#define BRISK_BRISK_FEATURE_DETECTOR_H_
 
-#include <brisk/brisk-descriptor-extractor.h>
-#include <brisk/brisk-feature-detector.h>
-#include <brisk/harris-feature-detector.h>
-#include <brisk/harris-score-calculator.h>
-#include <brisk/scale-space-feature-detector.h>
+#include <brisk/brisk-opencv.h>
+#include <brisk/internal/macros.h>
 
-#endif  //BRISK_BRISK_H_
+namespace cv {
+class CV_EXPORTS BriskFeatureDetector : public FeatureDetector {
+public:
+  BriskFeatureDetector(int thresh, int octaves = 3,
+                       bool suppressScaleNonmaxima = true);
+  virtual ~BriskFeatureDetector() { }
+  int threshold;
+  int octaves;
+protected:
+  virtual void detectImpl( const cv::Mat& image,
+      std::vector<cv::KeyPoint>& keypoints,
+      const cv::Mat& mask=cv::Mat() ) const;
+  bool m_suppressScaleNonmaxima;
+};
+}  // namespace cv
+
+#endif  // BRISK_BRISK_FEATURE_DETECTOR_H_

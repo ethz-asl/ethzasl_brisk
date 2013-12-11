@@ -38,13 +38,38 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_H_
-#define BRISK_BRISK_H_
+#ifndef BRISK_INTERNAL_SSE_FILTERS_H_
+#define BRISK_INTERNAL_SSE_FILTERS_H_
 
-#include <brisk/brisk-descriptor-extractor.h>
-#include <brisk/brisk-feature-detector.h>
-#include <brisk/harris-feature-detector.h>
-#include <brisk/harris-score-calculator.h>
-#include <brisk/scale-space-feature-detector.h>
+#include <brisk/brisk-opencv.h>
+#include <brisk/internal/macros.h>
 
-#endif  //BRISK_BRISK_H_
+namespace brisk {
+
+// Generic SSE-optimized 2D filter on CV_8U/CV_16S matrices. stores result in
+// CV_16S matrix.
+template<int X, int Y>
+__inline__ void filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);
+
+// Generic SSE-optimized 2D filter CV_8U to CV_16S.
+template<int X, int Y>
+__inline__ void filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);
+
+// Generic SSE-optimized 2D filter CV_16S to CV_16S.
+template<int X, int Y>
+__inline__ void filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);
+
+// 3-by-3 box filter CV_16S to CV_16S.
+__inline__ void filterBox3by316S(cv::Mat& src, cv::Mat& dst);
+
+// 3-by-3 Gaussian filter CV_16S to CV_16S.
+void filterGauss3by316S(cv::Mat& src, cv::Mat& dst);
+
+// 3-by-3 Gaussian filter CV_32F to CV_32F.
+void filterGauss3by332F(cv::Mat& src, cv::Mat& dst);
+
+#include "./sse-filters-inl.h"
+
+}  // namespace brisk
+
+#endif  // BRISK_INTERNAL_SSE_FILTERS_H_

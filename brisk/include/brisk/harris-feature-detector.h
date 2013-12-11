@@ -38,13 +38,38 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_H_
-#define BRISK_BRISK_H_
+#ifndef BRISK_HARRIS_FEATURE_DETECTOR_H_
+#define BRISK_HARRIS_FEATURE_DETECTOR_H_
 
-#include <brisk/brisk-descriptor-extractor.h>
-#include <brisk/brisk-feature-detector.h>
-#include <brisk/harris-feature-detector.h>
-#include <brisk/harris-score-calculator.h>
-#include <brisk/scale-space-feature-detector.h>
+#include <brisk/brisk-opencv.h>
+#include <brisk/internal/macros.h>
+#include <brisk/internal/sse-filters.h>
 
-#endif  //BRISK_BRISK_H_
+namespace brisk {
+
+class HarrisFeatureDetector : public cv::FeatureDetector {
+ public:
+  HarrisFeatureDetector(double radius);
+  void setRadius(double radius);
+
+ protected:
+  static __inline__ void getCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
+                                         cv::Mat& dydy, cv::Mat& dxdy);
+  static __inline__ void cornerHarris(const cv::Mat& dxdxSmooth,
+                                      const cv::Mat& dydySmooth,
+                                      const cv::Mat& dxdySmooth,
+                                      cv::Mat& score);
+  static __inline__ void nonmaxSuppress(const cv::Mat& scores,
+                                        std::vector<cv::KeyPoint>& keypoints);
+  __inline__ void enforceUniformity(const cv::Mat& scores,
+                                    std::vector<cv::KeyPoint>& keypoints) const;
+
+  virtual void detectImpl(const cv::Mat& image,
+                          std::vector<cv::KeyPoint>& keypoints,
+                          const cv::Mat& mask = cv::Mat()) const;
+
+  double _radius;
+  cv::Mat _LUT;
+};
+}  // namespace brisk
+#endif  // BRISK_HARRIS_FEATURE_DETECTOR_H_
