@@ -38,6 +38,9 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <emmintrin.h>
+#include <tmmintrin.h>
+
 #include <brisk/internal/harris-score-calculator-float.h>
 #include <brisk/internal/sse-filters.h>
 

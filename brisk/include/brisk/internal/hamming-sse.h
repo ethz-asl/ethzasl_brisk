@@ -40,6 +40,8 @@
 
 #ifndef INTERNAL_HAMMING_SSE_H_
 #define INTERNAL_HAMMING_SSE_H_
+#include <emmintrin.h>
+#include <tmmintrin.h>
 
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>

@@ -42,6 +42,8 @@
 #define INTERNAL_SCALE_SPACE_LAYER_INL_H_
 
 #include <algorithm>
+#include <emmintrin.h>
+#include <tmmintrin.h>
 #include <vector>
 
 #include <brisk/internal/rdtsc-wrapper.h>

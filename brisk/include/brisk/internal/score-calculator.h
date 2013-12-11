@@ -41,6 +41,8 @@
 #ifndef INTERNAL_SCORE_CALCULATOR_H_
 #define INTERNAL_SCORE_CALCULATOR_H_
 
+#include <emmintrin.h>
+#include <tmmintrin.h>
 #include <vector>
 
 #include <brisk/brisk-opencv.h>

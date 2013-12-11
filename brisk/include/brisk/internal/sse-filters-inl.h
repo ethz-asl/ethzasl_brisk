@@ -41,7 +41,9 @@
 #ifndef INTERNAL_SSE_FILTERS_INL_H_
 #define INTERNAL_SSE_FILTERS_INL_H_
 
+#include <emmintrin.h>
 #include <stdint.h>
+#include <tmmintrin.h>
 
 template<int X, int Y>
 __inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLINT

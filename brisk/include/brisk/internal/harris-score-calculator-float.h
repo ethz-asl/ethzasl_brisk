@@ -41,6 +41,8 @@
 #ifndef INTERNAL_HARRIS_SCORE_CALCULATOR_FLOAT_H_
 #define INTERNAL_HARRIS_SCORE_CALCULATOR_FLOAT_H_
 
+#include <emmintrin.h>
+#include <tmmintrin.h>
 #include <vector>
 
 #include <brisk/brisk-opencv.h>

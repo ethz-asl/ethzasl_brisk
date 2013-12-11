@@ -41,9 +41,6 @@
 #ifndef INTERNAL_HAMMING_SSE_INL_H_
 #define INTERNAL_HAMMING_SSE_INL_H_
 
-#include <emmintrin.h>
-#include <tmmintrin.h>
-
 namespace brisk {
 
 #ifdef __GNUC__
