@@ -45,7 +45,8 @@
 
 namespace cv {
 // Adapted from OpenCV 2.3 features2d/matcher.hpp
-cv::Ptr<DescriptorMatcher> BruteForceMatcherSse::clone(bool emptyTrainData) const {
+cv::Ptr<DescriptorMatcher> BruteForceMatcherSse::clone(bool emptyTrainData)
+const {
   BruteForceMatcherSse* matcher = new BruteForceMatcherSse(distance_);
   if (!emptyTrainData) {
     std::transform(trainDescCollection.begin(), trainDescCollection.end(),
@@ -55,7 +56,8 @@ cv::Ptr<DescriptorMatcher> BruteForceMatcherSse::clone(bool emptyTrainData) cons
 }
 
 void BruteForceMatcherSse::knnMatchImpl(const Mat& queryDescriptors,
-                                        vector<vector<DMatch> >& matches, int k,
+                                        vector<vector<DMatch> >& matches,
+                                        int k,
                                         const vector<Mat>& masks,
                                         bool compactResult) {
   commonKnnMatchImpl(*this, queryDescriptors, matches, k, masks, compactResult);
@@ -134,7 +136,8 @@ inline void BruteForceMatcherSse::commonKnnMatchImpl(
             Point minLoc;
             minMaxLoc(allDists[iIdx], &minVal, 0, &minLoc, 0);
             if (minVal < bestMatch.distance)
-              bestMatch = DMatch(qIdx, minLoc.x, (int) iIdx, (float) minVal);
+              bestMatch = DMatch(qIdx, minLoc.x, static_cast<int>(iIdx),
+                                 static_cast<float>(minVal));
           }
         }
         if (bestMatch.trainIdx == -1)
@@ -144,7 +147,7 @@ inline void BruteForceMatcherSse::commonKnnMatchImpl(
             std::numeric_limits < DistanceType > ::max();
         curMatches->push_back(bestMatch);
       }
-      //TODO(slynen): Shouldn't this be already sorted at this point?
+      // TODO(slynen): Shouldn't this be already sorted at this point?
       std::sort(curMatches->begin(), curMatches->end());
     }
   }
@@ -185,12 +188,13 @@ inline void BruteForceMatcherSse::commonRadiusMatchImpl(
             tIdx++) {
           if (masks.empty()
               || matcher.isPossibleMatch(masks[iIdx], qIdx, tIdx)) {
-            const ValueType* d2 = (const ValueType*) (matcher
-                .trainDescCollection[iIdx].data
+            const ValueType* d2 = static_cast<const ValueType*>(
+                matcher.trainDescCollection[iIdx].data
                 + matcher.trainDescCollection[iIdx].step * tIdx);
             DistanceType d = matcher.distance_(d1, d2, dimension);
             if (d < maxDistance)
-              curMatches->push_back(DMatch(qIdx, tIdx, (int) iIdx, (float) d));
+              curMatches->push_back(DMatch(qIdx, tIdx, static_cast<int>(iIdx),
+                                           static_cast<float>(d)));
           }
         }
       }

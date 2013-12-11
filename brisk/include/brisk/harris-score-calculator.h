@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,8 +38,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_INTERNAL_HARRIS_SCORE_CALCULATOR_H_
-#define BRISK_INTERNAL_HARRIS_SCORE_CALCULATOR_H_
+#ifndef BRISK_HARRIS_SCORE_CALCULATOR_H_
+#define BRISK_HARRIS_SCORE_CALCULATOR_H_
 
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
@@ -50,16 +50,16 @@ class HarrisScoreCalculator : public ScoreCalculator<int> {
  public:
   typedef ScoreCalculator<int> Base_t;
 
-  // Provide accessor implementations here in order to enable inlining.
-  inline double score(double u, double v) {
-    // Simple bilinear interpolation - no checking (for speed).
-    const int u_int = int(u);
-    const int v_int = int(v);
+  // Provide accessor implementations here in order to enable inlining.
+  inline double Score(double u, double v) {
+    // Simple bilinear interpolation - no checking (for speed).
+    const int u_int = static_cast<int>(u);
+    const int v_int = static_cast<int>(v);
     if (u_int + 1 >= _scores.cols || v_int + 1 >= _scores.rows || u_int < 0
         || v_int < 0)
       return 0.0;
-    const double ru = u - double(u_int);
-    const double rv = v - double(v_int);
+    const double ru = u - static_cast<double>(u_int);
+    const double rv = v - static_cast<double>(v_int);
     const double oneMinus_ru = 1.0 - ru;
     const double oneMinus_rv = 1.0 - rv;
     return oneMinus_rv
@@ -69,20 +69,21 @@ class HarrisScoreCalculator : public ScoreCalculator<int> {
             * (oneMinus_ru * _scores.at<int>(v_int + 1, u_int)
                 + ru * _scores.at<int>(v_int + 1, u_int + 1));
   }
-  inline Base_t::Score_t score(int u, int v) {
+  inline Base_t::Score_t Score(int u, int v) {
     return _scores.at<int>(v, u);
   }
-  virtual void get2dMaxima(std::vector<PointWithScore>& points,
+  virtual void Get2dMaxima(std::vector<PointWithScore>& points,  // NOLINT
                            int absoluteThreshold = 0);
+
  protected:
-  // Calculates the Harris scores.
-  virtual void initializeScores();
+  // Calculates the Harris scores.
+  virtual void InitializeScores();
 
   // Harris specific.
-  static void getCovarEntries(const cv::Mat& src, cv::Mat& dxdx, cv::Mat& dydy,
+  static void GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx, cv::Mat& dydy,
                               cv::Mat& dxdy);
-  static void cornerHarris(const cv::Mat& dxdxSmooth, const cv::Mat& dydySmooth,
+  static void CornerHarris(const cv::Mat& dxdxSmooth, const cv::Mat& dydySmooth,
                            const cv::Mat& dxdySmooth, cv::Mat& score);
 };
 }  // namespace brisk
-#endif  // BRISK_INTERNAL_HARRIS_SCORE_CALCULATOR_H_
+#endif  // BRISK_HARRIS_SCORE_CALCULATOR_H_

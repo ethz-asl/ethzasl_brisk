@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -40,6 +40,7 @@
 
 #include <tmmintrin.h>
 #include <mmintrin.h>
+#include <stdint.h>
 
 #include <brisk/harris-feature-detector.h>
 
@@ -50,9 +51,9 @@ __inline__ bool compareKeypointScore(cv::KeyPoint kp_i, cv::KeyPoint kp_j) {
 }
 
 HarrisFeatureDetector::HarrisFeatureDetector(double radius) {
-  setRadius(radius);
+  SetRadius(radius);
 }
-void HarrisFeatureDetector::setRadius(double radius) {
+void HarrisFeatureDetector::SetRadius(double radius) {
   _radius = radius;
 
   // Generic mask.
@@ -60,18 +61,15 @@ void HarrisFeatureDetector::setRadius(double radius) {
   for (int x = 0; x < 2 * 16 - 1; ++x) {
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       _LUT.at<float>(y, x) = std::max(
-          1
-              - double(
-                  (radius / 2.0 - x) * (radius / 2.0 - x)
+          1 - static_cast<double>((radius / 2.0 - x) * (radius / 2.0 - x)
                       + (radius / 2.0 - y) * (radius / 2.0 - y))
-                  / double(radius / 2.0 * radius / 2.0),
-          0.0);
+                  / static_cast<double>(radius / 2.0 * radius / 2.0), 0.0);
     }
   }
 }
 
 // X and Y denote the size of the mask.
-__inline__ void HarrisFeatureDetector::getCovarEntries(const cv::Mat& src,
+__inline__ void HarrisFeatureDetector::GetCovarEntries(const cv::Mat& src,
                                                        cv::Mat& dxdx,
                                                        cv::Mat& dydy,
                                                        cv::Mat& dxdy) {
@@ -89,7 +87,7 @@ __inline__ void HarrisFeatureDetector::getCovarEntries(const cv::Mat& src,
   const unsigned int cx = 1;
   const unsigned int cy = 1;
 
-  // Dest will be 16 bit.
+  // Dest will be 16 bit.
   dxdx = cv::Mat::zeros(src.rows, src.cols, CV_16S);
   dydy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
   dxdy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
@@ -122,7 +120,7 @@ __inline__ void HarrisFeatureDetector::getCovarEntries(const cv::Mat& src,
           __m128i mult_dy = _mm_set_epi16(m_dy, m_dy, m_dy, m_dy, m_dy, m_dy,
                                           m_dy, m_dy);
           uchar* p = (src.data + (stride * (i + y)) + x + j);
-          __m128i i0 = _mm_loadu_si128((__m128i *) p);
+          __m128i i0 = _mm_loadu_si128(reinterpret_cast<__m128i*>(p));
           __m128i i0_hi = _mm_and_si128(i0, mask_hi);
           __m128i i0_lo = _mm_srli_si128(_mm_and_si128(i0, mask_lo), 1);
 
@@ -161,23 +159,23 @@ __inline__ void HarrisFeatureDetector::getCovarEntries(const cv::Mat& src,
       uchar* p_lo_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
       uchar* p_hi_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
-      _mm_storeu_si128((__m128i *) p_hi_dxdx,
+      _mm_storeu_si128(reinterpret_cast<__m128i*>(p_hi_dxdx),
                        _mm_unpackhi_epi16(i_hi_dx_dx, i_lo_dx_dx));
-      _mm_storeu_si128((__m128i *) p_lo_dxdx,
+      _mm_storeu_si128(reinterpret_cast<__m128i*>(p_lo_dxdx),
                        _mm_unpacklo_epi16(i_hi_dx_dx, i_lo_dx_dx));
       uchar* p_lo_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
       uchar* p_hi_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
-      _mm_storeu_si128((__m128i *) p_hi_dydy,
+      _mm_storeu_si128(reinterpret_cast<__m128i*>(p_hi_dydy),
                        _mm_unpackhi_epi16(i_hi_dy_dy, i_lo_dy_dy));
-      _mm_storeu_si128((__m128i *) p_lo_dydy,
+      _mm_storeu_si128(reinterpret_cast<__m128i*>(p_lo_dydy),
                        _mm_unpacklo_epi16(i_hi_dy_dy, i_lo_dy_dy));
       uchar* p_lo_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
       uchar* p_hi_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
-      _mm_storeu_si128((__m128i *) p_hi_dxdy,
+      _mm_storeu_si128(reinterpret_cast<__m128i*>(p_hi_dxdy),
                        _mm_unpackhi_epi16(i_hi_dx_dy, i_lo_dx_dy));
-      _mm_storeu_si128((__m128i *) p_lo_dxdy,
+      _mm_storeu_si128(reinterpret_cast<__m128i*>(p_lo_dxdy),
                        _mm_unpacklo_epi16(i_hi_dx_dy, i_lo_dx_dy));
 
       // Take care about end.
@@ -190,11 +188,11 @@ __inline__ void HarrisFeatureDetector::getCovarEntries(const cv::Mat& src,
   }
 }
 
-__inline__ void HarrisFeatureDetector::cornerHarris(const cv::Mat& dxdxSmooth,
+__inline__ void HarrisFeatureDetector::CornerHarris(const cv::Mat& dxdxSmooth,
                                                     const cv::Mat& dydySmooth,
                                                     const cv::Mat& dxdySmooth,
                                                     cv::Mat& dst) {
-  // Dest will be 16 bit.
+  // Dest will be 16 bit.
   dst = cv::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32S);
   const unsigned int maxJ = ((dxdxSmooth.cols - 2) / 8) * 8;
   const unsigned int maxI = dxdxSmooth.rows - 2;
@@ -203,11 +201,14 @@ __inline__ void HarrisFeatureDetector::cornerHarris(const cv::Mat& dxdxSmooth,
   for (unsigned int i = 0; i < maxI; ++i) {
     bool end = false;
     for (unsigned int j = 0; j < maxJ;) {
-      __m128i dxdx = _mm_loadu_si128((__m128i *) &dxdxSmooth.at<short>(i, j));
-      __m128i dydy = _mm_loadu_si128((__m128i *) &dydySmooth.at<short>(i, j));
-      __m128i dxdy = _mm_loadu_si128((__m128i *) &dxdySmooth.at<short>(i, j));
+      __m128i dxdx = _mm_loadu_si128(
+          reinterpret_cast<const __m128i*>(&dxdxSmooth.at<int16_t>(i, j)));
+      __m128i dydy = _mm_loadu_si128(
+          reinterpret_cast<const __m128i*>(&dydySmooth.at<int16_t>(i, j)));
+      __m128i dxdy = _mm_loadu_si128(
+          reinterpret_cast<const __m128i*>(&dxdySmooth.at<int16_t>(i, j)));
 
-      // Determinant terms.
+      // Determinant terms.
       __m128i prod1_lo = _mm_mullo_epi16(dxdx, dydy);
       __m128i prod1_hi = _mm_mulhi_epi16(dxdx, dydy);
       __m128i prod2_lo = _mm_mullo_epi16(dxdy, dxdy);
@@ -217,7 +218,7 @@ __inline__ void HarrisFeatureDetector::cornerHarris(const cv::Mat& dxdxSmooth,
       __m128i prod2_1 = _mm_unpacklo_epi16(prod2_lo, prod2_hi);
       __m128i prod2_2 = _mm_unpackhi_epi16(prod2_lo, prod2_hi);
 
-      // Calculate the determinant.
+      // Calculate the determinant.
       __m128i det_1 = _mm_sub_epi32(prod1_1, prod2_1);
       __m128i det_2 = _mm_sub_epi32(prod1_2, prod2_2);
 
@@ -231,13 +232,15 @@ __inline__ void HarrisFeatureDetector::cornerHarris(const cv::Mat& dxdxSmooth,
       __m128i trace_sq_00625_2 = _mm_unpackhi_epi16(trace_sq_00625_lo,
                                                     trace_sq_00625_hi);
 
-      // Form score.
+      // Form score.
       __m128i score_1 = _mm_sub_epi32(det_1, trace_sq_00625_1);
       __m128i score_2 = _mm_sub_epi32(det_2, trace_sq_00625_2);
 
       // Store.
-      _mm_storeu_si128((__m128i *) &dst.at<int>(i, j), score_1);
-      _mm_storeu_si128((__m128i *) &dst.at<int>(i, j + 4), score_2);
+      _mm_storeu_si128(
+          reinterpret_cast<__m128i*>(&dst.at<int>(i, j)), score_1);
+      _mm_storeu_si128(
+          reinterpret_cast<__m128i*>(&dst.at<int>(i, j + 4)), score_2);
 
       // Take care about end.
       j += 8;
@@ -249,9 +252,9 @@ __inline__ void HarrisFeatureDetector::cornerHarris(const cv::Mat& dxdxSmooth,
   }
 }
 
-inline void HarrisFeatureDetector::nonmaxSuppress(
+inline void HarrisFeatureDetector::NonmaxSuppress(
     const cv::Mat& scores, std::vector<cv::KeyPoint>& keypoints) {
-  // First do the 8-neighbor nonmax suppression.
+  // First do the 8-neighbor nonmax suppression.
   const int stride = scores.cols;
   const int rows_end = scores.rows - 2;
   for (int j = 2; j < rows_end; ++j) {
@@ -293,7 +296,7 @@ inline void HarrisFeatureDetector::nonmaxSuppress(
   }
 }
 
-__inline__ void HarrisFeatureDetector::enforceUniformity(
+__inline__ void HarrisFeatureDetector::EnforceUniformity(
     const cv::Mat& scores, std::vector<cv::KeyPoint>& keypoints) const {
   // Sort.
   std::sort(keypoints.begin(), keypoints.end(), compareKeypointScore);
@@ -306,25 +309,28 @@ __inline__ void HarrisFeatureDetector::enforceUniformity(
   occupancy = cv::Mat::zeros((scores.rows) / 2 + 32, (scores.cols) / 2 + 32,
                              CV_8U);
 
-  // Go through the sorted keypoints and reject too close ones.
+  // Go through the sorted keypoints and reject too close ones.
   for (std::vector<cv::KeyPoint>::iterator it = keypoints.begin();
       it != keypoints.end(); ++it) {
     const int cy = (it->pt.y / 2 + 16);
     const int cx = (it->pt.x / 2 + 16);
 
-    // Check if this is a high enough score.
-    const double s0 = double(occupancy.at < uchar > (cy, cx));
+    // Check if this is a high enough score.
+    const double s0 = static_cast<double>(occupancy.at<uchar>(cy, cx));
     const double s1 = s0 * s0;
-    if (short(it->response) < s1 * s1)
+    if (static_cast<int16_t>(it->response) < s1 * s1) {
       continue;
+    }
 
     // Masks.
     const float nsc = sqrt(sqrt(it->response));
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       __m128i mem1 = _mm_loadu_si128(
-          (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx - 15));
+          reinterpret_cast<__m128i*>(&occupancy.at<uchar>(cy + y - 15,
+                                                          cx - 15)));
       __m128i mem2 = _mm_loadu_si128(
-          (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx + 1));
+          reinterpret_cast<__m128i*>(&occupancy.at<uchar>(cy + y - 15,
+                                                          cx + 1)));
       __m128i mask1 = _mm_set_epi8(_LUT.at<float>(y, 15) * nsc,
                                    _LUT.at<float>(y, 14) * nsc,
                                    _LUT.at<float>(y, 13) * nsc,
@@ -357,14 +363,16 @@ __inline__ void HarrisFeatureDetector::enforceUniformity(
                                    _LUT.at<float>(y, 17) * nsc,
                                    _LUT.at<float>(y, 16) * nsc);
       _mm_storeu_si128(
-          (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx - 15),
+          reinterpret_cast<__m128i*>(&occupancy.at<uchar>(cy + y - 15,
+                                                          cx - 15)),
           _mm_adds_epu8(mem1, mask1));
       _mm_storeu_si128(
-          (__m128i *) &occupancy.at < uchar > (cy + y - 15, cx + 1),
+          reinterpret_cast<__m128i*>(&occupancy.at<uchar>(cy + y - 15,
+                                                          cx + 1)),
           _mm_adds_epu8(mem2, mask2));
     }
 
-    // Store.
+    // Store.
     keypoints_new.push_back(*it);
   }
   keypoints.assign(keypoints_new.begin(), keypoints_new.end());
@@ -377,14 +385,13 @@ void HarrisFeatureDetector::detectImpl(const cv::Mat& image,
   cv::Mat DxDx1, DyDy1, DxDy1;
   cv::Mat DxDx, DyDy, DxDy;
 
-  // Pipeline.
-  getCovarEntries(image, DxDx1, DyDy1, DxDy1);
-  filterGauss3by316S(DxDx1, DxDx);
-  filterGauss3by316S(DyDy1, DyDy);
-  filterGauss3by316S(DxDy1, DxDy);
-  cornerHarris(DxDx, DyDy, DxDy, scores);
-  nonmaxSuppress(scores, keypoints);
-  enforceUniformity(scores, keypoints);
+  // Pipeline.
+  GetCovarEntries(image, DxDx1, DyDy1, DxDy1);
+  FilterGauss3by316S(DxDx1, DxDx);
+  FilterGauss3by316S(DyDy1, DyDy);
+  FilterGauss3by316S(DxDy1, DxDy);
+  CornerHarris(DxDx, DyDy, DxDy, scores);
+  NonmaxSuppress(scores, keypoints);
+  EnforceUniformity(scores, keypoints);
 }
-
-}  //namespace brisk
+}  // namespace brisk

@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,18 +38,22 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <emmintrin.h>
+#include <stdint.h>
+#include <tmmintrin.h>
+
 #include <brisk/harris-score-calculator.h>
 #include <brisk/internal/harris-scores-sse.h>
 
 namespace brisk {
 
-void HarrisScoreCalculator::initializeScores() {
-  harrisScores_sse(_img, _scores);
- }
+void HarrisScoreCalculator::InitializeScores() {
+  HarrisScoresSSE(_img, _scores);
+}
 
-void HarrisScoreCalculator::get2dMaxima(std::vector<PointWithScore>& points,
+void HarrisScoreCalculator::Get2dMaxima(std::vector<PointWithScore>& points,  // NOLINT
                                         int absoluteThreshold) {
-  // Do the 8-neighbor nonmax suppression.
+  // Do the 8-neighbor nonmax suppression.
   const int stride = _scores.cols;
   const int rows_end = _scores.rows - 2;
   points.reserve(4000);
@@ -92,31 +96,31 @@ void HarrisScoreCalculator::get2dMaxima(std::vector<PointWithScore>& points,
       points.push_back(PointWithScore(center, i, j));
 #else
 #error
-      points.push_back(PointWithScore(cv::Point2i(i,j),center));
+      points.push_back(PointWithScore(cv::Point2i(i, j), center));
 #endif
     }
   }
 }
 
 // X and Y denote the size of the mask.
-void HarrisScoreCalculator::getCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
+void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
                                             cv::Mat& dydy, cv::Mat& dxdy) {
   // Sanity check.
   assert(src.type() == CV_8U);
   cv::Mat kernel = cv::Mat::zeros(3, 3, CV_16S);
-  kernel.at<short>(0, 0) = 3 * 8;
-  kernel.at<short>(1, 0) = 10 * 8;
-  kernel.at<short>(2, 0) = 3 * 8;
-  kernel.at<short>(0, 2) = -3 * 8;
-  kernel.at<short>(1, 2) = -10 * 8;
-  kernel.at<short>(2, 2) = -3 * 8;
+  kernel.at<int16_t>(0, 0) = 3 * 8;
+  kernel.at<int16_t>(1, 0) = 10 * 8;
+  kernel.at<int16_t>(2, 0) = 3 * 8;
+  kernel.at<int16_t>(0, 2) = -3 * 8;
+  kernel.at<int16_t>(1, 2) = -10 * 8;
+  kernel.at<int16_t>(2, 2) = -3 * 8;
 
   const unsigned int X = 3;
   const unsigned int Y = 3;
   const unsigned int cx = 1;
   const unsigned int cy = 1;
 
-  // Dest will be 16 bit.
+  // Dest will be 16 bit.
   dxdx = cv::Mat::zeros(src.rows, src.cols, CV_16S);
   dydy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
   dxdy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
@@ -144,14 +148,14 @@ void HarrisScoreCalculator::getCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
       // Enter convolution with kernel.
       for (unsigned int x = 0; x < X; ++x) {
         for (unsigned int y = 0; y < Y; ++y) {
-          const short m_dx = kernel.at<short>(y, x);
-          const short m_dy = kernel.at<short>(x, y);
+          const int16_t& m_dx = kernel.at<int16_t>(y, x);
+          const int16_t& m_dy = kernel.at<int16_t>(x, y);
           __m128i mult_dx = _mm_set_epi16(m_dx, m_dx, m_dx, m_dx, m_dx, m_dx,
                                           m_dx, m_dx);
           __m128i mult_dy = _mm_set_epi16(m_dy, m_dy, m_dy, m_dy, m_dy, m_dy,
                                           m_dy, m_dy);
           uchar* p = (src.data + (stride * (i + y)) + x + j);
-          __m128i i0 = _mm_loadu_si128((__m128i *) p);
+          __m128i i0 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
           __m128i i0_hi = _mm_and_si128(i0, mask_hi);
           __m128i i0_lo = _mm_srli_si128(_mm_and_si128(i0, mask_lo), 1);
 
@@ -190,23 +194,23 @@ void HarrisScoreCalculator::getCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
       uchar* p_lo_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
       uchar* p_hi_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
-      _mm_storeu_si128((__m128i *) p_hi_dxdx,
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(p_hi_dxdx),
                        _mm_unpackhi_epi16(i_hi_dx_dx, i_lo_dx_dx));
-      _mm_storeu_si128((__m128i *) p_lo_dxdx,
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(p_lo_dxdx),
                        _mm_unpacklo_epi16(i_hi_dx_dx, i_lo_dx_dx));
       uchar* p_lo_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
       uchar* p_hi_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
-      _mm_storeu_si128((__m128i *) p_hi_dydy,
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(p_hi_dydy),
                        _mm_unpackhi_epi16(i_hi_dy_dy, i_lo_dy_dy));
-      _mm_storeu_si128((__m128i *) p_lo_dydy,
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(p_lo_dydy),
                        _mm_unpacklo_epi16(i_hi_dy_dy, i_lo_dy_dy));
       uchar* p_lo_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
       uchar* p_hi_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
-      _mm_storeu_si128((__m128i *) p_hi_dxdy,
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(p_hi_dxdy),
                        _mm_unpackhi_epi16(i_hi_dx_dy, i_lo_dx_dy));
-      _mm_storeu_si128((__m128i *) p_lo_dxdy,
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(p_lo_dxdy),
                        _mm_unpacklo_epi16(i_hi_dx_dy, i_lo_dx_dy));
 
       // Take care about end.
@@ -219,12 +223,11 @@ void HarrisScoreCalculator::getCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
   }
 }
 
-void HarrisScoreCalculator::cornerHarris(const cv::Mat& dxdxSmooth,
+void HarrisScoreCalculator::CornerHarris(const cv::Mat& dxdxSmooth,
                                          const cv::Mat& dydySmooth,
                                          const cv::Mat& dxdySmooth,
                                          cv::Mat& dst) {
-
-  // Dest will be 16 bit.
+  // Dest will be 16 bit.
   dst = cv::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32S);
   const unsigned int maxJ = ((dxdxSmooth.cols - 2) / 8) * 8;
   const unsigned int maxI = dxdxSmooth.rows - 2;
@@ -233,11 +236,14 @@ void HarrisScoreCalculator::cornerHarris(const cv::Mat& dxdxSmooth,
   for (unsigned int i = 0; i < maxI; ++i) {
     bool end = false;
     for (unsigned int j = 0; j < maxJ;) {
-      __m128i dxdx = _mm_loadu_si128((__m128i *) &dxdxSmooth.at<short>(i, j));
-      __m128i dydy = _mm_loadu_si128((__m128i *) &dydySmooth.at<short>(i, j));
-      __m128i dxdy = _mm_loadu_si128((__m128i *) &dxdySmooth.at<short>(i, j));
+      __m128i dxdx = _mm_loadu_si128(
+          reinterpret_cast<const __m128i *>(&dxdxSmooth.at<int16_t>(i, j)));
+      __m128i dydy = _mm_loadu_si128(
+          reinterpret_cast<const __m128i *>(&dydySmooth.at<int16_t>(i, j)));
+      __m128i dxdy = _mm_loadu_si128(
+          reinterpret_cast<const __m128i *>(&dxdySmooth.at<int16_t>(i, j)));
 
-      // Determinant terms.
+      // Determinant terms.
       __m128i prod1_lo = _mm_mullo_epi16(dxdx, dydy);
       __m128i prod1_hi = _mm_mulhi_epi16(dxdx, dydy);
       __m128i prod2_lo = _mm_mullo_epi16(dxdy, dxdy);
@@ -247,7 +253,7 @@ void HarrisScoreCalculator::cornerHarris(const cv::Mat& dxdxSmooth,
       __m128i prod2_1 = _mm_unpacklo_epi16(prod2_lo, prod2_hi);
       __m128i prod2_2 = _mm_unpackhi_epi16(prod2_lo, prod2_hi);
 
-      // Calculate the determinant.
+      // Calculate the determinant.
       __m128i det_1 = _mm_sub_epi32(prod1_1, prod2_1);
       __m128i det_2 = _mm_sub_epi32(prod1_2, prod2_2);
 
@@ -261,13 +267,15 @@ void HarrisScoreCalculator::cornerHarris(const cv::Mat& dxdxSmooth,
       __m128i trace_sq_00625_2 = _mm_unpackhi_epi16(trace_sq_00625_lo,
                                                     trace_sq_00625_hi);
 
-      // Form score.
+      // Form score.
       __m128i score_1 = _mm_sub_epi32(det_1, trace_sq_00625_1);
       __m128i score_2 = _mm_sub_epi32(det_2, trace_sq_00625_2);
 
       // Store.
-      _mm_storeu_si128((__m128i *) &dst.at<int>(i, j), score_1);
-      _mm_storeu_si128((__m128i *) &dst.at<int>(i, j + 4), score_2);
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(&dst.at<int>(i, j)),
+                       score_1);
+      _mm_storeu_si128(reinterpret_cast<__m128i *>(&dst.at<int>(i, j + 4)),
+                       score_2);
 
       // Take care about end.
       j += 8;
@@ -278,5 +286,4 @@ void HarrisScoreCalculator::cornerHarris(const cv::Mat& dxdxSmooth,
     }
   }
 }
-
-}
+}  // namespace brisk

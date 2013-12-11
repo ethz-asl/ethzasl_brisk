@@ -38,10 +38,11 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_INTERNAL_BRISK_LAYER_H_
-#define BRISK_INTERNAL_BRISK_LAYER_H_
+#ifndef INTERNAL_BRISK_LAYER_H_
+#define INTERNAL_BRISK_LAYER_H_
 
 #include <memory>
+#include <vector>
 
 #include <agast/agast5_8.h>
 #include <agast/oast9_16.h>
@@ -65,12 +66,12 @@ class CV_EXPORTS BriskLayer {
              uchar lowerThreshold);
 
   // Fast/Agast without non-max suppression.
-  void getAgastPoints(uint8_t threshold, std::vector<CvPoint>& keypoints);
+  void GetAgastPoints(uint8_t threshold, std::vector<CvPoint>* keypoints);
 
-  // Get scores - attention, this is in layer coordinates, not scale=1 coordinates!
-  uint8_t getAgastScore(int x, int y, uint8_t threshold);
-  uint8_t getAgastScore_5_8(int x, int y, uint8_t threshold);
-  uint8_t getAgastScore(float xf, float yf, uint8_t threshold, float scale =
+  // Get scores - this is in layer coordinates, not scale=1 coordinates!
+  uint8_t GetAgastScore(int x, int y, uint8_t threshold);
+  uint8_t GetAgastScore_5_8(int x, int y, uint8_t threshold);
+  uint8_t GetAgastScore(float xf, float yf, uint8_t threshold, float scale =
                             1.0f);
 
   // Accessors.
@@ -88,15 +89,15 @@ class CV_EXPORTS BriskLayer {
   }
 
   // Half sampling.
-  static void halfsample(const cv::Mat& srcimg, cv::Mat& dstimg);
+  static void HalfSample(const cv::Mat& srcimg, cv::Mat& dstimg);
   // Two third sampling.
-  static void twothirdsample(const cv::Mat& srcimg, cv::Mat& dstimg);
+  static void TwoThirdSample(const cv::Mat& srcimg, cv::Mat& dstimg);
 
  private:
   // Access gray values (smoothed/interpolated).
-  uint8_t value(const cv::Mat& mat, float xf, float yf, float scale);
+  uint8_t Value(const cv::Mat& mat, float xf, float yf, float scale);
   // Calculate threshold map.
-  void calculateThresholdMap();
+  void CalculateThresholdMap();
   // The image.
   cv::Mat img_;
   // Its Fast scores.
@@ -114,4 +115,4 @@ class CV_EXPORTS BriskLayer {
   uchar lowerThreshold_;
 };
 }  // namespace brisk
-#endif  // BRISK_INTERNAL_BRISK_LAYER_H_
+#endif  // INTERNAL_BRISK_LAYER_H_

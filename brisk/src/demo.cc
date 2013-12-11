@@ -38,9 +38,9 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <fstream>
+#include <fstream>  // NOLINT
 #include <iomanip>
-#include <iostream>
+#include <iostream>  //NOLINT
 #include <list>
 #include <vector>
 
@@ -83,7 +83,8 @@ void help(char** argv) {
       << "    "
       << "descriptor: Feature descriptor, e.g. SURF, BRIEF, BRISK or U-BRISK."
       << std::endl << "    "
-      << "[descFile]: Optional: files with descriptors to act as detected points."
+      << "[descFile]: Optional: files with descriptors to act as detected "
+          "points."
       << std::endl;
 }
 
@@ -284,7 +285,6 @@ int main(int argc, char ** argv) {
     descf1.close();
     descf2.close();
   } else {
-
     detector->detect(imgGray1, keypoints);
     detector->detect(imgGray2, keypoints2);
   }
@@ -338,10 +338,12 @@ int main(int argc, char ** argv) {
   }
   tt = cv::getTickCount() - tt;
   std::cout << std::setprecision(4);
-  std::cout << tt / ((double) cv::getTickFrequency() * testits) * 1000. << "ms "
+  std::cout << tt / (static_cast<double>(cv::getTickFrequency())
+      * testits) * 1000. << "ms "
       << keypoints.size() << std::endl;
   std::cout
-      << tt / ((double) cv::getTickFrequency() * testits * (keypoints.size()))
+      << tt / (static_cast<double>(cv::getTickFrequency())
+          * testits * (keypoints.size()))
           * 1000 << "ms " << std::endl;
 
   // Matching.

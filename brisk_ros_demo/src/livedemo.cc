@@ -329,7 +329,7 @@ class BriskVisualizer {
             // adapt display
             tmp.push_back(cv::Mat(image->rows / 2, image->cols / 2, CV_8U));
             if (sharedData.numRefImages == 2)
-              brisk::BriskLayer::halfsample(*image, tmp.back());
+              brisk::BriskLayer::HalfSample(*image, tmp.back());
             else
               tmp.push_back(*image);
             //cv::imshow("BRISK Demo",tmp);
