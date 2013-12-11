@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -46,7 +46,7 @@ namespace brisk {
 void HarrisScoreCalculatorFloat::InitializeScores() {
   cv::Mat DxDx1, DyDy1, DxDy1;
   cv::Mat DxDx, DyDy, DxDy;
-  // Pipeline.
+  // Pipeline.
   GetCovarEntries(_img, DxDx1, DyDy1, DxDy1);
   FilterGauss3by332F(DxDx1, DxDx);
   FilterGauss3by332F(DyDy1, DyDy);
@@ -56,7 +56,7 @@ void HarrisScoreCalculatorFloat::InitializeScores() {
 
 void HarrisScoreCalculatorFloat::Get2dMaxima(
     float absoluteThreshold, std::vector<PointWithScore>* points) {
-  // Do the 8-neighbor nonmax suppression.
+  // Do the 8-neighbor nonmax suppression.
   const int stride = _scores.cols;
   const int rows_end = _scores.rows - 2;
   for (int j = 2; j < rows_end; ++j) {
@@ -125,7 +125,7 @@ void HarrisScoreCalculatorFloat::GetCovarEntries(const cv::Mat& src,
   const unsigned int X = 3;
   const unsigned int Y = 3;
 
-  // Dest will be floats.
+  // Dest will be floats.
   dxdx = cv::Mat::zeros(src.rows, src.cols, CV_32F);
   dydy = cv::Mat::zeros(src.rows, src.cols, CV_32F);
   dxdy = cv::Mat::zeros(src.rows, src.cols, CV_32F);
@@ -151,12 +151,16 @@ void HarrisScoreCalculatorFloat::GetCovarEntries(const cv::Mat& src,
           __m128 i0;
           if (jump == 1) {
             const uchar* p = &src.at < uchar > (i + y, x + j);
-            i0 = _mm_setr_ps(float(*p), float(*(p + 1)), float(*(p + 2)),
-                             float(*(p + 3)));
+            i0 = _mm_setr_ps(static_cast<float>(*p),
+                             static_cast<float>(*(p + 1)),
+                             static_cast<float>(*(p + 2)),
+                             static_cast<float>(*(p + 3)));
           } else {
             const uint16_t* p = &src.at < uint16_t > (i + y, x + j);
-            i0 = _mm_setr_ps(float(*p), float(*(p + 1)), float(*(p + 2)),
-                             float(*(p + 3)));
+            i0 = _mm_setr_ps(static_cast<float>(*p),
+                             static_cast<float>(*(p + 1)),
+                             static_cast<float>(*(p + 2)),
+                             static_cast<float>(*(p + 3)));
           }
 
           if (m_dx != 0) {
@@ -196,8 +200,7 @@ void HarrisScoreCalculatorFloat::CornerHarris(const cv::Mat& dxdxSmooth,
                                               const cv::Mat& dydySmooth,
                                               const cv::Mat& dxdySmooth,
                                               cv::Mat& dst) {
-
-  // Dest will be float.
+  // Dest will be float.
   dst = cv::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32F);
   const unsigned int maxJ = ((dxdxSmooth.cols - 2) / 8) * 8;
   const unsigned int maxI = dxdxSmooth.rows - 2;
@@ -210,11 +213,11 @@ void HarrisScoreCalculatorFloat::CornerHarris(const cv::Mat& dxdxSmooth,
       __m128 dydy = _mm_loadu_ps(&dydySmooth.at<float>(i, j));
       __m128 dxdy = _mm_loadu_ps(&dxdySmooth.at<float>(i, j));
 
-      // Determinant terms.
+      // Determinant terms.
       __m128 prod1 = _mm_mul_ps(dxdx, dydy);
       __m128 prod2 = _mm_mul_ps(dxdy, dxdy);
 
-      // Calculate the determinant.
+      // Calculate the determinant.
       __m128 det = _mm_sub_ps(prod1, prod2);
 
       // Trace - uses kappa = 1 / 16.
@@ -223,7 +226,7 @@ void HarrisScoreCalculatorFloat::CornerHarris(const cv::Mat& dxdxSmooth,
       __m128 trace_sq_00625 = _mm_mul_ps(
           trace_sq, _mm_setr_ps(0.0625, 0.0625, 0.0625, 0.0625));
 
-      // Form score.
+      // Form score.
       __m128 score = _mm_sub_ps(det, trace_sq_00625);
 
       // Store.
@@ -238,4 +241,4 @@ void HarrisScoreCalculatorFloat::CornerHarris(const cv::Mat& dxdxSmooth,
     }
   }
 }
-}
+}  // namespace brisk
