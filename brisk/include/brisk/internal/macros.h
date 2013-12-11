@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,8 +38,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_INTERNAL_MACROS_H_
-#define BRISK_INTERNAL_MACROS_H_
+#ifndef INTERNAL_MACROS_H_
+#define INTERNAL_MACROS_H_
 
 #ifndef CV_EXPORTS
 #define CV_EXPORTS
@@ -50,6 +50,8 @@
 #endif
 
 #define USE_SIMPLE_POINT_WITH_SCORE
+
+#include <stdint.h>
 
 namespace rdtsc {
 namespace timing {
@@ -62,17 +64,17 @@ typedef rdtsc::timing::DummyTimer TimerSwitchable;
 // This is needed to avoid aliasing issues with the __m128i data type:
 #ifdef __GNUC__
 typedef unsigned char __attribute__ ((__may_alias__)) UCHAR_ALIAS;
-typedef unsigned short __attribute__ ((__may_alias__)) UINT16_ALIAS;
-typedef unsigned int __attribute__ ((__may_alias__)) UINT32_ALIAS;
-typedef unsigned long int __attribute__ ((__may_alias__)) UINT64_ALIAS;
+typedef uint16_t __attribute__ ((__may_alias__)) UINT16_ALIAS;
+typedef uint32_t __attribute__ ((__may_alias__)) UINT32_ALIAS;
+typedef uint64_t __attribute__ ((__may_alias__)) UINT64_ALIAS;
 typedef int __attribute__ ((__may_alias__)) INT32_ALIAS;
 typedef uint8_t __attribute__ ((__may_alias__)) U_INT8T_ALIAS;
 #endif
 #ifdef _MSC_VER
 // TODO(lestefan): Find the equivalent to may_alias.
-#define UCHAR_ALIAS unsigned char //__declspec(noalias)
-#define UINT32_ALIAS unsigned int //__declspec(noalias)
+#define UCHAR_ALIAS unsigned char  // __declspec(noalias)
+#define UINT32_ALIAS unsigned int  // __declspec(noalias)
 #define __inline__ __forceinline
 #endif
 }  // namespace brisk
-#endif  // BRISK_INTERNAL_MACROS_H_
+#endif  // INTERNAL_MACROS_H_

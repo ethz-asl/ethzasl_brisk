@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,8 +38,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_INTERNAL_SSE_FILTERS_H_
-#define BRISK_INTERNAL_SSE_FILTERS_H_
+#ifndef INTERNAL_SSE_FILTERS_H_
+#define INTERNAL_SSE_FILTERS_H_
 
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
@@ -49,27 +49,25 @@ namespace brisk {
 // Generic SSE-optimized 2D filter on CV_8U/CV_16S matrices. stores result in
 // CV_16S matrix.
 template<int X, int Y>
-__inline__ void filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);
+__inline__ void Filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
 
 // Generic SSE-optimized 2D filter CV_8U to CV_16S.
 template<int X, int Y>
-__inline__ void filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);
+__inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
 
 // Generic SSE-optimized 2D filter CV_16S to CV_16S.
 template<int X, int Y>
-__inline__ void filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);
+__inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
 
 // 3-by-3 box filter CV_16S to CV_16S.
-__inline__ void filterBox3by316S(cv::Mat& src, cv::Mat& dst);
+__inline__ void FilterBox3by316S(cv::Mat& src, cv::Mat& dst);  // NOLINT
 
 // 3-by-3 Gaussian filter CV_16S to CV_16S.
-void filterGauss3by316S(cv::Mat& src, cv::Mat& dst);
+void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst);  // NOLINT
 
 // 3-by-3 Gaussian filter CV_32F to CV_32F.
-void filterGauss3by332F(cv::Mat& src, cv::Mat& dst);
+void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst);  // NOLINT
 
 #include "./sse-filters-inl.h"
-
 }  // namespace brisk
-
-#endif  // BRISK_INTERNAL_SSE_FILTERS_H_
+#endif  // INTERNAL_SSE_FILTERS_H_

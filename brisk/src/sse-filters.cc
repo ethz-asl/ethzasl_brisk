@@ -38,10 +38,14 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <emmintrin.h>
+#include <stdint.h>
+#include <tmmintrin.h>
+
 #include <brisk/internal/sse-filters.h>
 
 namespace brisk {
-void filterGauss3by316S(cv::Mat& src, cv::Mat& dst) {
+void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst) {  // NOLINT
   // Sanity check.
   const unsigned int X = 3;
   const unsigned int Y = 3;
@@ -50,7 +54,7 @@ void filterGauss3by316S(cv::Mat& src, cv::Mat& dst) {
   int cx = X / 2;
   int cy = Y / 2;
 
-  // Dest will be 16 bit.
+  // Dest will be 16 bit.
   dst = cv::Mat::zeros(src.rows, src.cols, CV_16S);
   const unsigned int maxJ = ((src.cols - 2) / 8) * 8;
   const unsigned int maxI = src.rows - 2;
@@ -61,20 +65,29 @@ void filterGauss3by316S(cv::Mat& src, cv::Mat& dst) {
     for (unsigned int j = 0; j < maxJ;) {
       // Enter convolution with kernel. do the multiplication with 2/4 at the
       // same time.
-      __m128i i00 = _mm_loadu_si128((__m128i *) &src.at<short>(i, j));
+      __m128i i00 = _mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i, j)));
       __m128i i10 = _mm_slli_epi16(
-          _mm_loadu_si128((__m128i *) &src.at<short>(i + 1, j)), 1);
-      __m128i i20 = _mm_loadu_si128((__m128i *) &src.at<short>(i + 2, j));
+          _mm_loadu_si128(
+              reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 1, j))), 1);
+      __m128i i20 = _mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 2, j)));
       __m128i i01 = _mm_slli_epi16(
-          _mm_loadu_si128((__m128i *) &src.at<short>(i, j + 1)), 1);
+          _mm_loadu_si128(
+              reinterpret_cast<__m128i*>(&src.at<int16_t>(i, j + 1))), 1);
       __m128i i11 = _mm_slli_epi16(
-          _mm_loadu_si128((__m128i *) &src.at<short>(i + 1, j + 1)), 2);
+          _mm_loadu_si128(
+              reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 1, j + 1))), 2);
       __m128i i21 = _mm_slli_epi16(
-          _mm_loadu_si128((__m128i *) &src.at<short>(i + 2, j + 1)), 1);
-      __m128i i02 = _mm_loadu_si128((__m128i *) &src.at<short>(i, j + 2));
+          _mm_loadu_si128(
+              reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 2, j + 1))), 1);
+      __m128i i02 = _mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i, j + 2)));
       __m128i i12 = _mm_slli_epi16(
-          _mm_loadu_si128((__m128i *) &src.at<short>(i + 1, j + 2)), 1);
-      __m128i i22 = _mm_loadu_si128((__m128i *) &src.at<short>(i + 2, j + 2));
+          _mm_loadu_si128(
+              reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 1, j + 2))), 1);
+      __m128i i22 = _mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 2, j + 2)));
       __m128i result = i11;
       // Add up.
       result = _mm_add_epi16(result, i00);
@@ -88,7 +101,8 @@ void filterGauss3by316S(cv::Mat& src, cv::Mat& dst) {
       result = _mm_add_epi16(result, i21);
 
       // Store.
-      _mm_storeu_si128((__m128i *) &dst.at<short>(i + cy, j + cx), result);
+      _mm_storeu_si128(
+          reinterpret_cast<__m128i*>(&dst.at<int16_t>(i + cy, j + cx)), result);
 
       // Take care of the end.
       j += 8;
@@ -101,14 +115,14 @@ void filterGauss3by316S(cv::Mat& src, cv::Mat& dst) {
 }
 
 
-void filterGauss3by332F(cv::Mat& src, cv::Mat& dst) {
+void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst) {  // NOLINT
   // Sanity check.
   static const unsigned int X = 3;
   static const unsigned int Y = 3;
   static const int cx = X / 2;
   static const int cy = Y / 2;
 
-  // Destination will be 16 bit.
+  // Destination will be 16 bit.
   dst = cv::Mat::zeros(src.rows, src.cols, CV_32F);
   const unsigned int maxJ = ((src.cols - 2) / 8) * 8;
   const unsigned int maxI = src.rows - 2;
@@ -154,7 +168,7 @@ void filterGauss3by332F(cv::Mat& src, cv::Mat& dst) {
   }
 }
 
-void filterBox3by316S(cv::Mat& src, cv::Mat& dst) {
+void FilterBox3by316S(cv::Mat& src, cv::Mat& dst) {  // NOLINT
   // Sanity check.
   const unsigned int X = 3;
   const unsigned int Y = 3;
@@ -163,7 +177,7 @@ void filterBox3by316S(cv::Mat& src, cv::Mat& dst) {
   int cx = X / 2;
   int cy = Y / 2;
 
-  // Destination will be 16 bit.
+  // Destination will be 16 bit.
   dst = cv::Mat::zeros(src.rows, src.cols, CV_16S);
   const unsigned int maxJ = ((src.cols - 2) / 8) * 8;
   const unsigned int maxI = src.rows - 2;
@@ -174,15 +188,24 @@ void filterBox3by316S(cv::Mat& src, cv::Mat& dst) {
     for (unsigned int j = 0; j < maxJ;) {
       // Enter convolution with kernel. do the multiplication with 2/4 at the
       // same time.
-      __m128i i00 = _mm_loadu_si128((__m128i *) &src.at<short>(i, j));
-      __m128i i10 = (_mm_loadu_si128((__m128i *) &src.at<short>(i + 1, j)));
-      __m128i i20 = _mm_loadu_si128((__m128i *) &src.at<short>(i + 2, j));
-      __m128i i01 = (_mm_loadu_si128((__m128i *) &src.at<short>(i, j + 1)));
-      __m128i i11 = (_mm_loadu_si128((__m128i *) &src.at<short>(i + 1, j + 1)));
-      __m128i i21 = (_mm_loadu_si128((__m128i *) &src.at<short>(i + 2, j + 1)));
-      __m128i i02 = _mm_loadu_si128((__m128i *) &src.at<short>(i, j + 2));
-      __m128i i12 = (_mm_loadu_si128((__m128i *) &src.at<short>(i + 1, j + 2)));
-      __m128i i22 = _mm_loadu_si128((__m128i *) &src.at<short>(i + 2, j + 2));
+      __m128i i00 = _mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i, j)));
+      __m128i i10 = (_mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 1, j))));
+      __m128i i20 = _mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 2, j)));
+      __m128i i01 = (_mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i, j + 1))));
+      __m128i i11 = (_mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 1, j + 1))));
+      __m128i i21 = (_mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 2, j + 1))));
+      __m128i i02 = _mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i, j + 2)));
+      __m128i i12 = (_mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 1, j + 2))));
+      __m128i i22 = _mm_loadu_si128(
+          reinterpret_cast<__m128i*>(&src.at<int16_t>(i + 2, j + 2)));
       __m128i result = i11;
       // Add up.
       result = _mm_add_epi16(result, i00);
@@ -196,7 +219,8 @@ void filterBox3by316S(cv::Mat& src, cv::Mat& dst) {
       result = _mm_add_epi16(result, i21);
 
       // Store.
-      _mm_storeu_si128((__m128i *) &dst.at<short>(i + cy, j + cx), result);
+      _mm_storeu_si128(
+          reinterpret_cast<__m128i*>(&dst.at<int16_t>(i + cy, j + cx)), result);
 
       // Take care about end.
       j += 8;

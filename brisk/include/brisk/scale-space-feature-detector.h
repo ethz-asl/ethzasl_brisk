@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,8 +38,12 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_INTERNAL_SCALE_SPACE_FEATURE_DETECTOR_H_
-#define BRISK_INTERNAL_SCALE_SPACE_FEATURE_DETECTOR_H_
+#ifndef BRISK_SCALE_SPACE_FEATURE_DETECTOR_H_
+#define BRISK_SCALE_SPACE_FEATURE_DETECTOR_H_
+
+#include <algorithm>
+#include <limits>
+#include <vector>
 
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
@@ -47,7 +51,7 @@
 
 namespace brisk {
 
-// Uses the common feature interface to construct a generic
+// Uses the common feature interface to construct a generic
 // scale space detector from a given ScoreCalculator.
 template<class SCORE_CALCULTAOR_T>
 class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
@@ -77,28 +81,27 @@ class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
   virtual void detectImpl(const cv::Mat& image,
                           std::vector<cv::KeyPoint>& keypoints,
                           const cv::Mat& mask = cv::Mat()) const {
-
     // Find out, if we should use the provided keypoints.
     bool usePassedKeypoints = false;
     if (keypoints.size() > 0)
       usePassedKeypoints = true;
     else
-      keypoints.reserve(4000);  // Possibly speeds up things.
+      keypoints.reserve(4000);  // Possibly speeds up things.
 
-    // Construct scale space layers.
-    scaleSpaceLayers[0].create(image, !usePassedKeypoints);
-    scaleSpaceLayers[0].setUniformityRadius(_uniformityRadius);
-    scaleSpaceLayers[0].setMaxNumKpt(_maxNumKpt);
-    scaleSpaceLayers[0].setAbsoluteThreshold(_absoluteThreshold);
+    // Construct scale space layers.
+    scaleSpaceLayers[0].Create(image, !usePassedKeypoints);
+    scaleSpaceLayers[0].SetUniformityRadius(_uniformityRadius);
+    scaleSpaceLayers[0].SetMaxNumKpt(_maxNumKpt);
+    scaleSpaceLayers[0].SetAbsoluteThreshold(_absoluteThreshold);
     for (size_t i = 1; i < _octaves * 2; ++i) {
-      scaleSpaceLayers[i].create(&scaleSpaceLayers[i - 1], !usePassedKeypoints);
-      scaleSpaceLayers[i].setUniformityRadius(_uniformityRadius);
-      scaleSpaceLayers[i].setMaxNumKpt(_maxNumKpt);
-      scaleSpaceLayers[i].setAbsoluteThreshold(_absoluteThreshold);
+      scaleSpaceLayers[i].Create(&scaleSpaceLayers[i - 1], !usePassedKeypoints);
+      scaleSpaceLayers[i].SetUniformityRadius(_uniformityRadius);
+      scaleSpaceLayers[i].SetMaxNumKpt(_maxNumKpt);
+      scaleSpaceLayers[i].SetAbsoluteThreshold(_absoluteThreshold);
     }
     for (size_t i = 0; i < scaleSpaceLayers.size(); ++i) {
       // Only do refinement, if no keypoints are passed.
-      scaleSpaceLayers[i].detectScaleSpaceMaxima(keypoints, true,
+      scaleSpaceLayers[i].DetectScaleSpaceMaxima(keypoints, true,
                                                  !usePassedKeypoints,
                                                  usePassedKeypoints);
     }
@@ -109,9 +112,8 @@ class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
   double _absoluteThreshold;
   size_t _maxNumKpt;
   mutable std::vector<brisk::ScaleSpaceLayer<ScoreCalculator_t> >
-      scaleSpaceLayers;
+    scaleSpaceLayers;
 };
+}  // namespace brisk
 
-}  // namespace brisk
-
-#endif  // BRISK_INTERNAL_SCALE_SPACE_FEATURE_DETECTOR_H_
+#endif  // BRISK_SCALE_SPACE_FEATURE_DETECTOR_H_

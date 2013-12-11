@@ -41,6 +41,8 @@
 #ifndef BRISK_HARRIS_FEATURE_DETECTOR_H_
 #define BRISK_HARRIS_FEATURE_DETECTOR_H_
 
+#include <vector>
+
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/sse-filters.h>
@@ -49,19 +51,19 @@ namespace brisk {
 
 class HarrisFeatureDetector : public cv::FeatureDetector {
  public:
-  HarrisFeatureDetector(double radius);
-  void setRadius(double radius);
+  explicit HarrisFeatureDetector(double radius);
+  void SetRadius(double radius);
 
  protected:
-  static __inline__ void getCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
+  static __inline__ void GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
                                          cv::Mat& dydy, cv::Mat& dxdy);
-  static __inline__ void cornerHarris(const cv::Mat& dxdxSmooth,
+  static __inline__ void CornerHarris(const cv::Mat& dxdxSmooth,
                                       const cv::Mat& dydySmooth,
                                       const cv::Mat& dxdySmooth,
                                       cv::Mat& score);
-  static __inline__ void nonmaxSuppress(const cv::Mat& scores,
+  static __inline__ void NonmaxSuppress(const cv::Mat& scores,
                                         std::vector<cv::KeyPoint>& keypoints);
-  __inline__ void enforceUniformity(const cv::Mat& scores,
+  __inline__ void EnforceUniformity(const cv::Mat& scores,
                                     std::vector<cv::KeyPoint>& keypoints) const;
 
   virtual void detectImpl(const cv::Mat& image,

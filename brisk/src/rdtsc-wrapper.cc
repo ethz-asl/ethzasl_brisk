@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -37,6 +37,7 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include <stdint.h>
 
 #include <brisk/internal/rdtsc-wrapper.h>
 
@@ -53,14 +54,13 @@ Timing::Timing()
 #ifdef SM_USE_HIGH_PERF_TIMER
   LARGE_INTEGER freq;
   BOOL returnCode = QueryPerformanceFrequency(&freq);
-  SM_ASSERT_NE(TimerException,returnCode,0,"Unable to query the performance frequency");
+  SM_ASSERT_NE(TimerException, returnCode, 0, "Unable to query the performance "
+      "frequency");
   m_clockPeriod = 1.0 / freq.QuadPart;
 #endif
 }
 
-Timing::~Timing() {
-
-}
+Timing::~Timing() { }
 
 // Static funcitons to query the timers:
 size_t Timing::getHandle(std::string const & tag) {
@@ -71,7 +71,8 @@ size_t Timing::getHandle(std::string const & tag) {
     size_t handle = instance().m_timers.size();
     instance().m_tagMap[tag] = handle;
     instance().m_timers.push_back(TimerMapValue());
-    // Track the maximum tag length to help printing a table of timing values later.
+    // Track the maximum tag length to help printing a table of timing values
+    // later.
     instance().m_maxTagLength = std::max(instance().m_maxTagLength, tag.size());
     return handle;
   } else {
@@ -153,17 +154,16 @@ double Timing::getHz(std::string const & tag) {
 }
 
 std::string Timing::secondsToTimeString(double seconds) {
-
   double secs = fmod(seconds, 60);
-  int minutes = (long) (seconds / 60);
-  int hours = (long) (seconds / 3600);
+  int minutes = static_cast<int64_t>(seconds / 60);
+  int hours = static_cast<int64_t>(seconds / 3600);
   minutes = minutes - (hours * 60);
 
   char buffer[256];
 #ifdef WIN32
-  sprintf_s(buffer,256,"%02d:%02d:%09.6f",hours,minutes,secs);
+  sprintf_s(buffer, 256, "%02d:%02d:%09.6f", hours, minutes, secs);
 #else
-  sprintf(buffer, "%02d:%02d:%09.6f", hours, minutes, secs);
+  sprintf(buffer, "%02d:%02d:%09.6f", hours, minutes, secs);  // NOLINT
 #endif
   return buffer;
 }
@@ -226,4 +226,4 @@ std::string Timing::print() {
 }
 
 }  // namespace timing
-}  // end namespace sm
+}  // namespace rdtsc
