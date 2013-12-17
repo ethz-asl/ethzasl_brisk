@@ -39,6 +39,8 @@
  */
 
 #include <brisk/internal/brisk-layer.h>
+#include <tmmintrin.h>
+
 namespace brisk {
 // Construct a layer.
 BriskLayer::BriskLayer(const cv::Mat& img, uchar upperThreshold,

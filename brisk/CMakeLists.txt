@@ -18,7 +18,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall
                 -Wno-overloaded-virtual -Wno-non-virtual-dtor # OpenCV.
-                -std=c++11)
+                -std=c++0x)
 
 rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc  
                                      src/brisk-feature-detector.cc   
