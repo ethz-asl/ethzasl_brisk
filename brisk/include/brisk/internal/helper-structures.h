@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,13 +38,25 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_H_
-#define BRISK_BRISK_H_
+#ifndef INTERNAL_HELPER_STRUCTURES_H_
+#define INTERNAL_HELPER_STRUCTURES_H_
 
-#include <brisk/brisk-descriptor-extractor.h>
-#include <brisk/brisk-feature-detector.h>
-#include <brisk/harris-feature-detector.h>
-#include <brisk/harris-score-calculator.h>
-#include <brisk/scale-space-feature-detector.h>
-
-#endif  // BRISK_BRISK_H_
+namespace brisk {
+// Some helper structures for the Brisk pattern representation.
+struct BriskPatternPoint {
+  float x;         // x coordinate relative to center.
+  float y;         // x coordinate relative to center.
+  float sigma;     // Gaussian smoothing sigma.
+};
+struct BriskShortPair {
+  unsigned int i;  // Index of the first pattern point.
+  unsigned int j;  // Index of other pattern point.
+};
+struct BriskLongPair {
+  unsigned int i;  // Index of the first pattern point.
+  unsigned int j;  // Index of other pattern point.
+  int weighted_dx;  // 1024.0 / dx.
+  int weighted_dy;  // 1024.0 / dy.
+};
+}  // namespace brisk
+#endif  // INTERNAL_HELPER_STRUCTURES_H_

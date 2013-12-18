@@ -38,13 +38,16 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_H_
-#define BRISK_BRISK_H_
+#ifndef INTERNAL_HARRIS_SCORES_SSE_H_
+#define INTERNAL_HARRIS_SCORES_SSE_H_
 
-#include <brisk/brisk-descriptor-extractor.h>
-#include <brisk/brisk-feature-detector.h>
-#include <brisk/harris-feature-detector.h>
-#include <brisk/harris-score-calculator.h>
-#include <brisk/scale-space-feature-detector.h>
+#include <opencv2/opencv.hpp>
+#include <brisk/brisk.h>
 
-#endif  // BRISK_BRISK_H_
+namespace brisk {
+// SSE speeded up (dxdx dxdy and dydy only).
+// Based on harrisScores_basic_noMats(.).
+void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores);
+
+}  // namespace brisk
+#endif  // INTERNAL_HARRIS_SCORES_SSE_H_
