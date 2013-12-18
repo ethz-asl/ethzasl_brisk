@@ -86,13 +86,10 @@ typedef uint8_t __attribute__ ((__may_alias__)) U_INT8T_ALIAS;
 class CV_EXPORTS BriskDescriptorExtractor : public cv::DescriptorExtractor {
 public:
   // Create a descriptor with standard pattern.
-  BriskDescriptorExtractor(bool rotationInvariant=true, bool scaleInvariant=true, float patternScale=1.0f);
+  BriskDescriptorExtractor(bool rotationInvariant=true, bool scaleInvariant=true);
   // Create a descriptor with custom pattern file.
-  BriskDescriptorExtractor(const std::string& fname, bool rotationInvariant=true, bool scaleInvariant=true);
-  // Custom setup.
-  BriskDescriptorExtractor(std::vector<float> &radiusList, std::vector<int> &numberList,
-      bool rotationInvariant=true, bool scaleInvariant=true,
-      float dMax=5.85f, float dMin=8.2f, std::vector<int> indexChange=std::vector<int>());
+  BriskDescriptorExtractor(const std::string& fname, bool rotationInvariant=true,
+                           bool scaleInvariant=true);
   virtual ~BriskDescriptorExtractor();
 
   // Call this to generate the kernel:
@@ -120,6 +117,8 @@ public:
   // }  Opencv 2.1
 
 protected:
+  void InitFromStream(bool rotationInvariant, bool scaleInvariant,
+                      std::istream& pattern_stream);
   template<typename ImgPixel_T, typename IntegralPixel_T>
   __inline__ IntegralPixel_T smoothedIntensity(const cv::Mat& image,
       const cv::Mat& integral,const float key_x,

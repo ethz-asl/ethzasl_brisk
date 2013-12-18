@@ -24,9 +24,12 @@
  along with BRISK.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <istream>
+
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/core/core.hpp>
 #include <brisk/brisk.h>
+#include <brisk/pattern-provider.h>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -57,59 +60,20 @@ const int BriskScaleSpace::minDrop_ = 15;
 const uchar BriskScaleSpace::defaultLowerThreshold = 10;  // Originally 28.
 const uchar BriskScaleSpace::defaultUpperThreshold = 230;
 
-BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
-                                                   bool scaleInvariant,
-                                                   float patternScale) {
-  std::vector<float> rList;
-  std::vector<int> nList;
-
-  // This is the standard pattern found to be suitable also.
-  rList.resize(5);
-  nList.resize(5);
-  const double f = 0.85 * patternScale;
-
-  rList[0] = f * 0;
-  rList[1] = f * 2.9;
-  rList[2] = f * 4.9;
-  rList[3] = f * 7.4;
-  rList[4] = f * 10.8;
-
-  nList[0] = 1;
-  nList[1] = 10;
-  nList[2] = 14;
-  nList[3] = 15;
-  nList[4] = 20;
-
-  rotationInvariance = rotationInvariant;
-  scaleInvariance = scaleInvariant;
-  generateKernel(rList, nList, 5.85 * patternScale, 8.2 * patternScale);
-
-}
-BriskDescriptorExtractor::BriskDescriptorExtractor(
-    std::vector<float> &radiusList, std::vector<int> &numberList,
-    bool rotationInvariant, bool scaleInvariant, float dMax, float dMin,
-    std::vector<int> indexChange) {
-  rotationInvariance = rotationInvariant;
-  scaleInvariance = scaleInvariant;
-  generateKernel(radiusList, numberList, dMax, dMin, indexChange);
-}
-
-BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
-                                                   bool rotationInvariant,
-                                                   bool scaleInvariant) {
-
-  rotationInvariance = rotationInvariant;
-  scaleInvariance = scaleInvariant;
-
+void BriskDescriptorExtractor::InitFromStream(
+    bool rotationInvariant,
+    bool scaleInvariant,
+    std::istream& pattern_stream) {
   // Not in use.
   dMax_ = 0;
   dMin_ = 0;
-
-  std::ifstream myfile(fname.c_str());
-  assert(myfile.is_open());
+  rotationInvariance = rotationInvariant;
+  scaleInvariance = scaleInvariant;
 
   // Read number of points.
-  myfile >> points_;
+  pattern_stream >> points_;
+
+  std::cout << "Got " << points_ << " points" << std::endl;
 
   // Set up the patterns.
   patternPoints_ = new BriskPatternPoint[points_ * scales_ * n_rot_];
@@ -129,9 +93,9 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
   float* u_y = new float[points_];
   float* sigma = new float[points_];
   for (unsigned int i = 0; i < points_; i++) {
-    myfile >> u_x[i];
-    myfile >> u_y[i];
-    myfile >> sigma[i];
+    pattern_stream >> u_x[i];
+    pattern_stream >> u_y[i];
+    pattern_stream >> sigma[i];
   }
 
   // Now fill all the scaled and rotated versions.
@@ -170,23 +134,23 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
   }
 
   // Now also generate pairings.
-  myfile >> noShortPairs_;
+  pattern_stream >> noShortPairs_;
   shortPairs_ = new BriskShortPair[noShortPairs_];
   for (unsigned int p = 0; p < noShortPairs_; p++) {
     unsigned int i, j;
-    myfile >> i;
+    pattern_stream >> i;
     shortPairs_[p].i = i;
-    myfile >> j;
+    pattern_stream >> j;
     shortPairs_[p].j = j;
   }
 
-  myfile >> noLongPairs_;
+  pattern_stream >> noLongPairs_;
   longPairs_ = new BriskLongPair[noLongPairs_];
   for (unsigned int p = 0; p < noLongPairs_; p++) {
     unsigned int i, j;
-    myfile >> i;
+    pattern_stream >> i;
     longPairs_[p].i = i;
-    myfile >> j;
+    pattern_stream >> j;
     longPairs_[p].j = j;
     float dx = (u_x[j] - u_x[i]);
     float dy = (u_y[j] - u_y[i]);
@@ -197,8 +161,24 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
 
   // Number of descriptor bits:
   strings_ = (int) ceil((float(noShortPairs_)) / 128.0) * 4 * 4;
+}
 
-  // Clean up.
+BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
+                                                   bool scaleInvariant) {
+  std::stringstream ss;
+  brisk::GetDefaultPatternAsStream(&ss);
+
+  InitFromStream(rotationInvariant, scaleInvariant, ss);
+}
+
+BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
+                                                   bool rotationInvariant,
+                                                   bool scaleInvariant) {
+  std::ifstream myfile(fname.c_str());
+  assert(myfile.is_open());
+
+  InitFromStream(rotationInvariant, scaleInvariant, myfile);
+
   myfile.close();
 }
 
