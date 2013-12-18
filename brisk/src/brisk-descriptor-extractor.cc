@@ -44,6 +44,7 @@
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/helper-structures.h>
 #include <brisk/internal/macros.h>
+#include <brisk/internal/pattern-provider.h>
 #include <brisk/internal/rdtsc-wrapper.h>
 
 namespace cv {
@@ -54,57 +55,18 @@ const float BriskDescriptorExtractor::scalerange_ = 30;
 // Discretization of the rotation look-up.
 const unsigned int BriskDescriptorExtractor::n_rot_ = 1024;
 
-BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
-                                                   bool scaleInvariant,
-                                                   float patternScale) {
-  std::vector<float> rList;
-  std::vector<int> nList;
-
-  // This is the standard pattern found to be suitable also.
-  rList.resize(5);
-  nList.resize(5);
-  const double f = 0.85 * patternScale;
-
-  rList[0] = f * 0;
-  rList[1] = f * 2.9;
-  rList[2] = f * 4.9;
-  rList[3] = f * 7.4;
-  rList[4] = f * 10.8;
-
-  nList[0] = 1;
-  nList[1] = 10;
-  nList[2] = 14;
-  nList[3] = 15;
-  nList[4] = 20;
-
-  rotationInvariance = rotationInvariant;
-  scaleInvariance = scaleInvariant;
-  GenerateKernel(rList, nList, 5.85 * patternScale, 8.2 * patternScale);
-}
-BriskDescriptorExtractor::BriskDescriptorExtractor(
-    const std::vector<float> &radiusList, const std::vector<int> &numberList,
-    bool rotationInvariant, bool scaleInvariant, float dMax, float dMin,
-    std::vector<int> indexChange) {
-  rotationInvariance = rotationInvariant;
-  scaleInvariance = scaleInvariant;
-  GenerateKernel(radiusList, numberList, dMax, dMin, indexChange);
-}
-
-BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
-                                                   bool rotationInvariant,
-                                                   bool scaleInvariant) {
-  rotationInvariance = rotationInvariant;
-  scaleInvariance = scaleInvariant;
-
+void BriskDescriptorExtractor::InitFromStream(
+    bool rotationInvariant,
+    bool scaleInvariant,
+    std::istream& pattern_stream) {
   // Not in use.
   dMax_ = 0;
   dMin_ = 0;
-
-  std::ifstream myfile(fname.c_str());
-  assert(myfile.is_open());
+  rotationInvariance = rotationInvariant;
+  scaleInvariance = scaleInvariant;
 
   // Read number of points.
-  myfile >> points_;
+  pattern_stream >> points_;
 
   // Set up the patterns.
   patternPoints_ = new brisk::BriskPatternPoint[points_ * scales_ * n_rot_];
@@ -124,9 +86,9 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
   float* u_y = new float[points_];
   float* sigma = new float[points_];
   for (unsigned int i = 0; i < points_; i++) {
-    myfile >> u_x[i];
-    myfile >> u_y[i];
-    myfile >> sigma[i];
+    pattern_stream >> u_x[i];
+    pattern_stream >> u_y[i];
+    pattern_stream >> sigma[i];
   }
 
   // Now fill all the scaled and rotated versions.
@@ -166,23 +128,23 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
   }
 
   // Now also generate pairings.
-  myfile >> noShortPairs_;
+  pattern_stream >> noShortPairs_;
   shortPairs_ = new brisk::BriskShortPair[noShortPairs_];
   for (unsigned int p = 0; p < noShortPairs_; p++) {
     unsigned int i, j;
-    myfile >> i;
+    pattern_stream >> i;
     shortPairs_[p].i = i;
-    myfile >> j;
+    pattern_stream >> j;
     shortPairs_[p].j = j;
   }
 
-  myfile >> noLongPairs_;
+  pattern_stream >> noLongPairs_;
   longPairs_ = new brisk::BriskLongPair[noLongPairs_];
   for (unsigned int p = 0; p < noLongPairs_; p++) {
     unsigned int i, j;
-    myfile >> i;
+    pattern_stream >> i;
     longPairs_[p].i = i;
-    myfile >> j;
+    pattern_stream >> j;
     longPairs_[p].j = j;
     float dx = (u_x[j] - u_x[i]);
     float dy = (u_y[j] - u_y[i]);
@@ -196,129 +158,25 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
   // Number of descriptor bits:
   strings_ = static_cast<int>(ceil((static_cast<float>(noShortPairs_))
                                    / 128.0)) * 4 * 4;
-
-  // Clean up.
-  myfile.close();
 }
 
-void BriskDescriptorExtractor::GenerateKernel(
-    const std::vector<float> &radiusList, const std::vector<int> &numberList,
-    float dMax, float dMin, std::vector<int> indexChange) {
-  dMax_ = dMax;
-  dMin_ = dMin;
+BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
+                                                   bool scaleInvariant) {
+  std::stringstream ss;
+  brisk::GetDefaultPatternAsStream(&ss);
 
-  // Get the total number of points.
-  const int rings = radiusList.size();
-  assert(radiusList.size() != 0 && radiusList.size() == numberList.size());
-  points_ = 0;  // Remember the total number of points.
-  for (int ring = 0; ring < rings; ring++) {
-    points_ += numberList[ring];
-  }
-  // Set up the patterns.
-  patternPoints_ = new brisk::BriskPatternPoint[points_ * scales_ * n_rot_];
-  brisk::BriskPatternPoint* patternIterator = patternPoints_;
+  InitFromStream(rotationInvariant, scaleInvariant, ss);
+}
 
-  // Define the scale discretization:
-  static const float lb_scale = log(scalerange_) / log(2.0);
-  static const float lb_scale_step = lb_scale / (scales_);
+BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
+                                                   bool rotationInvariant,
+                                                   bool scaleInvariant) {
+  std::ifstream myfile(fname.c_str());
+  assert(myfile.is_open());
 
-  scaleList_ = new float[scales_];
-  sizeList_ = new unsigned int[scales_];
+  InitFromStream(rotationInvariant, scaleInvariant, myfile);
 
-  const float sigma_scale = 1.3;
-
-  for (unsigned int scale = 0; scale < scales_; ++scale) {
-    scaleList_[scale] = pow(2.0, static_cast<double>(scale * lb_scale_step));
-    sizeList_[scale] = 0;
-
-    // Generate the pattern points look-up.
-    double alpha, theta;
-    for (size_t rot = 0; rot < n_rot_; ++rot) {
-      // This is the rotation of the feature.
-      theta = static_cast<double>(rot) * 2 * M_PI / static_cast<double>(n_rot_);
-      for (int ring = 0; ring < rings; ++ring) {
-        for (int num = 0; num < numberList[ring]; ++num) {
-          // The actual coordinates on the circle.
-          alpha = (static_cast<double>(num)) * 2 * M_PI /
-              static_cast<double>(numberList[ring]);
-          // Feature rotation plus angle of the point.
-          patternIterator->x = scaleList_[scale] * radiusList[ring]
-              * cos(alpha + theta);
-          patternIterator->y = scaleList_[scale] * radiusList[ring]
-              * sin(alpha + theta);
-          // And the gaussian kernel sigma.
-          if (ring == 0) {
-            patternIterator->sigma = sigma_scale * scaleList_[scale] * 0.5;
-          } else {
-            patternIterator->sigma = sigma_scale * scaleList_[scale]
-                * (static_cast<double>(radiusList[ring])) *
-                sin(M_PI / numberList[ring]);
-          }
-          // Adapt the sizeList if necessary.
-          const unsigned int size = ceil(
-              ((scaleList_[scale] * radiusList[ring]) + patternIterator->sigma))
-              + 1;
-          if (sizeList_[scale] < size) {
-            sizeList_[scale] = size;
-          }
-
-          // Increment the iterator.
-          ++patternIterator;
-        }
-      }
-    }
-  }
-
-  // Now also generate pairings.
-  shortPairs_ = new brisk::BriskShortPair[points_ * (points_ - 1) / 2];
-  longPairs_ = new brisk::BriskLongPair[points_ * (points_ - 1) / 2];
-  noShortPairs_ = 0;
-  noLongPairs_ = 0;
-
-  // Fill indexChange with 0..n if empty.
-  unsigned int indSize = indexChange.size();
-  if (indSize == 0) {
-    indexChange.resize(points_ * (points_ - 1) / 2);
-    indSize = indexChange.size();
-    for (unsigned int i = 0; i < indSize; i++) {
-      indexChange[i] = i;
-    }
-  }
-  const float dMin_sq = dMin_ * dMin_;
-  const float dMax_sq = dMax_ * dMax_;
-  for (unsigned int i = 1; i < points_; i++) {
-    for (unsigned int j = 0; j < i; j++) {  // Find all the pairs.
-      // Point pair distance:
-      const float dx = patternPoints_[j].x - patternPoints_[i].x;
-      const float dy = patternPoints_[j].y - patternPoints_[i].y;
-      const float norm_sq = (dx * dx + dy * dy);
-      if (norm_sq > dMin_sq) {
-        // Save to long pairs.
-        brisk::BriskLongPair& longPair = longPairs_[noLongPairs_];
-        longPair.weighted_dx =
-            static_cast<int>((dx / (norm_sq)) * 2048.0 + 0.5);
-        longPair.weighted_dy =
-            static_cast<int>((dy / (norm_sq)) * 2048.0 + 0.5);
-        longPair.i = i;
-        longPair.j = j;
-        ++noLongPairs_;
-      }
-      if (norm_sq < dMax_sq) {
-        // Save to short pairs.
-        // Make sure the user passes something sensible.
-        assert(noShortPairs_ < indSize);
-        brisk::BriskShortPair& shortPair =
-            shortPairs_[indexChange[noShortPairs_]];
-        shortPair.j = j;
-        shortPair.i = i;
-        ++noShortPairs_;
-      }
-    }
-  }
-
-  // Number of descriptor bits:
-  strings_ = static_cast<int>(ceil((static_cast<float>(noShortPairs_)) /
-                                   128.0)) * 4 * 4;
+  myfile.close();
 }
 
 // Simple alternative:

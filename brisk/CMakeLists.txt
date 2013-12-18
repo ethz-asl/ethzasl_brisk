@@ -29,6 +29,7 @@ rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/harris-score-calculator.cc
                                      src/harris-score-calculator-float.cc
                                      src/harris-scores-sse.cc
+                                     src/pattern-provider.cc
                                      src/rdtsc-wrapper.cc
                                      src/sse-filters.cc
 )
