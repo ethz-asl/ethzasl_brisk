@@ -1,36 +1,58 @@
 /*
+ Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
+ Stefan Leutenegger, Simon Lynen and Margarita Chli.
+
+ Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
+ Stefan Leutenegger and Simon Lynen.
+
  BRISK - Binary Robust Invariant Scalable Keypoints
  Reference implementation of
  [1] Stefan Leutenegger,Margarita Chli and Roland Siegwart, BRISK:
  Binary Robust Invariant Scalable Keypoints, in Proceedings of
  the IEEE International Conference on Computer Vision (ICCV2011).
 
- Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
  This file is part of BRISK.
 
- BRISK is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
+ All rights reserved.
 
- BRISK is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+     * Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+     * Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+     * Neither the name of the <organization> nor the
+       names of its contributors may be used to endorse or promote products
+       derived from this software without specific prior written permission.
 
- You should have received a copy of the GNU General Public License
- along with BRISK.  If not, see <http://www.gnu.org/licenses/>.
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <opencv2/opencv.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include "../include/brisk/brisk.h"
-#include <fstream>
-#include <iostream>
-#include <list>
+#include <fstream>  // NOLINT
 #include <iomanip>
+#include <iostream>  //NOLINT
+#include <list>
+#include <vector>
+
+#include <brisk/brisk.h>
+#include <brisk/brute-force-matcher.h>
+#include <opencv2/opencv.hpp>
+#include "opencv2/core/core.hpp"
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/nonfree/features2d.hpp>
+#include "opencv2/nonfree/nonfree.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include <opencv2/imgproc/imgproc.hpp>
 
 // Standard configuration for the case of no file given.
 const int n = 12;
@@ -61,7 +83,8 @@ void help(char** argv) {
       << "    "
       << "descriptor: Feature descriptor, e.g. SURF, BRIEF, BRISK or U-BRISK."
       << std::endl << "    "
-      << "[descFile]: Optional: files with descriptors to act as detected points."
+      << "[descFile]: Optional: files with descriptors to act as detected "
+          "points."
       << std::endl;
 }
 
@@ -99,8 +122,8 @@ int main(int argc, char ** argv) {
     int i = 0;
     int fextensions_size = fextensions.size();
     while (imgRGB1.empty() || imgRGB2.empty()) {
-      fname1 = "../../images/img1" + fextensions[i];
-      fname2 = "../../images/img2" + fextensions[i];
+      fname1 = "../images/img1" + fextensions[i];
+      fname2 = "../images/img2" + fextensions[i];
       imgRGB1 = cv::imread(fname1);
       imgRGB2 = cv::imread(fname2);
       i++;
@@ -172,7 +195,7 @@ int main(int argc, char ** argv) {
   // Create the detector:
   cv::Ptr < cv::FeatureDetector > detector;
   if (argc == 1) {
-    detector = new cv::BriskFeatureDetector(60, 4);
+    detector = new cv::BriskFeatureDetector(70, 4);
   } else {
     if (strncmp("FAST", argv[3], 4) == 0) {
       threshold = atoi(argv[3] + 4);
@@ -198,12 +221,10 @@ int main(int argc, char ** argv) {
         threshold = 400;
       detector = new cv::SurfFeatureDetector(threshold);
     } else if (strncmp("SIFT", argv[3], 4) == 0) {
-      float thresh = 0.04 / cv::SIFT::CommonParams::DEFAULT_NOCTAVE_LAYERS
-          / 2.0;
       float edgeThreshold = atof(argv[3] + 4);
       if (edgeThreshold == 0)
-        thresh = 10.0;
-      detector = new cv::SiftFeatureDetector(thresh, edgeThreshold);
+        edgeThreshold = 10.0;
+      detector = new cv::SiftFeatureDetector(0, 3, 0.04, edgeThreshold);
     } else {
       detector = cv::FeatureDetector::create(argv[3]);
     }
@@ -264,7 +285,6 @@ int main(int argc, char ** argv) {
     descf1.close();
     descf2.close();
   } else {
-
     detector->detect(imgGray1, keypoints);
     detector->detect(imgGray2, keypoints2);
   }
@@ -286,10 +306,6 @@ int main(int argc, char ** argv) {
       descriptorExtractor = new cv::BriskDescriptorExtractor(true, false);
     } else if (std::string(argv[4]) == "BRIEF") {
       descriptorExtractor = new cv::BriefDescriptorExtractor(64);
-    } else if (std::string(argv[4]) == "CALONDER") {
-      descriptorExtractor = new cv::CalonderDescriptorExtractor<float>(
-          "current.rtc");
-      hamming = false;
     } else if (std::string(argv[4]) == "ORB") {
       descriptorExtractor = new cv::OrbDescriptorExtractor();
     } else if (std::string(argv[4]) == "SURF") {
@@ -322,23 +338,25 @@ int main(int argc, char ** argv) {
   }
   tt = cv::getTickCount() - tt;
   std::cout << std::setprecision(4);
-  std::cout << tt / ((double) cv::getTickFrequency() * testits) * 1000. << "ms "
+  std::cout << tt / (static_cast<double>(cv::getTickFrequency())
+      * testits) * 1000. << "ms "
       << keypoints.size() << std::endl;
   std::cout
-      << tt / ((double) cv::getTickFrequency() * testits * (keypoints.size()))
+      << tt / (static_cast<double>(cv::getTickFrequency())
+          * testits * (keypoints.size()))
           * 1000 << "ms " << std::endl;
 
   // Matching.
-  std::vector < std::vector<cv::DMatch> > matches;
-  cv::Ptr < cv::DescriptorMatcher > descriptorMatcher;
-  if (hamming)
-    descriptorMatcher = new cv::BruteForceMatcher<cv::HammingSse>();
-  else
-    descriptorMatcher = new cv::BruteForceMatcher<cv::L2<float> >();
-  if (hamming)
-    descriptorMatcher->radiusMatch(descriptors2, descriptors, matches, 80.0);
-  else
-    descriptorMatcher->radiusMatch(descriptors2, descriptors, matches, 0.21);
+  std::vector<std::vector<cv::DMatch> > matches;
+  cv::Ptr<cv::BFMatcher> descriptorMatcher;
+
+  if (hamming) {
+    cv::BruteForceMatcherSse matcher;
+    matcher.radiusMatch(descriptors2, descriptors, matches, 80.0);
+  } else {
+    cv::BFMatcher matcher(cv::NORM_L2);
+    matcher.radiusMatch(descriptors2, descriptors, matches, 0.21);
+  }
   cv::Mat outimg;
 
   // Drawing.

@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,13 +38,28 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_H_
-#define BRISK_BRISK_H_
+#ifndef BRISK_BRISK_FEATURE_DETECTOR_H_
+#define BRISK_BRISK_FEATURE_DETECTOR_H_
 
-#include <brisk/brisk-descriptor-extractor.h>
-#include <brisk/brisk-feature-detector.h>
-#include <brisk/harris-feature-detector.h>
-#include <brisk/harris-score-calculator.h>
-#include <brisk/scale-space-feature-detector.h>
+#include <vector>
 
-#endif  // BRISK_BRISK_H_
+#include <brisk/brisk-opencv.h>
+#include <brisk/internal/macros.h>
+
+namespace cv {
+class CV_EXPORTS BriskFeatureDetector : public FeatureDetector {
+ public:
+  BriskFeatureDetector(int thresh, int octaves = 3,
+                       bool suppressScaleNonmaxima = true);
+  virtual ~BriskFeatureDetector() { }
+  int threshold;
+  int octaves;
+ protected:
+  virtual void detectImpl(const cv::Mat& image,
+                          std::vector<cv::KeyPoint>& keypoints,
+                          const cv::Mat& mask = cv::Mat()) const;
+  bool m_suppressScaleNonmaxima;
+};
+}  // namespace cv
+
+#endif  // BRISK_BRISK_FEATURE_DETECTOR_H_

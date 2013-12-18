@@ -11,5 +11,4 @@ add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall -pedantic
                 -Wno-overloaded-virtual -Wno-non-virtual-dtor #OpenCV
                 )
 
-rosbuild_add_executable(livedemo src/livedemo.cpp)
-
+rosbuild_add_executable(livedemo src/livedemo.cc)
