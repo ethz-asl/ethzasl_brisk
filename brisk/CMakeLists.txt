@@ -10,6 +10,7 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
 set(ROS_BUILD_TYPE Release)
+#set(ROS_BUILD_TYPE Debug)
 
 rosbuild_init()
 
@@ -32,7 +33,11 @@ rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/pattern-provider.cc
                                      src/rdtsc-wrapper.cc
                                      src/sse-filters.cc
+                                     src/camera-aware-feature.cc
 )
 
 rosbuild_add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
+
+rosbuild_add_executable(camera src/test-cameras.cc)
+target_link_libraries(camera ${PROJECT_NAME})

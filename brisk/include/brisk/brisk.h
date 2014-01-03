@@ -46,5 +46,8 @@
 #include <brisk/harris-feature-detector.h>
 #include <brisk/harris-score-calculator.h>
 #include <brisk/scale-space-feature-detector.h>
+#include <brisk/cameras/cameras.h>
+#include <brisk/camera-aware-feature.h>
+#include <brisk/brisk-feature.h>
 
 #endif  // BRISK_BRISK_H_
