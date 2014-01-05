@@ -61,9 +61,9 @@ int main(int argc, char ** argv) {
                                                                    200.0, 400,
                                                                    true, true);
   brisk::CameraAwareFeature camera0AwareFeature(briskFeaturePtr,
-                                                cameraGeometry0Ptr);
+                                                cameraGeometry0Ptr, 2e-1);
   brisk::CameraAwareFeature camera1AwareFeature(briskFeaturePtr,
-                                                cameraGeometry1Ptr);
+                                                cameraGeometry1Ptr, 2e-1);
 
   // read imgates
   cv::Mat img0, img1;

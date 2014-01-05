@@ -365,13 +365,13 @@ void CameraAwareFeature::setCameraGeometry(
       // store look-up
       cv::Mat img = cv::Mat::ones(pixelsV, pixelsU, CV_8UC1) * (i + 1);
       if (!leftBoundary)
-        img.colRange(0, margin - 1).setTo(0);
+        img.colRange(0, margin).setTo(0);
       if (!topBoundary)
-        img.rowRange(0, margin - 1).setTo(0);
+        img.rowRange(0, margin ).setTo(0);
       if (!rightBoundary)
-        img.colRange(img.cols - margin + 1, img.cols - 1).setTo(0);
+        img.colRange(img.cols - margin, img.cols).setTo(0);
       if (!bottomBoundary)
-        img.rowRange(img.rows - margin + 1, img.rows - 1).setTo(0);
+        img.rowRange(img.rows - margin, img.rows).setTo(0);
       cv::Mat currentSelection = cv::Mat::zeros(pixelsV, pixelsU, CV_8UC1);
       cv::remap(img, currentSelection, _undistort_1_maps[i],
                 _undistort_2_maps[i], cv::INTER_LINEAR, cv::BORDER_CONSTANT);
@@ -614,12 +614,14 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
                             descriptorsVec.at(0).type());
   size_t start_row = 0;
   for (size_t i = 0; i < keypointsVec.size(); ++i) {
-    descriptorsVec.at(i).copyTo(
-        descriptors_final.rowRange(start_row,
-                                   start_row + descriptorsVec.at(i).rows));
-    //descriptors_final.rowRange(start_row,start_row+descriptorsVec.at(i).rows)=descriptorsVec.at(i);
-    //std::cout<<descriptors_final.row(start_row)<<std::endl;
-    start_row += descriptorsVec.at(i).rows;
+    if(keypointsVec.at(i).size()>0){
+      descriptorsVec.at(i).copyTo(
+          descriptors_final.rowRange(start_row,
+                                     start_row + descriptorsVec.at(i).rows));
+      //descriptors_final.rowRange(start_row,start_row+descriptorsVec.at(i).rows)=descriptorsVec.at(i);
+      //std::cout<<descriptors_final.row(start_row)<<std::endl;
+      start_row += descriptorsVec.at(i).rows;
+    }
   }
   descriptors.getMatRef() = descriptors_final;
 
