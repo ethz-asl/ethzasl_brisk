@@ -14,14 +14,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -35,8 +35,11 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_FEATURE_H_
-#define BRISK_FEATURE_H_
+#ifndef BRISK_BRISK_FEATURE_H_
+#define BRISK_BRISK_FEATURE_H_
+
+#include <limits>
+#include <vector>
 
 #include <brisk/brisk-descriptor-extractor.h>
 #include <brisk/brisk-feature-detector.h>
@@ -45,69 +48,66 @@
 #include <brisk/harris-score-calculator.h>
 #include <brisk/scale-space-feature-detector.h>
 
-namespace brisk{
+namespace brisk {
 
-class BriskFeature : public cv::Feature2D{
-public:
-	BriskFeature(size_t octaves, double uniformityRadius,
-	             double absoluteThreshold = 0,
-	             size_t maxNumKpt = std::numeric_limits<size_t>::max(),
-	             bool rotationInvariant = true,
-	             bool scaleInvariant = true) :
-            	_briskDetector(octaves, uniformityRadius, absoluteThreshold,
-            	               maxNumKpt),
-            	_briskExtractor(rotationInvariant, scaleInvariant) { }
+class BriskFeature : public cv::Feature2D {
+ public:
+  BriskFeature(size_t octaves, double uniformityRadius,
+               double absoluteThreshold = 0,
+               size_t maxNumKpt = std::numeric_limits < size_t > ::max(),
+               bool rotationInvariant = true, bool scaleInvariant = true)
+      : _briskDetector(octaves, uniformityRadius, absoluteThreshold, maxNumKpt),
+        _briskExtractor(rotationInvariant, scaleInvariant) { }
 
-	virtual ~BriskFeature(){ }
+  virtual ~BriskFeature() { }
 
-	// Inherited from cv::DescriptorExtractor interface.
-	virtual int descriptorSize() const {
-	  return _briskExtractor.descriptorSize();
-	}
-	virtual int descriptorType() const {
-	  return _briskExtractor.descriptorType();
-	}
+  // Inherited from cv::DescriptorExtractor interface.
+  virtual int descriptorSize() const {
+    return _briskExtractor.descriptorSize();
+  }
+  virtual int descriptorType() const {
+    return _briskExtractor.descriptorType();
+  }
 
-	// Inherited from cv::Feature2D interface.
-	virtual void operator()(cv::InputArray image, cv::InputArray mask,
-	                        std::vector<cv::KeyPoint>& keypoints,
-	                        cv::OutputArray descriptors,
-	                        bool useProvidedKeypoints = false) const {
-		if(!useProvidedKeypoints){
-			keypoints.clear();
-		}
+  // Inherited from cv::Feature2D interface.
+  virtual void operator()(cv::InputArray image, cv::InputArray mask,
+                          std::vector<cv::KeyPoint>& keypoints,
+                          cv::OutputArray descriptors,
+                          bool useProvidedKeypoints = false) const {
+    if (!useProvidedKeypoints) {
+      keypoints.clear();
+    }
 
-		// Convert input output arrays:
-		cv::Mat descriptors_;
-		cv::Mat image_ = image.getMat();
-		cv::Mat mask_ = mask.getMat();
+    // Convert input output arrays:
+    cv::Mat descriptors_;
+    cv::Mat image_ = image.getMat();
+    cv::Mat mask_ = mask.getMat();
 
-		// Run the detection. Take provided keypoints.
-		_briskDetector.detect(image_, keypoints, mask_);
+    // Run the detection. Take provided keypoints.
+    _briskDetector.detect(image_, keypoints, mask_);
 
-		// Run the extraction.
-		_briskExtractor.compute(image_, keypoints, descriptors_);
-		descriptors.getMatRef() = descriptors_;
-	}
+    // Run the extraction.
+    _briskExtractor.compute(image_, keypoints, descriptors_);
+    descriptors.getMatRef() = descriptors_;
+  }
 
-protected:
+ protected:
+  // Inherited from cv::FeatureDetector interface.
+  virtual void detectImpl(const cv::Mat& image,
+                          std::vector<cv::KeyPoint>& keypoints,
+                          const cv::Mat& mask = cv::Mat()) const {
+    _briskDetector.detect(image, keypoints, mask);
+  }
 
-	// Inherited from cv::FeatureDetector interface.
-	virtual void detectImpl(const cv::Mat& image,
-	                        std::vector<cv::KeyPoint>& keypoints,
-	                        const cv::Mat& mask = cv::Mat()) const{
-		_briskDetector.detect(image, keypoints, mask);
-	}
+  // Inherited from cv::DescriptorExtractor interface.
+  virtual void computeImpl(const cv::Mat& image,
+                           std::vector<cv::KeyPoint>& keypoints,
+                           cv::Mat& descriptors) const {
+    _briskExtractor.computeImpl(image, keypoints, descriptors);
+  }
 
-	// Inherited from cv::DescriptorExtractor interface.
-	virtual void computeImpl(const cv::Mat& image,
-	                         std::vector<cv::KeyPoint>& keypoints,
-	                         cv::Mat& descriptors) const{
-		_briskExtractor.computeImpl(image, keypoints, descriptors);
-	}
-
-	brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator> _briskDetector;
-	cv::BriskDescriptorExtractor _briskExtractor;
+  brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator> _briskDetector;
+  cv::BriskDescriptorExtractor _briskExtractor;
 };
 }  // namespace brisk
-#endif  // BRISKFEATURE_H_
+#endif  // BRISK_BRISK_FEATURE_H_
