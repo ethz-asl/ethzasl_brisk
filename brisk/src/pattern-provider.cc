@@ -40,7 +40,7 @@
 
 namespace brisk {
 void GetDefaultPatternAsStream(std::stringstream* pattern_stream) {
-assert(pattern_stream);
+  assert(pattern_stream);
 
   pattern_stream->clear();
   *pattern_stream << "66" << std::endl
@@ -1352,6 +1352,5 @@ assert(pattern_stream);
   << "65 62 " << std::endl
   << "65 63 " << std::endl
   << "65 64 " << std::endl;
-
 }
 }  // namespace brisk

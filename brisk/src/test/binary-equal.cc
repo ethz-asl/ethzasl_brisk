@@ -78,18 +78,8 @@ int main(int /*argc*/, char ** argv) {
   full_path = boost::filesystem::system_complete(
       boost::filesystem::path(argv[0]));
 
-  std::cout << "exec path " << argv[0] << std::endl;
-
-  unsigned idx1 = full_path.string().find_last_of("/\\");
-  unsigned idx2 = full_path.string().substr(0, idx1).find_last_of("/\\");
-
-  //where are the images
   std::string imagepath = "./test_data/";
-
-  //what is the dataset file called?
   std::string datasetfilename = "data.set";
-
-  //do we have a dataset for verification?
 
   std::string datasetfullpath = imagepath + "/" + datasetfilename;
 
@@ -213,7 +203,7 @@ void runpipeline(std::vector<DatasetEntry>& dataset,
    */
   //prepare BRISK detector
 
-  cv::Ptr < cv::FeatureDetector > detector =
+  cv::Ptr<cv::FeatureDetector> detector =
       new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>(
           BRISK_octaves, BRISK_uniformityradius, BRISK_absoluteThreshold);
 
@@ -255,13 +245,9 @@ void runpipeline(std::vector<DatasetEntry>& dataset,
     }
   }
 
-  /***
-   * EXTRACTION
-   */
-  //I suppose we are either optimizing detect or extract, so added another separate loop for that
-  std::string patternpath = briskbasepath + "/brisk.ptn";
+  // Extraction.
   cv::Ptr<cv::DescriptorExtractor> descriptorExtractor =
-      new brisk::BriskDescriptorExtractor(patternpath, BRISK_rotationestimation,
+      new brisk::BriskDescriptorExtractor(BRISK_rotationestimation,
                                           BRISK_scaleestimation);
   if (doDescriptorComputation || dataset.at(0).descriptors_.rows == 0) {
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset

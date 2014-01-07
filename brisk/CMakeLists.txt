@@ -13,6 +13,8 @@ set(ROS_BUILD_TYPE Release)
 
 rosbuild_init()
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
 # TODO remove
 set(Boost_USE_STATIC_LIBS   ON)
 set(Boost_USE_MULTITHREADED ON)
