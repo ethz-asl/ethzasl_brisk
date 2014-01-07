@@ -42,6 +42,7 @@
 
 #include <brisk/brisk.h>
 #include <brisk/internal/timer.h>
+#include <glog/logging.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/nonfree/features2d.hpp>
@@ -71,12 +72,7 @@ enum Parameters {
 };
 
 int main(int /*argc*/, char ** argv) {
-
-  //get the path to the images
-  boost::filesystem::path full_path(
-      boost::filesystem::initial_path<boost::filesystem::path>());
-  full_path = boost::filesystem::system_complete(
-      boost::filesystem::path(argv[0]));
+  google::InitGoogleLogging(argv[0]);
 
   std::string imagepath = "./test_data/";
   std::string datasetfilename = "data.set";
@@ -84,7 +80,10 @@ int main(int /*argc*/, char ** argv) {
   std::string datasetfullpath = imagepath + "/" + datasetfilename;
 
   std::cout << "Checking if there is a dataset at ..." << datasetfullpath;
-  bool have_dataset = boost::filesystem::is_regular_file(datasetfullpath);
+  std::ifstream dataset_file_stream(datasetfullpath.c_str());
+  bool have_dataset = dataset_file_stream.good();
+  dataset_file_stream.close();
+
   std::cout << (have_dataset ? " True " : " False") << std::endl;
 
   std::vector < DatasetEntry > dataset;
@@ -96,9 +95,11 @@ int main(int /*argc*/, char ** argv) {
     std::cout << "No dataset found at " << datasetfullpath
         << " will create one from the images in " << imagepath << std::endl;
 
-    std::vector < std::string > imgpaths;
+    std::vector<std::string> imgpaths;
     bool doLexicalsort = true;
-    getfilelists(imagepath, imgpaths, doLexicalsort);  //crawl directory
+    std::vector<std::string> search_paths;
+    search_paths.push_back(imagepath);
+    brisk::Getfilelists(search_paths, doLexicalsort, "", &imgpaths);
 
     /**
      * MAKE THE DATASET

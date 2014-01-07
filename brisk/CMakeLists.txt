@@ -15,6 +15,9 @@ rosbuild_init()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
+find_package(GLog REQUIRED)
+include_directories(GLOG_INCLUDE_DIRS)
+
 # TODO remove
 set(Boost_USE_STATIC_LIBS   ON)
 set(Boost_USE_MULTITHREADED ON)
@@ -39,12 +42,15 @@ rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/harris-scores-sse.cc
                                      src/pattern-provider.cc
                                      src/sse-filters.cc
-                                     src/timer.cc)
+                                     src/timer.cc
+                                     src/test/image-io.cc)
+
 
 rosbuild_add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
 
 rosbuild_add_executable(run_verification src/test/binary-equal.cc)
 target_link_libraries(run_verification ${PROJECT_NAME})
+target_link_libraries(run_verification ${GLOG_LIBRARY})
 # TODO remove
 target_link_libraries(run_verification ${Boost_LIBRARIES})

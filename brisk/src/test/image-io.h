@@ -37,72 +37,15 @@
 
 #ifndef IMAGE_IO_H_
 #define IMAGE_IO_H_
-#include <dirent.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdexcept>
-#include <boost/bind.hpp>
-#include <boost/filesystem.hpp>
-#include <brisk/brisk.h>
-#include "./sort-comp.h"
 
-int getfilelists(std::vector<std::string>& initialPaths,
-                 std::vector<std::string>& imagepaths, bool sortlexical = false);
+#include <string>
+#include <vector>
 
-int getfilelists(std::string& initialPath, std::vector<std::string>& imagepaths,
-                 bool sortlexical = false)
-{
-  std::vector<std::string> paths;
-  paths.push_back(initialPath);
-  return getfilelists(paths, imagepaths, sortlexical);
-}
-
-int getfilelists(std::vector<std::string>& initialPaths,
-                 std::vector<std::string>& imagepaths, bool sortlexical)
-{
-  std::string initialPath;
-  DIR *d;
-  struct dirent *dir;
-  for (size_t diridx = 0; diridx < initialPaths.size(); ++diridx)
-  {
-    initialPath = initialPaths.at(diridx);
-    if (initialPath.find_last_of("/\\") != initialPath.size())
-    {
-      initialPath = initialPath + "/"; //add trailing slash
-    }
-    d = opendir(initialPath.c_str());
-    if (d == NULL)
-    {
-      throw std::logic_error(initialPath + " results in d == NULL");
-      return 1;
-    }
-    int i = 0;
-    while ((dir = readdir(d)))
-    {
-      if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0)
-      {
-        continue;
-      }
-      if(boost::filesystem::is_directory(dir->d_name)){
-        continue;
-      }
-      if (dir == NULL)
-        break;
-
-      i++;
-      imagepaths.push_back(initialPath + dir->d_name);
-    }
-  }
-  if (sortlexical)
-  {
-    std::sort(imagepaths.begin(), imagepaths.end()); //normal lexical sort
-  }
-  else
-  {
-    std::sort(imagepaths.begin(), imagepaths.end(),
-              boost::bind(&numeric_string_compare, _2, _1)); // sorts strictly by the number in the file name
-  }
-  return 0;
-}
-
-#endif /* IMAGE_IO_H_ */
+namespace brisk {
+bool NumericStringCompare(const std::string& s1, const std::string& s2);
+int Getfilelists(const std::vector<std::string>& initialPaths,
+                 bool sortlexical,
+                 const std::string& extension_filter,
+                 std::vector<std::string>* imagepaths);
+}  // namespace brisk
+#endif  // IMAGE_IO_H_
