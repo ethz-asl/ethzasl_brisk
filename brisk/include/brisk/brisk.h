@@ -42,6 +42,7 @@
 #define BRISK_BRISK_H_
 
 #include <brisk/brisk-descriptor-extractor.h>
+#include <brisk/brisk-feature.h>
 #include <brisk/brisk-feature-detector.h>
 #include <brisk/harris-feature-detector.h>
 #include <brisk/harris-score-calculator.h>
