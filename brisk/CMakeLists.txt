@@ -13,6 +13,12 @@ set(ROS_BUILD_TYPE Release)
 
 rosbuild_init()
 
+# TODO remove
+set(Boost_USE_STATIC_LIBS   ON)
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost COMPONENTS thread date_time program_options filesystem system serialization REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
@@ -30,9 +36,13 @@ rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/harris-score-calculator-float.cc
                                      src/harris-scores-sse.cc
                                      src/pattern-provider.cc
-                                     src/rdtsc-wrapper.cc
                                      src/sse-filters.cc
-)
+                                     src/timer.cc)
 
 rosbuild_add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
+
+rosbuild_add_executable(run_verification src/test/binary-equal.cc)
+target_link_libraries(run_verification ${PROJECT_NAME})
+# TODO remove
+target_link_libraries(run_verification ${Boost_LIBRARIES})

@@ -195,7 +195,7 @@ int main(int argc, char ** argv) {
   // Create the detector:
   cv::Ptr < cv::FeatureDetector > detector;
   if (argc == 1) {
-    detector = new cv::BriskFeatureDetector(70, 4);
+    detector = new brisk::BriskFeatureDetector(70, 4);
   } else {
     if (strncmp("FAST", argv[3], 4) == 0) {
       threshold = atoi(argv[3] + 4);
@@ -206,12 +206,12 @@ int main(int argc, char ** argv) {
       threshold = atoi(argv[3] + 5);
       if (threshold == 0)
         threshold = 30;
-      detector = new cv::BriskFeatureDetector(threshold, 0);
+      detector = new brisk::BriskFeatureDetector(threshold, 0);
     } else if (strncmp("BRISK", argv[3], 5) == 0) {
       threshold = atoi(argv[3] + 5);
       if (threshold == 0)
         threshold = 30;
-      detector = new cv::BriskFeatureDetector(threshold, 4);
+      detector = new brisk::BriskFeatureDetector(threshold, 4);
     } else if (strncmp("ORB", argv[3], 3) == 0) {
       threshold = atoi(argv[3] + 3);
       detector = new cv::OrbFeatureDetector(threshold);
@@ -294,16 +294,16 @@ int main(int argc, char ** argv) {
   cv::Ptr < cv::DescriptorExtractor > descriptorExtractor;
   // Now the extractor:
   if (argc == 1) {
-    descriptorExtractor = new cv::BriskDescriptorExtractor();
+    descriptorExtractor = new brisk::BriskDescriptorExtractor();
   } else {
     if (std::string(argv[4]) == "BRISK") {
-      descriptorExtractor = new cv::BriskDescriptorExtractor();
+      descriptorExtractor = new brisk::BriskDescriptorExtractor();
     } else if (std::string(argv[4]) == "U-BRISK") {
-      descriptorExtractor = new cv::BriskDescriptorExtractor(false);
+      descriptorExtractor = new brisk::BriskDescriptorExtractor(false);
     } else if (std::string(argv[4]) == "SU-BRISK") {
-      descriptorExtractor = new cv::BriskDescriptorExtractor(false, false);
+      descriptorExtractor = new brisk::BriskDescriptorExtractor(false, false);
     } else if (std::string(argv[4]) == "S-BRISK") {
-      descriptorExtractor = new cv::BriskDescriptorExtractor(true, false);
+      descriptorExtractor = new brisk::BriskDescriptorExtractor(true, false);
     } else if (std::string(argv[4]) == "BRIEF") {
       descriptorExtractor = new cv::BriefDescriptorExtractor(64);
     } else if (std::string(argv[4]) == "ORB") {
@@ -351,7 +351,7 @@ int main(int argc, char ** argv) {
   cv::Ptr<cv::BFMatcher> descriptorMatcher;
 
   if (hamming) {
-    cv::BruteForceMatcherSse matcher;
+    brisk::BruteForceMatcherSse matcher;
     matcher.radiusMatch(descriptors2, descriptors, matches, 80.0);
   } else {
     cv::BFMatcher matcher(cv::NORM_L2);

@@ -48,7 +48,7 @@
 #include <brisk/internal/macros.h>
 
 namespace brisk {
-class CV_EXPORTS BriskScaleSpace {
+class  BriskScaleSpace {
  public:
   // Construct telling the octaves number:
   BriskScaleSpace(uint8_t _octaves = 3, bool suppressScaleNonmaxima = true);

@@ -107,7 +107,7 @@ class BriskFeature : public cv::Feature2D {
   }
 
   brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator> _briskDetector;
-  cv::BriskDescriptorExtractor _briskExtractor;
+  brisk::BriskDescriptorExtractor _briskExtractor;
 };
 }  // namespace brisk
 #endif  // BRISK_BRISK_FEATURE_H_

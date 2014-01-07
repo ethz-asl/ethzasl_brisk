@@ -39,15 +39,16 @@
  */
 
 #include <fstream>  // NOLINT
+#include <iostream>  // NOLINT
 
 #include <brisk/brisk-descriptor-extractor.h>
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/helper-structures.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/pattern-provider.h>
-#include <brisk/internal/rdtsc-wrapper.h>
+#include <brisk/internal/timer.h>
 
-namespace cv {
+namespace brisk {
 const float BriskDescriptorExtractor::basicSize_ = 12.0;
 const unsigned int BriskDescriptorExtractor::scales_ = 64;
 // 40->4 Octaves - else, this needs to be adjusted...
@@ -64,6 +65,8 @@ void BriskDescriptorExtractor::InitFromStream(
   dMin_ = 0;
   rotationInvariance = rotationInvariant;
   scaleInvariance = scaleInvariant;
+
+  assert(pattern_stream.ok());
 
   // Read number of points.
   pattern_stream >> points_;
@@ -186,8 +189,8 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
     const float key_y, const unsigned int scale, const unsigned int rot,
     const unsigned int point) const {
   // Get the float position.
-  const brisk::BriskPatternPoint& briskPoint = patternPoints_[scale * n_rot_
-      * points_ + rot * points_ + point];
+  const brisk::BriskPatternPoint& briskPoint =
+      patternPoints_[scale * n_rot_ * points_ + rot * points_ + point];
 
   const float xf = briskPoint.x + key_x;
   const float yf = briskPoint.y + key_y;
@@ -344,15 +347,15 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
 }
 
 bool RoiPredicate(const float minX, const float minY, const float maxX,
-                  const float maxY, const KeyPoint& keyPt) {
-  const Point2f& pt = keyPt.pt;
+                  const float maxY, const cv::KeyPoint& keyPt) {
+  const cv::Point2f& pt = keyPt.pt;
   return (pt.x < minX) || (pt.x >= maxX) || (pt.y < minY) || (pt.y >= maxY);
 }
 
 // Computes the descriptor.
-void BriskDescriptorExtractor::computeImpl(const Mat& image,
-                                           std::vector<KeyPoint>& keypoints,
-                                           Mat& descriptors) const {
+void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
+                                           std::vector<cv::KeyPoint>& keypoints,
+                                           cv::Mat& descriptors) const {
   // Remove keypoints very close to the border.
   size_t ksize = keypoints.size();
   std::vector<int> kscales;  // Remember the scale per keypoint.
@@ -360,7 +363,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
   static const float log2 = 0.693147180559945;
   static const float lb_scalerange = log(scalerange_) / (log2);
 
-  std::vector < KeyPoint > valid_kp;
+  std::vector<cv::KeyPoint> valid_kp;
   std::vector<int> valid_scales;
   valid_kp.reserve(keypoints.size());
   valid_scales.reserve(keypoints.size());
@@ -401,7 +404,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
 
   // First, calculate the integral image over the whole image:
   // current integral image.
-  brisk::TimerSwitchable timer_integral_image(
+  brisk::timing::DebugTimer timer_integral_image(
       "1.0 Brisk Extraction: integral computation");
   cv::Mat _integral;  // The integral image.
   cv::Mat imageScaled;
@@ -420,7 +423,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
     std::cout.flush();
     exit(-1);
   }
-  timer_integral_image.stop();
+  timer_integral_image.Stop();
 
   int* _values = new int[points_];  // For temporary use.
 
@@ -452,7 +455,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
         theta = 0;
       } else {
         // Get the gray values in the unrotated pattern.
-        brisk::TimerSwitchable timerFancyOp11(
+        brisk::timing::DebugTimer timer_rotation_determination_sample_points(
             "1.1.1 Brisk Extraction: rotation determination: sample points "
             "(per keypoint)");
         if (image.type() == CV_8UC1) {
@@ -462,17 +465,16 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
           }
         } else {
           for (unsigned int i = 0; i < points_; i++) {
-            *(pvalues++) = int(
-                65536.0
+            *(pvalues++) = static_cast<int>(65536.0
                     * SmoothedIntensity<float, float>(imageScaled, _integral, x,
                                                       y, scale, 0, i));
           }
         }
-        timerFancyOp11.stop();
+        timer_rotation_determination_sample_points.Stop();
         direction0 = 0;
         direction1 = 0;
         // Now iterate through the long pairings.
-        brisk::TimerSwitchable timerFancyOp12(
+        brisk::timing::DebugTimer timer_rotation_determination_gradient(
             "1.1.2 Brisk Extraction: rotation determination: calculate "
             "gradient (per keypoint)");
         const brisk::BriskLongPair* max = longPairs_ + noLongPairs_;
@@ -486,7 +488,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
           direction0 += tmp0;
           direction1 += tmp1;
         }
-        timerFancyOp12.stop();
+        timer_rotation_determination_gradient.Stop();
         kp.angle = atan2(static_cast<float>(direction1),
                          static_cast<float>(direction0)) / M_PI * 180.0;
         theta = static_cast<int>((n_rot_ * kp.angle) / (360.0) + 0.5);
@@ -513,7 +515,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
     shifter = 0;
     pvalues = _values;
     // Get the gray values in the rotated pattern.
-    brisk::TimerSwitchable timerFancyOp2(
+    brisk::timing::DebugTimer timer_sample_points(
         "1.2 Brisk Extraction: sample points (per keypoint)");
     if (image.type() == CV_8UC1) {
       for (unsigned int i = 0; i < points_; i++) {
@@ -527,10 +529,10 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
                                                   scale, theta, i));
       }
     }
-    timerFancyOp2.stop();
+    timer_sample_points.Stop();
 
     // Now iterate through all the pairings.
-    brisk::TimerSwitchable timerFancyOp3(
+    brisk::timing::DebugTimer timer_assemble_bits(
         "1.3 Brisk Extraction: assemble bits (per keypoint)");
     brisk::UINT32_ALIAS* ptr2 = (brisk::UINT32_ALIAS*) ptr;
     const brisk::BriskShortPair* max = shortPairs_ + noShortPairs_;
@@ -547,7 +549,7 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
         ++ptr2;
       }
     }
-    timerFancyOp3.stop();
+    timer_assemble_bits.Stop();
 
     ptr += strings_;
   }
@@ -572,4 +574,4 @@ BriskDescriptorExtractor::~BriskDescriptorExtractor() {
   delete[] scaleList_;
   delete[] sizeList_;
 }
-}  // namespace cv
+}  // namespace brisk
