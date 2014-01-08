@@ -45,3 +45,6 @@ target_link_libraries(demo ${PROJECT_NAME})
 rosbuild_add_executable(run_verification src/test/binary-equal.cc)
 target_link_libraries(run_verification ${PROJECT_NAME})
 target_link_libraries(run_verification ${GLOG_LIBRARY})
+
+rosbuild_add_gtest(test_serialization src/test/test-serialization.cc)
+target_link_libraries(test_serialization ${GLOG_LIBRARY})

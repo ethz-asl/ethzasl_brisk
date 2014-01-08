@@ -37,12 +37,14 @@
 
 #ifndef BENCHDS_H_
 #define BENCHDS_H_
+#include <fstream>
 #include <memory>
 #include <type_traits>
 
 #include <brisk/brisk.h>
 #include <brisk/internal/hamming-sse.h>
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
 
 typedef unsigned char imagedata_T;
 class Blob;
@@ -524,7 +526,8 @@ void Serialize(const cv::Point2f& pt, std::ofstream* out) {
   Serialize(pt.y, out);
 }
 
-void DeSerialize(cv::Point2f* pt, std::ifstream* in) {
+template<typename TYPE>
+void DeSerialize(cv::Point_<TYPE>* pt, std::ifstream* in) {
   CHECK_NOTNULL(pt);
   CHECK_NOTNULL(in);
   DeSerialize(&pt->x, in);
