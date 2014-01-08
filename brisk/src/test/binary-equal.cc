@@ -86,7 +86,7 @@ int main(int /*argc*/, char ** argv) {
 
   std::cout << (have_dataset ? " True " : " False") << std::endl;
 
-  std::vector < DatasetEntry > dataset;
+  std::vector<DatasetEntry> dataset;
 
   if (!have_dataset) {
     /***
@@ -95,9 +95,9 @@ int main(int /*argc*/, char ** argv) {
     std::cout << "No dataset found at " << datasetfullpath
         << " will create one from the images in " << imagepath << std::endl;
 
-    std::vector<std::string> imgpaths;
+    std::vector < std::string > imgpaths;
     bool doLexicalsort = true;
-    std::vector<std::string> search_paths;
+    std::vector < std::string > search_paths;
     search_paths.push_back(imagepath);
     brisk::Getfilelists(search_paths, doLexicalsort, "", &imgpaths);
 
@@ -127,10 +127,8 @@ int main(int /*argc*/, char ** argv) {
         << "Now saving to " << datasetfullpath << std::endl << std::endl;
 
     std::ofstream ofs(std::string(datasetfullpath).c_str());
-    {
-      boost::archive::binary_oarchive oa(ofs);
-      oa << dataset;
-    }
+    Serialize(dataset, &ofs);
+
     std::cout << "Done. Now re-run to check against the dataset." << std::endl;
     return 0;
   } else {
@@ -143,12 +141,10 @@ int main(int /*argc*/, char ** argv) {
      * DESERIALIZE THE DATASET
      */
     std::ifstream ifs(std::string(datasetfullpath).c_str());
-    {
-      boost::archive::binary_iarchive ia(ifs);
-      ia >> dataset;
-    }
-    std::vector < DatasetEntry > verifyds;
-    verifyds = dataset;  //nice deep copy
+    DeSerialize(&dataset, &ifs);
+
+    std::vector<DatasetEntry> verifyds;
+    verifyds = dataset;  // Intended deep copy.
 
     std::cout << "Loaded dataset:" << std::endl;
     int i = 0;
@@ -157,7 +153,7 @@ int main(int /*argc*/, char ** argv) {
       std::cout << i << ": " << it->print() << std::endl;
     }
 
-    //remove all processed data, only keep the images
+    // Remove all processed data, only keep the images.
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
         .end(); it != end; ++it)
       it->clear_processed_data(doDescriptorComputation, doKeypointDetection);
@@ -165,7 +161,6 @@ int main(int /*argc*/, char ** argv) {
     /**
      * RUN THE PIPELINE ON THE DATASET
      */
-    //for(size_t i=0; i<100; ++i)
     runpipeline(dataset, datasetfullpath);
 
     /**
@@ -181,7 +176,7 @@ int main(int /*argc*/, char ** argv) {
           << std::endl << std::endl;
     }
     if (drawKeypoints) {
-      draw (dataset);
+      draw(dataset);
     }
 
     for (int i = 0; verificationOK && i < 100; ++i) {
@@ -203,12 +198,11 @@ void runpipeline(std::vector<DatasetEntry>& dataset,
    * DETECTION
    */
   //prepare BRISK detector
-
-  cv::Ptr<cv::FeatureDetector> detector =
+  cv::Ptr < cv::FeatureDetector > detector =
       new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>(
           BRISK_octaves, BRISK_uniformityradius, BRISK_absoluteThreshold);
 
-  if (doKeypointDetection || dataset.at(0).keypoints_.empty()) {
+  if (doKeypointDetection || dataset.at(0).GetKeyPoints().empty()) {
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
         .end(); it != end; ++it) {
 
@@ -230,34 +224,34 @@ void runpipeline(std::vector<DatasetEntry>& dataset,
        std::cout << dst.at<float>(10,10)<<std::endl; // scared of dead code eliminations...*/
 
       brisk::timing::DebugTimer timerdetect(
-          DatasetEntry::getCurrentEntry()->path_ + "_detect");
-      detector->detect(it->imgGray_, it->keypoints_);
+          DatasetEntry::getCurrentEntry()->GetPath() + "_detect");
+      detector->detect(*it->GetImgMutable(), *it->GetKeyPointsMutable());
       timerdetect.Stop();
 
       //Test userdata
-      Blob& blob = DatasetEntry::getCurrentEntry()->getBlob("testImage");  //is generated if non existant
+      Blob& blob = DatasetEntry::getCurrentEntry()->getBlob("testImage");
       if (!blob.hasverificationData()) {
-        blob.setVerificationData(it->imgGray_.data,
-                                 it->imgGray_.rows * it->imgGray_.cols);
+        blob.setVerificationData(it->GetImage().data,
+                                 it->GetImage().rows * it->GetImage().cols);
       } else {
-        blob.setCurrentData(it->imgGray_.data,
-                            it->imgGray_.rows * it->imgGray_.cols);
+        blob.setCurrentData(it->GetImage().data,
+                            it->GetImage().rows * it->GetImage().cols);
       }
     }
   }
 
   // Extraction.
-  cv::Ptr<cv::DescriptorExtractor> descriptorExtractor =
+  cv::Ptr < cv::DescriptorExtractor > descriptorExtractor =
       new brisk::BriskDescriptorExtractor(BRISK_rotationestimation,
                                           BRISK_scaleestimation);
-  if (doDescriptorComputation || dataset.at(0).descriptors_.rows == 0) {
+  if (doDescriptorComputation || dataset.at(0).GetDescriptors().rows == 0) {
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
         .end(); it != end; ++it) {
       it->setThisAsCurrentEntry();  //now you can query for the current image to add tags to timers etc.
       brisk::timing::Timer timerextract(
-          DatasetEntry::getCurrentEntry()->path_ + "_extract");
-      descriptorExtractor->compute(it->imgGray_, it->keypoints_,
-                                   it->descriptors_);
+          DatasetEntry::getCurrentEntry()->GetPath() + "_extract");
+      descriptorExtractor->compute(it->GetImage(), *it->GetKeyPointsMutable(),
+                                   *it->GetDescriptorsMutable());
       timerextract.Stop();
     }
   }
@@ -276,10 +270,8 @@ bool runverification(std::vector<DatasetEntry>& current_dataset,
    * DO VALIDATION
    */
 
-  if (current_dataset.size() != verification_dataset.size()) {
-    throw std::runtime_error("Failed on database number of entries");
-    return false;
-  }
+  CHECK_EQ(current_dataset.size(), verification_dataset.size()) <<
+      "Failed on database number of entries";
 
   bool failed = false;
   //now go through every image
@@ -291,11 +283,12 @@ bool runverification(std::vector<DatasetEntry>& current_dataset,
     try {
       failed |= (*it_curr != *it_verif);
     } catch (std::exception& e) {
-      std::cout << "------" << std::endl << "Failed on image " << it_curr->path_
-          << std::endl << "* Error: " << e.what() << "------" << std::endl;
+      std::cout << "------" << std::endl << "Failed on image " <<
+          it_curr->GetPath() << std::endl << "* Error: " << e.what() << "------"
+          << std::endl;
       failed = true;
       if (exitfirstfail)
-        throw e;
+        CHECK(!failed);
     }
   }
   return !failed;
@@ -310,7 +303,8 @@ void draw(std::vector<DatasetEntry>& dataset) {
       .end(); it != end; ++it) {
     it->setThisAsCurrentEntry();  //now you can query DatasetEntry::getCurrentImageName() for the current image to add tags to timers etc.
     cv::Mat out;
-    cv::drawKeypoints(it->imgGray_, it->keypoints_, out, cv::Scalar::all(-1),
+    cv::drawKeypoints(it->GetImage(), it->GetKeyPoints(), out,
+                      cv::Scalar::all(-1),
                       cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
     cv::imshow("Keypoints", out);
     cv::waitKey();

@@ -18,12 +18,6 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 find_package(GLog REQUIRED)
 include_directories(GLOG_INCLUDE_DIRS)
 
-# TODO remove
-set(Boost_USE_STATIC_LIBS   ON)
-set(Boost_USE_MULTITHREADED ON)
-find_package(Boost COMPONENTS thread date_time program_options filesystem system serialization REQUIRED)
-include_directories(${Boost_INCLUDE_DIRS})
-
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
@@ -45,12 +39,9 @@ rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/timer.cc
                                      src/test/image-io.cc)
 
-
 rosbuild_add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
 
 rosbuild_add_executable(run_verification src/test/binary-equal.cc)
 target_link_libraries(run_verification ${PROJECT_NAME})
 target_link_libraries(run_verification ${GLOG_LIBRARY})
-# TODO remove
-target_link_libraries(run_verification ${Boost_LIBRARIES})

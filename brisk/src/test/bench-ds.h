@@ -37,40 +37,16 @@
 
 #ifndef BENCHDS_H_
 #define BENCHDS_H_
-
-#include <exception>
+#include <memory>
+#include <type_traits>
 
 #include <brisk/brisk.h>
 #include <brisk/internal/hamming-sse.h>
 #include <opencv2/core/core.hpp>
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/version.hpp>
-#include <boost/serialization/split_member.hpp>
-#include <boost/serialization/split_free.hpp>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/shared_array.hpp>
-
 typedef unsigned char imagedata_T;
-
-class dataverification_failed : public std::exception {
- public:
-  dataverification_failed(const std::string& msg)
-      : message_(msg) {
-  }
-  virtual const char* what() const throw () {
-    return message_.c_str();
-  }
-  ~dataverification_failed() throw () {
-  }
-  ;
- private:
-  std::string message_;
-};
+class Blob;
+class DatasetEntry;
 
 #define EXPECTSAMETHROW(THIS, OTHER, MEMBER) \
     do { if (THIS.MEMBER != OTHER.MEMBER) { \
@@ -78,7 +54,7 @@ class dataverification_failed : public std::exception {
       ss<<  "Failed on " << #MEMBER << ": "<< THIS.MEMBER \
       << " other " << OTHER.MEMBER << " at " << __PRETTY_FUNCTION__ \
       << " Line: " << __LINE__ << std::endl; \
-      throw dataverification_failed(ss.str()); \
+      CHECK(false) << ss.str(); \
       return false;\
     } }\
     while (0);
@@ -99,7 +75,7 @@ class dataverification_failed : public std::exception {
       << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
       << std::endl; \
-      throw dataverification_failed(ss.str()); \
+      CHECK(false) << ss.str(); \
       return false;\
     } }\
     while (0);
@@ -121,7 +97,7 @@ class dataverification_failed : public std::exception {
       << std::endl << "response:\t" << THIS.response<<"\t" << OTHER.response \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
       << std::endl;\
-      throw dataverification_failed(ss.str()); \
+      CHECK(false) << ss.str(); \
       return false;\
     } }\
     while (0);
@@ -136,64 +112,13 @@ std::string descriptortoString(const __m128i * d, int num128Words) {
   };
   return ss.str();
 }
-;
-
-namespace boost {
-namespace serialization {
-template<class Archive>
-void load(Archive & ar, cv::Mat& mat, const unsigned int /*version*/) {
-  int bwrows;
-  int bwcols;
-  int bwtype;
-  ar & bwrows;
-  ar & bwcols;
-  ar & bwtype;
-  mat.create(bwrows, bwcols, bwtype);
-  //zero copy de-serialize into cv::Mat
-  boost::serialization::array<imagedata_T> bwarr =
-      boost::serialization::make_array(mat.data, mat.rows * mat.cols);
-  ar & bwarr;
-}
-template<class Archive>
-void save(Archive & ar, const cv::Mat& mat_, const unsigned int /*version*/) {
-  cv::Mat mat;
-  if (!mat_.isContinuous()) {
-    mat = mat_.clone();
-  } else {
-    mat = mat_;
-  }
-  ar & mat.rows;
-  ar & mat.cols;
-  int tp_img = mat.type();
-  ar & tp_img;
-  boost::serialization::array<imagedata_T> bwarr =
-      boost::serialization::make_array(mat.data, mat.rows * mat.cols);
-  ar & bwarr;
-}
-
-template<class Archive>
-void serialize(Archive & ar, cv::Point2f& pt, const unsigned int /*version*/) {
-  ar & pt.x;
-  ar & pt.y;
-}
-
-template<class Archive>
-void serialize(Archive & ar, cv::KeyPoint& kp, const unsigned int /*version*/) {
-  ar & kp.angle;
-  ar & kp.class_id;
-  ar & kp.octave;
-  ar & kp.pt;
-  ar & kp.response;
-  ar & kp.size;
-}
-
-}
-}
 
 struct Blob {
+  friend void Serialize(const Blob& value, std::ofstream* out);
+  friend void DeSerialize(Blob* value, std::ifstream* in);
  private:
-  boost::shared_array<unsigned char> current_data_;
-  boost::shared_array<unsigned char> verification_data_;
+  std::unique_ptr<unsigned char[]> current_data_;
+  std::unique_ptr<unsigned char[]> verification_data_;
   uint32_t size_;
  public:
   Blob() {
@@ -240,9 +165,9 @@ struct Blob {
 
   void setCurrentData(const unsigned char* data, uint32_t size) {
     if (size != size_) {
-      throw std::logic_error(
-          "You set the current data to a different length than "
-          "the verification data. This will fail the verification. Use both times the same lenght.");
+      CHECK(false) << "You set the current data to a different length than "
+          "the verification data. This will fail the verification."
+          "Use both times the same lenght.";
     }
     current_data_.reset(new unsigned char[size]);
     memcpy(current_data_.get(), data, size);
@@ -263,46 +188,56 @@ struct Blob {
       return NULL;
     }
   }
-
-  template<class Archive>
-  void save(Archive & ar, const unsigned int /*version*/) const {
-    ar & size_;
-    boost::serialization::array<unsigned char> userdat =
-        boost::serialization::make_array(verification_data_.get(), size_);
-    ar & userdat;
-  }
-  template<class Archive>
-  void load(Archive & ar, const unsigned int /*version*/) {
-    ar & size_;
-    if (size_) {
-      verification_data_.reset(new unsigned char[size_]);
-      boost::serialization::array<unsigned char> userdat =
-          boost::serialization::make_array(verification_data_.get(), size_);
-      ar & userdat;
-    }
-  }
-  BOOST_SERIALIZATION_SPLIT_MEMBER();
 };
 
 struct DatasetEntry {
-  friend class boost::serialization::access;
-  /*
-   * Note: when addint members also put the to the cpy ctor!
-   */
+  friend void DeSerialize(DatasetEntry* value, std::ifstream* in);
+  friend void Serialize(const DatasetEntry& value, std::ofstream* out);
  private:
   std::map<std::string, Blob> userdata_;
-
- public:
   std::string path_;
   cv::Mat imgGray_;
   std::vector<cv::KeyPoint> keypoints_;
   cv::Mat descriptors_;
-  DatasetEntry() {
-  }
+
+ public:
+  DatasetEntry() = default;
 
   std::string shortname() {
     int idx = path_.find_last_of("/\\") + 1;
     return path_.substr(idx, path_.length() - idx);
+  }
+
+  const std::string& GetPath() const {
+    return path_;
+  }
+
+  const cv::Mat& GetImage() const {
+    return imgGray_;
+  }
+
+  const std::vector<cv::KeyPoint>& GetKeyPoints() const {
+    return keypoints_;
+  }
+
+  const cv::Mat& GetDescriptors() const {
+    return descriptors_;
+  }
+
+  std::string* GetPathMutable() {
+    return &path_;
+  }
+
+  cv::Mat* GetImgMutable() {
+    return &imgGray_;
+  }
+
+  std::vector<cv::KeyPoint>* GetKeyPointsMutable() {
+    return &keypoints_;
+  }
+
+  cv::Mat* GetDescriptorsMutable() {
+    return &descriptors_;
   }
 
   /*
@@ -371,7 +306,7 @@ struct DatasetEntry {
               << static_cast<int>(this->imgGray_.data[i]) << " other "
               << static_cast<int>(other.imgGray_.data[i]) << " at "
               << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl;
-          throw dataverification_failed(ss.str());
+          CHECK(false) << ss.str();
           return false;
         }
       }
@@ -385,16 +320,15 @@ struct DatasetEntry {
       return false;
     }
 
-    //for all keypoints
-    //TODO we might want to sort the keypoints and descriptors by location to allow detection and description to be done
-    //with blocking type optimizations
+    //TODO(slynen): we might want to sort the keypoints and descriptors by
+    // location to allow detection and description to be done with blocking type
+    // optimizations.
     int kpidx = 0;
     for (std::vector<cv::KeyPoint>::const_iterator it_this = this->keypoints_
         .begin(), it_other = other.keypoints_.begin(), end_this = this
         ->keypoints_.end(), end_other = other.keypoints_.end();
         it_this != end_this && it_other != end_other;
         ++it_this, ++it_other, ++kpidx) {
-//      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), angle, kpidx);
       CHECKCVKEYPOINTANGLESAME((*it_this), (*it_other), angle, kpidx);
       CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), class_id, kpidx);
       CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), octave, kpidx);
@@ -404,9 +338,7 @@ struct DatasetEntry {
       CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), size, kpidx);
     }
 
-    /**
-     * CHECK DESCRIPTORS
-     */
+    // Check descriptors.
     if (this->descriptors_.rows != other.descriptors_.rows) {
 
       EXPECTSAMETHROW((*this), other, descriptors_.rows);
@@ -435,9 +367,7 @@ struct DatasetEntry {
       }
     }
 
-    /**
-     * CHECK USERDATA
-     */
+    // Check user data.
     for (std::map<std::string, Blob>::const_iterator it = userdata_.begin(),
         end = userdata_.end(); it != end; ++it) {
       int diffbytes = it->second.checkCurrentDataSameAsVerificationData();
@@ -446,7 +376,7 @@ struct DatasetEntry {
         ss << "For userdata " << it->first << " failed with " << diffbytes
             << " bytes difference. At " << __PRETTY_FUNCTION__ << " Line: "
             << __LINE__ << std::endl;
-        throw dataverification_failed(ss.str());
+        CHECK(false) << ss.str();
       }
     }
     return true;
@@ -467,16 +397,6 @@ struct DatasetEntry {
     }
     ss << "\t" << listBlobs();
     return ss.str();
-  }
-
-  // Serialize.
-  template<class Archive>
-  void serialize(Archive & ar, const unsigned int /*version*/) {
-    ar & path_;
-    ar & imgGray_;
-    ar & keypoints_;
-    ar & descriptors_;
-    ar & userdata_;
   }
 
   /**
@@ -517,5 +437,237 @@ struct DatasetEntry {
  private:
   static DatasetEntry* current_entry;  //a global tag which image is currently being processed
 };
-BOOST_SERIALIZATION_SPLIT_FREE (cv::Mat);
+
+template<class TYPE>
+void Serialize(
+    const TYPE& value, std::ofstream* out,
+    typename std::enable_if<std::is_integral<TYPE>::value>::type* = 0) {
+  CHECK_NOTNULL(out);
+  out->write(reinterpret_cast<const char*>(&value), sizeof(value));
+}
+
+template<class TYPE>
+void DeSerialize(TYPE* value, std::ifstream* in,
+                 typename std::enable_if<std::is_integral<TYPE>::value>::type* =
+                     0) {
+  CHECK_NOTNULL(value);
+  CHECK_NOTNULL(in);
+  in->read(reinterpret_cast<char*>(value), sizeof(value));
+}
+template<class TYPE>
+void Serialize(
+    const TYPE& value, std::ofstream* out,
+    typename std::enable_if<std::is_floating_point<TYPE>::value>::type* = 0) {
+  CHECK_NOTNULL(out);
+  out->write(reinterpret_cast<const char*>(&value), sizeof(value));
+}
+
+template<class TYPE>
+void DeSerialize(
+    TYPE* value, std::ifstream* in,
+    typename std::enable_if<std::is_floating_point<TYPE>::value>::type* = 0) {
+  CHECK_NOTNULL(value);
+  CHECK_NOTNULL(in);
+  in->read(reinterpret_cast<char*>(value), sizeof(value));
+}
+
+void Serialize(const uint32_t& value, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  out->write(reinterpret_cast<const char*>(&value), sizeof(value));
+}
+
+void DeSerialize(uint32_t* value, std::ifstream* in) {
+  CHECK_NOTNULL(value);
+  CHECK_NOTNULL(in);
+  in->read(reinterpret_cast<char*>(value), sizeof(value));
+}
+
+void Serialize(const cv::Mat& mat, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  cv::Mat mat_cont;
+  if (!mat.isContinuous()) {
+    mat_cont = mat.clone();
+  } else {
+    mat_cont = mat;
+  }
+  int type = mat_cont.type();
+  int element_size = mat_cont.elemSize();
+
+  Serialize(mat_cont.rows, out);
+  Serialize(mat_cont.cols, out);
+  Serialize(type, out);
+  Serialize(element_size, out);
+
+  out->write(reinterpret_cast<char*>(mat_cont.data),
+             element_size * mat_cont.rows * mat_cont.cols);
+}
+
+void DeSerialize(cv::Mat* mat, std::ifstream* in) {
+  CHECK_NOTNULL(mat);
+  CHECK_NOTNULL(in);
+  int rows;
+  int cols;
+  int type;
+  int element_size;
+  DeSerialize(&rows, in);
+  DeSerialize(&cols, in);
+  DeSerialize(&type, in);
+  DeSerialize(&element_size, in);
+
+  mat->create(rows, cols, type);
+  in->read(reinterpret_cast<char*>(mat->data), element_size * rows * cols);
+}
+
+void Serialize(const cv::Point2f& pt, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  Serialize(pt.x, out);
+  Serialize(pt.y, out);
+}
+
+void DeSerialize(cv::Point2f* pt, std::ifstream* in) {
+  CHECK_NOTNULL(pt);
+  CHECK_NOTNULL(in);
+  DeSerialize(&pt->x, in);
+  DeSerialize(&pt->y, in);
+}
+
+void Serialize(const cv::KeyPoint& pt, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  Serialize(pt.angle, out);
+  Serialize(pt.class_id, out);
+  Serialize(pt.octave, out);
+  Serialize(pt.pt, out);
+  Serialize(pt.response, out);
+  Serialize(pt.size, out);
+}
+
+void DeSerialize(cv::KeyPoint* pt, std::ifstream* in) {
+  CHECK_NOTNULL(pt);
+  CHECK_NOTNULL(in);
+  DeSerialize(&pt->angle, in);
+  DeSerialize(&pt->class_id, in);
+  DeSerialize(&pt->octave, in);
+  DeSerialize(&pt->pt, in);
+  DeSerialize(&pt->response, in);
+  DeSerialize(&pt->size, in);
+}
+
+void Serialize(const std::string& value, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  size_t length = value.size();
+  Serialize(length, out);
+  out->write(reinterpret_cast<const char*>(value.data()),
+             length * sizeof(value[0]));
+}
+
+void DeSerialize(std::string* value, std::ifstream* in) {
+  CHECK_NOTNULL(value);
+  CHECK_NOTNULL(in);
+  size_t length;
+  DeSerialize(&length, in);
+  value->resize(length);
+  in->read(reinterpret_cast<char*>(&(value[0])), length * sizeof(value[0]));
+}
+
+template<typename TYPEA, typename TYPEB>
+void Serialize(const std::pair<TYPEA, TYPEB>& value, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  Serialize(value.first, out);
+  Serialize(value.second, out);
+}
+
+template<typename TYPEA, typename TYPEB>
+void DeSerialize(std::pair<TYPEA, TYPEB>* value, std::ifstream* in) {
+  CHECK_NOTNULL(value);
+  CHECK_NOTNULL(in);
+  DeSerialize(&value.first, in);
+  DeSerialize(&value.second, in);
+}
+
+template<typename TYPEA, typename TYPEB>
+void Serialize(const std::map<TYPEA, TYPEB>& value, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  size_t length = value.size();
+  Serialize(length, out);
+  for (const std::pair<TYPEA, TYPEB>& entry : value) {
+    Serialize(entry.first, out);
+    Serialize(entry.second, out);
+  }
+}
+
+template<typename TYPEA, typename TYPEB>
+void DeSerialize(std::map<TYPEA, TYPEB>* value, std::ifstream* in) {
+  CHECK_NOTNULL(value);
+  CHECK_NOTNULL(in);
+  size_t length;
+  DeSerialize(&length, in);
+  for (size_t i = 0; i < length; ++i) {
+    std::pair<TYPEA, TYPEB> entry;
+    DeSerialize(&entry.first, in);
+    DeSerialize(&entry.second, in);
+    value->insert(entry);
+  }
+}
+
+template<typename T>
+void Serialize(const std::vector<T>& value, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  size_t length = value.size();
+  Serialize(length, out);
+  for (const T& entry : value) {
+    Serialize(entry, out);
+  }
+}
+
+template<typename T>
+void DeSerialize(std::vector<T>* value, std::ifstream* in) {
+  CHECK_NOTNULL(value);
+  CHECK_NOTNULL(in);
+  size_t length;
+  DeSerialize(&length, in);
+  value->resize(length);
+  for (size_t i = 0; i < length; ++i) {
+    DeSerialize(&value->at(i), in);
+  }
+}
+
+void Serialize(const Blob& value, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  Serialize(value.size_, out);
+  out->write(reinterpret_cast<const char*>(value.verification_data_.get()),
+             value.size_);
+}
+
+void DeSerialize(Blob* value, std::ifstream* in) {
+  CHECK_NOTNULL(in);
+  CHECK_NOTNULL(value);
+  ::DeSerialize(&value->size_, in);
+  value->verification_data_.reset(new unsigned char[value->size_]);
+  in->read(reinterpret_cast<char*>(value->verification_data_.get()),
+           value->size_);
+}
+
+void Serialize(const DatasetEntry& value, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  Serialize(value.path_, out);
+  Serialize(value.imgGray_, out);
+  Serialize(value.keypoints_, out);
+  Serialize(value.descriptors_, out);
+  Serialize(value.userdata_, out);
+}
+
+void DeSerialize(DatasetEntry* value, std::ifstream* in) {
+  CHECK_NOTNULL(value);
+  CHECK_NOTNULL(in);
+  try {
+    DeSerialize(&value->path_, in);
+    DeSerialize(&value->imgGray_, in);
+    DeSerialize(&value->keypoints_, in);
+    DeSerialize(&value->descriptors_, in);
+    DeSerialize(&value->userdata_, in);
+  } catch (const std::ifstream::failure& e) {
+    CHECK(false) << "Failed to load DatasetEntry " + std::string(e.what());
+  }
+}
+
 #endif /* BENCHDS_H_ */
