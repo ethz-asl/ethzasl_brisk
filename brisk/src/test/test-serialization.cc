@@ -59,38 +59,24 @@ void SetRandom(
     TYPE* value,
     typename std::enable_if<std::is_floating_point<TYPE>::value>::type* = 0) {
   CHECK_NOTNULL(value);
-  *value = rand() / RAND_MAX;
+  *value = static_cast<TYPE>(rand()) / RAND_MAX;
 }
 
-template<typename TYPEA, typename TYPEB>
-void SetRandom(std::pair<TYPEA, TYPEB>* value) {
+void SetRandom(uint32_t* value) {
   CHECK_NOTNULL(value);
-  SetRandom(&value->first);
-  SetRandom(&value->second);
+  *value = rand() % std::numeric_limits<uint32_t>::max();
 }
 
-template<typename TYPE>
-void SetRandom(std::vector<TYPE>* value) {
+void SetRandom(std::string* value) {
   CHECK_NOTNULL(value);
-  int size;
+  size_t size;
   SetRandom(&size);
-  size %= 20;
-  value->resize(size);
-  for (TYPE& entry : *value) {
-    SetRandom(entry);
-  }
-}
-
-template<typename TYPEA, typename TYPEB>
-void SetRandom(std::map<TYPEA, TYPEB>* value) {
-  CHECK_NOTNULL(value);
-  int size;
-  SetRandom(&size);
-  size %= 20;
-  for (size_t i = 0; i < size; ++i) {
-    std::pair<TYPEA, TYPEB> entry;
-    SetRandom(entry);
-    value->insert(entry);
+  size = size % 20 + 1;
+  *value = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  int pos;
+  while(value->size() != size) {
+    pos = ((rand() % (value->size() - 1)));
+    value->erase (pos, 1);
   }
 }
 
@@ -103,7 +89,39 @@ void SetRandom(cv::Mat* value) {
   SetRandom(&cols);
   cols %= 20;
   value->create(rows, cols, CV_8UC1);
-  // We assume using random memory is random enough as matrix content.
+  // Just using the random memory which is contained in the matrix.
+}
+
+template<typename TYPEA, typename TYPEB>
+void SetRandom(std::pair<TYPEA, TYPEB>* value) {
+  CHECK_NOTNULL(value);
+  SetRandom(&value->first);
+  SetRandom(&value->second);
+}
+
+template<typename TYPE>
+void SetRandom(std::vector<TYPE>* value) {
+  CHECK_NOTNULL(value);
+  size_t size;
+  SetRandom(&size);
+  size %= 20;
+  value->resize(size);
+  for (TYPE& entry : *value) {
+    SetRandom(&entry);
+  }
+}
+
+template<typename TYPEA, typename TYPEB>
+void SetRandom(std::map<TYPEA, TYPEB>* value) {
+  CHECK_NOTNULL(value);
+  size_t size;
+  SetRandom(&size);
+  size %= 20;
+  for (size_t i = 0; i < size; ++i) {
+    std::pair<TYPEA, TYPEB> entry;
+    SetRandom(&entry);
+    value->insert(entry);
+  }
 }
 
 template<typename TYPE>
@@ -124,16 +142,120 @@ void SetRandom(cv::KeyPoint* value) {
 }
 
 template<typename TYPE>
-bool RunSerializationTest() {
-  TYPE loaded_value;
-  std::string filename = "serialization_file_" +
-      std::string(typeid(TYPE).name());
+void AssertEqual(const TYPE& lhs, const TYPE& rhs) {
+  ASSERT_EQ(lhs, rhs);
+}
 
+template<typename TYPE>
+void AssertNotEqual(const TYPE& lhs, const TYPE& rhs) {
+  ASSERT_NE(lhs, rhs);
+}
+
+template<>
+void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
+  ASSERT_EQ(lhs.size(), rhs.size());
+  for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
+    CHECK_EQ(lhs.at<unsigned char>(index), rhs.at<unsigned char>(index)) <<
+        "Failed matrix equality for index " << index;
+  }
+}
+
+template<>
+void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
+  ASSERT_NE(lhs.size(), rhs.size());
+  bool is_same = true;
+  for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
+    if (lhs.at<unsigned char>(index) != rhs.at<unsigned char>(index)) {
+      is_same = false;
+    }
+  }
+}
+
+template<typename TYPE>
+void RunSerializationTest() {
+  TYPE saved_value, loaded_value;
+  std::string filename = "serialization_file_" +
+      std::string(typeid(TYPE).name()) + "_tmp";
+  {  // Scoping to flush and close file.
+    std::ofstream ofs(filename);
+    SetRandom(&saved_value);
+    SetRandom(&loaded_value);
+    AssertNotEqual(saved_value, loaded_value);
+    Serialize(saved_value, &ofs);
+  }
+  std::ifstream ifs(filename);
+  DeSerialize(&loaded_value, &ifs);
+  AssertEqual(saved_value, loaded_value);
+}
+
+TEST(Serialization, Char) {
+  RunSerializationTest<char>();
+}
+
+TEST(Serialization, UnsignedChar) {
+  RunSerializationTest<unsigned char>();
 }
 
 TEST(Serialization, Integer) {
   RunSerializationTest<int>();
 }
+
+TEST(Serialization, UnsignedInteger) {
+  RunSerializationTest<unsigned int>();
+}
+
+TEST(Serialization, Float) {
+  RunSerializationTest<float>();
+}
+
+TEST(Serialization, Double) {
+  RunSerializationTest<double>();
+}
+
+TEST(Serialization, String) {
+  RunSerializationTest<std::string>();
+}
+
+TEST(Serialization, PairDoubleInt) {
+  RunSerializationTest<std::pair<double, int> >();
+}
+
+TEST(Serialization, PairDoubleDouble) {
+  RunSerializationTest<std::pair<double, double> >();
+}
+
+TEST(Serialization, PairStringDouble) {
+  RunSerializationTest<std::pair<std::string, double> >();
+}
+
+TEST(Serialization, VectorDouble) {
+  RunSerializationTest<std::vector<double> >();
+}
+
+TEST(Serialization, VectorString) {
+  RunSerializationTest<std::vector<std::string> >();
+}
+
+TEST(Serialization, MapIntDouble) {
+  RunSerializationTest<std::map<int, double> >();
+}
+
+TEST(Serialization, MapDoubleString) {
+  RunSerializationTest<std::map<double, std::string> >();
+}
+
+TEST(Serialization, MapStringDouble) {
+  RunSerializationTest<std::map<std::string, double> >();
+}
+
+TEST(Serialization, MapStringString) {
+  RunSerializationTest<std::map<std::string, std::string> >();
+}
+
+TEST(Serialization, CvMat) {
+  RunSerializationTest<cv::Mat>();
+}
+
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

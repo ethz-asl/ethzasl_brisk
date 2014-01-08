@@ -454,8 +454,9 @@ void DeSerialize(TYPE* value, std::ifstream* in,
                      0) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
-  in->read(reinterpret_cast<char*>(value), sizeof(value));
+  in->read(reinterpret_cast<char*>(value), sizeof(*value));
 }
+
 template<class TYPE>
 void Serialize(
     const TYPE& value, std::ofstream* out,
@@ -470,7 +471,7 @@ void DeSerialize(
     typename std::enable_if<std::is_floating_point<TYPE>::value>::type* = 0) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
-  in->read(reinterpret_cast<char*>(value), sizeof(value));
+  in->read(reinterpret_cast<char*>(value), sizeof(*value));
 }
 
 void Serialize(const uint32_t& value, std::ofstream* out) {
@@ -481,7 +482,7 @@ void Serialize(const uint32_t& value, std::ofstream* out) {
 void DeSerialize(uint32_t* value, std::ifstream* in) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
-  in->read(reinterpret_cast<char*>(value), sizeof(value));
+  in->read(reinterpret_cast<char*>(value), sizeof(*value));
 }
 
 void Serialize(const cv::Mat& mat, std::ofstream* out) {
@@ -515,7 +516,6 @@ void DeSerialize(cv::Mat* mat, std::ifstream* in) {
   DeSerialize(&cols, in);
   DeSerialize(&type, in);
   DeSerialize(&element_size, in);
-
   mat->create(rows, cols, type);
   in->read(reinterpret_cast<char*>(mat->data), element_size * rows * cols);
 }
@@ -569,7 +569,10 @@ void DeSerialize(std::string* value, std::ifstream* in) {
   size_t length;
   DeSerialize(&length, in);
   value->resize(length);
-  in->read(reinterpret_cast<char*>(&(value[0])), length * sizeof(value[0]));
+  std::unique_ptr<char[]> mem(new char[length + 1]);
+  in->read(mem.get(), length * sizeof(mem.get()[0]));
+  mem[length] = '\0';
+  *value = std::string(mem.get());
 }
 
 template<typename TYPEA, typename TYPEB>
@@ -583,8 +586,8 @@ template<typename TYPEA, typename TYPEB>
 void DeSerialize(std::pair<TYPEA, TYPEB>* value, std::ifstream* in) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
-  DeSerialize(&value.first, in);
-  DeSerialize(&value.second, in);
+  DeSerialize(&value->first, in);
+  DeSerialize(&value->second, in);
 }
 
 template<typename TYPEA, typename TYPEB>
@@ -593,8 +596,7 @@ void Serialize(const std::map<TYPEA, TYPEB>& value, std::ofstream* out) {
   size_t length = value.size();
   Serialize(length, out);
   for (const std::pair<TYPEA, TYPEB>& entry : value) {
-    Serialize(entry.first, out);
-    Serialize(entry.second, out);
+    Serialize(entry, out);
   }
 }
 
@@ -602,12 +604,12 @@ template<typename TYPEA, typename TYPEB>
 void DeSerialize(std::map<TYPEA, TYPEB>* value, std::ifstream* in) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
+  value->clear();
   size_t length;
   DeSerialize(&length, in);
   for (size_t i = 0; i < length; ++i) {
     std::pair<TYPEA, TYPEB> entry;
-    DeSerialize(&entry.first, in);
-    DeSerialize(&entry.second, in);
+    DeSerialize(&entry, in);
     value->insert(entry);
   }
 }
@@ -626,6 +628,7 @@ template<typename T>
 void DeSerialize(std::vector<T>* value, std::ifstream* in) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
+  value->clear();
   size_t length;
   DeSerialize(&length, in);
   value->resize(length);
