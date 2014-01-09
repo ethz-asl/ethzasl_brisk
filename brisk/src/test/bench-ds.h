@@ -614,6 +614,8 @@ void DeSerialize(std::map<TYPEA, TYPEB>* value, std::ifstream* in) {
   }
 }
 
+// TODO(slynen): Merge the templates for vector and list using template template
+// parameters.
 template<typename T>
 void Serialize(const std::vector<T>& value, std::ofstream* out) {
   CHECK_NOTNULL(out);
@@ -632,8 +634,31 @@ void DeSerialize(std::vector<T>* value, std::ifstream* in) {
   size_t length;
   DeSerialize(&length, in);
   value->resize(length);
-  for (size_t i = 0; i < length; ++i) {
-    DeSerialize(&value->at(i), in);
+  for (T& entry : *value) {
+    DeSerialize(&entry, in);
+  }
+}
+
+template<typename T>
+void Serialize(const std::list<T>& value, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  size_t length = value.size();
+  Serialize(length, out);
+  for (const T& entry : value) {
+    Serialize(entry, out);
+  }
+}
+
+template<typename T>
+void DeSerialize(std::list<T>* value, std::ifstream* in) {
+  CHECK_NOTNULL(value);
+  CHECK_NOTNULL(in);
+  value->clear();
+  size_t length;
+  DeSerialize(&length, in);
+  value->resize(length);
+  for (T& entry : *value) {
+    DeSerialize(&entry, in);
   }
 }
 

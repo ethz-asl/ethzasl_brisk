@@ -36,6 +36,9 @@
  */
 
 #include <limits>
+#include <list>
+#include <string>
+#include <vector>
 
 #include <glog/logging.h>
 #include <gtest/gtest.h>
@@ -101,6 +104,18 @@ void SetRandom(std::pair<TYPEA, TYPEB>* value) {
 
 template<typename TYPE>
 void SetRandom(std::vector<TYPE>* value) {
+  CHECK_NOTNULL(value);
+  size_t size;
+  SetRandom(&size);
+  size %= 20;
+  value->resize(size);
+  for (TYPE& entry : *value) {
+    SetRandom(&entry);
+  }
+}
+
+template<typename TYPE>
+void SetRandom(std::list<TYPE>* value) {
   CHECK_NOTNULL(value);
   size_t size;
   SetRandom(&size);
@@ -234,6 +249,22 @@ TEST(Serialization, VectorDouble) {
 
 TEST(Serialization, VectorString) {
   RunSerializationTest<std::vector<std::string> >();
+}
+
+TEST(Serialization, VectorPairStringDouble) {
+  RunSerializationTest<std::vector<std::pair<std::string, double> > >();
+}
+
+TEST(Serialization, ListDouble) {
+  RunSerializationTest<std::list<double> >();
+}
+
+TEST(Serialization, ListString) {
+  RunSerializationTest<std::list<std::string> >();
+}
+
+TEST(Serialization, ListPairStringDouble) {
+  RunSerializationTest<std::list<std::pair<std::string, double> > >();
 }
 
 TEST(Serialization, MapIntDouble) {
