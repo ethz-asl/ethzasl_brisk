@@ -489,6 +489,7 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
 
   // Check and get above maximum:
   float delta_x_above, delta_y_above;
+  delta_x_above = delta_y_above = 0;
   float max_above = GetScoreMaxAbove(layer, x_layer, y_layer, center, ismax,
                                      delta_x_above, delta_y_above);
 
