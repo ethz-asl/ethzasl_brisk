@@ -38,6 +38,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <istream>  // NOLINT
 #include <fstream>  // NOLINT
 #include <iostream>  // NOLINT
 
@@ -66,7 +67,7 @@ void BriskDescriptorExtractor::InitFromStream(
   rotationInvariance = rotationInvariant;
   scaleInvariance = scaleInvariant;
 
-  assert(pattern_stream.ok());
+  assert(pattern_stream.good());
 
   // Read number of points.
   pattern_stream >> points_;

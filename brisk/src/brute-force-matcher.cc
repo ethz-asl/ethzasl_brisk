@@ -83,7 +83,7 @@ inline void BruteForceMatcherSse::commonKnnMatchImpl(
   typedef brisk::HammingSse::ValueType ValueType;
   typedef brisk::HammingSse::ResultType DistanceType;
   assert(!queryDescriptors.empty());
-  assert(DataType<ValueType>::type == queryDescriptors.type());
+  assert(cv::DataType<ValueType>::type == queryDescriptors.type());
 
   int dimension = queryDescriptors.cols;
   matches.reserve(queryDescriptors.rows);
@@ -104,7 +104,7 @@ inline void BruteForceMatcherSse::commonKnnMatchImpl(
       // descriptors.
       for (size_t iIdx = 0; iIdx < imgCount; iIdx++) {
         assert(
-            DataType<ValueType>::type
+            cv::DataType<ValueType>::type
                 == matcher.trainDescCollection[iIdx].type()
                 || matcher.trainDescCollection[iIdx].empty());
         assert(
@@ -165,7 +165,7 @@ inline void BruteForceMatcherSse::commonRadiusMatchImpl(
   typedef brisk::HammingSse::ValueType ValueType;
   typedef brisk::HammingSse::ResultType DistanceType;
   CV_DbgAssert(!queryDescriptors.empty());
-  assert(DataType < ValueType > ::type == queryDescriptors.type());
+  assert(cv::DataType < ValueType > ::type == queryDescriptors.type());
   int dimension = queryDescriptors.cols;
 
   matches.reserve(queryDescriptors.rows);
@@ -181,7 +181,7 @@ inline void BruteForceMatcherSse::commonRadiusMatchImpl(
           matches.rbegin();
       for (size_t iIdx = 0; iIdx < imgCount; iIdx++) {
         assert(
-            DataType < ValueType > ::type
+            cv::DataType < ValueType > ::type
                 == matcher.trainDescCollection[iIdx].type()
                 || matcher.trainDescCollection[iIdx].empty());
         assert(
