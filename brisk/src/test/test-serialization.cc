@@ -52,10 +52,10 @@
 
 template<typename TYPE>
 void SetRandom(
-    TYPE* value,
-    typename std::enable_if<std::is_integral<TYPE>::value>::type* = 0) {
+    TYPE* value, typename std::enable_if<std::is_integral<TYPE>::value>::type* =
+        0) {
   CHECK_NOTNULL(value);
-  *value = rand() % std::numeric_limits<TYPE>::max();
+  *value = rand() % std::numeric_limits < TYPE > ::max();
 }
 
 template<typename TYPE>
@@ -68,7 +68,7 @@ void SetRandom(
 
 void SetRandom(uint32_t* value) {
   CHECK_NOTNULL(value);
-  *value = rand() % std::numeric_limits<uint32_t>::max();
+  *value = rand() % std::numeric_limits < uint32_t > ::max();
 }
 
 void SetRandom(std::string* value) {
@@ -78,9 +78,9 @@ void SetRandom(std::string* value) {
   size = size % 20 + 1;
   *value = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   int pos;
-  while(value->size() != size) {
+  while (value->size() != size) {
     pos = ((rand() % (value->size() - 1)));
-    value->erase (pos, 1);
+    value->erase(pos, 1);
   }
 }
 
@@ -171,8 +171,8 @@ template<>
 void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
   ASSERT_EQ(lhs.size(), rhs.size());
   for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
-    CHECK_EQ(lhs.at<unsigned char>(index), rhs.at<unsigned char>(index)) <<
-        "Failed matrix equality for index " << index;
+    CHECK_EQ(lhs.at<unsigned char>(index), rhs.at<unsigned char>(index))
+        << "Failed matrix equality for index " << index;
   }
 }
 
@@ -180,9 +180,11 @@ template<>
 void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
   bool is_same = true;
   is_same = is_same && lhs.size() == rhs.size();
-  for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
-    if (lhs.at<unsigned char>(index) != rhs.at<unsigned char>(index)) {
-      is_same = false;
+  if (is_same) {
+    for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
+      if (lhs.at<unsigned char>(index) != rhs.at<unsigned char>(index)) {
+        is_same = false;
+      }
     }
   }
   ASSERT_FALSE(is_same);
@@ -191,8 +193,8 @@ void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 template<typename TYPE>
 void RunSerializationTest() {
   TYPE saved_value, loaded_value;
-  std::string filename = "src/test/test_data/tmp/serialization_file_" +
-      std::string(typeid(TYPE).name()) + "_tmp";
+  std::string filename = "src/test/test_data/tmp/serialization_file_"
+      + std::string(typeid(TYPE).name()) + "_tmp";
   {  // Scoping to flush and close file.
     std::ofstream ofs(filename);
     SetRandom(&saved_value);
