@@ -488,7 +488,8 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
   const int center = thisLayer.GetAgastScore(x_layer, y_layer, 1);
 
   // Check and get above maximum:
-  float delta_x_above, delta_y_above;
+  float delta_x_above, delta_x_above;
+  delta_x_above = delta_x_above = 0;
   float max_above = GetScoreMaxAbove(layer, x_layer, y_layer, center, ismax,
                                      delta_x_above, delta_y_above);
 

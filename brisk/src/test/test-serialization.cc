@@ -178,13 +178,14 @@ void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 
 template<>
 void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
-  ASSERT_NE(lhs.size(), rhs.size());
   bool is_same = true;
+  is_same = is_same && lhs.size() == rhs.size();
   for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
     if (lhs.at<unsigned char>(index) != rhs.at<unsigned char>(index)) {
       is_same = false;
     }
   }
+  ASSERT_FALSE(is_same);
 }
 
 template<typename TYPE>
