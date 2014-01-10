@@ -49,13 +49,14 @@
 namespace brisk {
 // Faster Hamming distance functor - uses SSE
 // bit count of A exclusive XOR'ed with B.
-class CV_EXPORTS HammingSse {
+class  HammingSse {
  public:
   HammingSse() { }
 
   // SSSE3 - even faster!
   static __inline__ uint32_t SSSE3PopcntofXORed(const __m128i* signature1,
-  const __m128i* signature2, const int numberOf128BitWords);
+                                                const __m128i* signature2,
+                                                const int numberOf128BitWords);
 
   typedef unsigned char ValueType;
 

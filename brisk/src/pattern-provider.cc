@@ -1,7 +1,4 @@
 /*
- Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
  Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
  Stefan Leutenegger and Simon Lynen.
 
@@ -43,7 +40,7 @@
 
 namespace brisk {
 void GetDefaultPatternAsStream(std::stringstream* pattern_stream) {
-assert(pattern_stream);
+  assert(pattern_stream);
 
   pattern_stream->clear();
   *pattern_stream << "66" << std::endl
@@ -1355,6 +1352,5 @@ assert(pattern_stream);
   << "65 62 " << std::endl
   << "65 63 " << std::endl
   << "65 64 " << std::endl;
-
 }
 }  // namespace brisk

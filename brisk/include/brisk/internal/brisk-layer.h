@@ -51,10 +51,10 @@
 
 namespace brisk {
 // A layer in the Brisk detector pyramid.
-class CV_EXPORTS BriskLayer {
+class  BriskLayer {
  public:
   // Constructor arguments.
-  struct CV_EXPORTS CommonParams {
+  struct  CommonParams {
     static const int HALFSAMPLE = 0;
     static const int TWOTHIRDSAMPLE = 1;
   };

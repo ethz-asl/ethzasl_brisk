@@ -46,8 +46,8 @@
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
 
-namespace cv {
-class CV_EXPORTS BriskFeatureDetector : public FeatureDetector {
+namespace brisk {
+class  BriskFeatureDetector : public cv::FeatureDetector {
  public:
   BriskFeatureDetector(int thresh, int octaves = 3,
                        bool suppressScaleNonmaxima = true);
@@ -60,6 +60,6 @@ class CV_EXPORTS BriskFeatureDetector : public FeatureDetector {
                           const cv::Mat& mask = cv::Mat()) const;
   bool m_suppressScaleNonmaxima;
 };
-}  // namespace cv
+}  // namespace brisk
 
 #endif  // BRISK_BRISK_FEATURE_DETECTOR_H_

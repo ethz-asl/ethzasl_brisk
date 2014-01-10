@@ -41,8 +41,7 @@
 #include <brisk/brisk-feature-detector.h>
 #include <brisk/internal/brisk-scale-space.h>
 
-namespace cv {
-
+namespace brisk {
 BriskFeatureDetector::BriskFeatureDetector(int thresh, int octaves,
                                            bool suppressScaleNonmaxima) {
   threshold = thresh;
@@ -57,7 +56,6 @@ void BriskFeatureDetector::detectImpl(const cv::Mat& image,
   briskScaleSpace.ConstructPyramid(image, threshold);
   briskScaleSpace.GetKeypoints(&keypoints);
 
-  // Remove invalid points.
   removeInvalidPoints(mask, keypoints);
 }
-}  // namespace cv
+}  // namespace brisk

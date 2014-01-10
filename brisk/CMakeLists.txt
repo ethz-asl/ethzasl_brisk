@@ -9,9 +9,14 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-set(ROS_BUILD_TYPE Release)
+set(ROS_BUILD_TYPE RelWithDebInfo)
 
 rosbuild_init()
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
+find_package(GLog REQUIRED)
+include_directories(GLOG_INCLUDE_DIRS)
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
@@ -30,9 +35,18 @@ rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/harris-score-calculator-float.cc
                                      src/harris-scores-sse.cc
                                      src/pattern-provider.cc
-                                     src/rdtsc-wrapper.cc
                                      src/sse-filters.cc
-)
-
+                                     src/timer.cc
+                                     src/test/image-io.cc)
+  
 rosbuild_add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
+
+rosbuild_add_library(test_libs src/test/serialization.cc
+                               src/test/bench-ds.cc)
+
+rosbuild_add_gtest(test_binary_equal src/test/test-binary-equal.cc)
+target_link_libraries(test_binary_equal ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)
+
+rosbuild_add_gtest(test_serialization src/test/test-serialization.cc)
+target_link_libraries(test_serialization ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)
