@@ -44,6 +44,7 @@
 #include <gtest/gtest.h>
 #include <opencv2/core/core.hpp>
 #include "./bench-ds.h"
+#include "./serialization.h"
 
 #ifndef TEST
 #define TEST(a, b) int Test_##a##_##b()
@@ -189,17 +190,17 @@ void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 template<typename TYPE>
 void RunSerializationTest() {
   TYPE saved_value, loaded_value;
-  std::string filename = "serialization_file_" +
+  std::string filename = "src/test/test_data/tmp/serialization_file_" +
       std::string(typeid(TYPE).name()) + "_tmp";
   {  // Scoping to flush and close file.
     std::ofstream ofs(filename);
     SetRandom(&saved_value);
     SetRandom(&loaded_value);
     AssertNotEqual(saved_value, loaded_value);
-    Serialize(saved_value, &ofs);
+    serialization::Serialize(saved_value, &ofs);
   }
   std::ifstream ifs(filename);
-  DeSerialize(&loaded_value, &ifs);
+  serialization::DeSerialize(&loaded_value, &ifs);
   AssertEqual(saved_value, loaded_value);
 }
 
@@ -286,7 +287,6 @@ TEST(Serialization, MapStringString) {
 TEST(Serialization, CvMat) {
   RunSerializationTest<cv::Mat>();
 }
-
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);

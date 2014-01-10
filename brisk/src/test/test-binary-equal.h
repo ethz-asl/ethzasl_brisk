@@ -35,10 +35,20 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <gtest/gtest.h>
-#include <brisk/brisk.h>
+#ifndef TEST_BINARY_EQUAL_H_
+#define TEST_BINARY_EQUAL_H_
 
-int main(int argc, char** argv) {
-  ::testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
+#include <vector>
+
+
+namespace brisk {
+void RunPipeline(std::vector<DatasetEntry>& dataset,
+                 const std::string& briskbasepath);
+bool RunVerification(std::vector<DatasetEntry>& current_dataset,
+                     std::vector<DatasetEntry>& verification_dataset,
+                     bool do_gtest_checks);
+void Draw(std::vector<DatasetEntry>& dataset);
+bool RunValidation(bool do_gtest_checks);
+}  // namespace brisk
+
+#endif  // TEST_BINARY_EQUAL_H_

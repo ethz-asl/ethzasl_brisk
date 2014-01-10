@@ -38,13 +38,15 @@ rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/sse-filters.cc
                                      src/timer.cc
                                      src/test/image-io.cc)
-
+  
 rosbuild_add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
 
-rosbuild_add_executable(run_verification src/test/binary-equal.cc)
-target_link_libraries(run_verification ${PROJECT_NAME})
-target_link_libraries(run_verification ${GLOG_LIBRARY})
+rosbuild_add_library(test_libs src/test/serialization.cc
+                               src/test/bench-ds.cc)
+
+rosbuild_add_gtest(test_binary_equal src/test/test-binary-equal.cc)
+target_link_libraries(test_binary_equal ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)
 
 rosbuild_add_gtest(test_serialization src/test/test-serialization.cc)
-target_link_libraries(test_serialization ${GLOG_LIBRARY})
+target_link_libraries(test_serialization ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)

@@ -43,6 +43,7 @@
 #include <brisk/brisk.h>
 #include <brisk/internal/timer.h>
 #include <glog/logging.h>
+#include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/nonfree/features2d.hpp>
@@ -50,32 +51,39 @@
 
 #include "./bench-ds.h"
 #include "./image-io.h"
+#include "./test-binary-equal.h"
 
-void runpipeline(std::vector<DatasetEntry>& dataset,
-                 const std::string& briskbasepath);
-bool runverification(std::vector<DatasetEntry>& current_dataset,
-                     std::vector<DatasetEntry>& verification_dataset);
-void draw(std::vector<DatasetEntry>& dataset);
+#ifndef TEST
+#define TEST(a, b) int Test_##a##_##b()
+#endif
+
+namespace brisk {
 
 enum Parameters {
   doKeypointDetection = true,
-  doDescriptorComputation = true,  //before switching this to false, you need to add a function which removes keypoints that are too close to the border.
-  exitfirstfail = false,  //stop on first image for which the verification fails
-  drawKeypoints = false,  //drawimages with keypoints
+  // Before switching this to false, you need to add a function which removes
+  // keypoints that are too close to the border.
+  doDescriptorComputation = true,
+  // Stop on first image for which the verification fails.
+  exitfirstfail = false,
+  drawKeypoints = false,
 
   BRISK_absoluteThreshold = 20,
   BRISK_uniformityradius = 30,
   BRISK_octaves = 0,
-  BRISK_maxNumKpt = 4294967296,  // should be generic enough...
+  BRISK_maxNumKpt = 4294967296,
   BRISK_scaleestimation = true,
   BRISK_rotationestimation = true,
 };
 
-int main(int /*argc*/, char ** argv) {
-  google::InitGoogleLogging(argv[0]);
+TEST(BRISK, Validation) {
+  bool do_gtest_checks = true;
+  RunValidation(do_gtest_checks);
+}
 
-  std::string imagepath = "./test_data/";
-  std::string datasetfilename = "data.set";
+bool RunValidation(bool do_gtest_checks) {
+  std::string imagepath = "./src/test/test_data/";
+  std::string datasetfilename = "brisk_verification_data.set";
 
   std::string datasetfullpath = imagepath + "/" + datasetfilename;
 
@@ -89,9 +97,7 @@ int main(int /*argc*/, char ** argv) {
   std::vector<DatasetEntry> dataset;
 
   if (!have_dataset) {
-    /***
-     * READ IMAGES
-     */
+    // Read the dataset.
     std::cout << "No dataset found at " << datasetfullpath
         << " will create one from the images in " << imagepath << std::endl;
 
@@ -99,11 +105,9 @@ int main(int /*argc*/, char ** argv) {
     bool doLexicalsort = true;
     std::vector < std::string > search_paths;
     search_paths.push_back(imagepath);
-    brisk::Getfilelists(search_paths, doLexicalsort, "", &imgpaths);
+    brisk::Getfilelists(search_paths, doLexicalsort, "ppm", &imgpaths);
 
-    /**
-     * MAKE THE DATASET
-     */
+    // Make the dataset.
     std::cout << "Reading dataset path: " << imagepath << " got images: "
         << std::endl;
     for (std::vector<std::string>::iterator it = imgpaths.begin(), end =
@@ -114,34 +118,28 @@ int main(int /*argc*/, char ** argv) {
       std::cout << image.print();
     }
 
-    /**
-     * RUN THE PIPELINE
-     */
+    // Run the pipeline.
+    RunPipeline(dataset, datasetfullpath);
 
-    runpipeline(dataset, datasetfullpath);
-
-    /**
-     * SAVE THE DATASET
-     */
+    // Save the dataset.
     std::cout << "Done handling images from " << imagepath << ". " << std::endl
         << "Now saving to " << datasetfullpath << std::endl << std::endl;
 
     std::ofstream ofs(std::string(datasetfullpath).c_str());
-    Serialize(dataset, &ofs);
+    serialization::Serialize(dataset, &ofs);
 
     std::cout << "Done. Now re-run to check against the dataset." << std::endl;
+    if (do_gtest_checks) {
+      EXPECT_TRUE(have_dataset) <<
+          "No existing dataset found to verify against.";
+    }
     return 0;
   } else {
-    /***
-     * LOAD REFERENCE CHECK FILES AND DATASET
-     */
     std::cout << "Dataset found at " << datasetfullpath << std::endl;
 
-    /**
-     * DESERIALIZE THE DATASET
-     */
+    // Deserialize the dataset.
     std::ifstream ifs(std::string(datasetfullpath).c_str());
-    DeSerialize(&dataset, &ifs);
+    serialization::DeSerialize(&dataset, &ifs);
 
     std::vector<DatasetEntry> verifyds;
     verifyds = dataset;  // Intended deep copy.
@@ -158,16 +156,11 @@ int main(int /*argc*/, char ** argv) {
         .end(); it != end; ++it)
       it->clear_processed_data(doDescriptorComputation, doKeypointDetection);
 
-    /**
-     * RUN THE PIPELINE ON THE DATASET
-     */
-    runpipeline(dataset, datasetfullpath);
+    // Run the pipeline on the dataset.
+    RunPipeline(dataset, datasetfullpath);
 
-    /**
-     * RUN THE VERIFICATION
-     * fingers crossed :)
-     */
-    bool verificationOK = runverification(dataset, verifyds);
+    // Run the verification.
+    bool verificationOK = RunVerification(dataset, verifyds, do_gtest_checks);
     if (verificationOK) {
       std::cout << std::endl << "******* Verification success *******"
           << std::endl << std::endl;
@@ -176,12 +169,12 @@ int main(int /*argc*/, char ** argv) {
           << std::endl << std::endl;
     }
     if (drawKeypoints) {
-      draw(dataset);
+      Draw(dataset);
     }
 
     for (int i = 0; verificationOK && i < 100; ++i) {
       brisk::timing::DebugTimer timerOverall("BRISK overall");
-      runpipeline(dataset, datasetfullpath);
+      RunPipeline(dataset, datasetfullpath);
       timerOverall.Stop();
     }
 
@@ -189,61 +182,42 @@ int main(int /*argc*/, char ** argv) {
   }
 }
 
-void runpipeline(std::vector<DatasetEntry>& dataset,
+void RunPipeline(std::vector<DatasetEntry>& dataset,
                  const std::string& briskbasepath) {
-
   std::cout << "Running the pipeline..." << std::endl;
 
-  /***
-   * DETECTION
-   */
-  //prepare BRISK detector
-  cv::Ptr < cv::FeatureDetector > detector =
+  // Detection.
+  std::shared_ptr<cv::FeatureDetector> detector(
       new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>(
-          BRISK_octaves, BRISK_uniformityradius, BRISK_absoluteThreshold);
+          BRISK_octaves, BRISK_uniformityradius, BRISK_absoluteThreshold));
 
   if (doKeypointDetection || dataset.at(0).GetKeyPoints().empty()) {
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
         .end(); it != end; ++it) {
-
-      it->setThisAsCurrentEntry();  //now you can query for the current image to add tags to timers etc.
-
-      /*/ hack: benchmark OpenCv Harris:
-       cv::Mat dst = cv::Mat::zeros( it->imgGray_.size(), CV_32FC1 );
-
-       /// Detector parameters
-       int blockSize = 2;
-       int apertureSize = 3;
-       double k = 0.04;
-
-       /// Detecting corners
-       TimerSwitchableDetail timerdetect0(DatasetEntry::getCurrentImageName() + "_openCV_harris_detect", true);
-       timerdetect0.start();
-       cv::cornerHarris( it->imgGray_, dst, blockSize, apertureSize, k, cv::BORDER_DEFAULT );
-       timerdetect0.stop();
-       std::cout << dst.at<float>(10,10)<<std::endl; // scared of dead code eliminations...*/
+      // Now you can query for the current image to add tags to timers etc.
+      it->setThisAsCurrentEntry();
 
       brisk::timing::DebugTimer timerdetect(
           DatasetEntry::getCurrentEntry()->GetPath() + "_detect");
       detector->detect(*it->GetImgMutable(), *it->GetKeyPointsMutable());
       timerdetect.Stop();
 
-      //Test userdata
-      Blob& blob = DatasetEntry::getCurrentEntry()->getBlob("testImage");
-      if (!blob.hasverificationData()) {
-        blob.setVerificationData(it->GetImage().data,
+      // Test userdata.
+      Blob& blob = DatasetEntry::getCurrentEntry()->GetBlob("testImage");
+      if (!blob.HasverificationData()) {
+        blob.SetVerificationData(it->GetImage().data,
                                  it->GetImage().rows * it->GetImage().cols);
       } else {
-        blob.setCurrentData(it->GetImage().data,
+        blob.SetCurrentData(it->GetImage().data,
                             it->GetImage().rows * it->GetImage().cols);
       }
     }
   }
 
   // Extraction.
-  cv::Ptr < cv::DescriptorExtractor > descriptorExtractor =
+  std::shared_ptr<cv::DescriptorExtractor> descriptorExtractor(
       new brisk::BriskDescriptorExtractor(BRISK_rotationestimation,
-                                          BRISK_scaleestimation);
+                                          BRISK_scaleestimation));
   if (doDescriptorComputation || dataset.at(0).GetDescriptors().rows == 0) {
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
         .end(); it != end; ++it) {
@@ -256,22 +230,15 @@ void runpipeline(std::vector<DatasetEntry>& dataset,
     }
   }
 
-  /***
-   * OUTPUT RDTSC TIMING
-   */
+  // Output timing.
   brisk::timing::Timing::Print(std::cout);
-
 }
 
-bool runverification(std::vector<DatasetEntry>& current_dataset,
-                     std::vector<DatasetEntry>& verification_dataset) {
-
-  /***
-   * DO VALIDATION
-   */
-
-  CHECK_EQ(current_dataset.size(), verification_dataset.size()) <<
-      "Failed on database number of entries";
+bool RunVerification(std::vector<DatasetEntry>& current_dataset,
+                     std::vector<DatasetEntry>& verification_dataset,
+                     bool do_gtest_checks) {
+  CHECK_EQ(current_dataset.size(), verification_dataset.size())
+        << "Failed on database number of entries";
 
   bool failed = false;
   //now go through every image
@@ -283,10 +250,10 @@ bool runverification(std::vector<DatasetEntry>& current_dataset,
     try {
       failed |= (*it_curr != *it_verif);
     } catch (std::exception& e) {
-      std::cout << "------" << std::endl << "Failed on image " <<
-          it_curr->GetPath() << std::endl << "* Error: " << e.what() << "------"
-          << std::endl;
       failed = true;
+      std::cout << "------" << std::endl << "Failed on image "
+          << it_curr->GetPath() << std::endl << "* Error: " << e.what()
+          << "------" << std::endl;
       if (exitfirstfail)
         CHECK(!failed);
     }
@@ -294,14 +261,14 @@ bool runverification(std::vector<DatasetEntry>& current_dataset,
   return !failed;
 }
 
-void draw(std::vector<DatasetEntry>& dataset) {
-  /***
-   * DRAWING
-   */
+void Draw(std::vector<DatasetEntry>& dataset) {
+  // Drawing.
   cv::namedWindow("Keypoints");
   for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
       .end(); it != end; ++it) {
-    it->setThisAsCurrentEntry();  //now you can query DatasetEntry::getCurrentImageName() for the current image to add tags to timers etc.
+    // Now you can query DatasetEntry::getCurrentImageName() for the current
+    // image to add tags to timers etc.
+    it->setThisAsCurrentEntry();
     cv::Mat out;
     cv::drawKeypoints(it->GetImage(), it->GetKeyPoints(), out,
                       cv::Scalar::all(-1),
@@ -312,3 +279,10 @@ void draw(std::vector<DatasetEntry>& dataset) {
 }
 
 DatasetEntry* DatasetEntry::current_entry = NULL;
+}  // namespace brisk
+
+
+int main(int argc, char** argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

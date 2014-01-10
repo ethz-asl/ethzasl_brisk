@@ -38,6 +38,7 @@
 #ifndef BENCHDS_H_
 #define BENCHDS_H_
 #include <fstream>
+#include <iostream>
 #include <memory>
 #include <type_traits>
 
@@ -46,9 +47,14 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include "./serialization.h"
+
+namespace brisk {
+
 typedef unsigned char imagedata_T;
 class Blob;
 class DatasetEntry;
+
 
 #define EXPECTSAMETHROW(THIS, OTHER, MEMBER) \
     do { if (THIS.MEMBER != OTHER.MEMBER) { \
@@ -104,16 +110,7 @@ class DatasetEntry;
     } }\
     while (0);
 
-std::string descriptortoString(const __m128i * d, int num128Words) {
-  std::stringstream ss;
-  ss << "[";
-  const unsigned int __attribute__ ((__may_alias__))* data =
-      reinterpret_cast<const unsigned int __attribute__ ((__may_alias__))*>(d);
-  for (int bit = 0; bit < num128Words * 128; ++bit) {
-    ss << (data[bit >> 5] & (1 << (bit & 31)) ? "1 " : "0 ");
-  };
-  return ss.str();
-}
+std::string DescriptorToString(const __m128i * d, int num128Words);
 
 struct Blob {
   friend void Serialize(const Blob& value, std::ofstream* out);
@@ -138,11 +135,11 @@ struct Blob {
     }
   }
 
-  uint32_t size() const {
+  uint32_t Size() const {
     return size_;
   }
 
-  int checkCurrentDataSameAsVerificationData() const {
+  int CheckCurrentDataSameAsVerificationData() const {
     if (!size_) {
       return 0;
     }
@@ -155,17 +152,17 @@ struct Blob {
     return memcmp(current_data_.get(), verification_data_.get(), size_);
   }
 
-  bool hasverificationData() {
+  bool HasverificationData() {
     return static_cast<bool>(verification_data_);
   }
 
-  void setVerificationData(const unsigned char* data, uint32_t size) {
+  void SetVerificationData(const unsigned char* data, uint32_t size) {
     size_ = size;
     verification_data_.reset(new unsigned char[size_]);
     memcpy(verification_data_.get(), data, size_);
   }
 
-  void setCurrentData(const unsigned char* data, uint32_t size) {
+  void SetCurrentData(const unsigned char* data, uint32_t size) {
     if (size != size_) {
       CHECK(false) << "You set the current data to a different length than "
           "the verification data. This will fail the verification."
@@ -175,7 +172,7 @@ struct Blob {
     memcpy(current_data_.get(), data, size);
   }
 
-  const unsigned char* verificationData() {
+  const unsigned char* VerificationData() {
     if (verification_data_) {
       return verification_data_.get();
     } else {
@@ -183,7 +180,7 @@ struct Blob {
     }
   }
 
-  const unsigned char* currentData() {
+  const unsigned char* CurrentData() {
     if (current_data_) {
       return current_data_.get();
     } else {
@@ -205,7 +202,7 @@ struct DatasetEntry {
  public:
   DatasetEntry() = default;
 
-  std::string shortname() {
+  std::string Shortname() {
     int idx = path_.find_last_of("/\\") + 1;
     return path_.substr(idx, path_.length() - idx);
   }
@@ -253,29 +250,28 @@ struct DatasetEntry {
     userdata_ = other.userdata_;
   }
 
-  std::string path() const {
+  std::string Path() const {
     return path_;
   }
 
   // Returns a blob of data belonging to this key.
-  Blob& getBlob(std::string key) {
+  Blob& GetBlob(std::string key) {
     return userdata_[key];
   }
 
-  std::string listBlobs() const {
+  std::string ListBlobs() const {
     std::stringstream ss;
     ss << "Userdata:" << std::endl;
     int i = 0;
     for (std::map<std::string, Blob>::const_iterator it = userdata_.begin(),
         end = userdata_.end(); it != end; ++it, ++i) {
       ss << "\t\t" << i << ": " << "" "" << it->first << "" " size: "
-          << it->second.size() << std::endl;
+          << it->second.Size() << std::endl;
     }
     return ss.str();
   }
 
   bool operator==(const DatasetEntry& other) const {
-
     EXPECTSAMETHROW((*this), other, path_);
 
     /**
@@ -363,8 +359,8 @@ struct DatasetEntry {
       if (hammdist > hammdisttolerance)
       {
         std::cout << "Failed on descriptor " << rowidx << ": Hammdist "
-        << hammdist << " " << descriptortoString(d1, numberof128Blocks) <<
-        " other " <<descriptortoString(d2, numberof128Blocks) << std::endl;
+        << hammdist << " " << DescriptorToString(d1, numberof128Blocks) <<
+        " other " << DescriptorToString(d2, numberof128Blocks) << std::endl;
         return false;
       }
     }
@@ -372,7 +368,7 @@ struct DatasetEntry {
     // Check user data.
     for (std::map<std::string, Blob>::const_iterator it = userdata_.begin(),
         end = userdata_.end(); it != end; ++it) {
-      int diffbytes = it->second.checkCurrentDataSameAsVerificationData();
+      int diffbytes = it->second.CheckCurrentDataSameAsVerificationData();
       if (diffbytes) {
         std::stringstream ss;
         ss << "For userdata " << it->first << " failed with " << diffbytes
@@ -397,7 +393,7 @@ struct DatasetEntry {
       ss << "\t Keypoints: " << keypoints_.size() << " Descriptors: "
           << descriptors_.rows << std::endl;
     }
-    ss << "\t" << listBlobs();
+    ss << "\t" << ListBlobs();
     return ss.str();
   }
 
@@ -440,265 +436,15 @@ struct DatasetEntry {
   static DatasetEntry* current_entry;  //a global tag which image is currently being processed
 };
 
-template<class TYPE>
-void Serialize(
-    const TYPE& value, std::ofstream* out,
-    typename std::enable_if<std::is_integral<TYPE>::value>::type* = 0) {
-  CHECK_NOTNULL(out);
-  out->write(reinterpret_cast<const char*>(&value), sizeof(value));
-}
 
-template<class TYPE>
-void DeSerialize(TYPE* value, std::ifstream* in,
-                 typename std::enable_if<std::is_integral<TYPE>::value>::type* =
-                     0) {
-  CHECK_NOTNULL(value);
-  CHECK_NOTNULL(in);
-  in->read(reinterpret_cast<char*>(value), sizeof(*value));
-}
+void Serialize(const Blob& value, std::ofstream* out);
 
-template<class TYPE>
-void Serialize(
-    const TYPE& value, std::ofstream* out,
-    typename std::enable_if<std::is_floating_point<TYPE>::value>::type* = 0) {
-  CHECK_NOTNULL(out);
-  out->write(reinterpret_cast<const char*>(&value), sizeof(value));
-}
+void DeSerialize(Blob* value, std::ifstream* in);
 
-template<class TYPE>
-void DeSerialize(
-    TYPE* value, std::ifstream* in,
-    typename std::enable_if<std::is_floating_point<TYPE>::value>::type* = 0) {
-  CHECK_NOTNULL(value);
-  CHECK_NOTNULL(in);
-  in->read(reinterpret_cast<char*>(value), sizeof(*value));
-}
+void Serialize(const DatasetEntry& value, std::ofstream* out);
 
-void Serialize(const uint32_t& value, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  out->write(reinterpret_cast<const char*>(&value), sizeof(value));
-}
+void DeSerialize(DatasetEntry* value, std::ifstream* in);
 
-void DeSerialize(uint32_t* value, std::ifstream* in) {
-  CHECK_NOTNULL(value);
-  CHECK_NOTNULL(in);
-  in->read(reinterpret_cast<char*>(value), sizeof(*value));
-}
-
-void Serialize(const cv::Mat& mat, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  cv::Mat mat_cont;
-  if (!mat.isContinuous()) {
-    mat_cont = mat.clone();
-  } else {
-    mat_cont = mat;
-  }
-  int type = mat_cont.type();
-  int element_size = mat_cont.elemSize();
-
-  Serialize(mat_cont.rows, out);
-  Serialize(mat_cont.cols, out);
-  Serialize(type, out);
-  Serialize(element_size, out);
-
-  out->write(reinterpret_cast<char*>(mat_cont.data),
-             element_size * mat_cont.rows * mat_cont.cols);
-}
-
-void DeSerialize(cv::Mat* mat, std::ifstream* in) {
-  CHECK_NOTNULL(mat);
-  CHECK_NOTNULL(in);
-  int rows;
-  int cols;
-  int type;
-  int element_size;
-  DeSerialize(&rows, in);
-  DeSerialize(&cols, in);
-  DeSerialize(&type, in);
-  DeSerialize(&element_size, in);
-  mat->create(rows, cols, type);
-  in->read(reinterpret_cast<char*>(mat->data), element_size * rows * cols);
-}
-
-void Serialize(const cv::Point2f& pt, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  Serialize(pt.x, out);
-  Serialize(pt.y, out);
-}
-
-template<typename TYPE>
-void DeSerialize(cv::Point_<TYPE>* pt, std::ifstream* in) {
-  CHECK_NOTNULL(pt);
-  CHECK_NOTNULL(in);
-  DeSerialize(&pt->x, in);
-  DeSerialize(&pt->y, in);
-}
-
-void Serialize(const cv::KeyPoint& pt, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  Serialize(pt.angle, out);
-  Serialize(pt.class_id, out);
-  Serialize(pt.octave, out);
-  Serialize(pt.pt, out);
-  Serialize(pt.response, out);
-  Serialize(pt.size, out);
-}
-
-void DeSerialize(cv::KeyPoint* pt, std::ifstream* in) {
-  CHECK_NOTNULL(pt);
-  CHECK_NOTNULL(in);
-  DeSerialize(&pt->angle, in);
-  DeSerialize(&pt->class_id, in);
-  DeSerialize(&pt->octave, in);
-  DeSerialize(&pt->pt, in);
-  DeSerialize(&pt->response, in);
-  DeSerialize(&pt->size, in);
-}
-
-void Serialize(const std::string& value, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  size_t length = value.size();
-  Serialize(length, out);
-  out->write(reinterpret_cast<const char*>(value.data()),
-             length * sizeof(value[0]));
-}
-
-void DeSerialize(std::string* value, std::ifstream* in) {
-  CHECK_NOTNULL(value);
-  CHECK_NOTNULL(in);
-  size_t length;
-  DeSerialize(&length, in);
-  value->resize(length);
-  std::unique_ptr<char[]> mem(new char[length + 1]);
-  in->read(mem.get(), length * sizeof(mem.get()[0]));
-  mem[length] = '\0';
-  *value = std::string(mem.get());
-}
-
-template<typename TYPEA, typename TYPEB>
-void Serialize(const std::pair<TYPEA, TYPEB>& value, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  Serialize(value.first, out);
-  Serialize(value.second, out);
-}
-
-template<typename TYPEA, typename TYPEB>
-void DeSerialize(std::pair<TYPEA, TYPEB>* value, std::ifstream* in) {
-  CHECK_NOTNULL(value);
-  CHECK_NOTNULL(in);
-  DeSerialize(&value->first, in);
-  DeSerialize(&value->second, in);
-}
-
-template<typename TYPEA, typename TYPEB>
-void Serialize(const std::map<TYPEA, TYPEB>& value, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  size_t length = value.size();
-  Serialize(length, out);
-  for (const std::pair<TYPEA, TYPEB>& entry : value) {
-    Serialize(entry, out);
-  }
-}
-
-template<typename TYPEA, typename TYPEB>
-void DeSerialize(std::map<TYPEA, TYPEB>* value, std::ifstream* in) {
-  CHECK_NOTNULL(value);
-  CHECK_NOTNULL(in);
-  value->clear();
-  size_t length;
-  DeSerialize(&length, in);
-  for (size_t i = 0; i < length; ++i) {
-    std::pair<TYPEA, TYPEB> entry;
-    DeSerialize(&entry, in);
-    value->insert(entry);
-  }
-}
-
-// TODO(slynen): Merge the templates for vector and list using template template
-// parameters.
-template<typename T>
-void Serialize(const std::vector<T>& value, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  size_t length = value.size();
-  Serialize(length, out);
-  for (const T& entry : value) {
-    Serialize(entry, out);
-  }
-}
-
-template<typename T>
-void DeSerialize(std::vector<T>* value, std::ifstream* in) {
-  CHECK_NOTNULL(value);
-  CHECK_NOTNULL(in);
-  value->clear();
-  size_t length;
-  DeSerialize(&length, in);
-  value->resize(length);
-  for (T& entry : *value) {
-    DeSerialize(&entry, in);
-  }
-}
-
-template<typename T>
-void Serialize(const std::list<T>& value, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  size_t length = value.size();
-  Serialize(length, out);
-  for (const T& entry : value) {
-    Serialize(entry, out);
-  }
-}
-
-template<typename T>
-void DeSerialize(std::list<T>* value, std::ifstream* in) {
-  CHECK_NOTNULL(value);
-  CHECK_NOTNULL(in);
-  value->clear();
-  size_t length;
-  DeSerialize(&length, in);
-  value->resize(length);
-  for (T& entry : *value) {
-    DeSerialize(&entry, in);
-  }
-}
-
-void Serialize(const Blob& value, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  Serialize(value.size_, out);
-  out->write(reinterpret_cast<const char*>(value.verification_data_.get()),
-             value.size_);
-}
-
-void DeSerialize(Blob* value, std::ifstream* in) {
-  CHECK_NOTNULL(in);
-  CHECK_NOTNULL(value);
-  ::DeSerialize(&value->size_, in);
-  value->verification_data_.reset(new unsigned char[value->size_]);
-  in->read(reinterpret_cast<char*>(value->verification_data_.get()),
-           value->size_);
-}
-
-void Serialize(const DatasetEntry& value, std::ofstream* out) {
-  CHECK_NOTNULL(out);
-  Serialize(value.path_, out);
-  Serialize(value.imgGray_, out);
-  Serialize(value.keypoints_, out);
-  Serialize(value.descriptors_, out);
-  Serialize(value.userdata_, out);
-}
-
-void DeSerialize(DatasetEntry* value, std::ifstream* in) {
-  CHECK_NOTNULL(value);
-  CHECK_NOTNULL(in);
-  try {
-    DeSerialize(&value->path_, in);
-    DeSerialize(&value->imgGray_, in);
-    DeSerialize(&value->keypoints_, in);
-    DeSerialize(&value->descriptors_, in);
-    DeSerialize(&value->userdata_, in);
-  } catch (const std::ifstream::failure& e) {
-    CHECK(false) << "Failed to load DatasetEntry " + std::string(e.what());
-  }
-}
+}  // namespace brisk
 
 #endif /* BENCHDS_H_ */
