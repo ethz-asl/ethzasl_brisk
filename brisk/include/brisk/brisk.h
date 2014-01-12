@@ -48,4 +48,9 @@
 #include <brisk/harris-score-calculator.h>
 #include <brisk/scale-space-feature-detector.h>
 
+namespace cv {
+typedef brisk::BriskDescriptorExtractor BriskDescriptorExtractor;
+typedef brisk::BriskFeatureDetector BriskFeatureDetector;
+}  // namespace cv
+
 #endif  // BRISK_BRISK_H_
