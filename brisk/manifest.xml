@@ -12,7 +12,6 @@
   <depend package="roscpp"/>
   <depend package="agast"/>
   <depend package="opencv2"/>
-  <depend package="sm_timing"/>
 
   <export>
     <cpp cflags="-I${prefix}/include" lflags=" -L${prefix}/lib -lbrisk"/>
