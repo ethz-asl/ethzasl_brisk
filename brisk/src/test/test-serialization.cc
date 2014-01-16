@@ -40,7 +40,11 @@
 #include <string>
 #include <vector>
 
+#if HAVE_GLOG
 #include <glog/logging.h>
+#else
+#include <brisk/glog_replace.h>
+#endif
 #include <gtest/gtest.h>
 #include <opencv2/core/core.hpp>
 #include "./bench-ds.h"

@@ -35,7 +35,11 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if HAVE_GLOG
 #include <glog/logging.h>
+#else
+#include <brisk/glog_replace.h>
+#endif
 #include <gtest/gtest.h>
 
 #include <opencv2/opencv.hpp>
