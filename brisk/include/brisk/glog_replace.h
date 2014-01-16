@@ -2,7 +2,7 @@
 #define GLOG_REPLACE_H_
 
 #if !HAVE_GLOG
-#include <assert>
+#include <cassert>
 #include <iosfwd>
 
 struct nullstream {};
