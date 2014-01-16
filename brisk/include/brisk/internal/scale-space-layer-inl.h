@@ -42,6 +42,7 @@
 #define INTERNAL_SCALE_SPACE_LAYER_INL_H_
 
 #include <algorithm>
+#include <iostream>  // NOLINT
 #include <emmintrin.h>
 #include <tmmintrin.h>
 #include <vector>
