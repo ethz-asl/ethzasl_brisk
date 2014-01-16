@@ -42,7 +42,11 @@
 
 #include <brisk/brisk.h>
 #include <brisk/internal/timer.h>
+#if HAVE_GLOG
 #include <glog/logging.h>
+#else
+#include <brisk/glog_replace.h>
+#endif
 #include <gtest/gtest.h>
 #include <opencv2/opencv.hpp>
 #include <opencv2/features2d/features2d.hpp>

@@ -15,8 +15,13 @@ rosbuild_init()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
-find_package(GLog REQUIRED)
+find_package(GLog)
 include_directories(GLOG_INCLUDE_DIRS)
+if(${GLOG_FOUND})
+  add_definitions(-DHAVE_GLOG)
+else()
+  set(GLOG_LIBRARY "")
+endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
@@ -47,6 +52,7 @@ rosbuild_add_library(test_libs src/test/serialization.cc
 
 rosbuild_add_gtest(test_binary_equal src/test/test-binary-equal.cc)
 target_link_libraries(test_binary_equal ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)
+
 
 rosbuild_add_gtest(test_serialization src/test/test-serialization.cc)
 target_link_libraries(test_serialization ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)

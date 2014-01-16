@@ -37,8 +37,9 @@
 
 #ifndef BENCHDS_H_
 #define BENCHDS_H_
-#include <fstream>
-#include <iostream>
+
+#include <fstream>  // NOLINT
+#include <iostream>  // NOLINT
 #include <memory>
 #include <type_traits>
 
@@ -54,7 +55,6 @@ namespace brisk {
 typedef unsigned char imagedata_T;
 class Blob;
 class DatasetEntry;
-
 
 #define EXPECTSAMETHROW(THIS, OTHER, MEMBER) \
     do { if (THIS.MEMBER != OTHER.MEMBER) { \

@@ -44,7 +44,11 @@
 #include <type_traits>
 #include <vector>
 
+#if HAVE_GLOG
 #include <glog/logging.h>
+#else
+#include <brisk/glog_replace.h>
+#endif
 
 namespace cv {
 class KeyPoint;
