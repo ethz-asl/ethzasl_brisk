@@ -9,12 +9,9 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-<<<<<<< HEAD
+
 set(ROS_BUILD_TYPE Release)
 #set(ROS_BUILD_TYPE Debug)
-=======
-set(ROS_BUILD_TYPE RelWithDebInfo)
->>>>>>> origin/master
 
 rosbuild_init()
 
