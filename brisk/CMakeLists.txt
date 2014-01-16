@@ -9,8 +9,12 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 #  Release        : w/o debug symbols, w/ optimization
 #  RelWithDebInfo : w/ debug symbols, w/ optimization
 #  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
+<<<<<<< HEAD
 set(ROS_BUILD_TYPE Release)
 #set(ROS_BUILD_TYPE Debug)
+=======
+set(ROS_BUILD_TYPE RelWithDebInfo)
+>>>>>>> origin/master
 
 rosbuild_init()
 
@@ -61,4 +65,3 @@ target_link_libraries(test_binary_equal ${GLOG_LIBRARY} ${PROJECT_NAME} test_lib
 
 rosbuild_add_gtest(test_serialization src/test/test-serialization.cc)
 target_link_libraries(test_serialization ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)
-

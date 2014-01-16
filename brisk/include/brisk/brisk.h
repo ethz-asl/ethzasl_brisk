@@ -56,4 +56,9 @@ typedef brisk::BriskDescriptorExtractor BriskDescriptorExtractor;
 typedef brisk::BriskFeatureDetector BriskFeatureDetector;
 }  // namespace cv
 
+namespace cv {
+typedef brisk::BriskDescriptorExtractor BriskDescriptorExtractor;
+typedef brisk::BriskFeatureDetector BriskFeatureDetector;
+}  // namespace cv
+
 #endif  // BRISK_BRISK_H_
