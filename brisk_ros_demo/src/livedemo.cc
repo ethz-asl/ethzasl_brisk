@@ -50,7 +50,6 @@
 #include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <ros/ros.h>
-#include <sm/timing/Timer.hpp>
 
 using namespace std;
 
@@ -734,9 +733,6 @@ int main(int argc, char ** argv) {
         }
       }
     }
-
-    // display timing
-    ROS_INFO_STREAM_THROTTLE(5, sm::timing::Timing::print());
 
     // video writing?
     if (videoOut && writerIsOpen)

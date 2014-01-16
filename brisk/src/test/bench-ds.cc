@@ -1,7 +1,4 @@
 /*
- Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
  Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
  Stefan Leutenegger and Simon Lynen.
 
@@ -38,43 +35,58 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_MACROS_H_
-#define INTERNAL_MACROS_H_
-
-#ifndef CV_EXPORTS
-#define CV_EXPORTS
-#endif  // CV_EXPORTS
-
-#ifndef M_PI
-#define M_PI 3.141592653589793
-#endif
-
-#define USE_SIMPLE_POINT_WITH_SCORE
-
-#include <stdint.h>
-
-namespace rdtsc {
-namespace timing {
-class DummyTimer;
-}  // namespace timing
-}  // namespace rdtsc
+#include "./bench-ds.h"
 
 namespace brisk {
-typedef rdtsc::timing::DummyTimer DebugTimer;
-// This is needed to avoid aliasing issues with the __m128i data type:
-#ifdef __GNUC__
-typedef unsigned char __attribute__ ((__may_alias__)) UCHAR_ALIAS;
-typedef uint16_t __attribute__ ((__may_alias__)) UINT16_ALIAS;
-typedef uint32_t __attribute__ ((__may_alias__)) UINT32_ALIAS;
-typedef uint64_t __attribute__ ((__may_alias__)) UINT64_ALIAS;
-typedef int __attribute__ ((__may_alias__)) INT32_ALIAS;
-typedef uint8_t __attribute__ ((__may_alias__)) U_INT8T_ALIAS;
-#endif
-#ifdef _MSC_VER
-// TODO(lestefan): Find the equivalent to may_alias.
-#define UCHAR_ALIAS unsigned char  // __declspec(noalias)
-#define UINT32_ALIAS unsigned int  // __declspec(noalias)
-#define __inline__ __forceinline
-#endif
+
+std::string DescriptorToString(const __m128i * d, int num128Words) {
+  std::stringstream ss;
+  ss << "[";
+  const unsigned int __attribute__ ((__may_alias__))* data =
+      reinterpret_cast<const unsigned int __attribute__ ((__may_alias__))*>(d);
+  for (int bit = 0; bit < num128Words * 128; ++bit) {
+    ss << (data[bit >> 5] & (1 << (bit & 31)) ? "1 " : "0 ");
+  };
+  return ss.str();
+}
+
+void Serialize(const Blob& value, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  serialization::Serialize(value.size_, out);
+  out->write(reinterpret_cast<const char*>(value.verification_data_.get()),
+             value.size_);
+}
+
+void DeSerialize(Blob* value, std::ifstream* in) {
+  CHECK_NOTNULL(in);
+  CHECK_NOTNULL(value);
+  serialization::DeSerialize(&value->size_, in);
+  value->verification_data_.reset(new unsigned char[value->size_]);
+  in->read(reinterpret_cast<char*>(value->verification_data_.get()),
+           value->size_);
+}
+
+void Serialize(const DatasetEntry& value, std::ofstream* out) {
+  CHECK_NOTNULL(out);
+  serialization::Serialize(value.path_, out);
+  serialization::Serialize(value.imgGray_, out);
+  serialization::Serialize(value.keypoints_, out);
+  serialization::Serialize(value.descriptors_, out);
+  serialization::Serialize(value.userdata_, out);
+}
+
+void DeSerialize(DatasetEntry* value, std::ifstream* in) {
+  CHECK_NOTNULL(value);
+  CHECK_NOTNULL(in);
+  try {
+    serialization::DeSerialize(&value->path_, in);
+    serialization::DeSerialize(&value->imgGray_, in);
+    serialization::DeSerialize(&value->keypoints_, in);
+    serialization::DeSerialize(&value->descriptors_, in);
+    serialization::DeSerialize(&value->userdata_, in);
+  } catch (const std::ifstream::failure& e) {
+    CHECK(false) << "Failed to load DatasetEntry " + std::string(e.what());
+  }
+}
+
 }  // namespace brisk
-#endif  // INTERNAL_MACROS_H_

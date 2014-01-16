@@ -1,7 +1,4 @@
 /*
- Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
  Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
  Stefan Leutenegger and Simon Lynen.
 
@@ -38,43 +35,20 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_MACROS_H_
-#define INTERNAL_MACROS_H_
+#ifndef TEST_BINARY_EQUAL_H_
+#define TEST_BINARY_EQUAL_H_
 
-#ifndef CV_EXPORTS
-#define CV_EXPORTS
-#endif  // CV_EXPORTS
+#include <vector>
 
-#ifndef M_PI
-#define M_PI 3.141592653589793
-#endif
-
-#define USE_SIMPLE_POINT_WITH_SCORE
-
-#include <stdint.h>
-
-namespace rdtsc {
-namespace timing {
-class DummyTimer;
-}  // namespace timing
-}  // namespace rdtsc
 
 namespace brisk {
-typedef rdtsc::timing::DummyTimer DebugTimer;
-// This is needed to avoid aliasing issues with the __m128i data type:
-#ifdef __GNUC__
-typedef unsigned char __attribute__ ((__may_alias__)) UCHAR_ALIAS;
-typedef uint16_t __attribute__ ((__may_alias__)) UINT16_ALIAS;
-typedef uint32_t __attribute__ ((__may_alias__)) UINT32_ALIAS;
-typedef uint64_t __attribute__ ((__may_alias__)) UINT64_ALIAS;
-typedef int __attribute__ ((__may_alias__)) INT32_ALIAS;
-typedef uint8_t __attribute__ ((__may_alias__)) U_INT8T_ALIAS;
-#endif
-#ifdef _MSC_VER
-// TODO(lestefan): Find the equivalent to may_alias.
-#define UCHAR_ALIAS unsigned char  // __declspec(noalias)
-#define UINT32_ALIAS unsigned int  // __declspec(noalias)
-#define __inline__ __forceinline
-#endif
+void RunPipeline(std::vector<DatasetEntry>& dataset,
+                 const std::string& briskbasepath);
+bool RunVerification(std::vector<DatasetEntry>& current_dataset,
+                     std::vector<DatasetEntry>& verification_dataset,
+                     bool do_gtest_checks);
+void Draw(std::vector<DatasetEntry>& dataset);
+bool RunValidation(bool do_gtest_checks);
 }  // namespace brisk
-#endif  // INTERNAL_MACROS_H_
+
+#endif  // TEST_BINARY_EQUAL_H_

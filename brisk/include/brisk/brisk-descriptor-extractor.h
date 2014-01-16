@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -48,26 +48,25 @@
 #include <brisk/internal/helper-structures.h>
 #include <brisk/internal/macros.h>
 
-namespace cv {
-class CV_EXPORTS BriskDescriptorExtractor : public cv::DescriptorExtractor {
+namespace brisk {
+class BriskDescriptorExtractor : public cv::DescriptorExtractor {
  public:
   // Create a descriptor with standard pattern.
-  BriskDescriptorExtractor(bool rotationInvariant=true,
-                           bool scaleInvariant=true);
+  BriskDescriptorExtractor(bool rotationInvariant = true,
+                           bool scaleInvariant = true);
   // Create a descriptor with custom pattern file.
   BriskDescriptorExtractor(const std::string& fname,
-                           bool rotationInvariant=true,
-                           bool scaleInvariant=true);
+                           bool rotationInvariant = true,
+                           bool scaleInvariant = true);
   virtual ~BriskDescriptorExtractor();
 
   // Call this to generate the kernel:
   // Circle of radius r (pixels), with n points;
   // Short pairings with dMax, long pairings with dMin.
   void GenerateKernel(const std::vector<float>& radiusList,
-                      const std::vector<int>& numberList,
-                      float dMax = 5.85f,
-                      float dMin = 8.2f,
-                      std::vector<int> indexChange = std::vector<int>());
+                      const std::vector<int>& numberList, float dMax = 5.85f,
+                      float dMin = 8.2f, std::vector<int> indexChange =
+                          std::vector<int>());
 
   int descriptorSize() const;
   int descriptorType() const;
@@ -77,14 +76,14 @@ class CV_EXPORTS BriskDescriptorExtractor : public cv::DescriptorExtractor {
 
   // This is the subclass keypoint computation implementation:
   // (not meant to be public - hacked)
-  virtual void computeImpl(const Mat& image,
-                           std::vector<KeyPoint>& keypoints,
-                           Mat& descriptors) const;
+  virtual void computeImpl(const cv::Mat& image,
+                           std::vector<cv::KeyPoint>& keypoints,
+                           cv::Mat& descriptors) const;
 
   // Opencv 2.1 {
-  virtual void compute(const Mat& image,
-                       std::vector<KeyPoint>& keypoints,
-                       Mat& descriptors) const {
+  virtual void compute(const cv::Mat& image,
+                       std::vector<cv::KeyPoint>& keypoints,
+                       cv::Mat& descriptors) const {
     computeImpl(image, keypoints, descriptors);
   }
   // }  Opencv 2.1
@@ -134,6 +133,6 @@ class CV_EXPORTS BriskDescriptorExtractor : public cv::DescriptorExtractor {
   // General size.
   static const float basicSize_;
 };
-}  // namespace cv
+}  // namespace brisk
 
 #endif  // BRISK_BRISK_DESCRIPTOR_EXTRACTOR_H_

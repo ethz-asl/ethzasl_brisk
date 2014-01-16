@@ -46,17 +46,17 @@
 #include <tmmintrin.h>
 #include <vector>
 
-#include <brisk/internal/rdtsc-wrapper.h>
+#include <brisk/internal/timer.h>
 
 namespace brisk {
-template<class SCORE_CALCULTAOR_T>
-ScaleSpaceLayer<SCORE_CALCULTAOR_T>::ScaleSpaceLayer(const cv::Mat& img,
+template<class SCORE_CALCULATOR_T>
+ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScaleSpaceLayer(const cv::Mat& img,
                                                      bool initScores) {
   Create(img);
 }
 
-template<class SCORE_CALCULTAOR_T>
-void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(const cv::Mat& img,
+template<class SCORE_CALCULATOR_T>
+void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(const cv::Mat& img,
                                                  bool initScores) {
   // Octave 0.
   _isOctave = true;
@@ -96,17 +96,17 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(const cv::Mat& img,
   }
 }
 
-template<class SCORE_CALCULTAOR_T>
-ScaleSpaceLayer<SCORE_CALCULTAOR_T>::ScaleSpaceLayer(
+template<class SCORE_CALCULATOR_T>
+ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScaleSpaceLayer(
     ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores) {
   Create(layerBelow, initScores);
 }
 
-template<class SCORE_CALCULTAOR_T>
-void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(
+template<class SCORE_CALCULATOR_T>
+void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(
     ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores) {
   // For successive construction.
-  rdtsc::timing::Timer timerDownsample(
+  brisk::timing::Timer timerDownsample(
       "0.0 BRISK Detection: Creation&Downsampling (per layer)");
   int type = layerBelow->_img.type();
   if (layerBelow->_isOctave) {
@@ -154,7 +154,7 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(
     _scale = pow(2.0, static_cast<double>(_layerNumber / 2)) * 1.5;
     _offset = _scale * 0.5 - 0.5;
   }
-  timerDownsample.stop();
+  timerDownsample.Stop();
 
   // By default no uniformity radius.
   _radius = 1;
@@ -180,8 +180,8 @@ void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Create(
   }
 }
 
-template<class SCORE_CALCULTAOR_T>
-void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::SetUniformityRadius(double radius) {
+template<class SCORE_CALCULATOR_T>
+void ScaleSpaceLayer<SCORE_CALCULATOR_T>::SetUniformityRadius(double radius) {
   _radius = radius;
   if (radius == 0)
     _radius = 1;
@@ -206,10 +206,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       }
     }
   } else {
-    TimerSwitchable timerNonMaxSuppression2d(
+    brisk::timing::DebugTimer timerNonMaxSuppression2d(
         "0.2 BRISK Detection: 2d nonmax suppression (per layer)");
     _scoreCalculator.Get2dMaxima(points, _absoluteThreshold);
-    timerNonMaxSuppression2d.stop();
+    timerNonMaxSuppression2d.Stop();
   }
   // Next check above and below. The code looks a bit stupid, but that's
   // for speed. We don't want to make the distinction analyzing whether or
@@ -217,7 +217,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (!usePassedKeypoints) {
     if (_aboveLayer_ptr != 0 && _belowLayer_ptr != 0) {
       // Check above and below
-      TimerSwitchable timerNonMaxSuppression3d(
+      brisk::timing::DebugTimer timerNonMaxSuppression3d(
           "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
@@ -278,10 +278,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.stop();
+      timerNonMaxSuppression3d.Stop();
     } else if (_aboveLayer_ptr != 0) {
       // Check above.
-      TimerSwitchable timerNonMaxSuppression3d(
+      brisk::timing::DebugTimer timerNonMaxSuppression3d(
           "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
@@ -319,10 +319,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.stop();
+      timerNonMaxSuppression3d.Stop();
     } else if (_belowLayer_ptr != 0) {
       // Check below.
-      TimerSwitchable timerNonMaxSuppression3d(
+      brisk::timing::DebugTimer timerNonMaxSuppression3d(
           "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
@@ -360,7 +360,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.stop();
+      timerNonMaxSuppression3d.Stop();
     }
   }
 
@@ -368,14 +368,14 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (points.size() == 0)
     return;
   if (enforceUniformity && _radius > 0.0) {
-    TimerSwitchable timer_sort_keypoints("0.31 BRISK Detection: sort keypoints "
+    brisk::timing::DebugTimer timer_sort_keypoints("0.31 BRISK Detection: sort keypoints "
                                          "by score (per layer)");
     std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
 
     // Sort.
     std::sort(points.begin(), points.end());
     const float maxScore = points.front().score;
-    timer_sort_keypoints.stop();
+    timer_sort_keypoints.Stop();
 
     pt_tmp.reserve(keypoints.size() + points.size());  // Allow appending.
     keypoints.reserve(keypoints.size() + points.size());  // Allow appending.
@@ -386,7 +386,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
     occupancy = cv::Mat::zeros((_img.rows) * ceil(scaling) + 32,
                                (_img.cols) * ceil(scaling) + 32, CV_8U);
 
-    TimerSwitchable timer_uniformity_enforcement(
+    brisk::timing::DebugTimer timer_uniformity_enforcement(
         "0.3 BRISK Detection: "
         "uniformity enforcement (per layer)");
     // Go through the sorted keypoints and reject too close ones.
@@ -461,11 +461,11 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       }  // Limit the max number if necessary.
     }
     points.assign(pt_tmp.begin(), pt_tmp.end());
-    timer_uniformity_enforcement.stop();
+    timer_uniformity_enforcement.Stop();
   }
 
   // 3d(/2d) subpixel refinement.
-  TimerSwitchable timer_subpixel_refinement(
+  brisk::timing::DebugTimer timer_subpixel_refinement(
       "0.4 BRISK Detection: "
       "subpixel(&scale) refinement (per layer)");
   if (usePassedKeypoints)
@@ -505,7 +505,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
               _scale * 12.0, -1, it->score, _layerNumber / 2));
     }
   }
-  timer_subpixel_refinement.stop();
+  timer_subpixel_refinement.Stop();
 }
 #else
 #error
@@ -526,10 +526,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
       }
     }
   } else {
-    TimerSwitchable timer_2d_nonmax(
+    brisk::timing::DebugTimer timer_2d_nonmax(
         "0.2 BRISK Detection: 2d nonmax suppression (per layer)");
     _scoreCalculator.get2dMaxima(points, _absoluteThreshold);
-    timer_2d_nonmax.stop();
+    timer_2d_nonmax.Stop();
   }
 
   // Next check above and below. The code looks a bit stupid, but that's
@@ -538,7 +538,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
   if (!usePassedKeypoints) {
     if (_aboveLayer_ptr != 0 && _belowLayer_ptr != 0) {
       // Check above and below.
-      TimerSwitchable timer_3d_nonmax(
+      brisk::timing::DebugTimer timer_3d_nonmax(
           "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
@@ -606,10 +606,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timer_3d_nonmax.stop();
+      timer_3d_nonmax.Stop();
     } else if (_aboveLayer_ptr != 0) {
       // Check above.
-      TimerSwitchable timerFancyOp2(
+      brisk::timing::DebugTimer timer_nonmax_suppress_3d(
           "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
@@ -650,10 +650,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerFancyOp2.stop();
+      timer_nonmax_suppress_3d.Stop();
     } else if (_belowLayer_ptr != 0) {
       // Check below.
-      TimerSwitchable timer_3d_nonmax(
+      brisk::timing::DebugTimer timer_3d_nonmax(
           "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
@@ -694,7 +694,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timer_3d_nonmax.stop();
+      timer_3d_nonmax.Stop();
     }
   }
 
@@ -702,14 +702,14 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
   if (points.size() == 0)
     return;
   if (enforceUniformity && _radius > 0.0) {
-    TimerSwitchable timerFancyOp31(
+    brisk::timing::DebugTimer timer_sort_keypoint_by_score(
         "0.31 BRISK Detection: sort keypoint by score (per layer)");
     std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
 
     // Sort.
     std::sort(points.begin(), points.end());
     const float maxScore = points.front().score;
-    timerFancyOp31.stop();
+    timer_sort_keypoint_by_score.Stop();
 
     pt_tmp.reserve(keypoints.size() + points.size());  // Allow appending.
     keypoints.reserve(keypoints.size() + points.size());  // Allow appending.
@@ -720,7 +720,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
     occupancy = cv::Mat::zeros((_img.rows) * ceil(scaling) + 32,
                                (_img.cols) * ceil(scaling) + 32, CV_8U);
 
-    TimerSwitchable timerFancyOp3(
+    brisk::timing::DebugTimer timer_uniformity(
         "0.3 BRISK Detection: uniformity enforcement (per layer)");
     // Go through the sorted keypoints and reject too close ones.
     for (typename std::vector<
@@ -795,11 +795,11 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
       }  // limit the max number if necessary
     }
     points.assign(pt_tmp.begin(), pt_tmp.end());
-    timerFancyOp3.stop();
+    timer_uniformity.Stop();
   }
 
   // 3d(/2d) subpixel refinement.
-  TimerSwitchable timerFancyOp4(
+  brisk::timing::DebugTimer timer_subpixel_refinement(
       "0.4 BRISK Detection: subpixel(&scale) refinement (per layer)");
   if (usePassedKeypoints)
     keypoints.clear();
@@ -837,26 +837,26 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::detectScaleSpaceMaxima(
               _scale * 12.0, -1, it->score, _layerNumber / 2));
     }
   }
-  timerFancyOp4.stop();
+  timer_subpixel_refinement.Stop();
 }
 #endif
 
 // Utilities.
-template<class SCORE_CALCULTAOR_T>
-inline double ScaleSpaceLayer<SCORE_CALCULTAOR_T>::ScoreAbove(double u,
+template<class SCORE_CALCULATOR_T>
+inline double ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScoreAbove(double u,
                                                               double v) {
   return _aboveLayer_ptr->_scoreCalculator.Score(
       _scale_above * (u + _offset_above), _scale_above * (v + _offset_above));
 }
-template<class SCORE_CALCULTAOR_T>
-inline double ScaleSpaceLayer<SCORE_CALCULTAOR_T>::ScoreBelow(double u,
+template<class SCORE_CALCULATOR_T>
+inline double ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScoreBelow(double u,
                                                               double v) {
   return _belowLayer_ptr->_scoreCalculator.Score(
       _scale_below * (u + _offset_below), _scale_below * (v + _offset_below));
 }
 
-template<class SCORE_CALCULTAOR_T>
-inline bool ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample(
+template<class SCORE_CALCULATOR_T>
+inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
   if (srcimg.type() == CV_8UC1) {
     Halfsample8(srcimg, dstimg);
@@ -868,8 +868,8 @@ inline bool ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample(
   return true;
 }
 
-template<class SCORE_CALCULTAOR_T>
-inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample16(
+template<class SCORE_CALCULATOR_T>
+inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample16(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
   // Make sure the destination image is of the right size:
   assert(srcimg.cols / 2 == dstimg.cols);
@@ -950,8 +950,8 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample16(
 }
 
 // Half sampling.
-template<class SCORE_CALCULTAOR_T>
-inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample8(
+template<class SCORE_CALCULATOR_T>
+inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample8(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
   // Take care with border...
   const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
@@ -1084,8 +1084,8 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Halfsample8(
   }
 }
 
-template<class SCORE_CALCULTAOR_T>
-inline bool ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample(
+template<class SCORE_CALCULATOR_T>
+inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
   std::cout.flush();
   if (srcimg.type() == CV_8UC1) {
@@ -1098,8 +1098,8 @@ inline bool ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample(
   return true;
 }
 
-template<class SCORE_CALCULTAOR_T>
-inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample16(
+template<class SCORE_CALCULATOR_T>
+inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample16(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
   assert(srcimg.type() == CV_16UC1);
 
@@ -1250,8 +1250,8 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample16(
   }
 }
 
-template<class SCORE_CALCULTAOR_T>
-inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample8(
+template<class SCORE_CALCULATOR_T>
+inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample8(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
   // Take care with border...
   const uint16_t leftoverCols = ((srcimg.cols / 3) * 3) % 15;
@@ -1361,8 +1361,8 @@ inline void ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Twothirdsample8(
   }
 }
 
-template<class SCORE_CALCULTAOR_T>
-__inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Refine1D(const float s_05,
+template<class SCORE_CALCULATOR_T>
+__inline__ float ScaleSpaceLayer<SCORE_CALCULATOR_T>::Refine1D(const float s_05,
                                                                const float s0,
                                                                const float s05,
                                                                float& max) {
@@ -1407,8 +1407,8 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Refine1D(const float s_05,
   return ret_val;
 }
 
-template<class SCORE_CALCULTAOR_T>
-__inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Refine1D_1(
+template<class SCORE_CALCULATOR_T>
+__inline__ float ScaleSpaceLayer<SCORE_CALCULATOR_T>::Refine1D_1(
     const float s_05, const float s0, const float s05, float& max) {
   int i_05 = static_cast<int>(1024.0 * s_05 + 0.5);
   int i0 = static_cast<int>(1024.0 * s0 + 0.5);
@@ -1450,8 +1450,8 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Refine1D_1(
   return ret_val;
 }
 
-template<class SCORE_CALCULTAOR_T>
-__inline__ float ScaleSpaceLayer<SCORE_CALCULTAOR_T>::Subpixel2D(
+template<class SCORE_CALCULATOR_T>
+__inline__ float ScaleSpaceLayer<SCORE_CALCULATOR_T>::Subpixel2D(
     const double s_0_0, const double s_0_1, const double s_0_2,
     const double s_1_0, const double s_1_1, const double s_1_2,
     const double s_2_0, const double s_2_1, const double s_2_2, float& delta_x,

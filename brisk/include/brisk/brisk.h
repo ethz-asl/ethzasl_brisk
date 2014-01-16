@@ -42,6 +42,7 @@
 #define BRISK_BRISK_H_
 
 #include <brisk/brisk-descriptor-extractor.h>
+#include <brisk/brisk-feature.h>
 #include <brisk/brisk-feature-detector.h>
 #include <brisk/harris-feature-detector.h>
 #include <brisk/harris-score-calculator.h>
@@ -49,5 +50,10 @@
 #include <brisk/cameras/cameras.h>
 #include <brisk/camera-aware-feature.h>
 #include <brisk/brisk-feature.h>
+
+namespace cv {
+typedef brisk::BriskDescriptorExtractor BriskDescriptorExtractor;
+typedef brisk::BriskFeatureDetector BriskFeatureDetector;
+}  // namespace cv
 
 #endif  // BRISK_BRISK_H_
