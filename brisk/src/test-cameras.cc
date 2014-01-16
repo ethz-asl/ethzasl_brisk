@@ -13,7 +13,7 @@
 int main(int argc, char ** argv) {
   // Process command line args.
 
-  // TODO: make a proper unit test of this stuff...
+  // TODO (lestefan): make a proper unit test of this stuff...
   brisk::cameras::EquidistantPinholeCameraGeometry cameraGeometry(
       602, 601, 318, 241, 640, 480,
       brisk::cameras::EquidistantDistortion(0.3, 0.2, 0.01, 0.0002));
@@ -83,7 +83,7 @@ int main(int argc, char ** argv) {
 
   // match
   std::vector<std::vector<cv::DMatch> > matches;
-  cv::BruteForceMatcherSse matcher;
+  brisk::BruteForceMatcherSse matcher;
   matcher.radiusMatch(descriptors0, descriptors1, matches, 50.0);
 
   // draw stuff

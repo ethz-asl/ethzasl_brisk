@@ -291,7 +291,7 @@ int main(int argc, char ** argv) {
 
   // Now the extractor:
   bool hamming = true;
-  cv::Ptr < cv::DescriptorExtractor > descriptorExtractor;
+  cv::Ptr<cv::DescriptorExtractor> descriptorExtractor;
   // Now the extractor:
   if (argc == 1) {
     descriptorExtractor = new brisk::BriskDescriptorExtractor();
