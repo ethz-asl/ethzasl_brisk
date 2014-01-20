@@ -69,7 +69,7 @@ inline const float& KeyPointX(const KeyPoint& keypoint) {
 inline const float& KeyPointY(const KeyPoint& keypoint) {
   return keypoint.y;
 }
-#endif
+#endif  // HAVE_OPENCV
 
 class AstDetector {
  public:

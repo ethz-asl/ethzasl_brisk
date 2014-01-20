@@ -47,6 +47,7 @@
 #include <brisk/brute-force-matcher.h>
 #include <brisk/harris-feature-detector.h>
 #include <brisk/harris-score-calculator.h>
+#include <brisk/brisk-opencv.h>
 #include <brisk/scale-space-feature-detector.h>
 
 namespace cv {
