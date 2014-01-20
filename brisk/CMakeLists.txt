@@ -50,11 +50,11 @@ target_link_libraries(demo ${PROJECT_NAME})
 rosbuild_add_library(test_libs src/test/serialization.cc
                                src/test/bench-ds.cc)
 
+rosbuild_add_gtest(test_popcnt src/test/test-popcount.cc)
+target_link_libraries(test_popcnt ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)
+
 rosbuild_add_gtest(test_binary_equal src/test/test-binary-equal.cc)
 target_link_libraries(test_binary_equal ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)
-
-rosbuild_add_gtest(test_popcount src/test/test-popcount.cc)
-target_link_libraries(test_popcount ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)
 
 rosbuild_add_gtest(test_serialization src/test/test-serialization.cc)
 target_link_libraries(test_serialization ${GLOG_LIBRARY} ${PROJECT_NAME} test_libs)
