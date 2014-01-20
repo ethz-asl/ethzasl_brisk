@@ -129,7 +129,7 @@ void PlainTwoThirdSample(const unsigned char* src, unsigned char* dst,
       uint16_t E2 = (((C2 + B2 + 1) / 2 + C2 + 1) / 2);
       uint16_t E3 = (((C3 + B3 + 1) / 2 + C3 + 1) / 2);
 
-      //
+      // Horizontal.
       uint16_t F1 = ((D1 + D2 + 1) / 2 + D1 + 1) / 2;
       uint16_t F2 = ((D3 + D2 + 1) / 2 + D3 + 1) / 2;
       uint16_t F3 = ((E1 + E2 + 1) / 2 + E1 + 1) / 2;
