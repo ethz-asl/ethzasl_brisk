@@ -373,8 +373,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (points.size() == 0)
     return;
   if (enforceUniformity && _radius > 0.0) {
-    brisk::timing::DebugTimer timer_sort_keypoints("0.31 BRISK Detection: sort keypoints "
-                                         "by score (per layer)");
+    brisk::timing::DebugTimer timer_sort_keypoints("0.31 BRISK Detection: "
+        "sort keypoints by score (per layer)");
     std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
 
     // Sort.
@@ -412,10 +412,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       const float nsc = 0.99 * nsc1;
       for (int y = 0; y < 2 * 16 - 1; ++y) {
 #ifdef __ARM_NEON__
-      uint8x16_t mem1 = vld1q_u8 (reinterpret_cast<const uint8_t*>(
-          &occupancy.at<uint8_t>(cy+y-15,cx-15)));
-      uint8x16_t mem2 = vld1q_u8 (reinterpret_cast<const uint8_t*>(
-          &occupancy.at<uint8_t>(cy+y-15,cx+1)));
+      uint8x16_t mem1 = vld1q_u8(reinterpret_cast<const uint8_t*>(
+          &occupancy.at<uint8_t>(cy + y - 15, cx - 15)));
+      uint8x16_t mem2 = vld1q_u8(reinterpret_cast<const uint8_t*>(
+          &occupancy.at<uint8_t>(cy + y - 15, cx + 1)));
 
       const uint8_t tmpstore_mask1[16] = {
           ceil(_LUT.at<float>(y, 15) * nsc),
@@ -436,7 +436,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
           ceil(_LUT.at<float>(y, 0) * nsc));
         // Lacking the masked storing intrinsics in NEON.
         static_cast<uint8_t>(_LUT.at<float>(y, 15) * nsc)};
-      uint8x16_t mask1 = vld1q_u8 (&tmpstore_mask1[0]);
+      uint8x16_t mask1 = vld1q_u8(&tmpstore_mask1[0]);
 
       const uint8_t tmpstore_mask2[16] = {
         0, ceil(_LUT.at<float>(y, 30) * nsc),
@@ -456,12 +456,12 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         ceil(_LUT.at<float>(y, 16) * nsc));
         // Lacking the masked storing intrinsics in NEON.
         static_cast<uint8_t>(_LUT.at<float>(y, 30) * nsc)};
-      uint8x16_t mask2 = vld1q_u8 (&tmpstore_mask2[0]);
+      uint8x16_t mask2 = vld1q_u8(&tmpstore_mask2[0]);
 
-      vst1q_u8 (&occupancy.at<uint8_t>(cy + y - 15, cx - 15),
-                vqaddq_u8 (mem1, mask1));
-      vst1q_u8 (&occupancy.at<uint8_t>(cy + y - 15, cx + 1),
-                vqaddq_u8 (mem2, mask2));
+      vst1q_u8(&occupancy.at<uint8_t>(cy + y - 15, cx - 15),
+               vqaddq_u8(mem1, mask1));
+      vst1q_u8(&occupancy.at<uint8_t>(cy + y - 15, cx + 1),
+               vqaddq_u8(mem2, mask2));
 # else
         __m128i mem1 = _mm_loadu_si128(
             reinterpret_cast<__m128i *>(&occupancy.at < uchar

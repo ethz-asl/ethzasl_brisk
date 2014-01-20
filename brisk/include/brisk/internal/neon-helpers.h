@@ -38,9 +38,9 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef NEON_HELPERS_H_
-#define NEON_HELPERS_H_
-#ifdef ANDROID
+#ifndef INTERNAL_NEON_HELPERS_H_
+#define INTERNAL_NEON_HELPERS_H_
+#ifdef __ARM_NEON__
 #include <arm_neon.h>
 
 namespace brisk {
@@ -58,5 +58,5 @@ inline uint8x16_t shuffle_epi8_neon(const uint8x16_t& lhs,
 }
 }  // namespace brisk
 
-#endif  // ANDROID
-#endif  // NEON_HELPERS_H_
+#endif  // __ARM_NEON__
+#endif  // INTERNAL_NEON_HELPERS_H_

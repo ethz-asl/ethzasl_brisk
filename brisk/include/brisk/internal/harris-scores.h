@@ -38,8 +38,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_HARRIS_SCORES_SSE_H_
-#define INTERNAL_HARRIS_SCORES_SSE_H_
+#ifndef INTERNAL_HARRIS_SCORES_H_
+#define INTERNAL_HARRIS_SCORES_H_
 
 #include <opencv2/opencv.hpp>
 #include <brisk/brisk.h>
@@ -51,6 +51,6 @@ namespace brisk {
 // SSE speeded up (dxdx dxdy and dydy only).
 // Based on harrisScores_basic_noMats(.).
 void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores);
-#endif  // ANDROID
+#endif  // __ARM_NEON__
 }  // namespace brisk
-#endif  // INTERNAL_HARRIS_SCORES_SSE_H_
+#endif  // INTERNAL_HARRIS_SCORES_H_

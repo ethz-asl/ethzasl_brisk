@@ -56,7 +56,8 @@ class  BruteForceMatcher : public cv::DescriptorMatcher {
   virtual bool isMaskSupported() const {
     return true;
   }
-  virtual cv::Ptr<cv::DescriptorMatcher> clone(bool emptyTrainData = false) const;
+  virtual cv::Ptr<cv::DescriptorMatcher> clone(bool emptyTrainData = false)
+      const;
 
  protected:
   virtual void knnMatchImpl(const cv::Mat& queryDescriptors,
@@ -82,12 +83,13 @@ class  BruteForceMatcher : public cv::DescriptorMatcher {
                                  int k,
                                  const std::vector<cv::Mat>& masks,
                                  bool compactResult);
-  static void commonRadiusMatchImpl(BruteForceMatcher& matcher,  // NOLINT
-                                    const cv::Mat& queryDescriptors,
-                                    std::vector<std::vector<cv::DMatch> >& matches,
-                                    float maxDistance,
-                                    const std::vector<cv::Mat>& masks,
-                                    bool compactResult);
+  static void commonRadiusMatchImpl(
+      BruteForceMatcher& matcher,  // NOLINT
+      const cv::Mat& queryDescriptors,
+      std::vector<std::vector<cv::DMatch> >& matches,
+      float maxDistance,
+      const std::vector<cv::Mat>& masks,
+      bool compactResult);
 };
 }  // namespace brisk
 #endif  // BRISK_BRUTE_FORCE_MATCHER_H_

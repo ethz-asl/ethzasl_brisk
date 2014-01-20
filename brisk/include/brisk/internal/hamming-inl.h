@@ -104,7 +104,7 @@ __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
     xmm2 = xmm7;
     xmm3 = xmm7;  // Get popcount.
 //    xmm2 = _mm_shuffle_epi8(xmm2, xmm0);  // For all nibbles.
-    xmm2 = brisk::shuffle_epi8_neon(xmm2, xmm0);// For all nibbles.
+    xmm2 = brisk::shuffle_epi8_neon(xmm2, xmm0);  // For all nibbles.
 //    xmm3 = _mm_shuffle_epi8(xmm3, xmm1);  // Using PSHUFB.
     xmm3 = brisk::shuffle_epi8_neon(xmm3, xmm1);  // Using PSHUFB.
 //    xmm4 = _mm_add_epi8(xmm4, xmm2);  // Update local.

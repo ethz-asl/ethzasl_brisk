@@ -430,7 +430,8 @@ void BriskLayer::CalculateThresholdMap() {
 
       // Store the data back:
       uint8x16_t diff = vsubq_u8(max, min);
-      vst1q_u8(reinterpret_cast<uint8_t*> (thrmap_.get() + x + y * rowstride), diff);
+      vst1q_u8(reinterpret_cast<uint8_t*> (thrmap_.get() + x + y * rowstride),
+               diff);
 #else
       // SSE version.
       __m128i v00 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));

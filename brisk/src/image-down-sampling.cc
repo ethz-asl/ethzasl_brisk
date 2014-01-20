@@ -143,7 +143,8 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
   // Data pointers:
   const uint8x16_t* p1 = reinterpret_cast<const uint8x16_t*>(srcimg);
-  const uint8x16_t* p2 = reinterpret_cast<const uint8x16_t*>(srcimg + src_width);
+  const uint8x16_t* p2 = reinterpret_cast<const uint8x16_t*>(
+      srcimg + src_width);
   uint8x16_t* p_dest = reinterpret_cast<uint8x16_t*>(dstimg);
 
   unsigned char* p_dest_char;
@@ -204,7 +205,7 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       result = vhaddq_u8(result, result_shifted);
 
       // Store.
-      vst1q_u8((uint8_t*) p_dest, result);
+      vst1q_u8(static_cast<uint8_t*>(p_dest), result);
 
       p1++;
       p2++;
@@ -246,8 +247,10 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       p1 = reinterpret_cast<const uint8x16_t*>(srcimg + 2 * row * src_width);
       p2 = p1 + hsize;
     } else {
-      const unsigned char* p1_src_char = reinterpret_cast<const unsigned char*>(p1);
-      const unsigned char* p2_src_char = reinterpret_cast<const unsigned char*>(p2);
+      const unsigned char* p1_src_char =
+          reinterpret_cast<const unsigned char*>(p1);
+      const unsigned char* p2_src_char =
+          reinterpret_cast<const unsigned char*>(p2);
       for (unsigned int k = 0; k < leftoverCols; k++) {
         uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
         + p2_src_char[k] + p2_src_char[k + 1];
@@ -257,7 +260,8 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       row++;
       p_dest = reinterpret_cast<uint8x16_t*>(dstimg + row * dst_width);
       p1 = reinterpret_cast<const uint8x16_t*>(srcimg + 2 * row * src_width);
-      p2 = reinterpret_cast<const uint8x16_t*>(srcimg + (2 * row + 1) * src_width);
+      p2 = reinterpret_cast<const uint8x16_t*>(srcimg + (2 * row + 1) *
+                                               src_width);
     }
   }
 #else
@@ -576,7 +580,8 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
     const uint8_t tmpmask[16] = {0, 2, 3, 5, 6, 8, 9, 11, 12, 14, 0x80, 0x80,
       0x80, 0x80};
     const uint8_t tmpstore_mask[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-      0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0};  // Lacking the masked storing intrinsics in NEON
+        // Lacking the masked storing intrinsics in NEON.
+      0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0};
     register uint8x16_t store_mask = vld1q_u8(&tmpstore_mask[0]);
 
     while (p3 < p_end) {
@@ -672,14 +677,14 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
         const uint16_t C2 = *(p3++);
         const uint16_t C3 = *(p3++);
 
-        *(p_dest1++) = static_cast<unsigned char>(((4 * A1 + 2 * (A2 + B1) + B2) / 9)
-            & 0x00FF);
-        *(p_dest1++) = static_cast<unsigned char>(((4 * A3 + 2 * (A2 + B3) + B2) / 9)
-            & 0x00FF);
-        *(p_dest2++) = static_cast<unsigned char>(((4 * C1 + 2 * (C2 + B1) + B2) / 9)
-            & 0x00FF);
-        *(p_dest2++) = static_cast<unsigned char>(((4 * C3 + 2 * (C2 + B3) + B2) / 9)
-            & 0x00FF);
+        *(p_dest1++) = static_cast<unsigned char>(
+            ((4 * A1 + 2 * (A2 + B1) + B2) / 9) & 0x00FF);
+        *(p_dest1++) = static_cast<unsigned char>(
+            ((4 * A3 + 2 * (A2 + B3) + B2) / 9) & 0x00FF);
+        *(p_dest2++) = static_cast<unsigned char>(
+            ((4 * C1 + 2 * (C2 + B1) + B2) / 9) & 0x00FF);
+        *(p_dest2++) = static_cast<unsigned char>(
+            ((4 * C3 + 2 * (C2 + B3) + B2) / 9) & 0x00FF);
       }
 
       // Increment row counter:
