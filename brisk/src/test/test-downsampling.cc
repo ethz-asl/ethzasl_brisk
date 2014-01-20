@@ -55,15 +55,14 @@ void CheckImageSame(const unsigned char* lhs, const unsigned char* rhs,
   CHECK_NOTNULL(lhs);
   CHECK_NOTNULL(rhs);
   unsigned int errors = 0;
+  unsigned int error_limit = 10;
   for (size_t row = 0; row < rows; ++row) {
     for (size_t col = 0; col < rows; ++col) {
       EXPECT_EQ(lhs[row * cols + col], rhs[row * cols + col])
       << "Difference at row: " << row << " col: " << col;
       if (lhs[row * cols + col] != rhs[row * cols + col]) {
         ++errors;
-        if (errors > 10) {
-          ASSERT_TRUE(false) << "Too many errors";
-        }
+        ASSERT_LT(errors, error_limit) << "Too many errors.";
       }
     }
   }
@@ -84,7 +83,7 @@ void PlainHalfSample(const unsigned char* src, unsigned char* dst,
        unsigned int value22 = src[(row * 2 + 1) * src_cols + (col * 2 + 1)];
 
        // Also do horizontal pairwise add like vectorized versions.
-       // We also add the 1s to force rounding 'up'.
+       // We also add the 1s to round 'up'.
        dst[row * dst_cols + col] = std::min(
            ((value11 + 1 + value21) / 2 +
                (value12 + 1 + value22) / 2 + 1) / 2, 255u);
@@ -120,14 +119,28 @@ void PlainTwoThirdSample(const unsigned char* src, unsigned char* dst,
        const uint16_t C3 = src[(row / 2 * 3 + 2) * src_cols +
                                (col / 2 * 3 + 2)];
 
-       dst[row * dst_cols + col] = static_cast<unsigned char>(
-               ((4 * A1 + 2 * (A2 + B1) + B2) / 9) & 0x00FF);
-       dst[row * dst_cols + col + 1] = static_cast<unsigned char>(
-               ((4 * A3 + 2 * (A2 + B3) + B2) / 9) & 0x00FF);
-       dst[(row + 1) * dst_cols + col] = static_cast<unsigned char>(
-           ((4 * C1 + 2 * (C2 + B1) + B2) / 9) & 0x00FF);
-       dst[(row + 1) * dst_cols + col + 1] = static_cast<unsigned char>(
-           ((4 * C3 + 2 * (C2 + B3) + B2) / 9) & 0x00FF);
+      // Upper row.
+      uint16_t D1 = (((A1 + B1 + 1) / 2 + A1 + 1) / 2);
+      uint16_t D2 = (((A2 + B2 + 1) / 2 + A2 + 1) / 2);
+      uint16_t D3 = (((A3 + B3 + 1) / 2 + A3 + 1) / 2);
+
+      // Lower row.
+      uint16_t E1 = (((C1 + B1 + 1) / 2 + C1 + 1) / 2);
+      uint16_t E2 = (((C2 + B2 + 1) / 2 + C2 + 1) / 2);
+      uint16_t E3 = (((C3 + B3 + 1) / 2 + C3 + 1) / 2);
+
+      //
+      uint16_t F1 = ((D1 + D2 + 1) / 2 + D1 + 1) / 2;
+      uint16_t F2 = ((D3 + D2 + 1) / 2 + D3 + 1) / 2;
+      uint16_t F3 = ((E1 + E2 + 1) / 2 + E1 + 1) / 2;
+      uint16_t F4 = ((E3 + E2 + 1) / 2 + E3 + 1) / 2;
+
+      dst[row * dst_cols + col] = static_cast<unsigned char>(F1 & 0x00FF);
+      dst[row * dst_cols + col + 1] = static_cast<unsigned char>(F2 & 0x00FF);
+
+      dst[(row + 1) * dst_cols + col] = static_cast<unsigned char>(F3 & 0x00FF);
+      dst[(row + 1) * dst_cols + col + 1] = static_cast<unsigned char>(F4
+          & 0x00FF);
      }
   }
 }
@@ -166,10 +179,6 @@ TEST(Brisk, TwoThirdSample) {
 
   brisk::Twothirdsample8(src_img, dst_img_a);
   PlainTwoThirdSample(src_img.data, dst_img_b.data, source_rows, source_cols);
-
-  cv::namedWindow("DownSample", cv::WINDOW_AUTOSIZE);
-  cv::imshow("DownSample", dst_img_b);
-  cv::waitKey(0);
 
   CheckImageSame(dst_img_a.data, dst_img_b.data, dst_rows, dst_cols);
 }
