@@ -134,8 +134,9 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
     0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
   register uint8x16_t mask = vld1q_u8(&tmpmask[0]);
   // To be added in order to make successive averaging correct:
-  uint8_t tmpones[16] = {0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
-    0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11};
+  // TODO(slynen): The elements were set to 11 before, which seemed wrong.
+  uint8_t tmpones[16] = {0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1,
+      0x1, 0x1, 0x1, 0x1, 0x1};
   register uint8x16_t ones = vld1q_u8(&tmpones[0]);
 
   // Data pointers:
@@ -158,7 +159,7 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
   else
   half_end = true;
   while (p2 < p_end) {
-    for (unsigned int i = 0; i < end; i++) {
+    for (unsigned int i = 0; i < end; ++i) {
       // Load the two blocks of memory:
       uint8x16_t upper;
       uint8x16_t lower;
@@ -173,8 +174,8 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       uint8x16_t result1 = vqaddq_u8(upper, ones);
       result1 = vhaddq_u8(upper, lower);  // Average - halving add.
 
-      p1++;
-      p2++;
+      ++p1;
+      ++p2;
 
       // Load the two blocks of memory:
       upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
@@ -204,9 +205,9 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       // Store.
       vst1q_u8(static_cast<uint8_t*>(p_dest), result);
 
-      p1++;
-      p2++;
-      p_dest++;
+      ++p1;
+      ++p2;
+      ++p_dest;
     }
     // If we are not at the end of the row, do the rest:
     if (half_end) {
@@ -225,13 +226,13 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       result1 = vhaddq_u8(upper, lower);
 
       // Increment the pointers:
-      p1++;
-      p2++;
+      ++p1;
+      ++p2;
 
       // Compute horizontal pairwise average and store:
       p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
       const UCHAR_ALIAS* result = reinterpret_cast<UCHAR_ALIAS*>(&result1);
-      for (unsigned int j = 0; j < 8; j++) {
+      for (unsigned int j = 0; j < 8; ++j) {
         *(p_dest_char++) = (*(result + 2 * j) + *(result + 2 * j + 1)) / 2;
       }
     } else {
@@ -239,7 +240,7 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
     }
 
     if (noleftover) {
-      row++;
+      ++row;
       p_dest = reinterpret_cast<uint8x16_t*>(dstimg + row * dst_width);
       p1 = reinterpret_cast<const uint8x16_t*>(srcimg + 2 * row * src_width);
       p2 = p1 + hsize;
@@ -248,13 +249,13 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
           reinterpret_cast<const unsigned char*>(p1);
       const unsigned char* p2_src_char =
           reinterpret_cast<const unsigned char*>(p2);
-      for (unsigned int k = 0; k < leftoverCols; k++) {
+      for (unsigned int k = 0; k < leftoverCols; ++k) {
         uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
         + p2_src_char[k] + p2_src_char[k + 1];
         *(p_dest_char++) = static_cast<unsigned char>(tmp / 4);
       }
       // Done with the two rows:
-      row++;
+      ++row;
       p_dest = reinterpret_cast<uint8x16_t*>(dstimg + row * dst_width);
       p1 = reinterpret_cast<const uint8x16_t*>(srcimg + 2 * row * src_width);
       p2 = reinterpret_cast<const uint8x16_t*>(srcimg + (2 * row + 1) *
@@ -296,7 +297,7 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
   else
     half_end = true;
   while (p2 < p_end) {
-    for (unsigned int i = 0; i < end; i++) {
+    for (unsigned int i = 0; i < end; ++i) {
       // Load the two blocks of memory:
       __m128i upper;
       __m128i lower;
@@ -312,8 +313,8 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       result1 = _mm_avg_epu8(upper, lower);
 
       // Increment the pointers:
-      p1++;
-      p2++;
+      ++p1;
+      ++p2;
 
       // Load the two blocks of memory:
       upper = _mm_loadu_si128(p1);
@@ -336,9 +337,9 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       _mm_storeu_si128(p_dest, result);
 
       // Increment the pointers:
-      p1++;
-      p2++;
-      p_dest++;
+      ++p1;
+      ++p2;
+      ++p_dest;
     }
     // If we are not at the end of the row, do the rest:
     if (half_end) {
@@ -357,13 +358,13 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       result1 = _mm_avg_epu8(upper, lower);
 
       // Increment the pointers:
-      p1++;
-      p2++;
+      ++p1;
+      ++p2;
 
       // Compute horizontal pairwise average and store.
       p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
       const uchar* result = reinterpret_cast<unsigned char*>(&result1);
-      for (unsigned int j = 0; j < 8; j++) {
+      for (unsigned int j = 0; j < 8; ++j) {
         *(p_dest_char++) = (*(result + 2 * j) + *(result + 2 * j + 1)) / 2;
       }
     } else {
@@ -371,20 +372,20 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
     }
 
     if (noleftover) {
-      row++;
+      ++row;
       p_dest = reinterpret_cast<__m128i*>(dstimg.data + row * dstimg.cols);
       p1 = reinterpret_cast<__m128i*>(srcimg.data + 2 * row * srcimg.cols);
       p2 = p1 + hsize;
     } else {
       const unsigned char* p1_src_char = reinterpret_cast<unsigned char*>(p1);
       const unsigned char* p2_src_char = reinterpret_cast<unsigned char*>(p2);
-      for (unsigned int k = 0; k < leftoverCols; k++) {
+      for (unsigned int k = 0; k < leftoverCols; ++k) {
         uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
             + p2_src_char[k] + p2_src_char[k + 1];
         *(p_dest_char++) = static_cast<unsigned char>(tmp / 4);
       }
       // Done with the two rows:
-      row++;
+      ++row;
       p_dest = reinterpret_cast<__m128i*>(dstimg.data + row * dstimg.cols);
       p1 = reinterpret_cast<__m128i*>(srcimg.data + 2 * row * srcimg.cols);
       p2 = reinterpret_cast<__m128i*>(
@@ -582,7 +583,7 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
     register uint8x16_t store_mask = vld1q_u8(&tmpstore_mask[0]);
 
     while (p3 < p_end) {
-      for (int i = 0; i < hsize; i++) {
+      for (int i = 0; i < hsize; ++i) {
         // Load three rows:
         uint8x16_t first = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
         uint8x16_t second = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
@@ -710,7 +711,7 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
                                              0x80);
 
   while (p3 < p_end) {
-    for (int i = 0; i < hsize; i++) {
+    for (int i = 0; i < hsize; ++i) {
       // Load three rows
       __m128i first = _mm_loadu_si128(reinterpret_cast<__m128i *>(p1));
       __m128i second = _mm_loadu_si128(reinterpret_cast<__m128i *>(p2));
