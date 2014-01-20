@@ -176,7 +176,7 @@ bool RunValidation(bool do_gtest_checks) {
       Draw(dataset);
     }
 
-    for (int i = 0; verificationOK && i < 100; ++i) {
+    for (int i = 0; verificationOK && i < 20; ++i) {
       brisk::timing::DebugTimer timerOverall("BRISK overall");
       RunPipeline(dataset, datasetfullpath);
       timerOverall.Stop();
