@@ -676,13 +676,13 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
         const uint16_t C3 = *(p3++);
 
         *(p_dest1++) = static_cast<unsigned char>(
-            ((4 * A1 + 2 * (A2 + B1) + B2) / 9) & 0x00FF);
+            ((4 * A1 + 2 * (A2 + B1 + 1) + B2 + 1) / 9) & 0x00FF);
         *(p_dest1++) = static_cast<unsigned char>(
-            ((4 * A3 + 2 * (A2 + B3) + B2) / 9) & 0x00FF);
+            ((4 * A3 + 2 * (A2 + B3 + 1) + B2 + 1) / 9) & 0x00FF);
         *(p_dest2++) = static_cast<unsigned char>(
-            ((4 * C1 + 2 * (C2 + B1) + B2) / 9) & 0x00FF);
+            ((4 * C1 + 2 * (C2 + B1 + 1) + B2 + 1) / 9) & 0x00FF);
         *(p_dest2++) = static_cast<unsigned char>(
-            ((4 * C3 + 2 * (C2 + B3) + B2) / 9) & 0x00FF);
+            ((4 * C3 + 2 * (C2 + B3 + 1) + B2 + 1) / 9) & 0x00FF);
       }
 
       // Increment row counter:
@@ -764,14 +764,14 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       const uint16_t C2 = *(p3++);
       const uint16_t C3 = *(p3++);
 
-      *(p_dest1++) = static_cast<unsigned char>(((4 * A1 + 2 * (A2 + B1) + B2)
-          / 9) & 0x00FF);
-      *(p_dest1++) = static_cast<unsigned char>(((4 * A3 + 2 * (A2 + B3) + B2)
-          / 9) & 0x00FF);
-      *(p_dest2++) = static_cast<unsigned char>(((4 * C1 + 2 * (C2 + B1) + B2)
-          / 9) & 0x00FF);
-      *(p_dest2++) = static_cast<unsigned char>(((4 * C3 + 2 * (C2 + B3) + B2)
-          / 9) & 0x00FF);
+      *(p_dest1++) = static_cast<unsigned char>(((4 * A1 + 2 * (A2 + B1 + 1)
+          + B2 + 1) / 9) & 0x00FF);
+      *(p_dest1++) = static_cast<unsigned char>(((4 * A3 + 2 * (A2 + B3 + 1)
+          + B2 + 1) / 9) & 0x00FF);
+      *(p_dest2++) = static_cast<unsigned char>(((4 * C1 + 2 * (C2 + B1 + 1)
+          + B2 + 1) / 9) & 0x00FF);
+      *(p_dest2++) = static_cast<unsigned char>(((4 * C3 + 2 * (C2 + B3 + 1)
+          + B2 + 1) / 9) & 0x00FF);
     }
 
     // Increment row counter:
