@@ -162,6 +162,10 @@ void BriskDescriptorExtractor::InitFromStream(
   // Number of descriptor bits:
   strings_ = static_cast<int>(ceil((static_cast<float>(noShortPairs_))
                                    / 128.0)) * 4 * 4;
+
+  delete[] u_x;
+  delete[] u_y;
+  delete[] sigma;
 }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,

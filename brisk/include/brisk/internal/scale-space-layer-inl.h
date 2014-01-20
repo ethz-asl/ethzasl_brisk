@@ -596,7 +596,6 @@ inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample(
 template<class SCORE_CALCULATOR_T>
 inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
-  std::cout.flush();
   if (srcimg.type() == CV_8UC1) {
     Twothirdsample8(srcimg, dstimg);
   } else if (srcimg.type() == CV_16UC1) {

@@ -42,7 +42,7 @@
 #endif
 #include <gtest/gtest.h>
 
-#include <opencv2/highgui/highgui.hpp>
+#include <brisk/brisk-opencv.h>
 
 #include <brisk/internal/image-down-sampling.h>
 

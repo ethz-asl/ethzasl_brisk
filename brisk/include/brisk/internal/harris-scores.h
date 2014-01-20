@@ -41,8 +41,8 @@
 #ifndef INTERNAL_HARRIS_SCORES_H_
 #define INTERNAL_HARRIS_SCORES_H_
 
-#include <opencv2/opencv.hpp>
 #include <brisk/brisk.h>
+#include <brisk/brisk-opencv.h>
 
 namespace brisk {
 #ifdef __ARM_NEON__
