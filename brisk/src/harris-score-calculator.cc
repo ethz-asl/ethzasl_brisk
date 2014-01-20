@@ -38,12 +38,16 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#else
 #include <emmintrin.h>
-#include <stdint.h>
 #include <tmmintrin.h>
+#endif  // __ARM_NEON__
+#include <stdint.h>
 
 #include <brisk/harris-score-calculator.h>
-#include <brisk/internal/harris-scores-sse.h>
+#include <brisk/internal/harris-scores.h>
 
 namespace brisk {
 

@@ -41,9 +41,13 @@
 #ifndef INTERNAL_SSE_FILTERS_INL_H_
 #define INTERNAL_SSE_FILTERS_INL_H_
 
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#else
 #include <emmintrin.h>
-#include <stdint.h>
 #include <tmmintrin.h>
+#endif  // __ARM_NEON__
+#include <stdint.h>
 
 template<int X, int Y>
 __inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLINT
