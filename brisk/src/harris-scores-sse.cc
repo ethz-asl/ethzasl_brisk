@@ -132,7 +132,7 @@ void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
                   _mm_sub_epi16(
                       _mm_srli_si128(_mm_and_si128(mask_hi, src_p1_m1), 1),
                       _mm_srli_si128(_mm_and_si128(mask_hi, src_p1_p1), 1)))),
-          3);
+                      3);
 
       // Scharr y.
       const __m128i dy_lo = _mm_slli_epi16(
