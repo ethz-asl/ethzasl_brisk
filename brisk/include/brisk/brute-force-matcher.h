@@ -44,19 +44,20 @@
 #include <vector>
 
 #include <brisk/brisk-opencv.h>
-#include <brisk/internal/hamming-sse.h>
+#include <brisk/internal/hamming.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
-class  BruteForceMatcherSse : public cv::DescriptorMatcher {
+class  BruteForceMatcher : public cv::DescriptorMatcher {
  public:
-  BruteForceMatcherSse(const brisk::HammingSse& distance = brisk::HammingSse())
+  BruteForceMatcher(const brisk::Hamming& distance = brisk::Hamming())
       : distance_(distance) { }
-  virtual ~BruteForceMatcherSse() { }
+  virtual ~BruteForceMatcher() { }
   virtual bool isMaskSupported() const {
     return true;
   }
-  virtual cv::Ptr<cv::DescriptorMatcher> clone(bool emptyTrainData = false) const;
+  virtual cv::Ptr<cv::DescriptorMatcher> clone(bool emptyTrainData = false)
+      const;
 
  protected:
   virtual void knnMatchImpl(const cv::Mat& queryDescriptors,
@@ -72,22 +73,23 @@ class  BruteForceMatcherSse : public cv::DescriptorMatcher {
                                    std::vector<cv::Mat>(),
                                bool compactResult = false);
 
-  brisk::HammingSse distance_;
+  brisk::Hamming distance_;
 
  private:
   //  Next two methods are used to implement specialization.
-  static void commonKnnMatchImpl(BruteForceMatcherSse& matcher,  // NOLINT
+  static void commonKnnMatchImpl(BruteForceMatcher& matcher,  // NOLINT
                                  const cv::Mat& queryDescriptors,
                                  std::vector<std::vector<cv::DMatch> >& matches,
                                  int k,
                                  const std::vector<cv::Mat>& masks,
                                  bool compactResult);
-  static void commonRadiusMatchImpl(BruteForceMatcherSse& matcher,  // NOLINT
-                                    const cv::Mat& queryDescriptors,
-                                    std::vector<std::vector<cv::DMatch> >& matches,
-                                    float maxDistance,
-                                    const std::vector<cv::Mat>& masks,
-                                    bool compactResult);
+  static void commonRadiusMatchImpl(
+      BruteForceMatcher& matcher,  // NOLINT
+      const cv::Mat& queryDescriptors,
+      std::vector<std::vector<cv::DMatch> >& matches,
+      float maxDistance,
+      const std::vector<cv::Mat>& masks,
+      bool compactResult);
 };
 }  // namespace brisk
 #endif  // BRISK_BRUTE_FORCE_MATCHER_H_

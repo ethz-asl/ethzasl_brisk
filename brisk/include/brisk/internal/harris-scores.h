@@ -38,40 +38,19 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_HARRIS_FEATURE_DETECTOR_H_
-#define BRISK_HARRIS_FEATURE_DETECTOR_H_
+#ifndef INTERNAL_HARRIS_SCORES_H_
+#define INTERNAL_HARRIS_SCORES_H_
 
-#include <vector>
-
-#include <brisk/brisk-opencv.h>
-#include <brisk/internal/macros.h>
-#include <brisk/internal/vectorized-filters.h>
+#include <opencv2/opencv.hpp>
+#include <brisk/brisk.h>
 
 namespace brisk {
-
-class HarrisFeatureDetector : public cv::FeatureDetector {
- public:
-  explicit HarrisFeatureDetector(double radius);
-  void SetRadius(double radius);
-
- protected:
-  static __inline__ void GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
-                                         cv::Mat& dydy, cv::Mat& dxdy);
-  static __inline__ void CornerHarris(const cv::Mat& dxdxSmooth,
-                                      const cv::Mat& dydySmooth,
-                                      const cv::Mat& dxdySmooth,
-                                      cv::Mat& score);
-  static __inline__ void NonmaxSuppress(const cv::Mat& scores,
-                                        std::vector<cv::KeyPoint>& keypoints);
-  __inline__ void EnforceUniformity(const cv::Mat& scores,
-                                    std::vector<cv::KeyPoint>& keypoints) const;
-
-  virtual void detectImpl(const cv::Mat& image,
-                          std::vector<cv::KeyPoint>& keypoints,
-                          const cv::Mat& mask = cv::Mat()) const;
-
-  double _radius;
-  cv::Mat _LUT;
-};
+#ifdef __ARM_NEON__
+  // Not implemented.
+#else
+// SSE speeded up (dxdx dxdy and dydy only).
+// Based on harrisScores_basic_noMats(.).
+void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores);
+#endif  // __ARM_NEON__
 }  // namespace brisk
-#endif  // BRISK_HARRIS_FEATURE_DETECTOR_H_
+#endif  // INTERNAL_HARRIS_SCORES_H_

@@ -38,36 +38,58 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_SSE_FILTERS_H_
-#define INTERNAL_SSE_FILTERS_H_
+#ifndef INTERNAL_HAMMING_H_
+#define INTERNAL_HAMMING_H_
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#else
+#include <emmintrin.h>
+#include <tmmintrin.h>
+#endif  // __ARM_NEON__
 
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
+// Faster Hamming distance functor - uses SSE
+// bit count of A exclusive XOR'ed with B.
+class  Hamming {
+ public:
+  Hamming() { }
 
-// Generic SSE-optimized 2D filter on CV_8U/CV_16S matrices. stores result in
-// CV_16S matrix.
-template<int X, int Y>
-__inline__ void Filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
+  // SSSE3 - even faster!
+#ifdef __ARM_NEON__
+  static __inline__ uint32_t NEONPopcntofXORed(const vld1q_u8* signature1,
+                                               const vld1q_u8* signature2,
+                                               const int numberOf128BitWords);
+#else
+  static __inline__ uint32_t SSSE3PopcntofXORed(const __m128i* signature1,
+                                                const __m128i* signature2,
+                                                const int numberOf128BitWords);
+#endif  // __ARM_NEON__
 
-// Generic SSE-optimized 2D filter CV_8U to CV_16S.
-template<int X, int Y>
-__inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
+  typedef unsigned char ValueType;
 
-// Generic SSE-optimized 2D filter CV_16S to CV_16S.
-template<int X, int Y>
-__inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
+  // Important that this is signed as weird behavior happens in BruteForce if
+  // not.
+  typedef int ResultType;
 
-// 3-by-3 box filter CV_16S to CV_16S.
-__inline__ void FilterBox3by316S(cv::Mat& src, cv::Mat& dst);  // NOLINT
-
-// 3-by-3 Gaussian filter CV_16S to CV_16S.
-void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst);  // NOLINT
-
-// 3-by-3 Gaussian filter CV_32F to CV_32F.
-void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst);  // NOLINT
-
-#include "./sse-filters-inl.h"
+  // This will count the bits in a ^ b.
+  ResultType operator()(const unsigned char* a,
+                        const unsigned char* b,
+                        const int size) const {
+#ifdef __ARM_NEON__
+    return NEONPopcntofXORed(reinterpret_cast<const vld1q_u8*>(a),
+                             reinterpret_cast<const vld1q_u8*>(b),
+                             size / 16);
+#else
+    return SSSE3PopcntofXORed(reinterpret_cast<const __m128i*>(a),
+                              reinterpret_cast<const __m128i*>(b),
+                              size / 16);
+#endif  // __ARM_NEON__
+  }
+};
 }  // namespace brisk
-#endif  // INTERNAL_SSE_FILTERS_H_
+#include <brisk/internal/hamming-inl.h>
+#endif  // INTERNAL_HAMMING_H_
+

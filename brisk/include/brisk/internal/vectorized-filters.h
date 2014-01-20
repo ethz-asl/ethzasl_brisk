@@ -38,92 +38,39 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_SCORE_CALCULATOR_H_
-#define INTERNAL_SCORE_CALCULATOR_H_
-
-#ifdef __ARM_NEON__
-#include <arm_neon.h>
-#else
-#include <emmintrin.h>
-#include <tmmintrin.h>
-#endif  // __ARM_NEON__
-#include <vector>
+#ifndef INTERNAL_VECTORIZED_FILTERS_H_
+#define INTERNAL_VECTORIZED_FILTERS_H_
 
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
-
-// Abstract base class to provide an interface for score calculation of any
-// sort.
-template<typename SCORE_TYPE>
-class ScoreCalculator {
- public:
-  typedef SCORE_TYPE Score_t;
-
-  // Helper struct for point storage.
-#ifdef USE_SIMPLE_POINT_WITH_SCORE
-  struct PointWithScore {
-    PointWithScore()
-        : score(0),
-          x(0),
-          y(0) {
-    }
-    PointWithScore(Score_t score_, uint16_t x_, uint16_t y_)
-        : score(score_),
-          x(x_),
-          y(y_) {
-    }
-    Score_t score;
-    uint16_t x, y;
-    // This is so terrible. but so fast:
-    // TODO(slynen) Fix this: The operator says smaller than, but returns
-    // larger than.
-    bool operator<(const PointWithScore& other) const {
-      return score > other.score;
-    }
-  };
+#ifdef __ARM_NEON__
+  // Not implemented.
 #else
-#error
-  struct PointWithScore {
-    PointWithScore():
-    pt(cv::Point2i(0, 0)), Score(0) {}
-    PointWithScore(cv::Point2i pt_, Score_t score_):
-    pt(pt_), Score(score_) {}
-    cv::Point2i pt;
-    Score_t Score;
-    inline bool operator<(const PointWithScore& other) const {
-      return Score >= other.Score;
-    }
-  };
-#endif
+// Generic SSE-optimized 2D filter on CV_8U/CV_16S matrices. stores result in
+// CV_16S matrix.
+template<int X, int Y>
+__inline__ void Filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
 
-  // Constructor.
-  ScoreCalculator() {
-  }
-  // Destructor.
-  virtual ~ScoreCalculator() {
-  }
+// Generic SSE-optimized 2D filter CV_8U to CV_16S.
+template<int X, int Y>
+__inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
 
-  // Set image.
-  void SetImage(const cv::Mat& img, bool initScores = true) {
-    _img = img;
-    if (initScores)
-      InitializeScores();
-  }
+// Generic SSE-optimized 2D filter CV_16S to CV_16S.
+template<int X, int Y>
+__inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
 
-  // Calculate/get score - implement floating point and integer access.
-  virtual inline double Score(double u, double v)=0;
-  virtual inline Score_t Score(int u, int v)=0;
+// 3-by-3 box filter CV_16S to CV_16S.
+__inline__ void FilterBox3by316S(cv::Mat& src, cv::Mat& dst);  // NOLINT
 
-  // 2d maximum query.
-  virtual void Get2dMaxima(std::vector<PointWithScore>& points,  // NOLINT
-                           Score_t absoluteThreshold = 0) = 0;
+// 3-by-3 Gaussian filter CV_16S to CV_16S.
+void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst);  // NOLINT
 
- protected:
-  cv::Mat _img;  // The image we operate on.
-  cv::Mat _scores;  // Store calculated scores.
-  virtual void InitializeScores() = 0;
-};
+// 3-by-3 Gaussian filter CV_32F to CV_32F.
+void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst);  // NOLINT
+
+#include "./vectorized-filters-inl.h"
+#endif  // __ARM_NEON__
 }  // namespace brisk
-#endif  // INTERNAL_SCORE_CALCULATOR_H_
+#endif  // INTERNAL_VECTORIZED_FILTERS_H_

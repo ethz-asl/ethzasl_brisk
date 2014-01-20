@@ -1,7 +1,4 @@
 /*
- Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
  Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
  Stefan Leutenegger and Simon Lynen.
 
@@ -38,16 +35,22 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_HARRIS_SCORES_SSE_H_
-#define INTERNAL_HARRIS_SCORES_SSE_H_
+#ifndef INTERNAL_IMAGE_DOWN_SAMPLING_H_
+#define INTERNAL_IMAGE_DOWN_SAMPLING_H_
 
-#include <opencv2/opencv.hpp>
-#include <brisk/brisk.h>
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#else
+#include <emmintrin.h>
+#include <tmmintrin.h>
+#endif  // __ARM_NEON__
+
+#include <brisk/brisk-opencv.h>
 
 namespace brisk {
-// SSE speeded up (dxdx dxdy and dydy only).
-// Based on harrisScores_basic_noMats(.).
-void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores);
-
+void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
+void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
+void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
+void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
 }  // namespace brisk
-#endif  // INTERNAL_HARRIS_SCORES_SSE_H_
+#endif  // INTERNAL_IMAGE_DOWN_SAMPLING_H_

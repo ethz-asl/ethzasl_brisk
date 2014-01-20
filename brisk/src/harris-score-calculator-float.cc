@@ -38,14 +38,20 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#else
 #include <emmintrin.h>
 #include <tmmintrin.h>
+#endif  // __ARM_NEON__
 
 #include <brisk/internal/harris-score-calculator-float.h>
-#include <brisk/internal/sse-filters.h>
+#include <brisk/internal/vectorized-filters.h>
 
 namespace brisk {
-
+#ifdef __ARM_NEON__
+// Not implemented.
+#else
 void HarrisScoreCalculatorFloat::InitializeScores() {
   cv::Mat DxDx1, DyDy1, DxDy1;
   cv::Mat DxDx, DyDy, DxDy;
@@ -244,4 +250,5 @@ void HarrisScoreCalculatorFloat::CornerHarris(const cv::Mat& dxdxSmooth,
     }
   }
 }
+#endif  // __ARM_NEON__
 }  // namespace brisk

@@ -38,12 +38,16 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_SSE_FILTERS_INL_H_
-#define INTERNAL_SSE_FILTERS_INL_H_
+#ifndef INTERNAL_VECTORIZED_FILTERS_INL_H_
+#define INTERNAL_VECTORIZED_FILTERS_INL_H_
 
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#else
 #include <emmintrin.h>
-#include <stdint.h>
 #include <tmmintrin.h>
+#endif  // __ARM_NEON__
+#include <stdint.h>
 
 template<int X, int Y>
 __inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLINT
@@ -169,4 +173,4 @@ __inline__ void Filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLI
     assert(0 && "Only CV_8U and CV_16S are supported src matrix types.");
 }
 
-#endif  // INTERNAL_SSE_FILTERS_INL_H_
+#endif  // INTERNAL_VECTORIZED_FILTERS_INL_H_

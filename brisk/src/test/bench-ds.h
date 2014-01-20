@@ -35,16 +35,19 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BENCHDS_H_
-#define BENCHDS_H_
+#ifndef TEST_BENCH_DS_H_
+#define TEST_BENCH_DS_H_
 
 #include <fstream>  // NOLINT
 #include <iostream>  // NOLINT
+#include <map>
 #include <memory>
+#include <string>
 #include <type_traits>
+#include <vector>
 
 #include <brisk/brisk.h>
-#include <brisk/internal/hamming-sse.h>
+#include <brisk/internal/hamming.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -64,8 +67,7 @@ class DatasetEntry;
       << " Line: " << __LINE__ << std::endl; \
       CHECK(false) << ss.str(); \
       return false;\
-    } }\
-    while (0);
+    } } while (0);
 
 #define CHECKCVKEYPOINTMEMBERSAME(THIS, OTHER, MEMBER, KEYPOINTIDX) \
     do { if (THIS.MEMBER != OTHER.MEMBER) { \
@@ -79,14 +81,13 @@ class DatasetEntry;
       << std::endl << "pt.y:\t" << THIS.pt.y << "\t" << OTHER.pt.y << std::endl\
       << std::endl << "class_id:\t" << THIS.class_id << "\t" << OTHER.class_id \
       << std::endl \
-      << std::endl << "octave:\t" << THIS.octave<<"\t" << OTHER.octave \
+      << std::endl << "octave:\t" << THIS.octave << "\t" << OTHER.octave \
       << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
       << std::endl; \
       CHECK(false) << ss.str(); \
       return false;\
-    } }\
-    while (0);
+    } } while (0);
 
 #define CHECKCVKEYPOINTANGLESAME(THIS, OTHER, MEMBER, KEYPOINTIDX) \
     do { if ((std::abs(THIS.MEMBER - OTHER.MEMBER) > 180 ? \
@@ -102,13 +103,12 @@ class DatasetEntry;
       << std::endl << "pt.y:\t" << THIS.pt.y << "\t" << OTHER.pt.y \
       << std::endl << "class_id:\t" << THIS.class_id << "\t" << OTHER.class_id \
       << std::endl << "octave:\t" << THIS.octave << "\t" << OTHER.octave \
-      << std::endl << "response:\t" << THIS.response<<"\t" << OTHER.response \
+      << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
       << std::endl;\
       CHECK(false) << ss.str(); \
       return false;\
-    } }\
-    while (0);
+    } } while (0);
 
 std::string DescriptorToString(const __m128i * d, int num128Words);
 
@@ -143,7 +143,8 @@ struct Blob {
     if (!size_) {
       return 0;
     }
-    if (!current_data_) {  //if we don't have data to compare, we assume the user has not set it
+    // If we don't have data to compare, we assume the user has not set it.
+    if (!current_data_) {
       std::cout
           << "You asked me to verify userdata, but the current_data is not set"
           << std::endl;
@@ -164,9 +165,10 @@ struct Blob {
 
   void SetCurrentData(const unsigned char* data, uint32_t size) {
     if (size != size_) {
-      CHECK(false) << "You set the current data to a different length than "
-          "the verification data. This will fail the verification."
-          "Use both times the same lenght.";
+      CHECK(false)
+      << "You set the current data to a different length than "
+      "the verification data. This will fail the verification."
+      "Use both times the same lenght.";
     }
     current_data_.reset(new unsigned char[size]);
     memcpy(current_data_.get(), data, size);
@@ -274,27 +276,25 @@ struct DatasetEntry {
   bool operator==(const DatasetEntry& other) const {
     EXPECTSAMETHROW((*this), other, path_);
 
-    /**
-     * CHECK IMAGE
-     */
-    bool doImageVerification = true;  //not really necessary
+    // CHECK IMAGE.
+    bool doImageVerification = true;  // Not really necessary.
     if (doImageVerification) {
-      //check rows
+      // Check rows.
       if (this->imgGray_.rows != other.imgGray_.rows) {
         EXPECTSAMETHROW((*this), other, imgGray_.rows);
         return false;
       }
-      //check cols
+      // Check cols.
       if (this->imgGray_.cols != other.imgGray_.cols) {
         EXPECTSAMETHROW((*this), other, imgGray_.cols);
         return false;
       }
-      //check type
+      // Check type.
       if (this->imgGray_.type() != other.imgGray_.type()) {
         EXPECTSAMETHROW((*this), other, imgGray_.type());
         return false;
       }
-      //check pixel by pixel (very efficient!)
+      // Check pixel by pixel.
       for (int i = 0, size = this->imgGray_.rows * this->imgGray_.cols;
           i < size; ++i) {
         if (this->imgGray_.data[i] != other.imgGray_.data[i]) {
@@ -310,15 +310,13 @@ struct DatasetEntry {
       }
     }
 
-    /**
-     * CHECK KEYPOINTS
-     */
+    // CHECK KEYPOINTS.
     if (this->keypoints_.size() != other.keypoints_.size()) {
       EXPECTSAMETHROW((*this), other, keypoints_.size());
       return false;
     }
 
-    //TODO(slynen): we might want to sort the keypoints and descriptors by
+    // TODO(slynen): we might want to sort the keypoints and descriptors by
     // location to allow detection and description to be done with blocking type
     // optimizations.
     int kpidx = 0;
@@ -338,7 +336,6 @@ struct DatasetEntry {
 
     // Check descriptors.
     if (this->descriptors_.rows != other.descriptors_.rows) {
-
       EXPECTSAMETHROW((*this), other, descriptors_.rows);
       return false;
     }
@@ -354,10 +351,9 @@ struct DatasetEntry {
           this->descriptors_.data + this->descriptors_.step * rowidx);
       const __m128i* d2 = reinterpret_cast<const __m128i *>(
           other.descriptors_.data + other.descriptors_.step * rowidx);
-      uint32_t hammdist = brisk::HammingSse::SSSE3PopcntofXORed(
+      uint32_t hammdist = brisk::Hamming::SSSE3PopcntofXORed(
           d1, d2, numberof128Blocks);
-      if (hammdist > hammdisttolerance)
-      {
+      if (hammdist > hammdisttolerance) {
         std::cout << "Failed on descriptor " << rowidx << ": Hammdist "
         << hammdist << " " << DescriptorToString(d1, numberof128Blocks) <<
         " other " << DescriptorToString(d2, numberof128Blocks) << std::endl;
@@ -374,7 +370,8 @@ struct DatasetEntry {
         ss << "For userdata " << it->first << " failed with " << diffbytes
             << " bytes difference. At " << __PRETTY_FUNCTION__ << " Line: "
             << __LINE__ << std::endl;
-        CHECK(false) << ss.str();
+        CHECK(false)
+        << ss.str();
       }
     }
     return true;
@@ -397,9 +394,7 @@ struct DatasetEntry {
     return ss.str();
   }
 
-  /**
-   * remove processing results so we can re-run the pipeline on this image
-   */
+  // Remove processing results so we can re-run the pipeline on this image.
   void clear_processed_data(bool clearDescriptors, bool clearKeypoints) {
     if (clearDescriptors) {
       descriptors_ = cv::Mat::zeros(0, 0, CV_8U);
@@ -409,33 +404,28 @@ struct DatasetEntry {
     }
   }
 
-  /**
-   * get the images from the path and convert to grayscale
-   */
+  // Get the images from the path and convert to grayscale.
   void readImage(const std::string& path) {
     path_ = path;
-    cv::Mat imgRGB = cv::imread(path_);  //do we want these to be at specific mem locations?
+    // Do we want these to be at specific mem locations?
+    cv::Mat imgRGB = cv::imread(path_);
     cv::cvtColor(imgRGB, imgGray_, CV_BGR2GRAY);
   }
 
-  /**
-   * set the static image name to the current image
-   */
+  // Set the static image name to the current image.
   void setThisAsCurrentEntry() {
     current_entry = this;
   }
 
-  /**
-   * return the name of the image currently processed
-   */
+  // Return the name of the image currently processed.
   static DatasetEntry* getCurrentEntry() {
     return current_entry;
   }
 
  private:
-  static DatasetEntry* current_entry;  //a global tag which image is currently being processed
+  // A global tag which image is currently being processed.
+  static DatasetEntry* current_entry;
 };
-
 
 void Serialize(const Blob& value, std::ofstream* out);
 
@@ -447,4 +437,4 @@ void DeSerialize(DatasetEntry* value, std::ifstream* in);
 
 }  // namespace brisk
 
-#endif /* BENCHDS_H_ */
+#endif  // TEST_BENCH_DS_H_

@@ -1,15 +1,12 @@
 /*
- Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
- Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
+ Copyright(C) 2013 The Autonomous Systems Lab, ETH Zurich,
  Stefan Leutenegger and Simon Lynen.
 
  BRISK - Binary Robust Invariant Scalable Keypoints
  Reference implementation of
  [1] Stefan Leutenegger,Margarita Chli and Roland Siegwart, BRISK:
  Binary Robust Invariant Scalable Keypoints, in Proceedings of
- the IEEE International Conference on Computer Vision (ICCV2011).
+ the IEEE International Conference on Computer Vision(ICCV2011).
 
  This file is part of BRISK.
 
@@ -38,42 +35,25 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_HAMMING_SSE_H_
-#define INTERNAL_HAMMING_SSE_H_
-#include <emmintrin.h>
-#include <tmmintrin.h>
-
-#include <brisk/brisk-opencv.h>
-#include <brisk/internal/macros.h>
+#ifndef INTERNAL_NEON_HELPERS_H_
+#define INTERNAL_NEON_HELPERS_H_
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
 
 namespace brisk {
-// Faster Hamming distance functor - uses SSE
-// bit count of A exclusive XOR'ed with B.
-class  HammingSse {
- public:
-  HammingSse() { }
-
-  // SSSE3 - even faster!
-  static __inline__ uint32_t SSSE3PopcntofXORed(const __m128i* signature1,
-                                                const __m128i* signature2,
-                                                const int numberOf128BitWords);
-
-  typedef unsigned char ValueType;
-
-  // Important that this is signed as weird behavior happens in BruteForce if
-  // not.
-  typedef int ResultType;
-
-  // This will count the bits in a ^ b.
-  ResultType operator()(const unsigned char* a,
-                        const unsigned char* b,
-                        const int size) const {
-    return SSSE3PopcntofXORed(reinterpret_cast<const __m128i*>(a),
-                              reinterpret_cast<const __m128i*>(b),
-                              size / 16);
+inline uint8x16_t shuffle_epi8_neon(const uint8x16_t& lhs,
+                                    const uint8x16_t& mask) {
+  uint8_t tmp_mask[16], value[16];
+  vst1q_u8(tmp_mask, mask);
+  vst1q_u8(value, lhs);
+  uint8_t temp2_upper_array[16];
+  for (int shuffleidx = 0; shuffleidx < 16; ++shuffleidx) {
+    temp2_upper_array[shuffleidx] =
+        (tmp_mask[shuffleidx] & 0x80) ? 0 : value[tmp_mask[shuffleidx] & 0x0F];
   }
-};
+  return vld1q_u8(&temp2_upper_array[0]);
+}
 }  // namespace brisk
-#include <brisk/internal/hamming-sse-inl.h>
-#endif  // INTERNAL_HAMMING_SSE_H_
 
+#endif  // __ARM_NEON__
+#endif  // INTERNAL_NEON_HELPERS_H_

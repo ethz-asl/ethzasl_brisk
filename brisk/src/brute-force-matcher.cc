@@ -45,9 +45,9 @@
 
 namespace brisk {
 // Adapted from OpenCV 2.3 features2d/matcher.hpp
-cv::Ptr<cv::DescriptorMatcher> BruteForceMatcherSse::clone(bool emptyTrainData)
+cv::Ptr<cv::DescriptorMatcher> BruteForceMatcher::clone(bool emptyTrainData)
 const {
-  BruteForceMatcherSse* matcher = new BruteForceMatcherSse(distance_);
+  BruteForceMatcher* matcher = new BruteForceMatcher(distance_);
   if (!emptyTrainData) {
     std::transform(trainDescCollection.begin(), trainDescCollection.end(),
                    matcher->trainDescCollection.begin(), clone_op);
@@ -55,7 +55,7 @@ const {
   return matcher;
 }
 
-void BruteForceMatcherSse::knnMatchImpl(
+void BruteForceMatcher::knnMatchImpl(
     const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches,
     int k,
@@ -64,7 +64,7 @@ void BruteForceMatcherSse::knnMatchImpl(
   commonKnnMatchImpl(*this, queryDescriptors, matches, k, masks, compactResult);
 }
 
-void BruteForceMatcherSse::radiusMatchImpl(
+void BruteForceMatcher::radiusMatchImpl(
     const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches,
     float maxDistance,
@@ -74,14 +74,14 @@ void BruteForceMatcherSse::radiusMatchImpl(
                         compactResult);
 }
 
-inline void BruteForceMatcherSse::commonKnnMatchImpl(
-    BruteForceMatcherSse& matcher, const cv::Mat& queryDescriptors,
+inline void BruteForceMatcher::commonKnnMatchImpl(
+    BruteForceMatcher& matcher, const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches,
     int knn,
     const std::vector<cv::Mat>& masks,
     bool compactResult) {
-  typedef brisk::HammingSse::ValueType ValueType;
-  typedef brisk::HammingSse::ResultType DistanceType;
+  typedef brisk::Hamming::ValueType ValueType;
+  typedef brisk::Hamming::ResultType DistanceType;
   assert(!queryDescriptors.empty());
   assert(cv::DataType<ValueType>::type == queryDescriptors.type());
 
@@ -158,12 +158,12 @@ inline void BruteForceMatcherSse::commonKnnMatchImpl(
   }
 }
 
-inline void BruteForceMatcherSse::commonRadiusMatchImpl(
-    BruteForceMatcherSse& matcher, const cv::Mat& queryDescriptors,
+inline void BruteForceMatcher::commonRadiusMatchImpl(
+    BruteForceMatcher& matcher, const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches, float maxDistance,
     const std::vector<cv::Mat>& masks, bool compactResult) {
-  typedef brisk::HammingSse::ValueType ValueType;
-  typedef brisk::HammingSse::ResultType DistanceType;
+  typedef brisk::Hamming::ValueType ValueType;
+  typedef brisk::Hamming::ResultType DistanceType;
   CV_DbgAssert(!queryDescriptors.empty());
   assert(cv::DataType < ValueType > ::type == queryDescriptors.type());
   int dimension = queryDescriptors.cols;
