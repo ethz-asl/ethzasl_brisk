@@ -502,7 +502,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
             reinterpret_cast<__m128i *>(&occupancy.at < uchar
                 > (cy + y - 15, cx + 1)),
             _mm_adds_epu8(mem2, mask2));
-#endif  // ARM_NEON
+#endif  // __ARM_NEON__
       }
 
       // Store.
@@ -590,6 +590,9 @@ inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample(
 template<class SCORE_CALCULATOR_T>
 inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample16(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
+#ifdef __ARM_NEON__
+  CHECK(false) << "HalfSample16 not implemented for NEON.";
+#else
   // Make sure the destination image is of the right size:
   assert(srcimg.cols / 2 == dstimg.cols);
   assert(srcimg.rows / 2 == dstimg.rows);
@@ -666,12 +669,143 @@ inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample16(
       }
     }
   }
+#endif  // __ARM_NEON__
 }
 
 // Half sampling.
 template<class SCORE_CALCULATOR_T>
 inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample8(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
+#ifdef __ARM_NEON__
+  // Mask needed later:
+  uint8_t tmpmask[16] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
+    0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
+  register uint8x16_t mask = vld1q_u8(&tmpmask[0]);
+  // To be added in order to make successive averaging correct:
+  uint8_t tmpones[16] = {0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11,
+    0x11, 0x11, 0x11, 0x11, 0x11, 0x11, 0x11};
+  register uint8x16_t ones = vld1q_u8(&tmpones[0]);
+
+  // Data pointers:
+  const uint8x16_t* p1 = reinterpret_cast<const uint8x16_t*>(srcimg);
+  const uint8x16_t* p2 = reinterpret_cast<const uint8x16_t*>(srcimg + src_width);
+  uint8x16_t* p_dest = reinterpret_cast<uint8x16_t*>(dstimg);
+
+  unsigned char* p_dest_char;
+
+  // Size:
+  const unsigned int size = (src_width * src_height) / 16;
+  const unsigned int hsize = src_width / 16;
+  const uint8x16_t* p_end = p1 + size;
+  unsigned int row = 0;
+  const unsigned int end = hsize / 2;
+  bool half_end;
+  if (hsize % 2 == 0)
+  half_end = false;
+  else
+  half_end = true;
+  while (p2 < p_end) {
+    for (unsigned int i = 0; i < end; i++) {
+      // Load the two blocks of memory:
+      uint8x16_t upper;
+      uint8x16_t lower;
+      if (noleftover) {
+        upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
+        lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
+      } else {
+        upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
+        lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
+      }
+
+      uint8x16_t result1 = vqaddq_u8(upper, ones);
+      result1 = vhaddq_u8(upper, lower);  // Average - halving add.
+
+      p1++;
+      p2++;
+
+      // Load the two blocks of memory:
+      upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
+      lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
+      uint8x16_t result2 = vqaddq_u8(upper, ones);
+      result2 = vhaddq_u8(upper, lower);
+      // Calculate the shifted versions:
+
+      uint8x16_t result1_shifted = shiftrightonebyte(result1);
+
+      uint8x16_t result2_shifted = shiftrightonebyte(result2);
+      // Pack:
+      uint8x16_t result = vcombine_u8(
+          // AND and saturate to uint8.
+          vmovn_u16(vreinterpretq_u16_u8(vandq_u8(result1, mask))),
+          // Combine.
+          vqmovun_s16(vreinterpretq_s16_u8(vandq_u8(result2, mask))));
+
+      uint8x16_t result_shifted = vcombine_u8(
+          // AND and saturate to uint8.
+          vmovn_u16(vreinterpretq_u16_u8(vandq_u8(result1_shifted, mask))),
+          vqmovun_s16(vreinterpretq_s16_u8(vandq_u8(result2_shifted, mask))));
+      // Average for the second time:
+
+      result = vhaddq_u8(result, result_shifted);
+
+      // Store.
+      vst1q_u8((uint8_t*) p_dest, result);
+
+      p1++;
+      p2++;
+      p_dest++;
+    }
+    // If we are not at the end of the row, do the rest:
+    if (half_end) {
+      // Load the two blocks of memory:
+      uint8x16_t upper;
+      uint8x16_t lower;
+      if (noleftover) {
+        upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
+        lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
+      } else {
+        upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
+        lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
+      }
+
+      uint8x16_t result1 = vqaddq_u8(upper, ones);
+      result1 = vhaddq_u8(upper, lower);
+
+      // Increment the pointers:
+      p1++;
+      p2++;
+
+      // Compute horizontal pairwise average and store:
+      p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
+      const UCHAR_ALIAS* result = reinterpret_cast<UCHAR_ALIAS*>(&result1);
+      for (unsigned int j = 0; j < 8; j++) {
+        *(p_dest_char++) = (*(result + 2 * j) + *(result + 2 * j + 1)) / 2;
+      }
+    } else {
+      p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
+    }
+
+    if (noleftover) {
+      row++;
+      p_dest = reinterpret_cast<uint8x16_t*>(dstimg + row * dst_width);
+      p1 = reinterpret_cast<const uint8x16_t*>(srcimg + 2 * row * src_width);
+      p2 = p1 + hsize;
+    } else {
+      const unsigned char* p1_src_char = reinterpret_cast<const unsigned char*>(p1);
+      const unsigned char* p2_src_char = reinterpret_cast<const unsigned char*>(p2);
+      for (unsigned int k = 0; k < leftoverCols; k++) {
+        uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
+        + p2_src_char[k] + p2_src_char[k + 1];
+        *(p_dest_char++) = static_cast<unsigned char>(tmp / 4);
+      }
+      // Done with the two rows:
+      row++;
+      p_dest = reinterpret_cast<uint8x16_t*>(dstimg + row * dst_width);
+      p1 = reinterpret_cast<const uint8x16_t*>(srcimg + 2 * row * src_width);
+      p2 = reinterpret_cast<const uint8x16_t*>(srcimg + (2 * row + 1) * src_width);
+    }
+  }
+#else
   // Take care with border...
   const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
   // Note: leftoverCols can be zero but this still false...
@@ -801,6 +935,7 @@ inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample8(
           srcimg.data + (2 * row + 1) * srcimg.cols);
     }
   }
+#endif  // __ARM_NEON__
 }
 
 template<class SCORE_CALCULATOR_T>
@@ -820,6 +955,9 @@ inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample(
 template<class SCORE_CALCULATOR_T>
 inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample16(
     const cv::Mat& srcimg, cv::Mat& dstimg) {
+#ifdef __ARM_NEON__
+  CHECK(false) << "Twothirdsample16 not implemented for NEON";
+#else
   assert(srcimg.type() == CV_16UC1);
 
   // Make sure the destination image is of the right size:
@@ -967,6 +1105,7 @@ inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample16(
       }
     }
   }
+#endif
 }
 
 template<class SCORE_CALCULATOR_T>
@@ -979,6 +1118,145 @@ inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample8(
   assert((srcimg.cols / 3) * 2 == dstimg.cols);
   assert((srcimg.rows / 3) * 2 == dstimg.rows);
 
+  // Data pointers:
+  unsigned char* p1 = srcimg.data;
+  unsigned char* p2 = p1 + srcimg.cols;
+  unsigned char* p3 = p2 + srcimg.cols;
+  unsigned char* p_dest1 = dstimg.data;
+  unsigned char* p_dest2 = p_dest1 + dstimg.cols;
+  unsigned char* p_end = p1 + (srcimg.cols * srcimg.rows);
+
+  unsigned int row = 0;
+  unsigned int row_dest = 0;
+  int hsize = srcimg.cols / 15;
+
+#ifdef __ARM_NEON__
+  // masks:
+    const uint8_t tmpmask1[16] = {1, 0x80, 4, 0x80, 7, 0x80, 10, 0x80, 12, 0x80,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    const uint8_t tmpmask2[16] = {0x80, 1, 0x80, 4, 0x80, 7, 0x80, 10, 0x80, 12,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    const uint8_t tmpmask[16] = {0, 2, 3, 5, 6, 8, 9, 11, 12, 14, 0x80, 0x80,
+      0x80, 0x80};
+    const uint8_t tmpstore_mask[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+      0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0};  // Lacking the masked storing intrinsics in NEON
+    register uint8x16_t store_mask = vld1q_u8(&tmpstore_mask[0]);
+
+    while (p3 < p_end) {
+      for (int i = 0; i < hsize; i++) {
+        // Load three rows:
+        uint8x16_t first = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
+        uint8x16_t second = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
+        uint8x16_t third = vld1q_u8(reinterpret_cast<const uint8_t*>(p3));
+
+        // Upper row:
+        uint8_t upper[16];
+        vst1q_u8(&upper[0], vhaddq_u8(vhaddq_u8(first, second), first));
+        uint8_t shufuppermask1[16];
+        uint8_t shufuppermask2[16];
+        for (int shuffleidx = 0; shuffleidx < 16; ++shuffleidx) {
+          shufuppermask1[shuffleidx] =
+          (tmpmask1[shuffleidx] & 0x80) ?
+          0 : upper[tmpmask1[shuffleidx] & 0x0F];
+          shufuppermask2[shuffleidx] =
+          (tmpmask2[shuffleidx] & 0x80) ?
+          0 : upper[tmpmask2[shuffleidx] & 0x0F];
+        }
+        uint8x16_t temp1_upper = vorrq_u8(vld1q_u8(&shufuppermask1[0]),
+            vld1q_u8(&shufuppermask2[0]));
+
+        uint8_t temp2_upper_array[16];
+        for (int shuffleidx = 0; shuffleidx < 16; ++shuffleidx) {
+          temp2_upper_array[shuffleidx] =
+          (tmpmask[shuffleidx] & 0x80) ?
+          0 : upper[tmpmask[shuffleidx] & 0x0F];
+        }
+        uint8x16_t temp2_upper = vld1q_u8(&temp2_upper_array[0]);
+        uint8x16_t result_upper = vhaddq_u8(vhaddq_u8(temp2_upper, temp1_upper),
+            temp2_upper);
+
+        // Lower row:
+
+        uint8_t lower[16];
+        vst1q_u8(&lower[0], vhaddq_u8(vhaddq_u8(third, second), third));
+        uint8_t shuflowermask1[16];
+        uint8_t shuflowermask2[16];
+        uint8_t temp2_lower_array[16];
+        for (int shuffleidx = 0; shuffleidx < 16; ++shuffleidx) {
+          shuflowermask1[shuffleidx] =
+          (tmpmask1[shuffleidx] & 0x80) ?
+          0 : lower[tmpmask1[shuffleidx] & 0x0F];
+          shuflowermask2[shuffleidx] =
+          (tmpmask2[shuffleidx] & 0x80) ?
+          0 : lower[tmpmask2[shuffleidx] & 0x0F];
+          temp2_lower_array[shuffleidx] =
+          (tmpmask[shuffleidx] & 0x80) ?
+          0 : lower[tmpmask[shuffleidx] & 0x0F];
+        }
+        uint8x16_t temp1_lower = vorrq_u8(vld1q_u8(&shuflowermask1[0]),
+            vld1q_u8(&shuflowermask2[0]));
+        uint8x16_t temp2_lower = vld1q_u8(&temp2_lower_array[0]);
+
+        uint8x16_t result_lower = vhaddq_u8(vhaddq_u8(temp2_lower, temp1_lower),
+            temp2_lower);
+
+        // Store:
+        if (i * 10 + 16 > dst_width) {
+          // Mask necessary data to store and mask with data already existing:
+          uint8x16_t uppermasked = vorrq_u8(vandq_u8(result_upper, store_mask),
+              vld1q_u8(p_dest1));
+          uint8x16_t lowermasked = vorrq_u8(vandq_u8(result_lower, store_mask),
+              vld1q_u8(p_dest2));
+
+          vst1q_u8(p_dest1, uppermasked);
+          vst1q_u8(p_dest2, lowermasked);
+        } else {
+          vst1q_u8(reinterpret_cast<uint8_t*>(p_dest1), result_upper);
+          vst1q_u8(reinterpret_cast<uint8_t*>(p_dest2), result_lower);
+        }
+
+        // Shift pointers:
+        p1 += 15;
+        p2 += 15;
+        p3 += 15;
+        p_dest1 += 10;
+        p_dest2 += 10;
+      }
+
+      // Fill the remainder:
+      for (unsigned int j = 0; j < leftoverCols; j += 3) {
+        const uint16_t A1 = *(p1++);
+        const uint16_t A2 = *(p1++);
+        const uint16_t A3 = *(p1++);
+        const uint16_t B1 = *(p2++);
+        const uint16_t B2 = *(p2++);
+        const uint16_t B3 = *(p2++);
+        const uint16_t C1 = *(p3++);
+        const uint16_t C2 = *(p3++);
+        const uint16_t C3 = *(p3++);
+
+        *(p_dest1++) = static_cast<unsigned char>(((4 * A1 + 2 * (A2 + B1) + B2) / 9)
+            & 0x00FF);
+        *(p_dest1++) = static_cast<unsigned char>(((4 * A3 + 2 * (A2 + B3) + B2) / 9)
+            & 0x00FF);
+        *(p_dest2++) = static_cast<unsigned char>(((4 * C1 + 2 * (C2 + B1) + B2) / 9)
+            & 0x00FF);
+        *(p_dest2++) = static_cast<unsigned char>(((4 * C3 + 2 * (C2 + B3) + B2) / 9)
+            & 0x00FF);
+      }
+
+      // Increment row counter:
+      row += 3;
+      row_dest += 2;
+
+      // Reset pointers:
+      p1 = srcimg + row * src_width;
+      p2 = p1 + src_width;
+      p3 = p2 + src_width;
+      p_dest1 = dstimg + row_dest * dst_width;
+      p_dest2 = p_dest1 + dst_width;
+    }
+#else
   // Masks:
   register __m128i mask1 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
                                         0x80, 12, 0x80, 10, 0x80, 7, 0x80, 4,
@@ -992,17 +1270,6 @@ inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample8(
                                              0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
                                              0x80);
 
-  // Data pointers:
-  unsigned char* p1 = srcimg.data;
-  unsigned char* p2 = p1 + srcimg.cols;
-  unsigned char* p3 = p2 + srcimg.cols;
-  unsigned char* p_dest1 = dstimg.data;
-  unsigned char* p_dest2 = p_dest1 + dstimg.cols;
-  unsigned char* p_end = p1 + (srcimg.cols * srcimg.rows);
-
-  unsigned int row = 0;
-  unsigned int row_dest = 0;
-  int hsize = srcimg.cols / 15;
   while (p3 < p_end) {
     for (int i = 0; i < hsize; i++) {
       // Load three rows
@@ -1078,6 +1345,7 @@ inline void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample8(
     p_dest1 = dstimg.data + row_dest * dstimg.cols;
     p_dest2 = p_dest1 + dstimg.cols;
   }
+#endif  // __ARM_NEON__
 }
 
 template<class SCORE_CALCULATOR_T>
