@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package>
+  <name>agast</name>
+  <version>0.0.0</version>
+  <description>The agast package</description>
+
+  <!-- One maintainer tag required, multiple allowed, one person per tag --> 
+  <maintainer email="slynen@ethz.ch">slynen</maintainer>
+  <license>CLOSED</license>
+
+  <!-- Author tags are optional, mutiple are allowed, one per tag -->
+  <!-- Authors do not have to be maintianers, but could be -->
+  <author email="elmar.mair@dlr.de">Elmar Mair</author>
+
+  <!-- Add your dependencies using the build_depend tag -->
+  <build_depend>features_2d_helpers</build_depend>
+  <build_depend>glog_catkin</build_depend>
+  
+  <!-- Use buildtool_depend for build tool packages: -->
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>redwood_catkin</buildtool_depend>
+</package>
