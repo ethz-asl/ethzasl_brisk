@@ -40,13 +40,14 @@
 #include <string>
 #include <vector>
 
+#include <brisk/brisk-opencv.h>
 #if HAVE_GLOG
 #include <glog/logging.h>
 #else
 #include <brisk/glog_replace.h>
 #endif
 #include <gtest/gtest.h>
-#include <opencv2/core/core.hpp>
+
 #include "./bench-ds.h"
 #include "./serialization.h"
 

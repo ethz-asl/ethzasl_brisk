@@ -48,8 +48,7 @@
 
 #include <brisk/brisk.h>
 #include <brisk/internal/hamming.h>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
+#include <brisk/brisk-opencv.h>
 
 #include "./serialization.h"
 
