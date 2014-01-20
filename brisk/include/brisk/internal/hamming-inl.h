@@ -134,7 +134,7 @@ __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
 #else
 // - SSSE3 - better alorithm, minimized psadbw usage -
 // adapted from http://wm.ite.pl/articles/sse-popcount.html
-__inline__ uint32_t HammingSse::SSSE3PopcntofXORed(const __m128i* signature1,
+__inline__ uint32_t Hamming::SSSE3PopcntofXORed(const __m128i* signature1,
 const __m128i*signature2,
 const int numberOf128BitWords) {
   uint32_t result = 0;

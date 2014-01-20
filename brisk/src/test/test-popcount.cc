@@ -37,7 +37,7 @@
 
 #include <bitset>
 
-#include <brisk/internal/hamming-sse.h>
+#include <brisk/internal/hamming.h>
 #if HAVE_GLOG
 #include <glog/logging.h>
 #else
@@ -89,9 +89,9 @@ TEST(Brisk, PopCount) {
   data2[13] = 0x23;
   data2[15] = 0x75;
 
-  brisk::HammingSse popcnt;
+  brisk::Hamming popcnt;
 #if ANDROID
-  ASSERT_TRUE(false && "Neon test not implemented");
+  ASSERT_TRUE(false) << "Neon test not implemented";
 #else
   const __m128i* signature1 = reinterpret_cast<const __m128i*>(data1);
   const __m128i* signature2 = reinterpret_cast<const __m128i*>(data2);

@@ -44,7 +44,7 @@
 #include <type_traits>
 
 #include <brisk/brisk.h>
-#include <brisk/internal/hamming-sse.h>
+#include <brisk/internal/hamming.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
@@ -354,7 +354,7 @@ struct DatasetEntry {
           this->descriptors_.data + this->descriptors_.step * rowidx);
       const __m128i* d2 = reinterpret_cast<const __m128i *>(
           other.descriptors_.data + other.descriptors_.step * rowidx);
-      uint32_t hammdist = brisk::HammingSse::SSSE3PopcntofXORed(
+      uint32_t hammdist = brisk::Hamming::SSSE3PopcntofXORed(
           d1, d2, numberof128Blocks);
       if (hammdist > hammdisttolerance)
       {
