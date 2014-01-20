@@ -44,6 +44,7 @@
 #include <brisk/brisk-descriptor-extractor.h>
 #include <brisk/brisk-feature.h>
 #include <brisk/brisk-feature-detector.h>
+#include <brisk/brute-force-matcher.h>
 #include <brisk/harris-feature-detector.h>
 #include <brisk/harris-score-calculator.h>
 #include <brisk/scale-space-feature-detector.h>
@@ -52,5 +53,11 @@ namespace cv {
 typedef brisk::BriskDescriptorExtractor BriskDescriptorExtractor;
 typedef brisk::BriskFeatureDetector BriskFeatureDetector;
 }  // namespace cv
+
+namespace brisk {
+// Deprecated names.
+typedef brisk::BruteForceMatcher BruteForceMatcherSse;
+typedef brisk::Hamming HammingSse;
+}
 
 #endif  // BRISK_BRISK_H_

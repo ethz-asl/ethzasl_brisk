@@ -1,7 +1,4 @@
 /*
- Copyright (C) 2011 The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
  Copyright(C) 2013 The Autonomous Systems Lab, ETH Zurich,
  Stefan Leutenegger and Simon Lynen.
 
