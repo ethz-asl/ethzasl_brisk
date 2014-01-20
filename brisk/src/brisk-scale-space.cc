@@ -512,8 +512,8 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
     // Treat the patch below:
     float delta_x_below, delta_y_below;
     float max_below_float;
-    uchar max_below_uchar = 0;
     if (layer == 0) {
+      uchar max_below_uchar = 0;
       // Guess the lower intra octave...
       BriskLayer& l = pyramid_[0];
       register int s_0_0 = l.GetAgastScore_5_8(x_layer - 1, y_layer - 1, 1);

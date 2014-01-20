@@ -654,7 +654,7 @@ int main(int argc, char ** argv) {
     // display keypoints
     const unsigned int ksize = currentImage->keypoints.size();
     // before we have reference images, let's just draw blue circles
-    if (sharedData.referenceImage.size() == 0) {
+    if (sharedData.referenceImage.empty()) {
       for (unsigned int i = 0; i < ksize; i++) {
         cv::circle(sharedData.imgRGBmain, currentImage->keypoints[i].pt,
                    currentImage->keypoints[i].size / 4.0, cv::Scalar(255, 0, 0),

@@ -45,7 +45,7 @@ size_t Timing::GetHandle(std::string const& tag) {
 }
 
 std::string Timing::GetTag(size_t handle) {
-  std::string tag;
+  std::string tag = "";
 
   // Perform a linear search for the tag.
   for (typename map_t::value_type current_tag : Instance().tagMap_) {
@@ -169,7 +169,7 @@ std::string Timing::SecondsToTimeString(double seconds) {
   double secs = fmod(seconds, 60);
   int minutes = (seconds / 60);
   int hours = (seconds / 3600);
-  minutes = minutes - (hours * 60);
+  minutes -= (hours * 60);
 
 char buffer[256];
 snprintf(buffer, sizeof(buffer),
