@@ -40,12 +40,12 @@
 
 #ifndef INTERNAL_HAMMING_H_
 #define INTERNAL_HAMMING_H_
-#ifdef ANDROID
+#ifdef __ARM_NEON__
 #include <arm_neon.h>
 #else
 #include <emmintrin.h>
 #include <tmmintrin.h>
-#endif
+#endif  // __ARM_NEON__
 
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>

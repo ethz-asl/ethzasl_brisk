@@ -30,7 +30,7 @@ add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall
                 -Wno-overloaded-virtual -Wno-non-virtual-dtor # OpenCV.
                 -std=c++0x)
 
-rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc  
+rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/brisk-feature-detector.cc   
                                      src/brisk-layer.cc
                                      src/brisk-scale-space.cc
@@ -39,11 +39,14 @@ rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/harris-score-calculator.cc
                                      src/harris-score-calculator-float.cc
                                      src/harris-scores.cc
+                                     src/image-down-sampling.cc
                                      src/pattern-provider.cc
                                      src/vectorized-filters.cc
                                      src/timer.cc
                                      src/test/image-io.cc)
   
+target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARY})
+
 rosbuild_add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
 

@@ -80,16 +80,8 @@ class ScaleSpaceLayer {
   // Subsampling.
   // Half sampling.
   static inline bool Halfsample(const cv::Mat& srcimg, cv::Mat& dstimg);
-  // 8 bit.
-  static inline void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
-  // for 16 bit input images.
-  static inline void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
   // Two third sampling.
   static inline bool Twothirdsample(const cv::Mat& srcimg, cv::Mat& dstimg);
-  // 8 bit.
-  static inline void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
-  // for 16 bit input images.
-  static inline void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
 
  protected:
   // Utilities.

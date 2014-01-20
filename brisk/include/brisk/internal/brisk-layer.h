@@ -88,11 +88,6 @@ class  BriskLayer {
     return offset_;
   }
 
-  // Half sampling.
-  static void HalfSample(const cv::Mat& srcimg, cv::Mat& dstimg);
-  // Two third sampling.
-  static void TwoThirdSample(const cv::Mat& srcimg, cv::Mat& dstimg);
-
  private:
   // Access gray values (smoothed/interpolated).
   uint8_t Value(const cv::Mat& mat, float xf, float yf, float scale);
