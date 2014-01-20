@@ -80,7 +80,7 @@ enum Parameters {
   BRISK_rotationestimation = true,
 };
 
-TEST(BRISK, Validation) {
+TEST(Brisk, Validation) {
   bool do_gtest_checks = true;
   RunValidation(do_gtest_checks);
 }
