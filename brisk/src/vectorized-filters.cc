@@ -42,9 +42,12 @@
 #include <stdint.h>
 #include <tmmintrin.h>
 
-#include <brisk/internal/sse-filters.h>
+#include <brisk/internal/vectorized-filters.h>
 
 namespace brisk {
+#ifdef __ARM_NEON__
+  // Not implemented.
+#else
 void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst) {  // NOLINT
   // Sanity check.
   const unsigned int X = 3;
@@ -113,8 +116,11 @@ void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst) {  // NOLINT
     }
   }
 }
+#endif  // __ARM_NEON__
 
-
+#ifdef __ARM_NEON__
+  // Not implemented.
+#else
 void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst) {  // NOLINT
   // Sanity check.
   static const unsigned int X = 3;
@@ -167,7 +173,11 @@ void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst) {  // NOLINT
     }
   }
 }
+#endif  // __ARM_NEON__
 
+#ifdef __ARM_NEON__
+// Not implemented.
+#else
 void FilterBox3by316S(cv::Mat& src, cv::Mat& dst) {  // NOLINT
   // Sanity check.
   const unsigned int X = 3;
@@ -231,4 +241,5 @@ void FilterBox3by316S(cv::Mat& src, cv::Mat& dst) {  // NOLINT
     }
   }
 }
+#endif  // __ARM_NEON__
 }  // namespace brisk

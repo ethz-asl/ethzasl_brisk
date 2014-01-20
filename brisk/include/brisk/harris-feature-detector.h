@@ -45,7 +45,7 @@
 
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
-#include <brisk/internal/sse-filters.h>
+#include <brisk/internal/vectorized-filters.h>
 
 namespace brisk {
 

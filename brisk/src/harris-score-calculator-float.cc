@@ -42,10 +42,12 @@
 #include <tmmintrin.h>
 
 #include <brisk/internal/harris-score-calculator-float.h>
-#include <brisk/internal/sse-filters.h>
+#include <brisk/internal/vectorized-filters.h>
 
 namespace brisk {
-
+#ifdef __ARM_NEON__
+// Not implemented.
+#else
 void HarrisScoreCalculatorFloat::InitializeScores() {
   cv::Mat DxDx1, DyDy1, DxDy1;
   cv::Mat DxDx, DyDy, DxDy;
@@ -244,4 +246,5 @@ void HarrisScoreCalculatorFloat::CornerHarris(const cv::Mat& dxdxSmooth,
     }
   }
 }
+#endif  // __ARM_NEON__
 }  // namespace brisk

@@ -38,14 +38,16 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_SSE_FILTERS_H_
-#define INTERNAL_SSE_FILTERS_H_
+#ifndef INTERNAL_VECTORIZED_FILTERS_H_
+#define INTERNAL_VECTORIZED_FILTERS_H_
 
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
-
+#ifdef __ARM_NEON__
+  // Not implemented.
+#else
 // Generic SSE-optimized 2D filter on CV_8U/CV_16S matrices. stores result in
 // CV_16S matrix.
 template<int X, int Y>
@@ -68,6 +70,7 @@ void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst);  // NOLINT
 // 3-by-3 Gaussian filter CV_32F to CV_32F.
 void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst);  // NOLINT
 
-#include "./sse-filters-inl.h"
+#include "./vectorized-filters-inl.h"
+#endif  // __ARM_NEON__
 }  // namespace brisk
-#endif  // INTERNAL_SSE_FILTERS_H_
+#endif  // INTERNAL_VECTORIZED_FILTERS_H_

@@ -273,13 +273,54 @@ void BriskLayer::CalculateThresholdMap() {
 
   const int rowstride = img_.cols;
 
-  // SSE version.
-
   for (int y = 1; y < img_.rows - 1; y++) {
     int x = 1;
     while (x + 16 < img_.cols - 1) {
       // Access.
       uchar* p = img_.data + x - 1 + (y - 1) * rowstride;
+#ifdef __ARM_NEON__
+      // NEON version.
+      uint8x16_t v_1_1 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p++;
+      uint8x16_t v0_1 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p++;
+      uint8x16_t v1_1 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += rowstride;
+      uint8x16_t v10 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p--;
+      uint8x16_t v00 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p--;
+      uint8x16_t v_10 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += rowstride;
+      uint8x16_t v_11 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p++;
+      uint8x16_t v01 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p++;
+      uint8x16_t v11 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+
+      // Min/max calculation.
+      uint8x16_t max = vmaxq_u8(v_1_1, v0_1);
+      uint8x16_t min = vminq_u8(v_1_1, v0_1);
+      max = vmaxq_u8(max, v1_1);
+      min = vminq_u8(min, v1_1);
+      max = vmaxq_u8(max, v10);
+      min = vminq_u8(min, v10);
+      max = vmaxq_u8(max, v00);
+      min = vminq_u8(min, v00);
+      max = vmaxq_u8(max, v_10);
+      min = vminq_u8(min, v_10);
+      max = vmaxq_u8(max, v_11);
+      min = vminq_u8(min, v_11);
+      max = vmaxq_u8(max, v01);
+      min = vminq_u8(min, v01);
+      max = vmaxq_u8(max, v11);
+      min = vminq_u8(min, v11);
+
+      // Store data back:
+      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmax + x + y * rowstride), max);
+      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmin + x + y * rowstride), min);
+#else
+      // SSE version.
       __m128i v_1_1 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p++;
       __m128i v0_1 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
@@ -317,11 +358,11 @@ void BriskLayer::CalculateThresholdMap() {
       min = _mm_min_epu8(min, v11);
 
       // Store.
-      _mm_storeu_si128(reinterpret_cast<__m128i *>(tmpmax.data + x +
-          y * rowstride), max);
-      _mm_storeu_si128(reinterpret_cast<__m128i *>(tmpmin.data + x +
-          y * rowstride), min);
-
+      _mm_storeu_si128(
+          reinterpret_cast<__m128i *>(tmpmax.data + x + y * rowstride), max);
+      _mm_storeu_si128(
+          reinterpret_cast<__m128i *>(tmpmin.data + x + y * rowstride), min);
+#endif  // __ARM_NEON__
       // Next block.
       x += 16;
     }
@@ -332,6 +373,59 @@ void BriskLayer::CalculateThresholdMap() {
     while (x + 16 < img_.cols - 3) {
       // Access.
       uchar* p = img_.data + x + y * rowstride;
+#ifdef __ARM_NEON__
+      // NEON version //
+      uint8x16_t v00 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p -= 2 + 2 * rowstride;
+      uint8x16_t v_2_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4;
+      uint8x16_t v2_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4 * rowstride;
+      uint8x16_t v22 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p -= 4;
+      uint8x16_t v_22 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+
+      p = tmpmax + x + (y - 2) * rowstride;
+      uint8x16_t max0_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4 * rowstride;
+      uint8x16_t max02 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p -= 2 * rowstride + 2;
+      uint8x16_t max_20 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4;
+      uint8x16_t max20 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+
+      p = tmpmin + x + (y - 2) * rowstride;
+      uint8x16_t min0_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4 * rowstride;
+      uint8x16_t min02 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p -= 2 * rowstride + 2;
+      uint8x16_t min_20 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4;
+      uint8x16_t min20 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+
+      // Min/max.
+      uint8x16_t max = vmaxq_u8(v00, v_2_2);
+      uint8x16_t min = vminq_u8(v00, v_2_2);
+      max = vmaxq_u8(max, v2_2);
+      min = vminq_u8(min, v2_2);
+      max = vmaxq_u8(max, v22);
+      min = vminq_u8(min, v22);
+      max = vmaxq_u8(max, v_22);
+      min = vminq_u8(min, v_22);
+      max = vmaxq_u8(max, max0_2);
+      min = vminq_u8(min, min0_2);
+      max = vmaxq_u8(max, max02);
+      min = vminq_u8(min, min02);
+      max = vmaxq_u8(max, max_20);
+      min = vminq_u8(min, min_20);
+      max = vmaxq_u8(max, max20);
+      min = vminq_u8(min, min20);
+
+      // Store the data back:
+      uint8x16_t diff = vsubq_u8(max, min);
+      vst1q_u8(reinterpret_cast<uint8_t*> (thrmap_.get() + x + y * rowstride), diff);
+#else
+      // SSE version.
       __m128i v00 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p -= 2 + 2 * rowstride;
       __m128i v_2_2 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
@@ -382,7 +476,7 @@ void BriskLayer::CalculateThresholdMap() {
       __m128i diff = _mm_sub_epi8(max, min);
       _mm_storeu_si128(reinterpret_cast<__m128i *>(thrmap_.data + x +
           y * rowstride), diff);
-
+#endif  // __ARM_NEON__
       // Next block.
       x += 16;
     }
