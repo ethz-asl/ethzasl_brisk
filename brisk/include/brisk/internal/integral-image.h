@@ -50,7 +50,7 @@ void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
   const int cn = 1;
   const int srcstep = static_cast<int>(src.step / sizeof(unsigned char));
 
-  dest->create(cv::Size(src.cols + 1, src.rows + 1), CV_MAKETYPE(CV_32S, 1));
+  dest->create(src.rows + 1, src.cols + 1, CV_MAKETYPE(CV_32S, 1));
 
   const int sumstep = static_cast<int>(dest->step / sizeof(int32_t));
 
@@ -134,7 +134,7 @@ void IntegralImage16(const cv::Mat& src, cv::Mat* dest) {
   const int cn = 1;
   const int srcstep = static_cast<int>(src.step / sizeof(uint16_t));
 
-  dest->create(cv::Size(src.cols + 1, src.rows + 1), CV_MAKETYPE(CV_32F, 1));
+  dest->create(src.rows + 1, src.cols + 1, CV_MAKETYPE(CV_32F, 1));
 
   float float_val;
   const int sumstep = static_cast<int>(dest->step / sizeof(float_val));

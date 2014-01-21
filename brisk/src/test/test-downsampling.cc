@@ -147,9 +147,7 @@ TEST(Brisk, HalfSample) {
 #else
     std::string imagepath = "./test_data/img1.pgm";
 #endif
-  cv::Mat imgRGB = cv::imread(imagepath);
-  cv::Mat src_img;
-  cv::cvtColor(imgRGB, src_img, CV_BGR2GRAY);
+  cv::Mat src_img = cv::imread(imagepath);
 
   static const int source_cols = src_img.cols;
   static const int source_rows = src_img.rows;
@@ -170,9 +168,7 @@ TEST(Brisk, TwoThirdSample) {
 #else
     std::string imagepath = "./test_data/img1.pgm";
 #endif
-  cv::Mat imgRGB = cv::imread(imagepath);
-  cv::Mat src_img;
-  cv::cvtColor(imgRGB, src_img, CV_BGR2GRAY);
+  cv::Mat src_img = cv::imread(imagepath);
 
   static const int source_cols = src_img.cols;
   static const int source_rows = src_img.rows;
