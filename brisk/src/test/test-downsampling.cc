@@ -143,9 +143,9 @@ void PlainTwoThirdSample(const unsigned char* src, unsigned char* dst,
 
 TEST(Brisk, HalfSample) {
 #ifdef TEST_IN_SOURCE
-    std::string imagepath = "src/test/test_data/img1.ppm";
+    std::string imagepath = "src/test/test_data/img1.pgm";
 #else
-    std::string imagepath = "./test_data/img1.ppm";
+    std::string imagepath = "./test_data/img1.pgm";
 #endif
   cv::Mat imgRGB = cv::imread(imagepath);
   cv::Mat src_img;
@@ -166,9 +166,9 @@ TEST(Brisk, HalfSample) {
 
 TEST(Brisk, TwoThirdSample) {
 #ifdef TEST_IN_SOURCE
-    std::string imagepath = "src/test/test_data/img1.ppm";
+    std::string imagepath = "src/test/test_data/img1.pgm";
 #else
-    std::string imagepath = "./test_data/img1.ppm";
+    std::string imagepath = "./test_data/img1.pgm";
 #endif
   cv::Mat imgRGB = cv::imread(imagepath);
   cv::Mat src_img;
