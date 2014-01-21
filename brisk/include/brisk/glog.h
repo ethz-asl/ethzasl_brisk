@@ -1,7 +1,4 @@
 /*
- Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
  Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
  Stefan Leutenegger and Simon Lynen.
 
@@ -37,33 +34,33 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef BRISK_GLOG_H_
+#define BRISK_GLOG_H_
 
-#ifndef BRISK_BRISK_FEATURE_DETECTOR_H_
-#define BRISK_BRISK_FEATURE_DETECTOR_H_
-
-#include <vector>
-
-#include <brisk/brisk-opencv.h>
-#include <brisk/internal/macros.h>
-
-namespace brisk {
-#if HAVE_OPENCV
-class  BriskFeatureDetector : public cv::FeatureDetector {
+#if HAVE_GLOG
+#include <glog/logging.h>
 #else
-  class  BriskFeatureDetector {
-#endif  // HAVE_OPENCV
- public:
-  BriskFeatureDetector(int thresh, int octaves = 3,
-                       bool suppressScaleNonmaxima = true);
-  virtual ~BriskFeatureDetector() { }
-  int threshold;
-  int octaves;
- protected:
-  virtual void detectImpl(const cv::Mat& image,
-                          std::vector<KeyPoint>& keypoints,
-                          const cv::Mat& mask = cv::Mat()) const;
-  bool m_suppressScaleNonmaxima;
-};
-}  // namespace brisk
+#include <cassert>
+#include <iosfwd>
 
-#endif  // BRISK_BRISK_FEATURE_DETECTOR_H_
+struct nullstream {};
+template <typename T>
+inline nullstream & operator<<(nullstream& s, const T&) {
+  return s;
+}
+inline nullstream & operator<<(nullstream& s, std::ostream&(std::ostream&)) {
+  return s;
+}
+static nullstream logstream;
+
+#define CHECK_NOTNULL(x) assert(x != nullptr);
+#define CHECK_EQ(x, y) assert(x == y); logstream
+#define CHECK_NE(x, y) assert(x != y); logstream
+#define CHECK_GT(x, y) assert(x > y); logstream
+#define CHECK_LT(x, y) assert(x < y); logstream
+#define CHECK_GE(x, y) assert(x >= y); logstream
+#define CHECK_LE(x, y) assert(x <= y); logstream
+#define CHECK(x) assert(x); logstream
+
+#endif  // HAVE_GLOG
+#endif  // BRISK_GLOG_H_

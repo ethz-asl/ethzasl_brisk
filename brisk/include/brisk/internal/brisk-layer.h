@@ -67,13 +67,13 @@ class  BriskLayer {
 
   // Fast/Agast without non-max suppression.
   void GetAgastPoints(uint8_t threshold,
-                      std::vector<brisk::KeyPoint>* keypoints);
+                      std::vector<KeyPoint>* keypoints);
 
   // Get scores - this is in layer coordinates, not scale=1 coordinates!
   uint8_t GetAgastScore(int x, int y, uint8_t threshold);
   uint8_t GetAgastScore_5_8(int x, int y, uint8_t threshold);
-  uint8_t GetAgastScore(float xf, float yf, uint8_t threshold, float scale =
-                            1.0f);
+  uint8_t GetAgastScore(float xf, float yf, uint8_t threshold,
+                        float scale = 1.0f);
 
   // Accessors.
   inline const cv::Mat& img() const {

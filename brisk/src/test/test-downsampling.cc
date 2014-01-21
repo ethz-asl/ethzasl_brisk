@@ -35,11 +35,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
+#include <brisk/glog.h>
 #include <gtest/gtest.h>
 
 #include <brisk/brisk-opencv.h>
@@ -146,7 +142,11 @@ void PlainTwoThirdSample(const unsigned char* src, unsigned char* dst,
 }
 
 TEST(Brisk, HalfSample) {
-  std::string imagepath = "./src/test/test_data/img1.ppm";
+#ifdef TEST_IN_SOURCE
+    std::string imagepath = "src/test/test_data/img1.ppm";
+#else
+    std::string imagepath = "./test_data/img1.ppm";
+#endif
   cv::Mat imgRGB = cv::imread(imagepath);
   cv::Mat src_img;
   cv::cvtColor(imgRGB, src_img, CV_BGR2GRAY);
@@ -165,7 +165,11 @@ TEST(Brisk, HalfSample) {
 }
 
 TEST(Brisk, TwoThirdSample) {
-  std::string imagepath = "./src/test/test_data/img1.ppm";
+#ifdef TEST_IN_SOURCE
+    std::string imagepath = "src/test/test_data/img1.ppm";
+#else
+    std::string imagepath = "./test_data/img1.ppm";
+#endif
   cv::Mat imgRGB = cv::imread(imagepath);
   cv::Mat src_img;
   cv::cvtColor(imgRGB, src_img, CV_BGR2GRAY);

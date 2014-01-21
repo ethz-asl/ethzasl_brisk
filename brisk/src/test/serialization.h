@@ -44,17 +44,8 @@
 #include <type_traits>
 #include <vector>
 
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
-
-namespace cv {
-class KeyPoint;
-class Mat;
-template <typename TYPE> class Point_;
-}  // namespace cv
+#include <brisk/brisk-opencv.h>
+#include <brisk/glog.h>
 
 namespace serialization {
 
@@ -102,9 +93,9 @@ void DeSerialize(cv::Mat* mat, std::ifstream* in);
 
 void Serialize(const cv::Point2f& pt, std::ofstream* out);
 
-void Serialize(const cv::KeyPoint& pt, std::ofstream* out);
+void Serialize(const brisk::KeyPoint& pt, std::ofstream* out);
 
-void DeSerialize(cv::KeyPoint* pt, std::ifstream* in);
+void DeSerialize(brisk::KeyPoint* pt, std::ifstream* in);
 
 void Serialize(const std::string& value, std::ofstream* out);
 

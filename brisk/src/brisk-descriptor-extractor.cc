@@ -353,14 +353,14 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
 }
 
 bool RoiPredicate(const float minX, const float minY, const float maxX,
-                  const float maxY, const cv::KeyPoint& keyPt) {
-  const cv::Point2f& pt = keyPt.pt;
-  return (pt.x < minX) || (pt.x >= maxX) || (pt.y < minY) || (pt.y >= maxY);
+                  const float maxY, const KeyPoint& keyPt) {
+  return (brisk::KeyPointX(keyPt) < minX) || (brisk::KeyPointX(keyPt) >= maxX)
+      || (brisk::KeyPointY(keyPt) < minY) || (brisk::KeyPointY(keyPt) >= maxY);
 }
 
 // Computes the descriptor.
 void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
-                                           std::vector<cv::KeyPoint>& keypoints,
+                                           std::vector<KeyPoint>& keypoints,
                                            cv::Mat& descriptors) const {
   // Remove keypoints very close to the border.
   size_t ksize = keypoints.size();
@@ -369,7 +369,7 @@ void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
   static const float log2 = 0.693147180559945;
   static const float lb_scalerange = log(scalerange_) / (log2);
 
-  std::vector<cv::KeyPoint> valid_kp;
+  std::vector<KeyPoint> valid_kp;
   std::vector<int> valid_scales;
   valid_kp.reserve(keypoints.size());
   valid_scales.reserve(keypoints.size());
@@ -443,12 +443,12 @@ void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
   uchar* ptr = descriptors.data;
   for (size_t k = 0; k < ksize; k++) {
     int theta;
-    cv::KeyPoint& kp = keypoints[k];
+    KeyPoint& kp = keypoints[k];
     const int& scale = kscales[k];
     int shifter = 0;
     int* pvalues = _values;
-    const float& x = kp.pt.x;
-    const float& y = kp.pt.y;
+    const float& x = brisk::KeyPointX(kp);
+    const float& y = brisk::KeyPointY(kp);
     if (kp.angle == -1) {
       if (!rotationInvariance) {
         // Don't compute the gradient direction, just assign a rotation of 0°.

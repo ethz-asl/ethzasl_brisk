@@ -35,12 +35,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
 #include <brisk/internal/image-down-sampling.h>
+#include <brisk/glog.h>
 
 namespace brisk {
 void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {

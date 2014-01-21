@@ -49,7 +49,11 @@
 #include <brisk/internal/macros.h>
 
 namespace brisk {
+#if HAVE_OPENCV
 class BriskDescriptorExtractor : public cv::DescriptorExtractor {
+#else
+  class BriskDescriptorExtractor {
+#endif  // HAVE_OPENCV
  public:
   // Create a descriptor with standard pattern.
   BriskDescriptorExtractor(bool rotationInvariant = true,
@@ -77,12 +81,12 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   // This is the subclass keypoint computation implementation:
   // (not meant to be public - hacked)
   virtual void computeImpl(const cv::Mat& image,
-                           std::vector<cv::KeyPoint>& keypoints,
+                           std::vector<KeyPoint>& keypoints,
                            cv::Mat& descriptors) const;
 
   // Opencv 2.1 {
   virtual void compute(const cv::Mat& image,
-                       std::vector<cv::KeyPoint>& keypoints,
+                       std::vector<KeyPoint>& keypoints,
                        cv::Mat& descriptors) const {
     computeImpl(image, keypoints, descriptors);
   }
