@@ -42,11 +42,7 @@
 
 #include <brisk/brisk.h>
 #include <brisk/internal/timer.h>
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
+#include <brisk/glog.h>
 #include <gtest/gtest.h>
 #include <brisk/brisk-opencv.h>
 
@@ -83,7 +79,11 @@ TEST(Brisk, Validation) {
 }
 
 bool RunValidation(bool do_gtest_checks) {
-  std::string imagepath = "./src/test/test_data/";
+#ifdef TEST_IN_SOURCE
+    std::string imagepath = "src/test/test_data/";
+#else
+    std::string imagepath = "./test_data/";
+#endif
   std::string datasetfilename = "brisk_verification_data.set";
 
   std::string datasetfullpath = imagepath + "/" + datasetfilename;
@@ -169,9 +169,11 @@ bool RunValidation(bool do_gtest_checks) {
       std::cout << std::endl << "******* Verification failed *******"
           << std::endl << std::endl;
     }
+#if HAVE_OPENCV
     if (drawKeypoints) {
       Draw(dataset);
     }
+#endif  // HAVE_OPENCV
 
     for (int i = 0; verificationOK && i < 20; ++i) {
       brisk::timing::DebugTimer timerOverall("BRISK overall");
@@ -188,9 +190,8 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
   std::cout << "Running the pipeline..." << std::endl;
 
   // Detection.
-  std::shared_ptr<cv::FeatureDetector> detector(
-      new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>(
-          BRISK_octaves, BRISK_uniformityradius, BRISK_absoluteThreshold));
+  brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>
+    detector(BRISK_octaves, BRISK_uniformityradius, BRISK_absoluteThreshold);
 
   if (doKeypointDetection || dataset.at(0).GetKeyPoints().empty()) {
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
@@ -200,7 +201,7 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
 
       brisk::timing::DebugTimer timerdetect(
           DatasetEntry::getCurrentEntry()->GetPath() + "_detect");
-      detector->detect(*it->GetImgMutable(), *it->GetKeyPointsMutable());
+      detector.detect(*it->GetImgMutable(), *it->GetKeyPointsMutable());
       timerdetect.Stop();
 
       // Test userdata.
@@ -216,9 +217,8 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
   }
 
   // Extraction.
-  std::shared_ptr<cv::DescriptorExtractor> descriptorExtractor(
-      new brisk::BriskDescriptorExtractor(BRISK_rotationestimation,
-                                          BRISK_scaleestimation));
+  brisk::BriskDescriptorExtractor descriptorExtractor(BRISK_rotationestimation,
+                                                      BRISK_scaleestimation);
   if (doDescriptorComputation || dataset.at(0).GetDescriptors().rows == 0) {
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
         .end(); it != end; ++it) {
@@ -226,8 +226,8 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
       it->setThisAsCurrentEntry();
       brisk::timing::DebugTimer timerextract(
           DatasetEntry::getCurrentEntry()->GetPath() + "_extract");
-      descriptorExtractor->compute(it->GetImage(), *it->GetKeyPointsMutable(),
-                                   *it->GetDescriptorsMutable());
+      descriptorExtractor.compute(it->GetImage(), *it->GetKeyPointsMutable(),
+                                  *it->GetDescriptorsMutable());
       timerextract.Stop();
     }
   }
@@ -268,6 +268,7 @@ bool RunVerification(const std::vector<DatasetEntry>& current_dataset,
   return !failed;
 }
 
+#if HAVE_OPENCV
 void Draw(std::vector<DatasetEntry>& dataset) {  // NOLINT
   // Drawing.
   cv::namedWindow("Keypoints");
@@ -284,6 +285,7 @@ void Draw(std::vector<DatasetEntry>& dataset) {  // NOLINT
     cv::waitKey();
   }
 }
+#endif  // HAVE_OPENCV
 
 DatasetEntry* DatasetEntry::current_entry = NULL;
 }  // namespace brisk

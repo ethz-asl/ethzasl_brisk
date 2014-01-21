@@ -49,7 +49,11 @@
 #include <brisk/internal/macros.h>
 
 namespace brisk {
+#if HAVE_OPENCV
 class BriskDescriptorExtractor : public cv::DescriptorExtractor {
+#else
+  class BriskDescriptorExtractor {
+#endif  // HAVE_OPENCV
  public:
   // Create a descriptor with standard pattern.
   BriskDescriptorExtractor(bool rotationInvariant = true,

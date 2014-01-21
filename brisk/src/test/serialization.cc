@@ -36,11 +36,7 @@
  */
 
 #include <brisk/brisk-opencv.h>
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
+#include <brisk/glog.h>
 #include <gtest/gtest.h>
 
 #include "./serialization.h"
@@ -93,6 +89,9 @@ void Serialize(const brisk::KeyPoint& pt, std::ofstream* out) {
   Serialize(pt.angle, out);
 #ifdef HAVE_OPENCV
   Serialize(pt.class_id, out);
+#else
+  int class_id = 0;
+  Serialize(class_id, out);
 #endif  // HAVE_OPENCV
   Serialize(pt.octave, out);
 #ifdef HAVE_OPENCV
@@ -111,6 +110,9 @@ void DeSerialize(brisk::KeyPoint* pt, std::ifstream* in) {
   DeSerialize(&pt->angle, in);
 #ifdef HAVE_OPENCV
   DeSerialize(&pt->class_id, in);
+#else
+  int class_id = 0;
+  DeSerialize(&class_id, in);
 #endif
   DeSerialize(&pt->octave, in);
 #ifdef HAVE_OPENCV

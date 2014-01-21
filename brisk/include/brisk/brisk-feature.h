@@ -50,7 +50,11 @@
 
 namespace brisk {
 
-class BriskFeature : public cv::Feature2D {
+#if HAVE_OPENCV
+  class BriskFeature : public cv::Feature2D {
+#else
+  class BriskFeature {
+#endif  // HAVE_OPENCV
  public:
   BriskFeature(size_t octaves, double uniformityRadius,
                double absoluteThreshold = 0,

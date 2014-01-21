@@ -41,11 +41,7 @@
 #include <tmmintrin.h>
 #include <pmmintrin.h>
 
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
+#include <brisk/glog.h>
 
 namespace brisk {
 void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {

@@ -42,11 +42,7 @@
 #include <vector>
 
 #include <brisk/brisk-opencv.h>
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
+#include <brisk/glog.h>
 #include <gtest/gtest.h>
 
 #include "./bench-ds.h"
@@ -163,13 +159,20 @@ void SetRandom(cv::Point_<TYPE>* value, int seed) {
   SetRandom(&value->y, rd());
 }
 
-void SetRandom(KeyPoint* value, int seed) {
+void SetRandom(brisk::KeyPoint* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
   SetRandom(&value->angle, rd());
+#if HAVE_OPENCV
   SetRandom(&value->class_id, rd());
+#endif  // HAVE_OPENCV
   SetRandom(&value->octave, rd());
+#if HAVE_OPENCV
   SetRandom(&value->pt, rd());
+#else
+  SetRandom(&value->x, rd());
+  SetRandom(&value->y, rd());
+#endif  // HAVE_OPENCV
   SetRandom(&value->response, rd());
   SetRandom(&value->size, rd());
 }
@@ -210,8 +213,13 @@ void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 template<typename TYPE>
 void RunSerializationTest() {
   TYPE saved_value, loaded_value;
-  std::string filename = "src/test/test_data/tmp/serialization_file_"
-      + std::string(typeid(TYPE).name()) + "_tmp";
+#ifdef TEST_IN_SOURCE
+    std::string filename = "src/test/test_data/tmp/"
+#else
+    std::string filename = "./"
+#endif
+    "serialization_file_" + std::string(typeid(TYPE).name()) + "_tmp";
+
   std::mt19937 rd(42);
   {  // Scoping to flush and close file.
     std::ofstream ofs(filename);
