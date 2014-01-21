@@ -52,8 +52,6 @@
 #define TEST(a, b) int Test_##a##_##b()
 #endif
 
-using brisk::Mat;
-
 template<typename TYPE>
 void SetRandom(
     TYPE* value, int seed,

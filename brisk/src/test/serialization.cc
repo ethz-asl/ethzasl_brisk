@@ -43,8 +43,6 @@
 
 namespace serialization {
 
-using brisk::Mat;
-
 void Serialize(const Mat& mat, std::ofstream* out) {
   CHECK_NOTNULL(out);
   Mat mat_cont;

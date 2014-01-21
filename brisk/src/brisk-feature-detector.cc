@@ -43,7 +43,7 @@
 #include <brisk/internal/brisk-scale-space.h>
 
 namespace {
-void RemoveInvalidKeyPoints(const brisk::Mat& mask,
+void RemoveInvalidKeyPoints(const Mat& mask,
                             std::vector<brisk::KeyPoint>* keypoints) {
   CHECK_NOTNULL(keypoints);
   if (mask.empty())

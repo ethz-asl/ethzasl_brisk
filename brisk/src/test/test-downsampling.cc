@@ -46,8 +46,6 @@
 #define TEST(a, b) int Test_##a##_##b()
 #endif
 
-using brisk::Mat;
-
 void CheckImageSame(const unsigned char* lhs, const unsigned char* rhs,
                     size_t rows, size_t cols) {
   CHECK_NOTNULL(lhs);
@@ -137,8 +135,8 @@ void PlainTwoThirdSample(const unsigned char* src, unsigned char* dst,
       dst[row * dst_cols + col + 1] = static_cast<unsigned char>(F2 & 0x00FF);
 
       dst[(row + 1) * dst_cols + col] = static_cast<unsigned char>(F3 & 0x00FF);
-      dst[(row + 1) * dst_cols + col + 1] = static_cast<unsigned char>(F4
-          & 0x00FF);
+      dst[(row + 1) * dst_cols + col + 1] = static_cast<unsigned char>(
+          F4 & 0x00FF);
      }
   }
 }

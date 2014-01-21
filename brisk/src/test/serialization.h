@@ -49,8 +49,6 @@
 
 namespace serialization {
 
-using brisk::Mat;
-
 template<class TYPE>
 void Serialize(
     const TYPE& value, std::ofstream* out,
