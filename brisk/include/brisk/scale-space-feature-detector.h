@@ -72,8 +72,8 @@ class ScaleSpaceFeatureDetector {
   }
 
   typedef SCORE_CALCULATOR_T ScoreCalculator_t;
-  void detect(const cv::Mat& image, std::vector<KeyPoint>& keypoints,
-              const cv::Mat& mask = cv::Mat()) const {
+  void detect(const Mat& image, std::vector<KeyPoint>& keypoints,
+              const Mat& mask = Mat()) const {
     if (image.empty()) {
       LOG(WARNING) << "Image is empty in BRISK detect";
       return;
@@ -86,9 +86,9 @@ class ScaleSpaceFeatureDetector {
   }
 
  protected:
-  virtual void detectImpl(const cv::Mat& image,
+  virtual void detectImpl(const Mat& image,
                           std::vector<KeyPoint>& keypoints,
-                          const cv::Mat& /*mask*/ = cv::Mat()) const {
+                          const Mat& /*mask*/ = Mat()) const {
     // Find out, if we should use the provided keypoints.
     bool usePassedKeypoints = false;
     if (keypoints.size() > 0)

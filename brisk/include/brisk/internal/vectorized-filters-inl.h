@@ -49,8 +49,10 @@
 #endif  // __ARM_NEON__
 #include <stdint.h>
 
+#include <brisk/brisk-opencv.h>
+
 template<int X, int Y>
-__inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLINT
+__inline__ void Filter2D16S(Mat& src, Mat& dst, Mat& kernel) {  // NOLINT
   // Sanity check.
   assert(kernel.type() == CV_16S);
   assert(Y == kernel.rows);
@@ -61,7 +63,7 @@ __inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // N
   int cy = Y / 2;
 
   // Destination will be 16 bit.
-  dst = cv::Mat::zeros(src.rows, src.cols, CV_16S);
+  dst = Mat::zeros(src.rows, src.cols, CV_16S);
   const unsigned int maxJ = ((src.cols - 2) / 8) * 8;
   const unsigned int maxI = src.rows - 2;
   const unsigned int stride = src.cols;
@@ -98,7 +100,7 @@ __inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // N
 }
 
 template<int X, int Y>
-__inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLINT
+__inline__ void Filter2D8U(Mat& src, Mat& dst, Mat& kernel) {  // NOLINT
   // Sanity check.
   assert(kernel.type() == CV_8S);
   assert(Y == kernel.rows);
@@ -109,7 +111,7 @@ __inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NO
   int cy = Y / 2;
 
   // Destination will be 16 bit.
-  dst = cv::Mat::zeros(src.rows, src.cols, CV_16S);
+  dst = Mat::zeros(src.rows, src.cols, CV_16S);
   const unsigned int maxJ = ((src.cols - 2) / 16) * 16;
   const unsigned int maxI = src.rows - 2;
   const unsigned int stride = src.cols;
@@ -164,7 +166,7 @@ __inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NO
 
 // X and Y denote the size of the mask.
 template<int X, int Y>
-__inline__ void Filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLINT
+__inline__ void Filter2D(Mat& src, Mat& dst, Mat& kernel) {  // NOLINT
   if (src.type() == CV_8U)
     Filter2D8U<X, Y>(src, dst, kernel);
   else if (src.type() == CV_16S)

@@ -52,6 +52,8 @@
 #define TEST(a, b) int Test_##a##_##b()
 #endif
 
+using brisk::Mat;
+
 template<typename TYPE>
 void SetRandom(
     TYPE* value, int seed,
@@ -90,7 +92,7 @@ void SetRandom(std::string* value, int seed) {
   }
 }
 
-void SetRandom(cv::Mat* value, int seed) {
+void SetRandom(Mat* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
   int rows;
@@ -188,7 +190,7 @@ void AssertNotEqual(const TYPE& lhs, const TYPE& rhs) {
 }
 
 template<>
-void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
+void AssertEqual(const Mat& lhs, const Mat& rhs) {
   ASSERT_EQ(lhs.rows, rhs.rows);
   ASSERT_EQ(lhs.cols, rhs.cols);
   for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
@@ -198,7 +200,7 @@ void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 }
 
 template<>
-void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
+void AssertNotEqual(const Mat& lhs, const Mat& rhs) {
   bool is_same = true;
   is_same = is_same && lhs.rows == rhs.rows;
   is_same = is_same && lhs.cols == rhs.cols;
@@ -316,7 +318,7 @@ TEST(Serialization, MapStringString) {
 }
 
 TEST(Serialization, CvMat) {
-  RunSerializationTest<cv::Mat>();
+  RunSerializationTest<Mat>();
 }
 
 int main(int argc, char** argv) {

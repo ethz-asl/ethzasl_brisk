@@ -56,13 +56,13 @@
 
 namespace brisk {
 template<class SCORE_CALCULATOR_T>
-ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScaleSpaceLayer(const cv::Mat& img,
+ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScaleSpaceLayer(const Mat& img,
                                                      bool initScores) {
   Create(img);
 }
 
 template<class SCORE_CALCULATOR_T>
-void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(const cv::Mat& img,
+void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(const Mat& img,
                                                  bool initScores) {
   // Octave 0.
   _isOctave = true;
@@ -91,7 +91,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(const cv::Mat& img,
   _absoluteThreshold = 0;
 
   // Generic mask.
-  _LUT = cv::Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
+  _LUT = Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
   for (int x = 0; x < 2 * 16 - 1; ++x) {
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       _LUT.at<float>(y, x) = std::max(
@@ -175,7 +175,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(
   _aboveLayer_ptr = 0;
 
   // Generic mask.
-  _LUT = cv::Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
+  _LUT = Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
   for (int x = 0; x < 2 * 16 - 1; ++x) {
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       _LUT.at<float>(y, x) = std::max(
@@ -387,10 +387,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
     keypoints.reserve(keypoints.size() + points.size());  // Allow appending.
 
         // Store occupancy.
-    cv::Mat occupancy;
+    Mat occupancy;
     const float scaling = 15.0 / static_cast<float>(_radius);
-    occupancy = cv::Mat::zeros((_img.rows) * ceil(scaling) + 32,
-                               (_img.cols) * ceil(scaling) + 32, CV_8U);
+    occupancy = Mat::zeros((_img.rows) * ceil(scaling) + 32,
+                           (_img.cols) * ceil(scaling) + 32, CV_8U);
 
     brisk::timing::DebugTimer timer_uniformity_enforcement(
         "0.3 BRISK Detection: "
@@ -465,11 +465,11 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
                vqaddq_u8(mem2, mask2));
 # else
         __m128i mem1 = _mm_loadu_si128(
-            reinterpret_cast<__m128i *>(&occupancy.at < uchar
-                > (cy + y - 15, cx - 15)));
+            reinterpret_cast<__m128i *>(&occupancy.at<uchar>
+        (cy + y - 15, cx - 15)));
         __m128i mem2 = _mm_loadu_si128(
-            reinterpret_cast<__m128i *>(&occupancy.at < uchar
-                > (cy + y - 15, cx + 1)));
+            reinterpret_cast<__m128i *>(&occupancy.at<uchar>
+        (cy + y - 15, cx + 1)));
         __m128i mask1 = _mm_set_epi8(ceil(_LUT.at<float>(y, 15) * nsc),
                                      ceil(_LUT.at<float>(y, 14) * nsc),
                                      ceil(_LUT.at<float>(y, 13) * nsc),
@@ -583,7 +583,7 @@ inline double ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScoreBelow(double u,
 
 template<class SCORE_CALCULATOR_T>
 inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample(
-    const cv::Mat& srcimg, cv::Mat& dstimg) {
+    const Mat& srcimg, Mat& dstimg) {
   if (srcimg.type() == CV_8UC1) {
     Halfsample8(srcimg, dstimg);
   } else if (srcimg.type() == CV_16UC1) {
@@ -596,7 +596,7 @@ inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample(
 
 template<class SCORE_CALCULATOR_T>
 inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample(
-    const cv::Mat& srcimg, cv::Mat& dstimg) {
+    const Mat& srcimg, Mat& dstimg) {
   if (srcimg.type() == CV_8UC1) {
     Twothirdsample8(srcimg, dstimg);
   } else if (srcimg.type() == CV_16UC1) {

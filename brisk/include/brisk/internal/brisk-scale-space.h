@@ -55,7 +55,7 @@ class  BriskScaleSpace {
   ~BriskScaleSpace();
 
   // Construct the image pyramids.
-  void ConstructPyramid(const cv::Mat& image, uchar _threshold);
+  void ConstructPyramid(const Mat& image, uchar _threshold);
 
   // Get Keypoints.
   void GetKeypoints(std::vector<KeyPoint>* keypoints);

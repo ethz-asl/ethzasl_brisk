@@ -46,6 +46,8 @@
 #define TEST(a, b) int Test_##a##_##b()
 #endif
 
+using brisk::Mat;
+
 void CheckImageSame(const unsigned char* lhs, const unsigned char* rhs,
                     size_t rows, size_t cols) {
   CHECK_NOTNULL(lhs);
@@ -147,14 +149,14 @@ TEST(Brisk, HalfSample) {
 #else
     std::string imagepath = "./test_data/img1.pgm";
 #endif
-  cv::Mat src_img = cv::imread(imagepath);
+  Mat src_img = cv::imread(imagepath);
 
   static const int source_cols = src_img.cols;
   static const int source_rows = src_img.rows;
   static const int dst_cols = source_cols / 2;
   static const int dst_rows = source_rows / 2;
-  cv::Mat dst_img_a(dst_rows, dst_cols, CV_8UC1);
-  cv::Mat dst_img_b(dst_rows, dst_cols, CV_8UC1);
+  Mat dst_img_a(dst_rows, dst_cols, CV_8UC1);
+  Mat dst_img_b(dst_rows, dst_cols, CV_8UC1);
 
   brisk::Halfsample8(src_img, dst_img_a);
   PlainHalfSample(src_img.data, dst_img_b.data, source_rows, source_cols);
@@ -168,14 +170,14 @@ TEST(Brisk, TwoThirdSample) {
 #else
     std::string imagepath = "./test_data/img1.pgm";
 #endif
-  cv::Mat src_img = cv::imread(imagepath);
+  Mat src_img = cv::imread(imagepath);
 
   static const int source_cols = src_img.cols;
   static const int source_rows = src_img.rows;
   static const int dst_cols = source_cols / 3 * 2;
   static const int dst_rows = source_rows / 3 * 2;
-  cv::Mat dst_img_a(dst_rows, dst_cols, CV_8UC1);
-  cv::Mat dst_img_b(dst_rows, dst_cols, CV_8UC1);
+  Mat dst_img_a(dst_rows, dst_cols, CV_8UC1);
+  Mat dst_img_b(dst_rows, dst_cols, CV_8UC1);
 
   brisk::Twothirdsample8(src_img, dst_img_a);
   PlainTwoThirdSample(src_img.data, dst_img_b.data, source_rows, source_cols);

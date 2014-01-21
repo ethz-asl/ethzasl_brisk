@@ -72,6 +72,7 @@ inline const float& KeyPointY(const KeyPoint& keypoint) {
 #else
 namespace brisk {
 typedef features_2d::Keypoint KeyPoint;
+typedef cv::Mat Mat;
 inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
   return keypoint.x;
 }
@@ -88,7 +89,7 @@ inline const float& KeyPointY(const KeyPoint& keypoint) {
 
 namespace cv {
 // Reads a pgm image from file.
-cv::Mat imread(const std::string& filename);
+Mat imread(const std::string& filename);
 }  // namespace cv
 #endif  // HAVE_OPENCV
 

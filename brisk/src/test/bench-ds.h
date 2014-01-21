@@ -197,9 +197,9 @@ struct DatasetEntry {
  private:
   std::map<std::string, Blob> userdata_;
   std::string path_;
-  cv::Mat imgGray_;
+  Mat imgGray_;
   std::vector<KeyPoint> keypoints_;
-  cv::Mat descriptors_;
+  Mat descriptors_;
 
  public:
   DatasetEntry() = default;
@@ -213,7 +213,7 @@ struct DatasetEntry {
     return path_;
   }
 
-  const cv::Mat& GetImage() const {
+  const Mat& GetImage() const {
     return imgGray_;
   }
 
@@ -221,7 +221,7 @@ struct DatasetEntry {
     return keypoints_;
   }
 
-  const cv::Mat& GetDescriptors() const {
+  const Mat& GetDescriptors() const {
     return descriptors_;
   }
 
@@ -229,7 +229,7 @@ struct DatasetEntry {
     return &path_;
   }
 
-  cv::Mat* GetImgMutable() {
+  Mat* GetImgMutable() {
     return &imgGray_;
   }
 
@@ -237,12 +237,12 @@ struct DatasetEntry {
     return &keypoints_;
   }
 
-  cv::Mat* GetDescriptorsMutable() {
+  Mat* GetDescriptorsMutable() {
     return &descriptors_;
   }
 
   /*
-   * especially do a deep copy of the cv::Mats
+   * especially do a deep copy of the Mats
    */
   DatasetEntry(const DatasetEntry& other) {
     path_ = other.path_;
@@ -409,7 +409,7 @@ struct DatasetEntry {
   // Remove processing results so we can re-run the pipeline on this image.
   void clear_processed_data(bool clearDescriptors, bool clearKeypoints) {
     if (clearDescriptors) {
-      descriptors_ = cv::Mat::zeros(0, 0, CV_8U);
+      descriptors_ = Mat::zeros(0, 0, CV_8U);
     }
     if (clearKeypoints) {
       keypoints_.clear();
@@ -420,7 +420,7 @@ struct DatasetEntry {
   void readImage(const std::string& path) {
     path_ = path;
 #if HAVE_OPENCV
-    cv::Mat imgRGB = cv::imread(path_);
+    Mat imgRGB = cv::imread(path_);
     cv::cvtColor(imgRGB, imgGray_, CV_BGR2GRAY);
 #else
     CHECK(false) << "Cannot open pgm file without opencv";

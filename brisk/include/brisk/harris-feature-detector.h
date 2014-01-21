@@ -58,23 +58,23 @@ class HarrisFeatureDetector {
   void SetRadius(double radius);
 
  protected:
-  static __inline__ void GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
-                                         cv::Mat& dydy, cv::Mat& dxdy);
-  static __inline__ void CornerHarris(const cv::Mat& dxdxSmooth,
-                                      const cv::Mat& dydySmooth,
-                                      const cv::Mat& dxdySmooth,
-                                      cv::Mat& score);
-  static __inline__ void NonmaxSuppress(const cv::Mat& scores,
+  static __inline__ void GetCovarEntries(const Mat& src, Mat& dxdx,
+                                         Mat& dydy, Mat& dxdy);
+  static __inline__ void CornerHarris(const Mat& dxdxSmooth,
+                                      const Mat& dydySmooth,
+                                      const Mat& dxdySmooth,
+                                      Mat& score);
+  static __inline__ void NonmaxSuppress(const Mat& scores,
                                         std::vector<KeyPoint>& keypoints);
-  __inline__ void EnforceUniformity(const cv::Mat& scores,
+  __inline__ void EnforceUniformity(const Mat& scores,
                                     std::vector<KeyPoint>& keypoints) const;
 
-  virtual void detectImpl(const cv::Mat& image,
+  virtual void detectImpl(const Mat& image,
                           std::vector<KeyPoint>& keypoints,
-                          const cv::Mat& mask = cv::Mat()) const;
+                          const Mat& mask = Mat()) const;
 
   double _radius;
-  cv::Mat _LUT;
+  Mat _LUT;
 };
 }  // namespace brisk
 #endif  // BRISK_HARRIS_FEATURE_DETECTOR_H_

@@ -63,17 +63,17 @@ class  BruteForceMatcher : public cv::DescriptorMatcher {
       const;
 
  protected:
-  virtual void knnMatchImpl(const cv::Mat& queryDescriptors,
+  virtual void knnMatchImpl(const Mat& queryDescriptors,
                             std::vector<std::vector<cv::DMatch> >& matches,
                             int k,
-                            const std::vector<cv::Mat>& masks =
-                                std::vector<cv::Mat>(),
+                            const std::vector<Mat>& masks =
+                                std::vector<Mat>(),
                             bool compactResult = false);
-  virtual void radiusMatchImpl(const cv::Mat& queryDescriptors,
+  virtual void radiusMatchImpl(const Mat& queryDescriptors,
                                std::vector<std::vector<cv::DMatch> >& matches,
                                float maxDistance,
-                               const std::vector<cv::Mat>& masks =
-                                   std::vector<cv::Mat>(),
+                               const std::vector<Mat>& masks =
+                                   std::vector<Mat>(),
                                bool compactResult = false);
 
   brisk::Hamming distance_;
@@ -81,17 +81,17 @@ class  BruteForceMatcher : public cv::DescriptorMatcher {
  private:
   //  Next two methods are used to implement specialization.
   static void commonKnnMatchImpl(BruteForceMatcher& matcher,  // NOLINT
-                                 const cv::Mat& queryDescriptors,
+                                 const Mat& queryDescriptors,
                                  std::vector<std::vector<cv::DMatch> >& matches,
                                  int k,
-                                 const std::vector<cv::Mat>& masks,
+                                 const std::vector<Mat>& masks,
                                  bool compactResult);
   static void commonRadiusMatchImpl(
       BruteForceMatcher& matcher,  // NOLINT
-      const cv::Mat& queryDescriptors,
+      const Mat& queryDescriptors,
       std::vector<std::vector<cv::DMatch> >& matches,
       float maxDistance,
-      const std::vector<cv::Mat>& masks,
+      const std::vector<Mat>& masks,
       bool compactResult);
 };
 #endif  // HAVE_OPENCV

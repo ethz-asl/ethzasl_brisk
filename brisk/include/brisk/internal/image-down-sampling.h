@@ -48,9 +48,9 @@
 #include <brisk/brisk-opencv.h>
 
 namespace brisk {
-void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
-void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
-void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
-void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
+void Halfsample16(const Mat& srcimg, Mat& dstimg);
+void Halfsample8(const Mat& srcimg, Mat& dstimg);
+void Twothirdsample16(const Mat& srcimg, Mat& dstimg);
+void Twothirdsample8(const Mat& srcimg, Mat& dstimg);
 }  // namespace brisk
 #endif  // INTERNAL_IMAGE_DOWN_SAMPLING_H_

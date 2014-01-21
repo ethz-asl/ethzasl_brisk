@@ -53,8 +53,8 @@ namespace brisk {
 // Not implemented.
 #else
 void HarrisScoreCalculatorFloat::InitializeScores() {
-  cv::Mat DxDx1, DyDy1, DxDy1;
-  cv::Mat DxDx, DyDy, DxDy;
+  Mat DxDx1, DyDy1, DxDy1;
+  Mat DxDx, DyDy, DxDy;
   // Pipeline.
   GetCovarEntries(_img, DxDx1, DyDy1, DxDy1);
   FilterGauss3by332F(DxDx1, DxDx);
@@ -112,9 +112,9 @@ void HarrisScoreCalculatorFloat::Get2dMaxima(
 }
 
 // X and Y denote the size of the mask.
-void HarrisScoreCalculatorFloat::GetCovarEntries(const cv::Mat& src,
-                                                 cv::Mat& dxdx, cv::Mat& dydy,
-                                                 cv::Mat& dxdy) {
+void HarrisScoreCalculatorFloat::GetCovarEntries(const Mat& src,
+                                                 Mat& dxdx, Mat& dydy,
+                                                 Mat& dxdy) {
   int jump = 0;  // Number of bytes.
   if (src.type() == CV_8U)
     jump = 1;
@@ -123,7 +123,7 @@ void HarrisScoreCalculatorFloat::GetCovarEntries(const cv::Mat& src,
   else
     assert(0 && "Unsupported type");
 
-  cv::Mat kernel = cv::Mat::zeros(3, 3, CV_32F);
+  Mat kernel = Mat::zeros(3, 3, CV_32F);
   kernel.at<float>(0, 0) = 0.09375;
   kernel.at<float>(1, 0) = 0.3125;
   kernel.at<float>(2, 0) = 0.09375;
@@ -135,9 +135,9 @@ void HarrisScoreCalculatorFloat::GetCovarEntries(const cv::Mat& src,
   const unsigned int Y = 3;
 
   // Dest will be floats.
-  dxdx = cv::Mat::zeros(src.rows, src.cols, CV_32F);
-  dydy = cv::Mat::zeros(src.rows, src.cols, CV_32F);
-  dxdy = cv::Mat::zeros(src.rows, src.cols, CV_32F);
+  dxdx = Mat::zeros(src.rows, src.cols, CV_32F);
+  dydy = Mat::zeros(src.rows, src.cols, CV_32F);
+  dxdy = Mat::zeros(src.rows, src.cols, CV_32F);
 
   const unsigned int maxJ = ((src.cols - 2) / 4) * 4;
   const unsigned int maxI = src.rows - 2;
@@ -205,12 +205,12 @@ void HarrisScoreCalculatorFloat::GetCovarEntries(const cv::Mat& src,
   }
 }
 
-void HarrisScoreCalculatorFloat::CornerHarris(const cv::Mat& dxdxSmooth,
-                                              const cv::Mat& dydySmooth,
-                                              const cv::Mat& dxdySmooth,
-                                              cv::Mat& dst) {
+void HarrisScoreCalculatorFloat::CornerHarris(const Mat& dxdxSmooth,
+                                              const Mat& dydySmooth,
+                                              const Mat& dxdySmooth,
+                                              Mat& dst) {
   // Dest will be float.
-  dst = cv::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32F);
+  dst = Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32F);
   const unsigned int maxJ = ((dxdxSmooth.cols - 2) / 8) * 8;
   const unsigned int maxI = dxdxSmooth.rows - 2;
   const unsigned int stride = dxdxSmooth.cols;

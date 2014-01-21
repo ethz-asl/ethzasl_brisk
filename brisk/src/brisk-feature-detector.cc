@@ -43,7 +43,7 @@
 #include <brisk/internal/brisk-scale-space.h>
 
 namespace {
-void RemoveInvalidKeyPoints(const cv::Mat& mask,
+void RemoveInvalidKeyPoints(const brisk::Mat& mask,
                             std::vector<brisk::KeyPoint>* keypoints) {
   CHECK_NOTNULL(keypoints);
   if (mask.empty())
@@ -71,9 +71,9 @@ BriskFeatureDetector::BriskFeatureDetector(int thresh, int octaves,
   m_suppressScaleNonmaxima = suppressScaleNonmaxima;
 }
 
-void BriskFeatureDetector::detectImpl(const cv::Mat& image,
+void BriskFeatureDetector::detectImpl(const Mat& image,
                                       std::vector<KeyPoint>& keypoints,
-                                      const cv::Mat& mask) const {
+                                      const Mat& mask) const {
   brisk::BriskScaleSpace briskScaleSpace(octaves, m_suppressScaleNonmaxima);
   briskScaleSpace.ConstructPyramid(image, threshold);
   briskScaleSpace.GetKeypoints(&keypoints);
