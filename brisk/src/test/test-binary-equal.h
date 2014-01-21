@@ -46,7 +46,7 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
 bool RunVerification(const std::vector<DatasetEntry>& current_dataset,
                      const std::vector<DatasetEntry>& verification_dataset,
                      bool do_gtest_checks);
-void Draw(std::vector<DatasetEntry>& dataset);  // NOLINT
+void Draw(std::vector<DatasetEntry>& dataset);  // NOLINTr
 bool RunValidation(bool do_gtest_checks);
 }  // namespace brisk
 
