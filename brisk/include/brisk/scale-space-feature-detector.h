@@ -54,11 +54,11 @@ namespace brisk {
 
 // Uses the common feature interface to construct a generic
 // scale space detector from a given ScoreCalculator.
-template<class SCORE_CALCULTAOR_T>
+template<class SCORE_CALCULATOR_T>
 #if HAVE_OPENCV
 class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
 #else
-  class ScaleSpaceFeatureDetector {
+class ScaleSpaceFeatureDetector {
 #endif  // HAVE_OPENCV
  public:
   ScaleSpaceFeatureDetector(
@@ -71,7 +71,7 @@ class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
     scaleSpaceLayers.resize(std::max(_octaves * 2, size_t(1)));
   }
 
-  typedef SCORE_CALCULTAOR_T ScoreCalculator_t;
+  typedef SCORE_CALCULATOR_T ScoreCalculator_t;
   void detect(const cv::Mat& image, std::vector<KeyPoint>& keypoints,
               const cv::Mat& mask = cv::Mat()) const {
     if (image.empty()) {
