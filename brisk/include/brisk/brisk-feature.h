@@ -48,13 +48,9 @@
 #include <brisk/harris-score-calculator.h>
 #include <brisk/scale-space-feature-detector.h>
 
-namespace brisk {
-
 #if HAVE_OPENCV
-  class BriskFeature : public cv::Feature2D {
-#else
-  class BriskFeature {
-#endif  // HAVE_OPENCV
+namespace brisk {
+class BriskFeature : public cv::Feature2D {
  public:
   BriskFeature(size_t octaves, double uniformityRadius,
                double absoluteThreshold = 0,
@@ -114,4 +110,5 @@ namespace brisk {
   brisk::BriskDescriptorExtractor _briskExtractor;
 };
 }  // namespace brisk
+#endif  // HAVE_OPENCV
 #endif  // BRISK_BRISK_FEATURE_H_

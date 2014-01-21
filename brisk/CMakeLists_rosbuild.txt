@@ -28,6 +28,7 @@ add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall
 rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/brisk-feature-detector.cc   
                                      src/brisk-layer.cc
+                                     src/brisk-opencv.cc
                                      src/brisk-scale-space.cc
                                      src/brute-force-matcher.cc   
                                      src/harris-feature-detector.cc

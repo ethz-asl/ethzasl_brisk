@@ -568,12 +568,12 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
 #ifdef __ARM_NEON__
   // masks:
-    const uint8_t tmpmask1[16] = {1, -127, 4, -127, 7, -127, 10, -127, 13, -127,
-      -127, -127, -127, -127, -127, -127};
-    const uint8_t tmpmask2[16] = {-127, 1, -127, 4, -127, 7, -127, 10, -127, 13,
-      -127, -127, -127, -127, -127, -127};
-    const uint8_t tmpmask[16] = {0, 2, 3, 5, 6, 8, 9, 11, 12, 14, -127, -127,
-      -127, -127};
+    const uint8_t tmpmask1[16] = {1, 0x80, 4, 0x80, 7, 0x80, 10, 0x80, 13, 0x80,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    const uint8_t tmpmask2[16] = {0x80, 1, 0x80, 4, 0x80, 7, 0x80, 10, 0x80, 13,
+      0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
+    const uint8_t tmpmask[16] = {0, 2, 3, 5, 6, 8, 9, 11, 12, 14, 0x80, 0x80,
+      0x80, 0x80};
     const uint8_t tmpstore_mask[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         // Lacking the masked storing intrinsics in NEON.
       0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0};
@@ -695,17 +695,17 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
     }
 #else
   // Masks:
-  register __m128i mask1 = _mm_set_epi8(-127, -127, -127, -127, -127, -127,
-                                        -127, 13, -127, 10, -127, 7, -127, 4,
-                                        -127, 1);
-  register __m128i mask2 = _mm_set_epi8(-127, -127, -127, -127, -127, -127,
-                                        13, -127, 10, -127, 7, -127, 4, -127,
-                                        1, -127);
-  register __m128i mask = _mm_set_epi8(-127, -127, -127, -127, -127, -127, 14,
+  register __m128i mask1 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+                                        0x80, 13, 0x80, 10, 0x80, 7, 0x80, 4,
+                                        0x80, 1);
+  register __m128i mask2 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+                                        13, 0x80, 10, 0x80, 7, 0x80, 4, 0x80,
+                                        1, 0x80);
+  register __m128i mask = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 14,
                                        12, 11, 9, 8, 6, 5, 3, 2, 0);
-  register __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, -127, -127, -127,
-                                             -127, -127, -127, -127, -127, -127,
-                                             -127);
+  register __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, 0x80, 0x80, 0x80,
+                                             0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
+                                             0x80);
 
   while (p3 < p_end) {
     for (int i = 0; i < hsize; ++i) {
