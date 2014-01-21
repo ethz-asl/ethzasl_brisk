@@ -50,7 +50,7 @@ BriskFeatureDetector::BriskFeatureDetector(int thresh, int octaves,
 }
 
 void BriskFeatureDetector::detectImpl(const cv::Mat& image,
-                                      std::vector<cv::KeyPoint>& keypoints,
+                                      std::vector<KeyPoint>& keypoints,
                                       const cv::Mat& mask) const {
   brisk::BriskScaleSpace briskScaleSpace(octaves, m_suppressScaleNonmaxima);
   briskScaleSpace.ConstructPyramid(image, threshold);

@@ -62,12 +62,12 @@ class HarrisFeatureDetector : public cv::FeatureDetector {
                                       const cv::Mat& dxdySmooth,
                                       cv::Mat& score);
   static __inline__ void NonmaxSuppress(const cv::Mat& scores,
-                                        std::vector<cv::KeyPoint>& keypoints);
+                                        std::vector<KeyPoint>& keypoints);
   __inline__ void EnforceUniformity(const cv::Mat& scores,
-                                    std::vector<cv::KeyPoint>& keypoints) const;
+                                    std::vector<KeyPoint>& keypoints) const;
 
   virtual void detectImpl(const cv::Mat& image,
-                          std::vector<cv::KeyPoint>& keypoints,
+                          std::vector<KeyPoint>& keypoints,
                           const cv::Mat& mask = cv::Mat()) const;
 
   double _radius;

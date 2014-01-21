@@ -88,23 +88,37 @@ void Serialize(const cv::Point2f& pt, std::ofstream* out) {
   Serialize(pt.y, out);
 }
 
-void Serialize(const cv::KeyPoint& pt, std::ofstream* out) {
+void Serialize(const brisk::KeyPoint& pt, std::ofstream* out) {
   CHECK_NOTNULL(out);
   Serialize(pt.angle, out);
+#ifdef HAVE_OPENCV
   Serialize(pt.class_id, out);
+#endif  // HAVE_OPENCV
   Serialize(pt.octave, out);
+#ifdef HAVE_OPENCV
   Serialize(pt.pt, out);
+#else
+  Serialize(pt.x, out);
+  Serialize(pt.y, out);
+#endif  // HAVE_OPENCV
   Serialize(pt.response, out);
   Serialize(pt.size, out);
 }
 
-void DeSerialize(cv::KeyPoint* pt, std::ifstream* in) {
+void DeSerialize(brisk::KeyPoint* pt, std::ifstream* in) {
   CHECK_NOTNULL(pt);
   CHECK_NOTNULL(in);
   DeSerialize(&pt->angle, in);
+#ifdef HAVE_OPENCV
   DeSerialize(&pt->class_id, in);
+#endif
   DeSerialize(&pt->octave, in);
+#ifdef HAVE_OPENCV
   DeSerialize(&pt->pt, in);
+#else
+  DeSerialize(&pt->x, in);
+  DeSerialize(&pt->y, in);
+#endif
   DeSerialize(&pt->response, in);
   DeSerialize(&pt->size, in);
 }

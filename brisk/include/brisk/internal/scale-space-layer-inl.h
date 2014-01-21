@@ -196,7 +196,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::SetUniformityRadius(double radius) {
 // Feature detection.
 template<class SCORE_CALCULATOR_T>
 void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
-    std::vector<cv::KeyPoint>& keypoints, bool enforceUniformity,
+    std::vector<KeyPoint>& keypoints, bool enforceUniformity,
     bool doRefinement, bool usePassedKeypoints) {
   // First get the maxima points inside this layer.
   std::vector<typename ScoreCalculator_t::PointWithScore> points;
@@ -205,9 +205,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
     for (size_t k = 0; k < keypoints.size(); ++k) {
       if (keypoints[k].response > 1e6) {
         points.push_back(
-            typename ScoreCalculator_t::PointWithScore(keypoints[k].response,
-                                                       keypoints[k].pt.x,
-                                                       keypoints[k].pt.y));
+            typename ScoreCalculator_t::PointWithScore(
+                keypoints[k].response,
+                brisk::KeyPointX(keypoints[k]),
+                brisk::KeyPointY(keypoints[k])));
       }
     }
   } else {
@@ -547,9 +548,9 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
                  _scoreCalculator.Score(u + 1, v + 1), delta_x, delta_y);
       // TODO(lestefan): 3d refinement.
       keypoints.push_back(
-          cv::KeyPoint(
-              cv::Point2f(_scale * ((it->x + delta_x) + _offset),
-                          _scale * ((it->y + delta_y) + _offset)),
+          KeyPoint(
+              _scale * ((it->x + delta_x) + _offset),
+              _scale * ((it->y + delta_y) + _offset),
               _scale * 12.0, -1, it->score, _layerNumber / 2));
     }
   } else {
@@ -557,9 +558,9 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         typename ScoreCalculator_t::PointWithScore>::const_iterator it =
         points.begin(); it != points.end(); ++it) {
       keypoints.push_back(
-          cv::KeyPoint(
-              cv::Point2f(_scale * ((it->x) + _offset),
-                          _scale * ((it->y) + _offset)),
+          KeyPoint(
+              _scale * ((it->x) + _offset),
+              _scale * ((it->y) + _offset),
               _scale * 12.0, -1, it->score, _layerNumber / 2));
     }
   }

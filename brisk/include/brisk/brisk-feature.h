@@ -71,7 +71,7 @@ class BriskFeature : public cv::Feature2D {
 
   // Inherited from cv::Feature2D interface.
   virtual void operator()(cv::InputArray image, cv::InputArray mask,
-                          std::vector<cv::KeyPoint>& keypoints,
+                          std::vector<KeyPoint>& keypoints,
                           cv::OutputArray descriptors,
                           bool useProvidedKeypoints = false) const {
     if (!useProvidedKeypoints) {
@@ -94,14 +94,14 @@ class BriskFeature : public cv::Feature2D {
  protected:
   // Inherited from cv::FeatureDetector interface.
   virtual void detectImpl(const cv::Mat& image,
-                          std::vector<cv::KeyPoint>& keypoints,
+                          std::vector<KeyPoint>& keypoints,
                           const cv::Mat& mask = cv::Mat()) const {
     _briskDetector.detect(image, keypoints, mask);
   }
 
   // Inherited from cv::DescriptorExtractor interface.
   virtual void computeImpl(const cv::Mat& image,
-                           std::vector<cv::KeyPoint>& keypoints,
+                           std::vector<KeyPoint>& keypoints,
                            cv::Mat& descriptors) const {
     _briskExtractor.computeImpl(image, keypoints, descriptors);
   }

@@ -77,12 +77,12 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   // This is the subclass keypoint computation implementation:
   // (not meant to be public - hacked)
   virtual void computeImpl(const cv::Mat& image,
-                           std::vector<cv::KeyPoint>& keypoints,
+                           std::vector<KeyPoint>& keypoints,
                            cv::Mat& descriptors) const;
 
   // Opencv 2.1 {
   virtual void compute(const cv::Mat& image,
-                       std::vector<cv::KeyPoint>& keypoints,
+                       std::vector<KeyPoint>& keypoints,
                        cv::Mat& descriptors) const {
     computeImpl(image, keypoints, descriptors);
   }

@@ -163,7 +163,7 @@ void SetRandom(cv::Point_<TYPE>* value, int seed) {
   SetRandom(&value->y, rd());
 }
 
-void SetRandom(cv::KeyPoint* value, int seed) {
+void SetRandom(KeyPoint* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
   SetRandom(&value->angle, rd());
