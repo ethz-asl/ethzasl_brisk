@@ -46,6 +46,7 @@
 #include <vector>
 
 #include <brisk/brisk-opencv.h>
+#include <brisk/glog.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/scale-space-layer.h>
 
@@ -73,11 +74,14 @@ class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
   typedef SCORE_CALCULTAOR_T ScoreCalculator_t;
   void detect(const cv::Mat& image, std::vector<KeyPoint>& keypoints,
               const cv::Mat& mask = cv::Mat()) const {
-    if (image.empty())
+    if (image.empty()) {
+      LOG(WARNING) << "Image is empty in BRISK detect";
       return;
-    CV_Assert(
+    }
+    CHECK(
         mask.empty()
-            || (mask.type() == CV_8UC1 && mask.size() == image.size()));
+            || (mask.type() == CV_8UC1 && mask.rows == image.rows
+                && mask.cols == image.cols));
     detectImpl(image, keypoints, mask);
   }
 
