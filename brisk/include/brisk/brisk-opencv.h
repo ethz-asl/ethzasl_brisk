@@ -14,14 +14,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -38,19 +38,23 @@
 #ifndef BRISK_BRISK_OPENCV_H_
 #define BRISK_BRISK_OPENCV_H_
 
+#include <brisk/glog.h>
+
 #include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
 
 #if HAVE_OPENCV
 #include <opencv2/features2d/features2d.hpp>
 #else
+#include <fstream>  // NOLINT
+#include <memory>
 #include <features-2d-helpers/keypoint.h>
+typedef unsigned char uchar;
+typedef unsigned short ushort;
 #endif
 
-namespace brisk {
 
 #if HAVE_OPENCV
+namespace brisk {
 typedef cv::KeyPoint KeyPoint;
 inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
   return keypoint.pt.x;
@@ -64,7 +68,9 @@ inline const float& KeyPointX(const KeyPoint& keypoint) {
 inline const float& KeyPointY(const KeyPoint& keypoint) {
   return keypoint.pt.y;
 }
+}  // namespace brisk
 #else
+namespace brisk {
 typedef features_2d::Keypoint KeyPoint;
 inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
   return keypoint.x;
@@ -78,8 +84,12 @@ inline const float& KeyPointX(const KeyPoint& keypoint) {
 inline const float& KeyPointY(const KeyPoint& keypoint) {
   return keypoint.y;
 }
-#endif  // HAVE_OPENCV
-
 }  // namespace brisk
+
+namespace cv {
+// Reads a pgm image from file.
+cv::Mat imread(const std::string& filename);
+}  // namespace cv
+#endif  // HAVE_OPENCV
 
 #endif  // BRISK_BRISK_OPENCV_H_
