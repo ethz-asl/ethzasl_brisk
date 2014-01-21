@@ -45,6 +45,7 @@
 #include <brisk/brisk-descriptor-extractor.h>
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/helper-structures.h>
+#include <brisk/internal/integral-image.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/pattern-provider.h>
 #include <brisk/internal/timer.h>
@@ -414,15 +415,9 @@ void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
   cv::Mat _integral;  // The integral image.
   cv::Mat imageScaled;
   if (image.type() == CV_16UC1) {
-    // 16 bit image - convert to float. this is simple but not the fastest...
-    cv::Mat imageCvt;
-    image.convertTo(imageCvt, CV_32FC1);
-    imageScaled = imageCvt / 65536.0;
-    // TODO(slynen): Put in the optimized integral computation.
-    cv::integral(imageScaled, _integral, CV_32F);
+    IntegralImage16(imageScaled, &_integral);
   } else if (image.type() == CV_8UC1) {
-    // TODO(slynen): Put in the optimized integral computation.
-    cv::integral(image, _integral);
+    IntegralImage8(image, &_integral);
   } else {
     std::cout << "unsupported image format" << std::endl;
     std::cout.flush();

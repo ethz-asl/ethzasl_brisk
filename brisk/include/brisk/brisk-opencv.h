@@ -1,7 +1,4 @@
 /*
- Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
  Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
  Stefan Leutenegger and Simon Lynen.
 
@@ -42,12 +39,9 @@
 #define BRISK_BRISK_OPENCV_H_
 
 #include <opencv2/core/core.hpp>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/nonfree/features2d.hpp>
-#include <opencv2/nonfree/nonfree.hpp>
 #include <opencv2/highgui/highgui.hpp>
-
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/nonfree/nonfree.hpp>
 
 #if HAVE_OPENCV
 #include <opencv2/features2d/features2d.hpp>

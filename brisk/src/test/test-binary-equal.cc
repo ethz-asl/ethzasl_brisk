@@ -35,9 +35,9 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <fstream>
+#include <fstream>  // NOLINT
 #include <iomanip>
-#include <iostream>
+#include <iostream>  // NOLINT
 #include <list>
 
 #include <brisk/brisk.h>
@@ -183,7 +183,7 @@ bool RunValidation(bool do_gtest_checks) {
   }
 }
 
-void RunPipeline(std::vector<DatasetEntry>& dataset,
+void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
                  const std::string& briskbasepath) {
   std::cout << "Running the pipeline..." << std::endl;
 
@@ -222,8 +222,9 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,
   if (doDescriptorComputation || dataset.at(0).GetDescriptors().rows == 0) {
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
         .end(); it != end; ++it) {
-      it->setThisAsCurrentEntry();  //now you can query for the current image to add tags to timers etc.
-      brisk::timing::Timer timerextract(
+      // Now you can query for the current image to add tags to timers etc.
+      it->setThisAsCurrentEntry();
+      brisk::timing::DebugTimer timerextract(
           DatasetEntry::getCurrentEntry()->GetPath() + "_extract");
       descriptorExtractor->compute(it->GetImage(), *it->GetKeyPointsMutable(),
                                    *it->GetDescriptorsMutable());
@@ -235,22 +236,27 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,
   brisk::timing::Timing::Print(std::cout);
 }
 
-bool RunVerification(std::vector<DatasetEntry>& current_dataset,
-                     std::vector<DatasetEntry>& verification_dataset,
+bool RunVerification(const std::vector<DatasetEntry>& current_dataset,
+                     const std::vector<DatasetEntry>& verification_dataset,
                      bool do_gtest_checks) {
   CHECK_EQ(current_dataset.size(), verification_dataset.size())
         << "Failed on database number of entries";
 
   bool failed = false;
-  //now go through every image
-  for (std::vector<DatasetEntry>::iterator it_curr = current_dataset.begin(),
+  // Now go through every image.
+  for (std::vector<DatasetEntry>::const_iterator it_curr =
+      current_dataset.begin(),
       it_verif = verification_dataset.begin(), end_curr = current_dataset.end(),
       end_verif = verification_dataset.end();
       it_curr != end_curr && it_verif != end_verif; ++it_curr, ++it_verif) {
-    it_curr->setThisAsCurrentEntry();  //now you can query for the current image to add tags to timers etc.
+    // Now you can query for the current image to add tags to timers etc.
+    {
+      DatasetEntry& current_entry = const_cast<DatasetEntry&>(*it_curr);
+      current_entry.setThisAsCurrentEntry();
+    }
     try {
       failed |= (*it_curr != *it_verif);
-    } catch (std::exception& e) {
+    } catch(const std::exception& e) {
       failed = true;
       std::cout << "------" << std::endl << "Failed on image "
           << it_curr->GetPath() << std::endl << "* Error: " << e.what()
@@ -262,11 +268,11 @@ bool RunVerification(std::vector<DatasetEntry>& current_dataset,
   return !failed;
 }
 
-void Draw(std::vector<DatasetEntry>& dataset) {
+void Draw(std::vector<DatasetEntry>& dataset) {  // NOLINT
   // Drawing.
   cv::namedWindow("Keypoints");
-  for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
-      .end(); it != end; ++it) {
+  for (std::vector<DatasetEntry>::iterator it = dataset.begin(),
+      end = dataset.end(); it != end; ++it) {
     // Now you can query DatasetEntry::getCurrentImageName() for the current
     // image to add tags to timers etc.
     it->setThisAsCurrentEntry();

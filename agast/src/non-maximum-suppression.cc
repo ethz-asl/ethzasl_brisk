@@ -134,7 +134,7 @@ void AstDetector::NonMaximumSuppression(const std::vector<agast::KeyPoint>& corn
       }
     }
 
-    currCorner++;
+    ++currCorner;
   }
 
   // Collecting maximum corners.

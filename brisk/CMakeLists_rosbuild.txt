@@ -3,8 +3,8 @@ set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
-# Debug RelWithDebInfo
-set(ROS_BUILD_TYPE RelWithDebInfo)
+# Debug RelWithDebInfo Release
+set(ROS_BUILD_TYPE Release)
 
 rosbuild_init()
 
@@ -23,7 +23,7 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall
                 -Wno-overloaded-virtual -Wno-non-virtual-dtor # OpenCV.
-                -std=c++0x)
+                -std=c++0x -DENABLE_BRISK_TIMING)
 
 rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                      src/brisk-feature-detector.cc   
