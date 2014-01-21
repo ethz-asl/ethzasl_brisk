@@ -36,6 +36,7 @@
  */
 
 #include <brisk/internal/image-down-sampling.h>
+#include <brisk/internal/macros.h>
 #include <brisk/glog.h>
 
 namespace brisk {
@@ -499,22 +500,22 @@ void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
       result2p = _mm_add_epi32(result2p, result1);
 
       // Divide by 9 - not sure if this is very safe...
-      (reinterpret_cast<int*>(&result0p))[0] /= 9;
-      (reinterpret_cast<int*>(&result0p))[1] /= 9;
-      (reinterpret_cast<int*>(&result0p))[2] /= 9;
-      (reinterpret_cast<int*>(&result0p))[3] /= 9;
-      (reinterpret_cast<int*>(&result2p))[0] /= 9;
-      (reinterpret_cast<int*>(&result2p))[1] /= 9;
-      (reinterpret_cast<int*>(&result2p))[2] /= 9;
-      (reinterpret_cast<int*>(&result2p))[3] /= 9;
-      (reinterpret_cast<int*>(&result0))[0] /= 9;
-      (reinterpret_cast<int*>(&result0))[1] /= 9;
-      (reinterpret_cast<int*>(&result0))[2] /= 9;
-      (reinterpret_cast<int*>(&result0))[3] /= 9;
-      (reinterpret_cast<int*>(&result2))[0] /= 9;
-      (reinterpret_cast<int*>(&result2))[1] /= 9;
-      (reinterpret_cast<int*>(&result2))[2] /= 9;
-      (reinterpret_cast<int*>(&result2))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[3] /= 9;
 
       // Pack.
       __m128i store0 = _mm_packs_epi32(result0, result0p);
@@ -567,12 +568,12 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
 #ifdef __ARM_NEON__
   // masks:
-    const uint8_t tmpmask1[16] = {1, 0x80, 4, 0x80, 7, 0x80, 10, 0x80, 13, 0x80,
-      0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
-    const uint8_t tmpmask2[16] = {0x80, 1, 0x80, 4, 0x80, 7, 0x80, 10, 0x80, 13,
-      0x80, 0x80, 0x80, 0x80, 0x80, 0x80};
-    const uint8_t tmpmask[16] = {0, 2, 3, 5, 6, 8, 9, 11, 12, 14, 0x80, 0x80,
-      0x80, 0x80};
+    const uint8_t tmpmask1[16] = {1, -127, 4, -127, 7, -127, 10, -127, 13, -127,
+      -127, -127, -127, -127, -127, -127};
+    const uint8_t tmpmask2[16] = {-127, 1, -127, 4, -127, 7, -127, 10, -127, 13,
+      -127, -127, -127, -127, -127, -127};
+    const uint8_t tmpmask[16] = {0, 2, 3, 5, 6, 8, 9, 11, 12, 14, -127, -127,
+      -127, -127};
     const uint8_t tmpstore_mask[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         // Lacking the masked storing intrinsics in NEON.
       0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0};
@@ -694,17 +695,17 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
     }
 #else
   // Masks:
-  register __m128i mask1 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                        0x80, 13, 0x80, 10, 0x80, 7, 0x80, 4,
-                                        0x80, 1);
-  register __m128i mask2 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                        13, 0x80, 10, 0x80, 7, 0x80, 4, 0x80,
-                                        1, 0x80);
-  register __m128i mask = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 14,
+  register __m128i mask1 = _mm_set_epi8(-127, -127, -127, -127, -127, -127,
+                                        -127, 13, -127, 10, -127, 7, -127, 4,
+                                        -127, 1);
+  register __m128i mask2 = _mm_set_epi8(-127, -127, -127, -127, -127, -127,
+                                        13, -127, 10, -127, 7, -127, 4, -127,
+                                        1, -127);
+  register __m128i mask = _mm_set_epi8(-127, -127, -127, -127, -127, -127, 14,
                                        12, 11, 9, 8, 6, 5, 3, 2, 0);
-  register __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, 0x80, 0x80, 0x80,
-                                             0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                             0x80);
+  register __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, -127, -127, -127,
+                                             -127, -127, -127, -127, -127, -127,
+                                             -127);
 
   while (p3 < p_end) {
     for (int i = 0; i < hsize; ++i) {
