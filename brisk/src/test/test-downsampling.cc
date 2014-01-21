@@ -151,10 +151,10 @@ TEST(Brisk, HalfSample) {
   cv::Mat src_img;
   cv::cvtColor(imgRGB, src_img, CV_BGR2GRAY);
 
-  const static int source_cols = src_img.cols;
-  const static int source_rows = src_img.rows;
-  const static int dst_cols = source_cols / 2;
-  const static int dst_rows = source_rows / 2;
+  static const int source_cols = src_img.cols;
+  static const int source_rows = src_img.rows;
+  static const int dst_cols = source_cols / 2;
+  static const int dst_rows = source_rows / 2;
   cv::Mat dst_img_a(dst_rows, dst_cols, CV_8UC1);
   cv::Mat dst_img_b(dst_rows, dst_cols, CV_8UC1);
 
@@ -170,10 +170,10 @@ TEST(Brisk, TwoThirdSample) {
   cv::Mat src_img;
   cv::cvtColor(imgRGB, src_img, CV_BGR2GRAY);
 
-  const static int source_cols = src_img.cols;
-  const static int source_rows = src_img.rows;
-  const static int dst_cols = source_cols / 3 * 2;
-  const static int dst_rows = source_rows / 3 * 2;
+  static const int source_cols = src_img.cols;
+  static const int source_rows = src_img.rows;
+  static const int dst_cols = source_cols / 3 * 2;
+  static const int dst_rows = source_rows / 3 * 2;
   cv::Mat dst_img_a(dst_rows, dst_cols, CV_8UC1);
   cv::Mat dst_img_b(dst_rows, dst_cols, CV_8UC1);
 

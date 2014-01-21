@@ -35,20 +35,19 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_BINARY_EQUAL_H_
-#define TEST_BINARY_EQUAL_H_
-
+#ifndef TEST_TEST_BINARY_EQUAL_H_
+#define TEST_TEST_BINARY_EQUAL_H_
+#include <string>
 #include <vector>
 
-
 namespace brisk {
-void RunPipeline(std::vector<DatasetEntry>& dataset,
+void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
                  const std::string& briskbasepath);
-bool RunVerification(std::vector<DatasetEntry>& current_dataset,
-                     std::vector<DatasetEntry>& verification_dataset,
+bool RunVerification(const std::vector<DatasetEntry>& current_dataset,
+                     const std::vector<DatasetEntry>& verification_dataset,
                      bool do_gtest_checks);
-void Draw(std::vector<DatasetEntry>& dataset);
+void Draw(std::vector<DatasetEntry>& dataset);  // NOLINT
 bool RunValidation(bool do_gtest_checks);
 }  // namespace brisk
 
-#endif  // TEST_BINARY_EQUAL_H_
+#endif  // TEST_TEST_BINARY_EQUAL_H_

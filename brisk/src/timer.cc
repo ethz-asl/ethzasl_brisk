@@ -212,7 +212,6 @@ void Timing::Print(std::ostream& out) {  //NOLINT
     out.setf(std::ios::right, std::ios::adjustfield);
     out << GetNumSamples(i) << "\t";
     if (GetNumSamples(i) > 0) {
-
 #ifdef USE_RDTSC
       out << GetTotalSeconds(i) << "\t";
       double meansec = GetMeanSeconds(i);
