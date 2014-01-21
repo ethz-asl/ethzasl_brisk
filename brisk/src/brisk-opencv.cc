@@ -35,60 +35,57 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_OPENCV_H_
-#define BRISK_BRISK_OPENCV_H_
+#include <fstream>  // NOLINT
+#include <string>
 
+#include <brisk/brisk-opencv.h>
 #include <brisk/glog.h>
 
-#include <opencv2/core/core.hpp>
+namespace {
+void GetNextUncommentedLine(std::ifstream& infile, std::string* input_line) {
+  std::getline(infile, *input_line);
+  while ((*input_line)[0] == '#') {
+    std::getline(infile, *input_line);
+  }
+}
+}  // namespace
 
-#if HAVE_OPENCV
-#include <opencv2/features2d/features2d.hpp>
-#else
-#include <fstream>  // NOLINT
-#include <memory>
-#include <features-2d-helpers/keypoint.h>
-typedef unsigned char uchar;
-typedef unsigned short ushort;
-#endif
-
-
-#if HAVE_OPENCV
 namespace brisk {
-typedef cv::KeyPoint KeyPoint;
-inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt.x;
-}
-inline float& KeyPointY(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt.y;
-}
-inline const float& KeyPointX(const KeyPoint& keypoint) {
-  return keypoint.pt.x;
-}
-inline const float& KeyPointY(const KeyPoint& keypoint) {
-  return keypoint.pt.y;
+// Reads a pgm image from file.
+Mat imread(const std::string& filename) {
+  std::ifstream infile;
+  infile.open(filename.c_str());
+  if (infile.fail()) {
+    infile.close();
+    return Mat();
+  }
+
+  std::string input_line;
+  // First line: version.
+  GetNextUncommentedLine(infile, &input_line);
+  // Second line: size.
+  GetNextUncommentedLine(infile, &input_line);
+  int cols, rows;
+  {
+    std::stringstream ss;
+    ss << input_line;
+    ss >> cols >> rows;
+  }
+
+  if (!cols || !rows) {
+    return Mat();
+  }
+
+  // Encoding
+  GetNextUncommentedLine(infile, &input_line);
+
+  // Create image and read in data.
+  Mat img(rows, cols, CV_8UC1);
+  size_t size = rows * cols * img.elemSize();
+  CHECK_NOTNULL(img.data);
+  infile.read(reinterpret_cast<char*>(img.data), size);
+
+  infile.close();
+  return img;
 }
 }  // namespace brisk
-#else
-namespace brisk {
-typedef features_2d::Keypoint KeyPoint;
-typedef cv::Mat Mat;
-inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.x;
-}
-inline float& KeyPointY(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.y;
-}
-inline const float& KeyPointX(const KeyPoint& keypoint) {
-  return keypoint.x;
-}
-inline const float& KeyPointY(const KeyPoint& keypoint) {
-  return keypoint.y;
-}
-// Reads a pgm image from file.
-Mat imread(const std::string& filename);
-}  // namespace cv
-using brisk::imread;
-#endif  // HAVE_OPENCV
-
-#endif  // BRISK_BRISK_OPENCV_H_
