@@ -45,7 +45,6 @@
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
-using cv::imread;
 #else
 #include <fstream>  // NOLINT
 #include <memory>
@@ -248,7 +247,6 @@ struct Point_{
 
 typedef Point_<float> Point2f;
 typedef Point_<int> Point2i;
-
 // Reads a pgm image from file.
 cv::Mat imread(const std::string& filename);
 }  // namespace cv
@@ -268,6 +266,7 @@ inline const float& KeyPointY(const KeyPoint& keypoint) {
   return keypoint.y;
 }
 }  // namespace brisk
+
 #endif  // HAVE_OPENCV
 
 #include "./internal/brisk-opencv-inl.h"
