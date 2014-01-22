@@ -66,14 +66,14 @@ class  BruteForceMatcher : public cv::DescriptorMatcher {
   virtual void knnMatchImpl(const cv::Mat& queryDescriptors,
                             std::vector<std::vector<cv::DMatch> >& matches,
                             int k,
-                            const std::vector<Mat>& masks =
-                                std::vector<Mat>(),
+                            const std::vector<cv::Mat>& masks =
+                                std::vector<cv::Mat>(),
                             bool compactResult = false);
   virtual void radiusMatchImpl(const cv::Mat& queryDescriptors,
                                std::vector<std::vector<cv::DMatch> >& matches,
                                float maxDistance,
-                               const std::vector<Mat>& masks =
-                                   std::vector<Mat>(),
+                               const std::vector<cv::Mat>& masks =
+                                   std::vector<cv::Mat>(),
                                bool compactResult = false);
 
   brisk::Hamming distance_;
