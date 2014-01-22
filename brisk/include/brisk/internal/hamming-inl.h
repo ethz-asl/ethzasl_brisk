@@ -68,18 +68,18 @@ static const __m128i shiftval = _mm_set_epi32(0, 0, 0, 4);
 
 #ifdef __ARM_NEON__
 __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
-                                               const uint8x16_t*signature2,
+                                               const uint8x16_t* signature2,
                                                const int numberOf128BitWords) {
   uint32_t result = 0;
 
-  register uint8x16_t xmm0;
-  register uint8x16_t xmm1;
-  register uint8x16_t xmm2;
-  register uint8x16_t xmm3;
-  register uint8x16_t xmm4;
-  register uint8x16_t xmm5;
-  register uint8x16_t xmm6;
-  register uint8x16_t xmm7;
+  uint8x16_t xmm0;
+  uint8x16_t xmm1;
+  uint8x16_t xmm2;
+  uint8x16_t xmm3;
+  uint8x16_t xmm4;
+  uint8x16_t xmm5;
+  uint8x16_t xmm6;
+  uint8x16_t xmm7;
 
 //  xmm7 = _mm_load_si128(reinterpret_cast<const __m128i*>(POPCOUNT_4bit));
   xmm7 = vld1q_u8(reinterpret_cast<const uint8_t*>(POPCOUNT_4bit));
@@ -98,9 +98,9 @@ __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
 //    xmm1 = _mm_srl_epi16(xmm1, shiftval);
     xmm1 = vsriq_n_u8(xmm1, shiftval, 0);
 //    xmm0 = _mm_and_si128(xmm0, xmm6);  // xmm0 := lower nibbles.
-    xmm0 = vandq_s8(xmm0, xmm6);  // xmm0 := lower nibbles.
+    xmm0 = vandq_u8(xmm0, xmm6);  // xmm0 := lower nibbles.
 //    xmm1 = _mm_and_si128(xmm1, xmm6);  // xmm1 := higher nibbles.
-    xmm1 = vandq_s8(xmm1, xmm6);  // xmm1 := higher nibbles.
+    xmm1 = vandq_u8(xmm1, xmm6);  // xmm1 := higher nibbles.
     xmm2 = xmm7;
     xmm3 = xmm7;  // Get popcount.
 //    xmm2 = _mm_shuffle_epi8(xmm2, xmm0);  // For all nibbles.
@@ -108,27 +108,29 @@ __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
 //    xmm3 = _mm_shuffle_epi8(xmm3, xmm1);  // Using PSHUFB.
     xmm3 = brisk::shuffle_epi8_neon(xmm3, xmm1);  // Using PSHUFB.
 //    xmm4 = _mm_add_epi8(xmm4, xmm2);  // Update local.
-    xmm4 = vaddq_s8(xmm4, xmm2);  // Update local.
+    xmm4 = vaddq_u8(xmm4, xmm2);  // Update local.
 //    xmm4 = _mm_add_epi8(xmm4, xmm3);  // Accumulator.
-    xmm4 = vaddq_s8(xmm4, xmm3);  // Accumulator.
+    xmm4 = vaddq_u8(xmm4, xmm3);  // Accumulator.
   }while (signature1 < end);
   // Update global accumulator(two 32-bits counters).
 //  xmm4 = _mm_sad_epu8(xmm4, xmm5);
-  xmm4 = vabdq_s8(xmm4, xmm5);
+  xmm4 = vabdq_u8(xmm4, xmm5);
 //  xmm5 = _mm_add_epi32(xmm5, xmm4);
-  xmm5 = vaddq_s32(xmm5, xmm4);
+  xmm5 = vreinterpretq_u8_u32(
+      vaddq_u32(vreinterpretq_u32_u8(xmm5), vreinterpretq_u32_u8(xmm4)));
   // finally add together 32-bits counters stored in global accumulator.
   // __asm__ volatile(
   //  "movhlps  %%xmm5, %%xmm0 \n"
   //  xmm0 = _mm_cvtps_epi32(_mm_movehl_ps(_mm_cvtepi32_ps(xmm0),
   //      _mm_cvtepi32_ps(xmm5)));
-  int64x1_t upper_xmm5 = vget_high_u64(xmm5);
-  int64x1_t upper_xmm0 = vget_high_u64(xmm0);
-  xmm0 = vcombine_u64(upper_xmm0, upper_xmm5);
+  int64x1_t upper_xmm5 = vget_high_u64(vreinterpretq_u64_u8(xmm5));
+  int64x1_t upper_xmm0 = vget_high_u64(vreinterpretq_u64_u8(xmm0));
+  xmm0 = vreinterpretq_u8_u64(vcombine_u64(upper_xmm0, upper_xmm5));
 //  xmm0 = _mm_add_epi32(xmm0, xmm5);
-  xmm0 = vaddq_s32(xmm0, xmm5);
+  xmm0 = vreinterpretq_u8_u32(
+      vaddq_u32(vreinterpretq_u32_u8(xmm0), vreinterpretq_u32_u8(xmm5)));
 //  result = _mm_cvtsi128_si32(xmm0);
-  result = vget_lane_s32(xmm0, 0);
+  vst1q_lane_u32(&result, vreinterpretq_u32_u8(xmm0), 0);
   return result;
 }
 #else

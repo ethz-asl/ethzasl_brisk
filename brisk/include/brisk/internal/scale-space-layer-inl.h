@@ -434,7 +434,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
           ceil(_LUT.at<float>(y, 3) * nsc),
           ceil(_LUT.at<float>(y, 2) * nsc),
           ceil(_LUT.at<float>(y, 1) * nsc),
-          ceil(_LUT.at<float>(y, 0) * nsc));
+          ceil(_LUT.at<float>(y, 0) * nsc)};
         // Lacking the masked storing intrinsics in NEON.
         static_cast<uint8_t>(_LUT.at<float>(y, 15) * nsc)};
       uint8x16_t mask1 = vld1q_u8(&tmpstore_mask1[0]);
@@ -454,7 +454,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         ceil(_LUT.at<float>(y, 19) * nsc),
         ceil(_LUT.at<float>(y, 18) * nsc),
         ceil(_LUT.at<float>(y, 17) * nsc),
-        ceil(_LUT.at<float>(y, 16) * nsc));
+        ceil(_LUT.at<float>(y, 16) * nsc) };
         // Lacking the masked storing intrinsics in NEON.
         static_cast<uint8_t>(_LUT.at<float>(y, 30) * nsc)};
       uint8x16_t mask2 = vld1q_u8(&tmpstore_mask2[0]);

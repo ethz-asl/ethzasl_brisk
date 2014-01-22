@@ -37,9 +37,14 @@
 
 #ifndef INTERNAL_INTEGRAL_IMAGE_H_
 #define INTERNAL_INTEGRAL_IMAGE_H_
+
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#else
 #include <emmintrin.h>
-#include <tmmintrin.h>
 #include <pmmintrin.h>
+#include <tmmintrin.h>
+#endif  // __ARM_NEON__
 
 #include <brisk/glog.h>
 

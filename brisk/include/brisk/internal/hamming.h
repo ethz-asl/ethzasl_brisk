@@ -59,8 +59,8 @@ class  Hamming {
 
   // SSSE3 - even faster!
 #ifdef __ARM_NEON__
-  static __inline__ uint32_t NEONPopcntofXORed(const vld1q_u8* signature1,
-                                               const vld1q_u8* signature2,
+  static __inline__ uint32_t NEONPopcntofXORed(const uint8x16_t* signature1,
+                                               const uint8x16_t* signature2,
                                                const int numberOf128BitWords);
 #else
   static __inline__ uint32_t SSSE3PopcntofXORed(const __m128i* signature1,
@@ -79,8 +79,8 @@ class  Hamming {
                         const unsigned char* b,
                         const int size) const {
 #ifdef __ARM_NEON__
-    return NEONPopcntofXORed(reinterpret_cast<const vld1q_u8*>(a),
-                             reinterpret_cast<const vld1q_u8*>(b),
+    return NEONPopcntofXORed(reinterpret_cast<const uint8x16_t*>(a),
+                             reinterpret_cast<const uint8x16_t*>(b),
                              size / 16);
 #else
     return SSSE3PopcntofXORed(reinterpret_cast<const __m128i*>(a),
