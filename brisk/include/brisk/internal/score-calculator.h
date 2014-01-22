@@ -106,7 +106,7 @@ class ScoreCalculator {
   }
 
   // Set image.
-  void SetImage(const Mat& img, bool initScores = true) {
+  void SetImage(const cv::Mat& img, bool initScores = true) {
     _img = img;
     if (initScores)
       InitializeScores();
@@ -121,8 +121,8 @@ class ScoreCalculator {
                            Score_t absoluteThreshold = 0) = 0;
 
  protected:
-  Mat _img;  // The image we operate on.
-  Mat _scores;  // Store calculated scores.
+  cv::Mat _img;  // The image we operate on.
+  cv::Mat _scores;  // Store calculated scores.
   virtual void InitializeScores() = 0;
 };
 }  // namespace brisk

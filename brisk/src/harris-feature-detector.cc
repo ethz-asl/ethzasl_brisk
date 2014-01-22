@@ -57,7 +57,7 @@ void HarrisFeatureDetector::SetRadius(double radius) {
   _radius = radius;
 
   // Generic mask.
-  _LUT = Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
+  _LUT = cv::Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
   for (int x = 0; x < 2 * 16 - 1; ++x) {
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       _LUT.at<float>(y, x) = std::max(
@@ -69,12 +69,12 @@ void HarrisFeatureDetector::SetRadius(double radius) {
 }
 
 // X and Y denote the size of the mask.
-__inline__ void HarrisFeatureDetector::GetCovarEntries(const Mat& src,
-                                                       Mat& dxdx,
-                                                       Mat& dydy,
-                                                       Mat& dxdy) {
+__inline__ void HarrisFeatureDetector::GetCovarEntries(const cv::Mat& src,
+                                                       cv::Mat& dxdx,
+                                                       cv::Mat& dydy,
+                                                       cv::Mat& dxdy) {
   // Sanity check.
-  Mat kernel = Mat::zeros(3, 3, CV_8S);
+  cv::Mat kernel = cv::Mat::zeros(3, 3, CV_8S);
   kernel.at<char>(0, 0) = 3 * 8;
   kernel.at<char>(1, 0) = 10 * 8;
   kernel.at<char>(2, 0) = 3 * 8;
@@ -88,9 +88,9 @@ __inline__ void HarrisFeatureDetector::GetCovarEntries(const Mat& src,
   const unsigned int cy = 1;
 
   // Dest will be 16 bit.
-  dxdx = Mat::zeros(src.rows, src.cols, CV_16S);
-  dydy = Mat::zeros(src.rows, src.cols, CV_16S);
-  dxdy = Mat::zeros(src.rows, src.cols, CV_16S);
+  dxdx = cv::Mat::zeros(src.rows, src.cols, CV_16S);
+  dydy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
+  dxdy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
 
   const unsigned int maxJ = ((src.cols - 2) / 16) * 16;
   const unsigned int maxI = src.rows - 2;
@@ -188,12 +188,12 @@ __inline__ void HarrisFeatureDetector::GetCovarEntries(const Mat& src,
   }
 }
 
-__inline__ void HarrisFeatureDetector::CornerHarris(const Mat& dxdxSmooth,
-                                                    const Mat& dydySmooth,
-                                                    const Mat& dxdySmooth,
-                                                    Mat& dst) {
+__inline__ void HarrisFeatureDetector::CornerHarris(const cv::Mat& dxdxSmooth,
+                                                    const cv::Mat& dydySmooth,
+                                                    const cv::Mat& dxdySmooth,
+                                                    cv::Mat& dst) {
   // Dest will be 16 bit.
-  dst = Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32S);
+  dst = cv::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32S);
   const unsigned int maxJ = ((dxdxSmooth.cols - 2) / 8) * 8;
   const unsigned int maxI = dxdxSmooth.rows - 2;
   const unsigned int stride = dxdxSmooth.cols;
@@ -253,7 +253,7 @@ __inline__ void HarrisFeatureDetector::CornerHarris(const Mat& dxdxSmooth,
 }
 
 inline void HarrisFeatureDetector::NonmaxSuppress(
-    const Mat& scores, std::vector<KeyPoint>& keypoints) {
+    const cv::Mat& scores, std::vector<KeyPoint>& keypoints) {
   // First do the 8-neighbor nonmax suppression.
   const int stride = scores.cols;
   const int rows_end = scores.rows - 2;
@@ -298,7 +298,7 @@ inline void HarrisFeatureDetector::NonmaxSuppress(
 }
 
 __inline__ void HarrisFeatureDetector::EnforceUniformity(
-    const Mat& scores, std::vector<KeyPoint>& keypoints) const {
+    const cv::Mat& scores, std::vector<KeyPoint>& keypoints) const {
   // Sort.
   std::sort(keypoints.begin(), keypoints.end(), compareKeypointScore);
 
@@ -306,8 +306,8 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
   keypoints_new.reserve(keypoints.size());
 
   // Store occupancy.
-  Mat occupancy;
-  occupancy = Mat::zeros((scores.rows) / 2 + 32, (scores.cols) / 2 + 32,
+  cv::Mat occupancy;
+  occupancy = cv::Mat::zeros((scores.rows) / 2 + 32, (scores.cols) / 2 + 32,
                              CV_8U);
 
   // Go through the sorted keypoints and reject too close ones.
@@ -378,13 +378,13 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
   }
   keypoints.assign(keypoints_new.begin(), keypoints_new.end());
 }
-void HarrisFeatureDetector::detectImpl(const Mat& image,
+void HarrisFeatureDetector::detectImpl(const cv::Mat& image,
                                        std::vector<KeyPoint>& keypoints,
-                                       const Mat& mask) const {
+                                       const cv::Mat& mask) const {
   keypoints.resize(0);
-  Mat scores;
-  Mat DxDx1, DyDy1, DxDy1;
-  Mat DxDx, DyDy, DxDy;
+  cv::Mat scores;
+  cv::Mat DxDx1, DyDy1, DxDy1;
+  cv::Mat DxDx, DyDy, DxDy;
 
   // Pipeline.
   GetCovarEntries(image, DxDx1, DyDy1, DxDy1);

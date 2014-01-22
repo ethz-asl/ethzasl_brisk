@@ -56,13 +56,13 @@
 
 namespace brisk {
 template<class SCORE_CALCULATOR_T>
-ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScaleSpaceLayer(const Mat& img,
+ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScaleSpaceLayer(const cv::Mat& img,
                                                      bool initScores) {
   Create(img);
 }
 
 template<class SCORE_CALCULATOR_T>
-void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(const Mat& img,
+void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(const cv::Mat& img,
                                                  bool initScores) {
   // Octave 0.
   _isOctave = true;
@@ -91,7 +91,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(const Mat& img,
   _absoluteThreshold = 0;
 
   // Generic mask.
-  _LUT = Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
+  _LUT = cv::Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
   for (int x = 0; x < 2 * 16 - 1; ++x) {
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       _LUT.at<float>(y, x) = std::max(
@@ -175,7 +175,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(
   _aboveLayer_ptr = 0;
 
   // Generic mask.
-  _LUT = Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
+  _LUT = cv::Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
   for (int x = 0; x < 2 * 16 - 1; ++x) {
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       _LUT.at<float>(y, x) = std::max(
@@ -387,9 +387,9 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
     keypoints.reserve(keypoints.size() + points.size());  // Allow appending.
 
         // Store occupancy.
-    Mat occupancy;
+    cv::Mat occupancy;
     const float scaling = 15.0 / static_cast<float>(_radius);
-    occupancy = Mat::zeros((_img.rows) * ceil(scaling) + 32,
+    occupancy = cv::Mat::zeros((_img.rows) * ceil(scaling) + 32,
                            (_img.cols) * ceil(scaling) + 32, CV_8U);
 
     brisk::timing::DebugTimer timer_uniformity_enforcement(
@@ -584,7 +584,7 @@ inline double ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScoreBelow(double u,
 
 template<class SCORE_CALCULATOR_T>
 inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample(
-    const Mat& srcimg, Mat& dstimg) {
+    const cv::Mat& srcimg, cv::Mat& dstimg) {
   if (srcimg.type() == CV_8UC1) {
     Halfsample8(srcimg, dstimg);
   } else if (srcimg.type() == CV_16UC1) {
@@ -597,7 +597,7 @@ inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Halfsample(
 
 template<class SCORE_CALCULATOR_T>
 inline bool ScaleSpaceLayer<SCORE_CALCULATOR_T>::Twothirdsample(
-    const Mat& srcimg, Mat& dstimg) {
+    const cv::Mat& srcimg, cv::Mat& dstimg) {
   if (srcimg.type() == CV_8UC1) {
     Twothirdsample8(srcimg, dstimg);
   } else if (srcimg.type() == CV_16UC1) {

@@ -51,7 +51,7 @@ namespace brisk {
 #ifdef __ARM_NEON__
   // Not implemented.
 #else
-void FilterGauss3by316S(Mat& src, Mat& dst) {  // NOLINT
+void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst) {  // NOLINT
   // Sanity check.
   const unsigned int X = 3;
   const unsigned int Y = 3;
@@ -61,7 +61,7 @@ void FilterGauss3by316S(Mat& src, Mat& dst) {  // NOLINT
   int cy = Y / 2;
 
   // Dest will be 16 bit.
-  dst = Mat::zeros(src.rows, src.cols, CV_16S);
+  dst = cv::Mat::zeros(src.rows, src.cols, CV_16S);
   const unsigned int maxJ = ((src.cols - 2) / 8) * 8;
   const unsigned int maxI = src.rows - 2;
   const unsigned int stride = src.cols;
@@ -124,7 +124,7 @@ void FilterGauss3by316S(Mat& src, Mat& dst) {  // NOLINT
 #ifdef __ARM_NEON__
   // Not implemented.
 #else
-void FilterGauss3by332F(Mat& src, Mat& dst) {  // NOLINT
+void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst) {  // NOLINT
   // Sanity check.
   static const unsigned int X = 3;
   static const unsigned int Y = 3;
@@ -132,7 +132,7 @@ void FilterGauss3by332F(Mat& src, Mat& dst) {  // NOLINT
   static const int cy = Y / 2;
 
   // Destination will be 16 bit.
-  dst = Mat::zeros(src.rows, src.cols, CV_32F);
+  dst = cv::Mat::zeros(src.rows, src.cols, CV_32F);
   const unsigned int maxJ = ((src.cols - 2) / 8) * 8;
   const unsigned int maxI = src.rows - 2;
   const unsigned int stride = src.cols;
@@ -181,7 +181,7 @@ void FilterGauss3by332F(Mat& src, Mat& dst) {  // NOLINT
 #ifdef __ARM_NEON__
 // Not implemented.
 #else
-void FilterBox3by316S(Mat& src, Mat& dst) {  // NOLINT
+void FilterBox3by316S(cv::Mat& src, cv::Mat& dst) {  // NOLINT
   // Sanity check.
   const unsigned int X = 3;
   const unsigned int Y = 3;
@@ -191,7 +191,7 @@ void FilterBox3by316S(Mat& src, Mat& dst) {  // NOLINT
   int cy = Y / 2;
 
   // Destination will be 16 bit.
-  dst = Mat::zeros(src.rows, src.cols, CV_16S);
+  dst = cv::Mat::zeros(src.rows, src.cols, CV_16S);
   const unsigned int maxJ = ((src.cols - 2) / 8) * 8;
   const unsigned int maxI = src.rows - 2;
   const unsigned int stride = src.cols;

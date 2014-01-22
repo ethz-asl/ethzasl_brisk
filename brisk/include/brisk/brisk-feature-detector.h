@@ -59,9 +59,9 @@ class  BriskFeatureDetector : public cv::FeatureDetector {
   int threshold;
   int octaves;
  protected:
-  virtual void detectImpl(const Mat& image,
+  virtual void detectImpl(const cv::Mat& image,
                           std::vector<KeyPoint>& keypoints,
-                          const Mat& mask = Mat()) const;
+                          const cv::Mat& mask = cv::Mat()) const;
   bool m_suppressScaleNonmaxima;
 };
 }  // namespace brisk

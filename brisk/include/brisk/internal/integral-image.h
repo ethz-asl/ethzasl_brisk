@@ -44,7 +44,7 @@
 #include <brisk/glog.h>
 
 namespace brisk {
-void IntegralImage8(const Mat& src, Mat* dest) {
+void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
   CHECK_NOTNULL(dest);
   int x, y;
   const int cn = 1;
@@ -128,7 +128,7 @@ void IntegralImage8(const Mat& src, Mat* dest) {
   }
 }
 
-void IntegralImage16(const Mat& src, Mat* dest) {
+void IntegralImage16(const cv::Mat& src, cv::Mat* dest) {
   CHECK_NOTNULL(dest);
   int x, y;
   const int cn = 1;

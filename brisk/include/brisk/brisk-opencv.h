@@ -56,7 +56,6 @@ typedef unsigned short ushort;
 
 #if HAVE_OPENCV
 namespace brisk {
-typedef cv::Mat Mat;
 typedef cv::KeyPoint KeyPoint;
 inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
   return keypoint.pt.x;
@@ -249,9 +248,10 @@ struct Point_{
 
 typedef Point_<float> Point2f;
 typedef Point_<int> Point2i;
-}  // namespace cv
 
-typedef cv::Mat Mat;
+// Reads a pgm image from file.
+cv::Mat imread(const std::string& filename);
+}  // namespace cv
 
 namespace brisk {
 typedef features_2d::Keypoint KeyPoint;
@@ -267,10 +267,7 @@ inline const float& KeyPointX(const KeyPoint& keypoint) {
 inline const float& KeyPointY(const KeyPoint& keypoint) {
   return keypoint.y;
 }
-// Reads a pgm image from file.
-Mat imread(const std::string& filename);
 }  // namespace brisk
-using brisk::imread;
 #endif  // HAVE_OPENCV
 
 #include "./internal/brisk-opencv-inl.h"

@@ -43,9 +43,9 @@
 
 namespace serialization {
 
-void Serialize(const Mat& mat, std::ofstream* out) {
+void Serialize(const cv::Mat& mat, std::ofstream* out) {
   CHECK_NOTNULL(out);
-  Mat mat_cont;
+  cv::Mat mat_cont;
   if (!mat.isContinuous()) {
     mat_cont = mat.clone();
   } else {
@@ -63,7 +63,7 @@ void Serialize(const Mat& mat, std::ofstream* out) {
              element_size * mat_cont.rows * mat_cont.cols);
 }
 
-void DeSerialize(Mat* mat, std::ifstream* in) {
+void DeSerialize(cv::Mat* mat, std::ifstream* in) {
   CHECK_NOTNULL(mat);
   CHECK_NOTNULL(in);
   int rows;

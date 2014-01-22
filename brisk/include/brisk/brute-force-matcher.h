@@ -63,13 +63,13 @@ class  BruteForceMatcher : public cv::DescriptorMatcher {
       const;
 
  protected:
-  virtual void knnMatchImpl(const Mat& queryDescriptors,
+  virtual void knnMatchImpl(const cv::Mat& queryDescriptors,
                             std::vector<std::vector<cv::DMatch> >& matches,
                             int k,
                             const std::vector<Mat>& masks =
                                 std::vector<Mat>(),
                             bool compactResult = false);
-  virtual void radiusMatchImpl(const Mat& queryDescriptors,
+  virtual void radiusMatchImpl(const cv::Mat& queryDescriptors,
                                std::vector<std::vector<cv::DMatch> >& matches,
                                float maxDistance,
                                const std::vector<Mat>& masks =
@@ -81,14 +81,14 @@ class  BruteForceMatcher : public cv::DescriptorMatcher {
  private:
   //  Next two methods are used to implement specialization.
   static void commonKnnMatchImpl(BruteForceMatcher& matcher,  // NOLINT
-                                 const Mat& queryDescriptors,
+                                 const cv::Mat& queryDescriptors,
                                  std::vector<std::vector<cv::DMatch> >& matches,
                                  int k,
                                  const std::vector<Mat>& masks,
                                  bool compactResult);
   static void commonRadiusMatchImpl(
       BruteForceMatcher& matcher,  // NOLINT
-      const Mat& queryDescriptors,
+      const cv::Mat& queryDescriptors,
       std::vector<std::vector<cv::DMatch> >& matches,
       float maxDistance,
       const std::vector<Mat>& masks,

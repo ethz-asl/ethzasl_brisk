@@ -40,7 +40,7 @@
 #include <brisk/glog.h>
 
 namespace brisk {
-void Halfsample16(const Mat& srcimg, Mat& dstimg) {
+void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 #ifdef __ARM_NEON__
   CHECK(false) << "HalfSample16 not implemented for NEON.";
 #else
@@ -124,7 +124,7 @@ void Halfsample16(const Mat& srcimg, Mat& dstimg) {
 }
 
 // Half sampling.
-void Halfsample8(const Mat& srcimg, Mat& dstimg) {
+void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
 #ifdef __ARM_NEON__
   // Mask needed later:
   uint8_t tmpmask[16] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
@@ -392,7 +392,7 @@ void Halfsample8(const Mat& srcimg, Mat& dstimg) {
 #endif  // __ARM_NEON__
 }
 
-void Twothirdsample16(const Mat& srcimg, Mat& dstimg) {
+void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 #ifdef __ARM_NEON__
   CHECK(false) << "Twothirdsample16 not implemented for NEON";
 #else
@@ -546,7 +546,7 @@ void Twothirdsample16(const Mat& srcimg, Mat& dstimg) {
 #endif
 }
 
-void Twothirdsample8(const Mat& srcimg, Mat& dstimg) {
+void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
   // Take care with border...
   const uint16_t leftoverCols = ((srcimg.cols / 3) * 3) % 15;
 

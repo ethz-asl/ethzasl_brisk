@@ -277,7 +277,7 @@ void Draw(std::vector<DatasetEntry>& dataset) {  // NOLINT
     // Now you can query DatasetEntry::getCurrentImageName() for the current
     // image to add tags to timers etc.
     it->setThisAsCurrentEntry();
-    Mat out;
+    cv::Mat out;
     cv::drawKeypoints(it->GetImage(), it->GetKeyPoints(), out,
                       cv::Scalar::all(-1),
                       cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);

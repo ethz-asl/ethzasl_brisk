@@ -87,9 +87,9 @@ void Serialize(const uint32_t& value, std::ofstream* out);
 
 void DeSerialize(uint32_t* value, std::ifstream* in);
 
-void Serialize(const Mat& mat, std::ofstream* out);
+void Serialize(const cv::Mat& mat, std::ofstream* out);
 
-void DeSerialize(Mat* mat, std::ifstream* in);
+void DeSerialize(cv::Mat* mat, std::ifstream* in);
 
 void Serialize(const cv::Point2f& pt, std::ofstream* out);
 

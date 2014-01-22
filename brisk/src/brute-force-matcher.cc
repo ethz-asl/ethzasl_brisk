@@ -57,7 +57,7 @@ const {
 }
 
 void BruteForceMatcher::knnMatchImpl(
-    const Mat& queryDescriptors,
+    const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches,
     int k,
     const std::vector<Mat>& masks,
@@ -66,7 +66,7 @@ void BruteForceMatcher::knnMatchImpl(
 }
 
 void BruteForceMatcher::radiusMatchImpl(
-    const Mat& queryDescriptors,
+    const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches,
     float maxDistance,
     const std::vector<Mat>& masks,
@@ -76,7 +76,7 @@ void BruteForceMatcher::radiusMatchImpl(
 }
 
 inline void BruteForceMatcher::commonKnnMatchImpl(
-    BruteForceMatcher& matcher, const Mat& queryDescriptors,
+    BruteForceMatcher& matcher, const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches,
     int knn,
     const std::vector<Mat>& masks,
@@ -93,7 +93,7 @@ inline void BruteForceMatcher::commonKnnMatchImpl(
   // Distances between one query descriptor and all train descriptors.
   std::vector<Mat> allDists(imgCount);
   for (size_t i = 0; i < imgCount; i++)
-    allDists[i] = Mat(1, matcher.trainDescCollection[i].rows,
+    allDists[i] = cv::Mat(1, matcher.trainDescCollection[i].rows,
                           cv::DataType<DistanceType>::type);
 
   for (int qIdx = 0; qIdx < queryDescriptors.rows; qIdx++) {
@@ -160,7 +160,7 @@ inline void BruteForceMatcher::commonKnnMatchImpl(
 }
 
 inline void BruteForceMatcher::commonRadiusMatchImpl(
-    BruteForceMatcher& matcher, const Mat& queryDescriptors,
+    BruteForceMatcher& matcher, const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches, float maxDistance,
     const std::vector<Mat>& masks, bool compactResult) {
   typedef brisk::Hamming::ValueType ValueType;
