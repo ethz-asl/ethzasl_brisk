@@ -67,6 +67,34 @@ inline Mat::MStep& Mat::MStep::operator =(size_t s) {
   buf[0] = s;
   return *this;
 }
+
+template<typename _Tp> inline _Tp& Mat::at(int i0, int i1) {
+  return ((_Tp*) (data + step.p[0] * i0))[i1];
+}
+
+template<typename _Tp> inline const _Tp& Mat::at(int i0, int i1) const {
+  return ((const _Tp*) (data + step.p[0] * i0))[i1];
+}
+
+template<typename _Tp> inline _Tp& Mat::at(int i0) {
+  if (isContinuous() || rows == 1)
+    return ((_Tp*) data)[i0];
+  if (cols == 1)
+    return *(_Tp*) (data + step.p[0] * i0);
+  int i = i0 / cols, j = i0 - i * cols;
+  return ((_Tp*) (data + step.p[0] * i))[j];
+}
+
+template<typename _Tp> inline const _Tp& Mat::at(int i0) const {
+  if (isContinuous() || rows == 1)
+    return ((const _Tp*) data)[i0];
+  if (cols == 1)
+    return *(const _Tp*) (data + step.p[0] * i0);
+  int i = i0 / cols, j = i0 - i * cols;
+  return ((const _Tp*) (data + step.p[0] * i))[j];
+}
+
+
 }  // namespace cv
 #endif  // !HAVE_OPENCV
 #endif  // BRISK_BRISK_OPENCV_INL_H_
