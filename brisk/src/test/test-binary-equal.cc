@@ -181,9 +181,6 @@ bool RunValidation(bool do_gtest_checks) {
       timerOverall.Stop();
     }
 
-    LOG(WARNING) << "char cast " << static_cast<int>((char)0xFF);
-    LOG(WARNING) << "char init " << static_cast<int>(char(0xFF));
-
     return !verificationOK;
   }
 }

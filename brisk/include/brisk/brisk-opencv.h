@@ -105,14 +105,14 @@ namespace cv {
 
 struct Mat {
   struct MStep {
+    friend struct Mat;
     MStep();
     MStep(size_t s);
     const size_t& operator[](int i) const;
     size_t& operator[](int i);
     operator size_t() const;
     MStep& operator =(size_t s);
-
-    size_t* p;
+   private:
     size_t buf[2];
    protected:
     MStep& operator =(const MStep&);
@@ -182,8 +182,8 @@ struct Mat {
     cols = _cols;
     type_ = _type;
     unsigned int bytedepth = ComputeByteDepth(type_);
-    step.p[0] = cols * bytedepth;
-    step.p[1] = 0;
+    step.buf[0] = cols * bytedepth;
+    step.buf[1] = 0;
     CHECK_VALID_TYPES(type_);
     unsigned int final_size = rows * cols * bytedepth;
     img.reset(new ImageContainer(final_size));

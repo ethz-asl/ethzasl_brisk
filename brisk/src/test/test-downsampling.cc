@@ -182,6 +182,7 @@ TEST(Brisk, TwoThirdSample) {
 
   CheckImageSame(dst_img_a.data, dst_img_b.data, dst_rows, dst_cols);
 }
+
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
