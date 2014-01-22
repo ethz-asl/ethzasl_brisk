@@ -57,7 +57,7 @@ namespace brisk {
 void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
   const int cols = src.cols;
   const int rows = src.rows;
-  const int stride = src.step.p[0];
+  const int stride = src.step[0];
   const int maxJ = cols - 1 - 16;
 
   // Allocate stuff.

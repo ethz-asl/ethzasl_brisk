@@ -44,54 +44,50 @@
 #if !HAVE_OPENCV
 namespace cv {
 inline cv::Mat::MStep::MStep() {
-  p = buf;
-  p[0] = p[1] = 0;
+  buf[0] = buf[1] = 0;
 }
 inline cv::Mat::MStep::MStep(size_t s) {
-  p = buf;
-  p[0] = s;
-  p[1] = 0;
+  buf[0] = s;
+  buf[1] = 0;
 }
 inline const size_t& cv::Mat::MStep::operator[](int i) const {
-  return p[i];
+  return buf[i];
 }
 inline size_t& cv::Mat::MStep::operator[](int i) {
-  return p[i];
+  return buf[i];
 }
 inline cv::Mat::MStep::operator size_t() const {
-  CHECK_EQ(p, buf);
   return buf[0];
 }
 inline cv::Mat::MStep& cv::Mat::MStep::operator =(size_t s) {
-  CHECK_EQ(p, buf);
   buf[0] = s;
   return *this;
 }
 
 template<typename _Tp> inline _Tp& cv::Mat::at(int i0, int i1) {
-  return ((_Tp*) (data + step.p[0] * i0))[i1];
+  return ((_Tp*) (data + step.buf[0] * i0))[i1];
 }
 
 template<typename _Tp> inline const _Tp& cv::Mat::at(int i0, int i1) const {
-  return ((const _Tp*) (data + step.p[0] * i0))[i1];
+  return ((const _Tp*) (data + step.buf[0] * i0))[i1];
 }
 
 template<typename _Tp> inline _Tp& cv::Mat::at(int i0) {
   if (isContinuous() || rows == 1)
     return ((_Tp*) data)[i0];
   if (cols == 1)
-    return *(_Tp*) (data + step.p[0] * i0);
+    return *(_Tp*) (data + step.buf[0] * i0);
   int i = i0 / cols, j = i0 - i * cols;
-  return ((_Tp*) (data + step.p[0] * i))[j];
+  return ((_Tp*) (data + step.buf[0] * i))[j];
 }
 
 template<typename _Tp> inline const _Tp& cv::Mat::at(int i0) const {
   if (isContinuous() || rows == 1)
     return ((const _Tp*) data)[i0];
   if (cols == 1)
-    return *(const _Tp*) (data + step.p[0] * i0);
+    return *(const _Tp*) (data + step.buf[0] * i0);
   int i = i0 / cols, j = i0 - i * cols;
-  return ((const _Tp*) (data + step.p[0] * i))[j];
+  return ((const _Tp*) (data + step.buf[0] * i))[j];
 }
 
 

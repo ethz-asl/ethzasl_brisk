@@ -44,6 +44,12 @@ if(CATKIN_ENABLE_TESTING)
   cs_add_library(${PROJECT_NAME}_test_lib src/test/serialization.cc
                                           src/test/bench-ds.cc)
 
+  catkin_add_gtest(test_integral_image src/test/test-integral-image.cc
+                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  target_link_libraries(test_integral_image ${GLOG_LIBRARY} 
+                                            ${PROJECT_NAME}
+                                            ${PROJECT_NAME}_test_lib)
+                                          
   catkin_add_gtest(test_popcnt src/test/test-popcount.cc
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   target_link_libraries(test_popcnt ${GLOG_LIBRARY} 
