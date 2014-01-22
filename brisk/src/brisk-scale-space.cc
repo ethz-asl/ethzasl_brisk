@@ -61,7 +61,7 @@ BriskScaleSpace::BriskScaleSpace(uint8_t _octaves,
 }
 BriskScaleSpace::~BriskScaleSpace() { }
 // Construct the image pyramids.
-void BriskScaleSpace::ConstructPyramid(const Mat& image, uchar threshold) {
+void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold) {
   // Set correct size:
   pyramid_.clear();
 
@@ -386,7 +386,7 @@ __inline__ int BriskScaleSpace::GetScoreBelow(const uint8_t layer,
 
 __inline__ bool BriskScaleSpace::IsMax2D(const uint8_t layer, const int x_layer,
                                          const int y_layer) {
-  const Mat& scores = pyramid_[layer].scores();
+  const cv::Mat& scores = pyramid_[layer].scores();
   brisk::BriskLayer& l = pyramid_[layer];
   const int scorescols = scores.cols;
   uchar* data = scores.data + y_layer * scorescols + x_layer;

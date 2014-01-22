@@ -79,9 +79,9 @@ class BriskFeature : public cv::Feature2D {
     }
 
     // Convert input output arrays:
-    Mat descriptors_;
-    Mat image_ = image.getMat();
-    Mat mask_ = mask.getMat();
+    cv::Mat descriptors_;
+    cv::Mat image_ = image.getMat();
+    cv::Mat mask_ = mask.getMat();
 
     // Run the detection. Take provided keypoints.
     _briskDetector.detect(image_, keypoints, mask_);

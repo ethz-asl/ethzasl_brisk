@@ -58,7 +58,7 @@ class ScaleSpaceLayer {
   ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
                   bool initScores = true);  // For successive construction.
 
-  void Create(const Mat& img, bool initScores = true);  // Octave 0.
+  void Create(const cv::Mat& img, bool initScores = true);  // Octave 0.
   void Create(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores =
                   true);  // For successive construction.
 
@@ -78,9 +78,9 @@ class ScaleSpaceLayer {
 
   // Subsampling.
   // Half sampling.
-  static inline bool Halfsample(const Mat& srcimg, Mat& dstimg);
+  static inline bool Halfsample(const cv::Mat& srcimg, cv::Mat& dstimg);
   // Two third sampling.
-  static inline bool Twothirdsample(const Mat& srcimg, Mat& dstimg);
+  static inline bool Twothirdsample(const cv::Mat& srcimg, cv::Mat& dstimg);
 
  protected:
   // Utilities.
@@ -106,7 +106,7 @@ class ScaleSpaceLayer {
   int _layerNumber;
 
   // Have a reference to the image for convenience:
-  Mat _img;
+  cv::Mat _img;
 
   // The score calculation.
   ScoreCalculator_t _scoreCalculator;
@@ -125,7 +125,7 @@ class ScaleSpaceLayer {
   double _radius;
   size_t _maxNumKpt;
   double _absoluteThreshold;
-  Mat _LUT;
+  cv::Mat _LUT;
 };
 }  // namespace brisk
 

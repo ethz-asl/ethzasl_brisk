@@ -50,7 +50,7 @@ namespace brisk {
 #else
 // SSE speeded up (dxdx dxdy and dydy only).
 // Based on harrisScores_basic_noMats(.).
-void HarrisScoresSSE(const Mat& src, Mat& scores);
+void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores);
 #endif  // __ARM_NEON__
 }  // namespace brisk
 #endif  // INTERNAL_HARRIS_SCORES_H_

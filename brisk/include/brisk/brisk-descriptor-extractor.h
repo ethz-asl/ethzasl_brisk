@@ -96,8 +96,8 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   void InitFromStream(bool rotationInvariant, bool scaleInvariant,
                       std::istream& pattern_stream);
   template<typename ImgPixel_T, typename IntegralPixel_T>
-  __inline__ IntegralPixel_T SmoothedIntensity(const Mat& image,
-                                               const Mat& integral,
+  __inline__ IntegralPixel_T SmoothedIntensity(const cv::Mat& image,
+                                               const cv::Mat& integral,
                                                const float key_x,
                                                const float key_y,
                                                const unsigned int scale,

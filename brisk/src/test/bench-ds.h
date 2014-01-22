@@ -213,7 +213,7 @@ struct DatasetEntry {
     return path_;
   }
 
-  const Mat& GetImage() const {
+  const cv::Mat& GetImage() const {
     return imgGray_;
   }
 
@@ -221,7 +221,7 @@ struct DatasetEntry {
     return keypoints_;
   }
 
-  const Mat& GetDescriptors() const {
+  const cv::Mat& GetDescriptors() const {
     return descriptors_;
   }
 
@@ -229,7 +229,7 @@ struct DatasetEntry {
     return &path_;
   }
 
-  Mat* GetImgMutable() {
+  cv::Mat* GetImgMutable() {
     return &imgGray_;
   }
 
@@ -237,12 +237,12 @@ struct DatasetEntry {
     return &keypoints_;
   }
 
-  Mat* GetDescriptorsMutable() {
+  cv::Mat* GetDescriptorsMutable() {
     return &descriptors_;
   }
 
   /*
-   * especially do a deep copy of the Mats
+   * especially do a deep copy of the cv::Mats
    */
   DatasetEntry(const DatasetEntry& other) {
     path_ = other.path_;
@@ -409,7 +409,7 @@ struct DatasetEntry {
   // Remove processing results so we can re-run the pipeline on this image.
   void clear_processed_data(bool clearDescriptors, bool clearKeypoints) {
     if (clearDescriptors) {
-      descriptors_ = Mat::zeros(0, 0, CV_8U);
+      descriptors_ = cv::Mat::zeros(0, 0, CV_8U);
     }
     if (clearKeypoints) {
       keypoints_.clear();

@@ -90,7 +90,7 @@ void SetRandom(std::string* value, int seed) {
   }
 }
 
-void SetRandom(Mat* value, int seed) {
+void SetRandom(cv::Mat* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
   int rows;
@@ -198,7 +198,7 @@ void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 }
 
 template<>
-void AssertNotEqual(const Mat& lhs, const Mat& rhs) {
+void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
   bool is_same = true;
   is_same = is_same && lhs.rows == rhs.rows;
   is_same = is_same && lhs.cols == rhs.cols;
@@ -316,7 +316,7 @@ TEST(Serialization, MapStringString) {
 }
 
 TEST(Serialization, CvMat) {
-  RunSerializationTest<Mat>();
+  RunSerializationTest<cv::Mat>();
 }
 
 int main(int argc, char** argv) {

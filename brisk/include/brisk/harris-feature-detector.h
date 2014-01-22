@@ -74,7 +74,7 @@ class HarrisFeatureDetector {
                           const cv::Mat& mask = cv::Mat()) const;
 
   double _radius;
-  Mat _LUT;
+  cv::Mat _LUT;
 };
 }  // namespace brisk
 #endif  // BRISK_HARRIS_FEATURE_DETECTOR_H_

@@ -191,7 +191,7 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
 // Simple alternative:
 template<typename ImgPixel_T, typename IntegralPixel_T>
 __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
-    const Mat& image, const Mat& integral, const float key_x,
+    const cv::Mat& image, const cv::Mat& integral, const float key_x,
     const float key_y, const unsigned int scale, const unsigned int rot,
     const unsigned int point) const {
   // Get the float position.
@@ -412,8 +412,8 @@ void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
   // current integral image.
   brisk::timing::DebugTimer timer_integral_image(
       "1.0 Brisk Extraction: integral computation");
-  Mat _integral;  // The integral image.
-  Mat imageScaled;
+  cv::Mat _integral;  // The integral image.
+  cv::Mat imageScaled;
   if (image.type() == CV_16UC1) {
     IntegralImage16(imageScaled, &_integral);
   } else if (image.type() == CV_8UC1) {
@@ -428,11 +428,7 @@ void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
   int* _values = new int[points_];  // For temporary use.
 
   // Resize the descriptors:
-<<<<<<< HEAD
-  descriptors = Mat::zeros(ksize, strings_, CV_8UC1);
-=======
   descriptors = cv::Mat::zeros(ksize, strings_, CV_8UC1);
->>>>>>> e009e2a56cf563b5fadf058a9fb813c0507187eb
 
   // Now do the extraction for all keypoints:
 

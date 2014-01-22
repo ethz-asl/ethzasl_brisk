@@ -59,7 +59,7 @@ class  BriskLayer {
     static const int TWOTHIRDSAMPLE = 1;
   };
   // Construct a base layer.
-  BriskLayer(const Mat& img, uchar upperThreshold, uchar lowerThreshold,
+  BriskLayer(const cv::Mat& img, uchar upperThreshold, uchar lowerThreshold,
              float scale = 1.0f, float offset = 0.0f);
   // Derive a layer.
   BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
@@ -76,10 +76,10 @@ class  BriskLayer {
                         float scale = 1.0f);
 
   // Accessors.
-  inline const Mat& img() const {
+  inline const cv::Mat& img() const {
     return img_;
   }
-  inline const Mat& scores() const {
+  inline const cv::Mat& scores() const {
     return scores_;
   }
   inline float scale() const {
@@ -91,15 +91,15 @@ class  BriskLayer {
 
  private:
   // Access gray values (smoothed/interpolated).
-  uint8_t Value(const Mat& mat, float xf, float yf, float scale);
+  uint8_t Value(const cv::Mat& mat, float xf, float yf, float scale);
   // Calculate threshold map.
   void CalculateThresholdMap();
   // The image.
-  Mat img_;
+  cv::Mat img_;
   // Its Fast scores.
-  Mat scores_;
+  cv::Mat scores_;
   // Its threshold map.
-  Mat thrmap_;
+  cv::Mat thrmap_;
   // coordinate transformation.
   float scale_;
   float offset_;
