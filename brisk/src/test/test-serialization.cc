@@ -90,7 +90,7 @@ void SetRandom(std::string* value, int seed) {
   }
 }
 
-void SetRandom(Mat* value, int seed) {
+void SetRandom(cv::Mat* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
   int rows;
@@ -316,7 +316,7 @@ TEST(Serialization, MapStringString) {
 }
 
 TEST(Serialization, CvMat) {
-  RunSerializationTest<Mat>();
+  RunSerializationTest<cv::Mat>();
 }
 
 int main(int argc, char** argv) {
