@@ -83,11 +83,28 @@ void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
       const int s2 = s1 + _src[x2];
       const int s3 = s2 + _src[x3];
       s = s3;
+#ifdef __ARM_NEON__
+//      __m128i    __src0 = _mm_set_epi32(s3, s2, s1, s0);
+      int tmp1[4];
+      tmp1[0] = s0;
+      tmp1[1] = s1;
+      tmp1[2] = s2;
+      tmp1[3] = s3;
+      int32x4_t  __src0 = vld1q_s32(tmp1);
+//      __m128i    __sum =
+//          _mm_lddqu_si128(reinterpret_cast<__m128i *>(&sum[x - sumstep]));
+      int32x4_t    __sum = vld1q_s32(&sum[x - sumstep]);
+//      __sum = _mm_add_epi32(__src0, __sum);
+      __sum = vaddq_s32(__src0, __sum);
+//      _mm_storeu_si128(reinterpret_cast<__m128i *>(&sum[x]), __sum);
+      vst1q_s32(&sum[x], __sum);
+#else
       __m128i    __src0 = _mm_set_epi32(s3, s2, s1, s0);
       __m128i    __sum =
           _mm_lddqu_si128(reinterpret_cast<__m128i *>(&sum[x - sumstep]));
       __sum = _mm_add_epi32(__src0, __sum);
       _mm_storeu_si128(reinterpret_cast<__m128i *>(&sum[x]), __sum);
+#endif
 
       const unsigned char * __src = _src + srcstep;
       const int s0_1 = ss + __src[x];
@@ -95,9 +112,23 @@ void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
       const int s2_1 = s1_1 + __src[x2];
       const int s3_1 = s2_1 + __src[x3];
       ss = s3_1;
+#ifdef __ARM_NEON__
+      int tmp2[4];
+      tmp2[0] = s0_1;
+      tmp2[1] = s1_1;
+      tmp2[2] = s2_1;
+      tmp2[3] = s3_1;
+//      __src0 = _mm_set_epi32(s3_1, s2_1, s1_1, s0_1);
+      __src0 = vld1q_s32(tmp2);
+//      __sum = _mm_add_epi32(__src0, __sum);
+      __sum = vaddq_s32(__src0, __sum);
+//      _mm_storeu_si128(reinterpret_cast<__m128i *>(&sum[x + sumstep]), __sum);
+      vst1q_s32(&sum[x + sumstep], __sum);
+#else
       __src0 = _mm_set_epi32(s3_1, s2_1, s1_1, s0_1);
       __sum = _mm_add_epi32(__src0, __sum);
       _mm_storeu_si128(reinterpret_cast<__m128i *>(&sum[x + sumstep]), __sum);
+#endif
     }
 
     // Finish the row.
@@ -118,11 +149,28 @@ void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
       const int s2 = s1 + _src[x + 2];
       const int s3 = s2 + _src[x + 3];
       s = s3;
+#ifdef __ARM_NEON__
+//      __m128i     __src0 = _mm_set_epi32(s3, s2, s1, s0);
+      int tmp3[4];
+      tmp3[0] = s0;
+      tmp3[1] = s1;
+      tmp3[2] = s2;
+      tmp3[3] = s3;
+      int32x4_t __src0 = vld1q_s32(tmp3);
+//      __m128i     __sum =
+//          _mm_lddqu_si128(reinterpret_cast<__m128i *>(&sum[x - sumstep]));
+      int32x4_t  __sum = vld1q_s32(&sum[x - sumstep]);
+//      __sum = _mm_add_epi32(__src0, __sum);
+      __sum = vaddq_s32(__src0, __sum);
+//      _mm_storeu_si128(reinterpret_cast<__m128i *>(&sum[x]), __sum);
+      vst1q_s32(&sum[x], __sum);
+#else
       __m128i     __src0 = _mm_set_epi32(s3, s2, s1, s0);
       __m128i     __sum =
           _mm_lddqu_si128(reinterpret_cast<__m128i *>(&sum[x - sumstep]));
       __sum = _mm_add_epi32(__src0, __sum);
       _mm_storeu_si128(reinterpret_cast<__m128i *>(&sum[x]), __sum);
+#endif
     }
 
     // finish the row
@@ -166,11 +214,28 @@ void IntegralImage16(const cv::Mat& src, cv::Mat* dest) {
       float s2 = s1 + _src[x2] * cvtScale;
       float s3 = s2 + _src[x3] * cvtScale;
       s = s3;
+#ifdef __ARM_NEON__
+//      __m128  __src0 = _mm_set_ps(s3, s2, s1, s0);
+      float tmp1[4];
+      tmp1[0] = s0;
+      tmp1[1] = s1;
+      tmp1[2] = s2;
+      tmp1[3] = s3;
+      float32x4_t  __src0 = vld1q_f32(tmp1);
+
+//      __m128  __sum = _mm_loadu_ps(&sum[x - sumstep]);
+      float32x4_t  __sum = vld1q_f32(&sum[x - sumstep]);
+//      __sum = _mm_add_ps(__src0, __sum);
+      __sum = vaddq_f32(__src0, __sum);
+//      _mm_storeu_ps(&sum[x], __sum);
+      vst1q_f32(&sum[x], __sum);
+#else
       __m128  __src0 = _mm_set_ps(s3, s2, s1, s0);
 
       __m128  __sum = _mm_loadu_ps(&sum[x - sumstep]);
       __sum = _mm_add_ps(__src0, __sum);
       _mm_storeu_ps(&sum[x], __sum);
+#endif
     }
 
     // Finish the row.
