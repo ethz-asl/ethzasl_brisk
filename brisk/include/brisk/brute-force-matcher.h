@@ -84,14 +84,14 @@ class  BruteForceMatcher : public cv::DescriptorMatcher {
                                  const cv::Mat& queryDescriptors,
                                  std::vector<std::vector<cv::DMatch> >& matches,
                                  int k,
-                                 const std::vector<Mat>& masks,
+                                 const std::vector<cv::Mat>& masks,
                                  bool compactResult);
   static void commonRadiusMatchImpl(
       BruteForceMatcher& matcher,  // NOLINT
       const cv::Mat& queryDescriptors,
       std::vector<std::vector<cv::DMatch> >& matches,
       float maxDistance,
-      const std::vector<Mat>& masks,
+      const std::vector<cv::Mat>& masks,
       bool compactResult);
 };
 #endif  // HAVE_OPENCV
