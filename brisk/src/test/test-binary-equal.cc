@@ -181,12 +181,15 @@ bool RunValidation(bool do_gtest_checks) {
       timerOverall.Stop();
     }
 
+    LOG(WARNING) << "char cast " << static_cast<int>((char)0xFF);
+    LOG(WARNING) << "char init " << static_cast<int>(char(0xFF));
+
     return !verificationOK;
   }
 }
 
 void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
-                 const std::string& briskbasepath) {
+                 const std::string& /*briskbasepath*/) {
   std::cout << "Running the pipeline..." << std::endl;
 
   // Detection.
@@ -238,7 +241,7 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
 
 bool RunVerification(const std::vector<DatasetEntry>& current_dataset,
                      const std::vector<DatasetEntry>& verification_dataset,
-                     bool do_gtest_checks) {
+                     bool /*do_gtest_checks*/) {
   CHECK_EQ(current_dataset.size(), verification_dataset.size())
         << "Failed on database number of entries";
 

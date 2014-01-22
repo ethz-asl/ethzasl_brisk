@@ -695,17 +695,17 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
     }
 #else
   // Masks:
-  register __m128i mask1 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                        0x80, 13, 0x80, 10, 0x80, 7, 0x80, 4,
-                                        0x80, 1);
-  register __m128i mask2 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                        13, 0x80, 10, 0x80, 7, 0x80, 4, 0x80,
-                                        1, 0x80);
-  register __m128i mask = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 14,
+  register __m128i mask1 = _mm_set_epi8(-128, -128, -128, -128, -128, -128,
+                                        -128, 13, -128, 10, -128, 7, -128, 4,
+                                        -128, 1);
+  register __m128i mask2 = _mm_set_epi8(-128, -128, -128, -128, -128, -128,
+                                        13, -128, 10, -128, 7, -128, 4, -128,
+                                        1, -128);
+  register __m128i mask = _mm_set_epi8(-128, -128, -128, -128, -128, -128, 14,
                                        12, 11, 9, 8, 6, 5, 3, 2, 0);
-  register __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, 0x80, 0x80, 0x80,
-                                             0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                             0x80);
+  register __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, -128, -128, -128,
+                                             -128, -128, -128, -128, -128, -128,
+                                             -128);
 
   while (p3 < p_end) {
     for (int i = 0; i < hsize; ++i) {
