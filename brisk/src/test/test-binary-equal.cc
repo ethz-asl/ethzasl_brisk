@@ -70,7 +70,7 @@ enum Parameters {
   BRISK_octaves = 0,
   BRISK_maxNumKpt = 4294967296,
   BRISK_scaleestimation = true,
-  BRISK_rotationestimation = true,
+  BRISK_rotationestimation = true
 };
 
 TEST(Brisk, Validation) {
@@ -106,7 +106,7 @@ bool RunValidation(bool do_gtest_checks) {
     bool doLexicalsort = true;
     std::vector < std::string > search_paths;
     search_paths.push_back(imagepath);
-    brisk::Getfilelists(search_paths, doLexicalsort, "ppm", &imgpaths);
+    brisk::Getfilelists(search_paths, doLexicalsort, "pgm", &imgpaths);
 
     // Make the dataset.
     std::cout << "Reading dataset path: " << imagepath << " got images: "

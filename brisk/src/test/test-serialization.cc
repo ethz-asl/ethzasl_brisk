@@ -189,7 +189,8 @@ void AssertNotEqual(const TYPE& lhs, const TYPE& rhs) {
 
 template<>
 void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
-  ASSERT_EQ(lhs.size(), rhs.size());
+  ASSERT_EQ(lhs.rows, rhs.rows);
+  ASSERT_EQ(lhs.cols, rhs.cols);
   for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
     CHECK_EQ(lhs.at<unsigned char>(index), rhs.at<unsigned char>(index))
         << "Failed matrix equality for index " << index;
@@ -199,7 +200,8 @@ void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 template<>
 void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
   bool is_same = true;
-  is_same = is_same && lhs.size() == rhs.size();
+  is_same = is_same && lhs.rows == rhs.rows;
+  is_same = is_same && lhs.cols == rhs.cols;
   if (is_same) {
     for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
       if (lhs.at<unsigned char>(index) != rhs.at<unsigned char>(index)) {

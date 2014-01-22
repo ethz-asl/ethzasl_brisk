@@ -248,6 +248,7 @@ struct DatasetEntry {
     path_ = other.path_;
     imgGray_ = other.imgGray_.clone();
     keypoints_ = other.keypoints_;
+    LOG(WARNING) << "Cloning keypoints " << keypoints_.size();
     descriptors_ = other.descriptors_.clone();
     userdata_ = other.userdata_;
   }
@@ -292,6 +293,12 @@ struct DatasetEntry {
       // Check type.
       if (this->imgGray_.type() != other.imgGray_.type()) {
         EXPECTSAMETHROW((*this), other, imgGray_.type());
+        return false;
+      }
+      if(!this->imgGray_.data && other.imgGray_.data) {
+        return false;
+      }
+      if (this->imgGray_.data && !other.imgGray_.data) {
         return false;
       }
       // Check pixel by pixel.
@@ -412,9 +419,11 @@ struct DatasetEntry {
   // Get the images from the path and convert to grayscale.
   void readImage(const std::string& path) {
     path_ = path;
-    // Do we want these to be at specific mem locations?
-    cv::Mat imgRGB = cv::imread(path_);
-    cv::cvtColor(imgRGB, imgGray_, CV_BGR2GRAY);
+#if HAVE_OPENCV
+    cv::Mat imgGray_ = cv::imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
+#else
+    cv::Mat imgGray_ = cv::imread(path_);
+#endif
   }
 
   // Set the static image name to the current image.

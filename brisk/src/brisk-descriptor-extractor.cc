@@ -428,7 +428,7 @@ void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
   int* _values = new int[points_];  // For temporary use.
 
   // Resize the descriptors:
-  descriptors = cv::Mat::zeros(ksize, strings_, CV_8U);
+  descriptors = cv::Mat::zeros(ksize, strings_, CV_8UC1);
 
   // Now do the extraction for all keypoints:
 

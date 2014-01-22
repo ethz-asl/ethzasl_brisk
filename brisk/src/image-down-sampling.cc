@@ -36,6 +36,7 @@
  */
 
 #include <brisk/internal/image-down-sampling.h>
+#include <brisk/internal/macros.h>
 #include <brisk/glog.h>
 
 namespace brisk {
@@ -499,22 +500,22 @@ void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
       result2p = _mm_add_epi32(result2p, result1);
 
       // Divide by 9 - not sure if this is very safe...
-      (reinterpret_cast<int*>(&result0p))[0] /= 9;
-      (reinterpret_cast<int*>(&result0p))[1] /= 9;
-      (reinterpret_cast<int*>(&result0p))[2] /= 9;
-      (reinterpret_cast<int*>(&result0p))[3] /= 9;
-      (reinterpret_cast<int*>(&result2p))[0] /= 9;
-      (reinterpret_cast<int*>(&result2p))[1] /= 9;
-      (reinterpret_cast<int*>(&result2p))[2] /= 9;
-      (reinterpret_cast<int*>(&result2p))[3] /= 9;
-      (reinterpret_cast<int*>(&result0))[0] /= 9;
-      (reinterpret_cast<int*>(&result0))[1] /= 9;
-      (reinterpret_cast<int*>(&result0))[2] /= 9;
-      (reinterpret_cast<int*>(&result0))[3] /= 9;
-      (reinterpret_cast<int*>(&result2))[0] /= 9;
-      (reinterpret_cast<int*>(&result2))[1] /= 9;
-      (reinterpret_cast<int*>(&result2))[2] /= 9;
-      (reinterpret_cast<int*>(&result2))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[3] /= 9;
 
       // Pack.
       __m128i store0 = _mm_packs_epi32(result0, result0p);

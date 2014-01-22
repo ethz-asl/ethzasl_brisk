@@ -49,12 +49,11 @@
 namespace brisk {
 
 // A generic layer to be used within the ScaleSpace class.
-template<class SCORE_CALCULTAOR_T>
+template<class SCORE_CALCULATOR_T>
 class ScaleSpaceLayer {
  public:
-  typedef SCORE_CALCULTAOR_T ScoreCalculator_t;
-  ScaleSpaceLayer() {
-  }
+  typedef SCORE_CALCULATOR_T ScoreCalculator_t;
+  ScaleSpaceLayer() { }
   ScaleSpaceLayer(const cv::Mat& img, bool initScores = true);  // Octave 0.
   ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
                   bool initScores = true);  // For successive construction.

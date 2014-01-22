@@ -48,8 +48,11 @@
 #include <brisk/internal/vectorized-filters.h>
 
 namespace brisk {
-
+#if HAVE_OPENCV
 class HarrisFeatureDetector : public cv::FeatureDetector {
+#else
+class HarrisFeatureDetector {
+#endif  // HAVE_OPENCV
  public:
   explicit HarrisFeatureDetector(double radius);
   void SetRadius(double radius);

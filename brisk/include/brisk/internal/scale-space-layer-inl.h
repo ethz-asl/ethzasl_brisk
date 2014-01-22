@@ -390,7 +390,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
     cv::Mat occupancy;
     const float scaling = 15.0 / static_cast<float>(_radius);
     occupancy = cv::Mat::zeros((_img.rows) * ceil(scaling) + 32,
-                               (_img.cols) * ceil(scaling) + 32, CV_8U);
+                           (_img.cols) * ceil(scaling) + 32, CV_8U);
 
     brisk::timing::DebugTimer timer_uniformity_enforcement(
         "0.3 BRISK Detection: "
@@ -465,11 +465,11 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
                vqaddq_u8(mem2, mask2));
 # else
         __m128i mem1 = _mm_loadu_si128(
-            reinterpret_cast<__m128i *>(&occupancy.at < uchar
-                > (cy + y - 15, cx - 15)));
+            reinterpret_cast<__m128i *>(&occupancy.at<uchar>
+        (cy + y - 15, cx - 15)));
         __m128i mem2 = _mm_loadu_si128(
-            reinterpret_cast<__m128i *>(&occupancy.at < uchar
-                > (cy + y - 15, cx + 1)));
+            reinterpret_cast<__m128i *>(&occupancy.at<uchar>
+        (cy + y - 15, cx + 1)));
         __m128i mask1 = _mm_set_epi8(ceil(_LUT.at<float>(y, 15) * nsc),
                                      ceil(_LUT.at<float>(y, 14) * nsc),
                                      ceil(_LUT.at<float>(y, 13) * nsc),
@@ -520,6 +520,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       }  // Limit the max number if necessary.
     }
     points.assign(pt_tmp.begin(), pt_tmp.end());
+
     timer_uniformity_enforcement.Stop();
   }
 
