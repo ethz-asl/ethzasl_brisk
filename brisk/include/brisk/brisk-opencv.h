@@ -44,6 +44,8 @@
 #if HAVE_OPENCV
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+using cv::imread;
 #else
 #include <fstream>  // NOLINT
 #include <memory>
@@ -270,8 +272,6 @@ Mat imread(const std::string& filename);
 }  // namespace brisk
 using brisk::imread;
 #endif  // HAVE_OPENCV
-
-using brisk::Mat;
 
 #include "./internal/brisk-opencv-inl.h"
 #endif  // BRISK_BRISK_OPENCV_H_
