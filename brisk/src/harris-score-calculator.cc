@@ -133,12 +133,10 @@ void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
   const unsigned int maxI = src.rows - 2;
   const unsigned int stride = src.cols;
 
-  __m128i mask_hi = _mm_set_epi8(0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
-                                 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
-                                 0xFF);
-  __m128i mask_lo = _mm_set_epi8(0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
-                                 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
-                                 0x00);
+  __m128i mask_hi = _mm_set_epi8(0, -1, 0, -1, 0, -1, 0, -1,
+                                 0, -1, 0, -1, 0, -1, 0, -1);
+  __m128i mask_lo = _mm_set_epi8(-1, 0, -1, 0, -1, 0, -1, 0,
+                                 -1, 0, -1, 0, -1, 0, -1, 0);
 
   for (unsigned int i = 0; i < maxI; ++i) {
     bool end = false;
