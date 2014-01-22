@@ -54,7 +54,7 @@ class ScaleSpaceLayer {
  public:
   typedef SCORE_CALCULATOR_T ScoreCalculator_t;
   ScaleSpaceLayer() { }
-  ScaleSpaceLayer(const Mat& img, bool initScores = true);  // Octave 0.
+  ScaleSpaceLayer(const cv::Mat& img, bool initScores = true);  // Octave 0.
   ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
                   bool initScores = true);  // For successive construction.
 

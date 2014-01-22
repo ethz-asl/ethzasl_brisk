@@ -50,14 +50,14 @@ void GetNextUncommentedLine(std::ifstream& infile, std::string* input_line) {
 }
 }  // namespace
 
-namespace brisk {
+namespace cv {
 // Reads a pgm image from file.
-Mat imread(const std::string& filename) {
+cv::Mat imread(const std::string& filename) {
   std::ifstream infile;
   infile.open(filename.c_str());
   if (infile.fail()) {
     infile.close();
-    return Mat();
+    return cv::Mat();
   }
 
   std::string input_line;
@@ -73,14 +73,14 @@ Mat imread(const std::string& filename) {
   }
 
   if (!cols || !rows) {
-    return Mat();
+    return cv::Mat();
   }
 
   // Encoding
   GetNextUncommentedLine(infile, &input_line);
 
   // Create image and read in data.
-  Mat img(rows, cols, CV_8UC1);
+  cv::Mat img(rows, cols, CV_8UC1);
   size_t size = rows * cols * img.elemSize();
   CHECK_NOTNULL(img.data);
   infile.read(reinterpret_cast<char*>(img.data), size);
@@ -88,4 +88,4 @@ Mat imread(const std::string& filename) {
   infile.close();
   return img;
 }
-}  // namespace brisk
+}  // namespace cv

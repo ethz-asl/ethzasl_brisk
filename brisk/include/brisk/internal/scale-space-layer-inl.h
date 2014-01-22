@@ -389,8 +389,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         // Store occupancy.
     Mat occupancy;
     const float scaling = 15.0 / static_cast<float>(_radius);
-    occupancy = Mat::zeros((_img.rows) * ceil(scaling) + 32,
-                           (_img.cols) * ceil(scaling) + 32, CV_8U);
+    occupancy = cv::Mat::zeros((_img.rows) * ceil(scaling) + 32,
+                               (_img.cols) * ceil(scaling) + 32, CV_8U);
 
     brisk::timing::DebugTimer timer_uniformity_enforcement(
         "0.3 BRISK Detection: "

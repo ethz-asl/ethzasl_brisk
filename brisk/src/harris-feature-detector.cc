@@ -253,7 +253,7 @@ __inline__ void HarrisFeatureDetector::CornerHarris(const Mat& dxdxSmooth,
 }
 
 inline void HarrisFeatureDetector::NonmaxSuppress(
-    const Mat& scores, std::vector<KeyPoint>& keypoints) {
+    const cv::Mat& scores, std::vector<KeyPoint>& keypoints) {
   // First do the 8-neighbor nonmax suppression.
   const int stride = scores.cols;
   const int rows_end = scores.rows - 2;
@@ -298,7 +298,7 @@ inline void HarrisFeatureDetector::NonmaxSuppress(
 }
 
 __inline__ void HarrisFeatureDetector::EnforceUniformity(
-    const Mat& scores, std::vector<KeyPoint>& keypoints) const {
+    const cv::Mat& scores, std::vector<KeyPoint>& keypoints) const {
   // Sort.
   std::sort(keypoints.begin(), keypoints.end(), compareKeypointScore);
 
@@ -378,9 +378,9 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
   }
   keypoints.assign(keypoints_new.begin(), keypoints_new.end());
 }
-void HarrisFeatureDetector::detectImpl(const Mat& image,
+void HarrisFeatureDetector::detectImpl(const cv::Mat& image,
                                        std::vector<KeyPoint>& keypoints,
-                                       const Mat& mask) const {
+                                       const cv::Mat& mask) const {
   keypoints.resize(0);
   Mat scores;
   Mat DxDx1, DyDy1, DxDy1;

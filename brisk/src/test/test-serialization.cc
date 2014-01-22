@@ -188,7 +188,7 @@ void AssertNotEqual(const TYPE& lhs, const TYPE& rhs) {
 }
 
 template<>
-void AssertEqual(const Mat& lhs, const Mat& rhs) {
+void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
   ASSERT_EQ(lhs.rows, rhs.rows);
   ASSERT_EQ(lhs.cols, rhs.cols);
   for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {

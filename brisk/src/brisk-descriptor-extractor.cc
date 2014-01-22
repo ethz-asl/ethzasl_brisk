@@ -359,9 +359,9 @@ bool RoiPredicate(const float minX, const float minY, const float maxX,
 }
 
 // Computes the descriptor.
-void BriskDescriptorExtractor::computeImpl(const Mat& image,
+void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
                                            std::vector<KeyPoint>& keypoints,
-                                           Mat& descriptors) const {
+                                           cv::Mat& descriptors) const {
   // Remove keypoints very close to the border.
   size_t ksize = keypoints.size();
   std::vector<int> kscales;  // Remember the scale per keypoint.
@@ -428,7 +428,11 @@ void BriskDescriptorExtractor::computeImpl(const Mat& image,
   int* _values = new int[points_];  // For temporary use.
 
   // Resize the descriptors:
+<<<<<<< HEAD
   descriptors = Mat::zeros(ksize, strings_, CV_8UC1);
+=======
+  descriptors = cv::Mat::zeros(ksize, strings_, CV_8UC1);
+>>>>>>> e009e2a56cf563b5fadf058a9fb813c0507187eb
 
   // Now do the extraction for all keypoints:
 

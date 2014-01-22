@@ -197,9 +197,9 @@ struct DatasetEntry {
  private:
   std::map<std::string, Blob> userdata_;
   std::string path_;
-  Mat imgGray_;
+  cv::Mat imgGray_;
   std::vector<KeyPoint> keypoints_;
-  Mat descriptors_;
+  cv::Mat descriptors_;
 
  public:
   DatasetEntry() = default;
@@ -420,10 +420,9 @@ struct DatasetEntry {
   void readImage(const std::string& path) {
     path_ = path;
 #if HAVE_OPENCV
-    Mat imgRGB = cv::imread(path_);
-    cv::cvtColor(imgRGB, imgGray_, CV_BGR2GRAY);
+    cv::Mat imgGray_ = cv::imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
 #else
-    CHECK(false) << "Cannot open pgm file without opencv";
+    cv::Mat imgGray_ = cv::imread(path_);
 #endif
   }
 
