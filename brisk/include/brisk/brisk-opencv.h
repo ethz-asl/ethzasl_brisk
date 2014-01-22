@@ -71,12 +71,8 @@ inline const float& KeyPointY(const KeyPoint& keypoint) {
 }  // namespace brisk
 #else
 
-//#define SWITCH_CV
-#ifdef SWITCH_CV
-#include <opencv2/core/core.hpp>
-#else
+// A minimal opencv subpart with std::shared allocation.
 namespace cv {
-
 #define CV_CN_MAX     512
 #define CV_CN_SHIFT   3
 #define CV_DEPTH_MAX  (1 << CV_CN_SHIFT)
@@ -252,7 +248,6 @@ struct Point_{
 typedef Point_<float> Point2f;
 typedef Point_<int> Point2i;
 }  // namespace cv
-#endif
 
 typedef cv::Mat Mat;
 
@@ -270,14 +265,11 @@ inline const float& KeyPointX(const KeyPoint& keypoint) {
 inline const float& KeyPointY(const KeyPoint& keypoint) {
   return keypoint.y;
 }
-//typedef cv::Mat Mat;
 // Reads a pgm image from file.
 Mat imread(const std::string& filename);
 }  // namespace brisk
 using brisk::imread;
 #endif  // HAVE_OPENCV
 
-#ifndef SWITCH_CV
 #include "./internal/brisk-opencv-inl.h"
-#endif
 #endif  // BRISK_BRISK_OPENCV_H_

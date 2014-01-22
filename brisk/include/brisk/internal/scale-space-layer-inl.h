@@ -520,6 +520,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       }  // Limit the max number if necessary.
     }
     points.assign(pt_tmp.begin(), pt_tmp.end());
+
     timer_uniformity_enforcement.Stop();
   }
 
