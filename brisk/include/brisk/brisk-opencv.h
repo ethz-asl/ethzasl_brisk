@@ -271,5 +271,7 @@ Mat imread(const std::string& filename);
 using brisk::imread;
 #endif  // HAVE_OPENCV
 
+using brisk::Mat;
+
 #include "./internal/brisk-opencv-inl.h"
 #endif  // BRISK_BRISK_OPENCV_H_
