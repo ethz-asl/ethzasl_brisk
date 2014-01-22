@@ -420,10 +420,9 @@ struct DatasetEntry {
   void readImage(const std::string& path) {
     path_ = path;
 #if HAVE_OPENCV
-    Mat imgRGB = cv::imread(path_);
-    cv::cvtColor(imgRGB, imgGray_, CV_BGR2GRAY);
+    Mat imgGray_ = imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
 #else
-    CHECK(false) << "Cannot open pgm file without opencv";
+    Mat imgGray_ = imread(path_);
 #endif
   }
 
