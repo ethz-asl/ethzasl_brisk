@@ -39,6 +39,7 @@
  */
 
 #include <brisk/brisk-feature-detector.h>
+#include <brisk/brisk-opencv.h>
 #include <brisk/glog.h>
 #include <brisk/internal/brisk-scale-space.h>
 
