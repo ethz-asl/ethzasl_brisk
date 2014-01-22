@@ -39,11 +39,10 @@
  */
 
 #ifdef __ARM_NEON__
-#include <arm_neon.h>
+// Not implemented.
 #else
 #include <emmintrin.h>
 #include <tmmintrin.h>
-#endif  // __ARM_NEON__
 #include <stdint.h>
 
 #include <brisk/harris-score-calculator.h>
@@ -289,3 +288,4 @@ void HarrisScoreCalculator::CornerHarris(const cv::Mat& dxdxSmooth,
   }
 }
 }  // namespace brisk
+#endif  // __ARM_NEON__
