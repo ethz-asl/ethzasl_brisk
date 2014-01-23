@@ -49,22 +49,8 @@ namespace brisk {
 static const char __attribute__((aligned(16))) MASK_4bit[16] =
   {0xf, 0xf, 0xf,  0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf,
    0xf};
-<<<<<<< HEAD
-#ifdef __ARM_NEON__
-static const uint8_t __attribute__((aligned(16))) POPCOUNT_4bit[16] =
-{4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0};
-int8_t tmpmask[16] = {0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-    0x0, 0x0, 0x0, 0x0, 0x0};
-static const int8x16_t shiftval = vld1q_s8(tmpmask);
-#else
 static const uint8_t __attribute__((aligned(16))) POPCOUNT_4bit[16] = {0, 1, 1,
   2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4};
-static const __m128i shiftval = _mm_set_epi32(0, 0, 0, 4);
-#endif  // __ARM_NEON__
-=======
-static const uint8_t __attribute__((aligned(16))) POPCOUNT_4bit[16] = {0, 1, 1,
-  2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4};
->>>>>>> feature/brisk2.0
 #endif  // __GNUC__
 #ifdef _MSC_VER
 __declspec(align(16)) static const char MASK_4bit[16] = {0xf, 0xf, 0xf, 0xf,
