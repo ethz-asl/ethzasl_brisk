@@ -41,7 +41,7 @@
 #ifndef BRISK_HARRIS_SCORE_CALCULATOR_H_
 #define BRISK_HARRIS_SCORE_CALCULATOR_H_
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/score-calculator.h>
 

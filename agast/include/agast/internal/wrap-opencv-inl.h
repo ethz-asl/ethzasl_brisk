@@ -35,11 +35,11 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_OPENCV_INL_H_
-#define BRISK_BRISK_OPENCV_INL_H_
+#ifndef AGAST_WRAP_OPENCV_INL_H_
+#define AGAST_WRAP_OPENCV_INL_H_
 
-#include <brisk/brisk-opencv.h>
-#include <brisk/glog.h>
+#include <agast/glog.h>
+#include <agast/wrap-opencv.h>
 
 #if !HAVE_OPENCV
 namespace cv {
@@ -93,4 +93,4 @@ template<typename _Tp> inline const _Tp& cv::Mat::at(int i0) const {
 
 }  // namespace cv
 #endif  // !HAVE_OPENCV
-#endif  // BRISK_BRISK_OPENCV_INL_H_
+#endif  // AGAST_WRAP_OPENCV_INL_H_

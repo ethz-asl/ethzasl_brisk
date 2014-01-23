@@ -29,24 +29,26 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <agast/wrap-opencv.h>
 #include <agast/agast5-8.h>
 
 namespace agast {
+
 // Using also bisection as propsed by Edward Rosten in FAST,
-// but it is based on the OAST.
-int AgastDetector5_8::CornerScore(const unsigned char* p) {
-  int bmin = b_;
+// But it is based on the OAST.
+int AgastDetector5_8::cornerScore(const unsigned char* p) {
+  int bmin = b;
   int bmax = 255;
   int b_test = (bmax + bmin) / 2;
 
-  register int_fast16_t offset0 = s_offset0_;
-  register int_fast16_t offset1 = s_offset1_;
-  register int_fast16_t offset2 = s_offset2_;
-  register int_fast16_t offset3 = s_offset3_;
-  register int_fast16_t offset4 = s_offset4_;
-  register int_fast16_t offset5 = s_offset5_;
-  register int_fast16_t offset6 = s_offset6_;
-  register int_fast16_t offset7 = s_offset7_;
+  register int_fast16_t offset0 = s_offset0;
+  register int_fast16_t offset1 = s_offset1;
+  register int_fast16_t offset2 = s_offset2;
+  register int_fast16_t offset3 = s_offset3;
+  register int_fast16_t offset4 = s_offset4;
+  register int_fast16_t offset5 = s_offset5;
+  register int_fast16_t offset6 = s_offset6;
+  register int_fast16_t offset7 = s_offset7;
 
   while (1) {
     register const int cb = *p + b_test;

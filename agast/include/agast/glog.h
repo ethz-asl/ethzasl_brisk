@@ -34,8 +34,8 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef BRISK_GLOG_H_
-#define BRISK_GLOG_H_
+#ifndef AGAST_GLOG_H_
+#define AGAST_GLOG_H_
 
 #if HAVE_GLOG
 #include <glog/logging.h>
@@ -63,6 +63,5 @@ static nullstream logstream;
 #define CHECK(x) assert(x); logstream
 #define LOG(WARNING) std ::cout
 
-
 #endif  // HAVE_GLOG
-#endif  // BRISK_GLOG_H_
+#endif  // AGAST_GLOG_H_

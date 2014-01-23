@@ -38,7 +38,7 @@
 #include <bitset>
 
 #include <brisk/internal/hamming.h>
-#include <brisk/glog.h>
+#include <agast/glog.h>
 #include <gtest/gtest.h>
 
 #ifndef TEST

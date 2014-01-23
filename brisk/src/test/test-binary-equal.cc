@@ -44,9 +44,9 @@
 
 #include <brisk/brisk.h>
 #include <brisk/internal/timer.h>
-#include <brisk/glog.h>
+#include <agast/glog.h>
 #include <gtest/gtest.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 
 #include "./bench-ds.h"
 #include "./image-io.h"

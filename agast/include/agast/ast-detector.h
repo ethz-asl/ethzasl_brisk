@@ -27,101 +27,65 @@
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef CLOSED_FEATURES2D_AGAST_ASTDETECTOR_H
-#define CLOSED_FEATURES2D_AGAST_ASTDETECTOR_H
+#ifndef ASTDETECTOR_H
+#define ASTDETECTOR_H
 
-#include <iostream>
 #include <vector>
-
-#if HAVE_OPENCV
-#include <opencv2/features2d/features2d.hpp>
-#else
-#include <features-2d-helpers/keypoint.h>
-#endif
+#include <iostream>
+#include <agast/wrap-opencv.h>
 
 namespace agast {
 
-#if HAVE_OPENCV
-typedef cv::KeyPoint KeyPoint;
-inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt.x;
-}
-inline float& KeyPointY(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt.y;
-}
-inline const float& KeyPointX(const KeyPoint& keypoint) {
-  return keypoint.pt.x;
-}
-inline const float& KeyPointY(const KeyPoint& keypoint) {
-  return keypoint.pt.y;
-}
-#else
-typedef features_2d::Keypoint KeyPoint;
-inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.x;
-}
-inline float& KeyPointY(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.y;
-}
-inline const float& KeyPointX(const KeyPoint& keypoint) {
-  return keypoint.x;
-}
-inline const float& KeyPointY(const KeyPoint& keypoint) {
-  return keypoint.y;
-}
-#endif  // HAVE_OPENCV
-
 class AstDetector {
  public:
-  AstDetector(int width, int height)
-      : xsize_(width),
-        ysize_(height),
-        b_(-1) { }
+  AstDetector()
+      : xsize(0),
+        ysize(0),
+        b(-1) { }
   AstDetector(int width, int height, int thr)
-      : xsize_(width),
-        ysize_(height),
-        b_(thr) { }
+      : xsize(width),
+        ysize(height),
+        b(thr) { }
   virtual ~AstDetector() { }
-  virtual void Detect(const unsigned char* im,
-                      std::vector<agast::KeyPoint>& corners_all,
-                      const unsigned char* thrmap = 0) = 0;
-  virtual int GetBorderWidth() = 0;
-  void Nms(const unsigned char* im,
-           const std::vector<agast::KeyPoint>& corners_all,
-           std::vector<agast::KeyPoint>& corners_nms);
-  void ProcessImage(const unsigned char* im,
-                    std::vector<agast::KeyPoint>& keypoints_nms) {
-    std::vector<agast::KeyPoint> keypoints;
-    Detect(im, keypoints, 0);
-    Nms(im, keypoints, keypoints_nms);
+  virtual void detect(const unsigned char* im,
+                      std::vector<cv::KeyPoint>& corners_all,
+                      const cv::Mat* thrmap = 0) = 0;
+  virtual int get_borderWidth() = 0;
+  void nms(const unsigned char* im, const std::vector<cv::KeyPoint>& corners_all,
+           std::vector<cv::KeyPoint>& corners_nms);
+  void processImage(const unsigned char* im,
+                    std::vector<cv::KeyPoint>& keypoints_nms) {
+    std::vector<cv::KeyPoint> keypoints;
+    detect(im, keypoints, 0);
+    nms(im, keypoints, keypoints_nms);
   }
-  void SetThreshold(int b_, int upperThreshold = 120,
-                    int lowerThreshold = 50) {
-    b_ = b_;
+  void set_threshold(int b_, int upperThreshold = 120,
+                     int lowerThreshold = 50) {
+    b = b_;
     upperThreshold_ = upperThreshold;
     lowerThreshold_ = lowerThreshold;
-    cmpThreshold_ = (b_ * lowerThreshold_) / 100;
+    cmpThreshold_ = (b * lowerThreshold_) / 100;
   }
-  void SetImageSize(int xsize_, int ysize_) {
-    xsize_ = xsize_;
-    ysize_ = ysize_;
-    InitPattern();
+  void set_imageSize(int xsize_, int ysize_) {
+    xsize = xsize_;
+    ysize = ysize_;
+    init_pattern();
   }
-  virtual int CornerScore(const unsigned char* p)=0;
+  virtual int cornerScore(const unsigned char* p) = 0;
 
  protected:
-  virtual void InitPattern()=0;
-  void Score(const unsigned char* i,
-             const std::vector<agast::KeyPoint>& corners_all);
-  void NonMaximumSuppression(const std::vector<agast::KeyPoint>& corners_all,
-                             std::vector<agast::KeyPoint>& corners_nms);
-  std::vector<int> scores_;
-  std::vector<int> nmsFlags_;
-  int xsize_, ysize_;
-  int b_;
+  virtual void init_pattern()=0;
+  void score(const unsigned char* i, const std::vector<cv::KeyPoint>& corners_all);
+  void nonMaximumSuppression(const std::vector<cv::KeyPoint>& corners_all,
+                             std::vector<cv::KeyPoint>& corners_nms);
+  std::vector<int> scores;
+  std::vector<int> nmsFlags;
+  int xsize, ysize;
+  int b;
   int upperThreshold_;
   int lowerThreshold_;
-  int cmpThreshold_;
+  int cmpThreshold_;  //b*lowerThreshold_)/100, for speed
 };
 }  // namespace agast
-#endif  // CLOSED_FEATURES2D_AGAST_AGASTDETECTOR_H
+
+#endif  // AGASTDETECTOR_H
