@@ -43,7 +43,8 @@
 namespace brisk {
 inline uint8x16_t shuffle_epi8_neon(const uint8x16_t& lhs,
                                     const uint8x16_t& mask) {
-  uint8_t tmp_mask[16], value[16];
+  uint8_t tmp_mask[16];
+  uint8_t value[16];
   vst1q_u8(tmp_mask, mask);
   vst1q_u8(value, lhs);
   uint8_t temp2_upper_array[16];
