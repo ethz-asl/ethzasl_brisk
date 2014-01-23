@@ -46,7 +46,7 @@
 #include <tmmintrin.h>
 #endif  // __ARM_NEON__
 
-#include <brisk/glog.h>
+#include <agast/glog.h>
 
 namespace brisk {
 void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {

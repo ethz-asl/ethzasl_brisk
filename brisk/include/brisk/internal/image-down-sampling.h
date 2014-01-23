@@ -45,7 +45,7 @@
 #include <tmmintrin.h>
 #endif  // __ARM_NEON__
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 
 namespace brisk {
 void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);

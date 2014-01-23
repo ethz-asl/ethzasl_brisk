@@ -35,8 +35,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <brisk/brisk-opencv.h>
-#include <brisk/glog.h>
+#include <agast/glog.h>
+#include <agast/wrap-opencv.h>
 #include <gtest/gtest.h>
 
 #include "./serialization.h"
@@ -84,7 +84,7 @@ void Serialize(const cv::Point2f& pt, std::ofstream* out) {
   Serialize(pt.y, out);
 }
 
-void Serialize(const brisk::KeyPoint& pt, std::ofstream* out) {
+void Serialize(const cv::KeyPoint& pt, std::ofstream* out) {
   CHECK_NOTNULL(out);
   Serialize(pt.angle, out);
 #ifdef HAVE_OPENCV
@@ -104,7 +104,7 @@ void Serialize(const brisk::KeyPoint& pt, std::ofstream* out) {
   Serialize(pt.size, out);
 }
 
-void DeSerialize(brisk::KeyPoint* pt, std::ifstream* in) {
+void DeSerialize(cv::KeyPoint* pt, std::ifstream* in) {
   CHECK_NOTNULL(pt);
   CHECK_NOTNULL(in);
   DeSerialize(&pt->angle, in);

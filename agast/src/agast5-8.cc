@@ -27,55 +27,55 @@
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Machine generated code
-// Probability of an equal pixel on the Bresenham's circle: 0.33 and 0.1
-// Number of equal pixels to switch: 1
-// Number of unequal pixels to switch: 6
-// Memory costs: cache=0.2
-//               same line=1
-//               memory=4
+// Machine generated code.
+// Probability of an equal pixel on the Bresenham's circle: 0.33 and 0.1.
+// Number of equal pixels to switch: 1.
+// Number of unequal pixels to switch: 6.
+// Memory costs: cache = 0.2.
+//               same line = 1.
+//               memory = 4.
 
 #include <stdint.h>																			
 #include <stdlib.h>
 #include <agast/agast5-8.h>
 
 namespace agast {
-void AgastDetector5_8::Detect(const unsigned char* im,
-                              std::vector<agast::KeyPoint>& corners_all,
-                              const unsigned char* /*thrmap*/) {
+void AgastDetector5_8::detect(const unsigned char* im,
+                              std::vector<cv::KeyPoint>& corners_all,
+                              const cv::Mat* /*thrmap*/) {
   int total = 0;
   int nExpectedCorners = corners_all.capacity();
-  agast::KeyPoint h;
+  cv::KeyPoint h;
   register int x, y;
-  register int xsizeB = xsize_ - 2;
-  register int ysizeB = ysize_ - 1;
+  register int xsizeB = xsize - 2;
+  register int ysizeB = ysize - 1;
   register int_fast16_t offset0, offset1, offset2, offset3, offset4, offset5,
       offset6, offset7;
   register int width;
 
   corners_all.resize(0);
 
-  offset0 = s_offset0_;
-  offset1 = s_offset1_;
-  offset2 = s_offset2_;
-  offset3 = s_offset3_;
-  offset4 = s_offset4_;
-  offset5 = s_offset5_;
-  offset6 = s_offset6_;
-  offset7 = s_offset7_;
-  width = xsize_;
+  offset0 = s_offset0;
+  offset1 = s_offset1;
+  offset2 = s_offset2;
+  offset3 = s_offset3;
+  offset4 = s_offset4;
+  offset5 = s_offset5;
+  offset6 = s_offset6;
+  offset7 = s_offset7;
+  width = xsize;
 
-  for (y = 1; y < ysizeB; ++y) {
+  for (y = 1; y < ysizeB; y++) {
     x = 0;
     while (1) {
       homogeneous: {
-        ++x;
+        x++;
         if (x > xsizeB)
           break;
         else {
           register const unsigned char* const p = im + y * width + x;
-          register const int cb = *p + b_;
-          register const int c_b = *p - b_;
+          register const int cb = *p + b;
+          register const int c_b = *p - b;
           if (p[offset0] > cb)
             if (p[offset2] > cb)
               if (p[offset3] > cb)
@@ -372,8 +372,8 @@ void AgastDetector5_8::Detect(const unsigned char* im,
           break;
         else {
           register const unsigned char* const p = im + y * width + x;
-          register const int cb = *p + b_;
-          register const int c_b = *p - b_;
+          register const int cb = *p + b;
+          register const int c_b = *p - b;
           if (p[offset0] > cb)
             if (p[offset2] > cb)
               if (p[offset3] > cb)
@@ -684,8 +684,8 @@ void AgastDetector5_8::Detect(const unsigned char* im,
           corners_all.reserve(nExpectedCorners);
         }
       }
-      agast::KeyPointX(h) = x;
-      agast::KeyPointY(h) = y;
+      agast::KeyPoint(h).x = x;
+      agast::KeyPoint(h).y = y;
       corners_all.push_back(h);
       total++;
       goto homogeneous;
@@ -698,12 +698,12 @@ void AgastDetector5_8::Detect(const unsigned char* im,
           corners_all.reserve(nExpectedCorners);
         }
       }
-      agast::KeyPointX(h) = x;
-      agast::KeyPointY(h) = y;
+      agast::KeyPoint(h).x = x;
+      agast::KeyPoint(h).y = y;
       corners_all.push_back(h);
       total++;
       goto structured;
     }
   }
 }
-}  // namespace agast
+} // namespace agast

@@ -35,11 +35,10 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_OPENCV_H_
-#define BRISK_BRISK_OPENCV_H_
+#ifndef AGAST_WRAP_OPENCV_H_
+#define AGAST_WRAP_OPENCV_H_
 
-#include <brisk/glog.h>
-
+#include <agast/glog.h>
 
 #if HAVE_OPENCV
 #include <opencv2/features2d/features2d.hpp>
@@ -54,21 +53,14 @@ typedef unsigned short ushort;
 #endif
 
 #if HAVE_OPENCV
-namespace brisk {
-typedef cv::KeyPoint KeyPoint;
-inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt.x;
+namespace agast {
+inline cv::Point2f& KeyPoint(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.pt;
 }
-inline float& KeyPointY(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt.y;
+inline const cv::Point2f& KeyPoint(const cv::KeyPoint& keypoint) {
+  return keypoint.pt;
 }
-inline const float& KeyPointX(const KeyPoint& keypoint) {
-  return keypoint.pt.x;
-}
-inline const float& KeyPointY(const KeyPoint& keypoint) {
-  return keypoint.pt.y;
-}
-}  // namespace brisk
+}  // namespace agast
 #else
 
 // A minimal opencv subpart with std::shared allocation.
@@ -249,25 +241,19 @@ typedef Point_<float> Point2f;
 typedef Point_<int> Point2i;
 // Reads a pgm image from file.
 cv::Mat imread(const std::string& filename);
+typedef features_2d::Keypoint KeyPoint;
 }  // namespace cv
 
-namespace brisk {
-typedef features_2d::Keypoint KeyPoint;
-inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.x;
+namespace agast {
+inline cv::KeyPoint& KeyPoint(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint;
 }
-inline float& KeyPointY(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.y;
+inline const cv::KeyPoint& KeyPoint(const cv::KeyPoint& keypoint) {
+  return keypoint;
 }
-inline const float& KeyPointX(const KeyPoint& keypoint) {
-  return keypoint.x;
-}
-inline const float& KeyPointY(const KeyPoint& keypoint) {
-  return keypoint.y;
-}
-}  // namespace brisk
+}  // namespace agast
 
 #endif  // HAVE_OPENCV
 
-#include "./internal/brisk-opencv-inl.h"
-#endif  // BRISK_BRISK_OPENCV_H_
+#include "./internal/wrap-opencv-inl.h"
+#endif  // AGAST_WRAP_OPENCV_H_

@@ -38,8 +38,8 @@
 #include <fstream>  // NOLINT
 #include <string>
 
-#include <brisk/brisk-opencv.h>
-#include <brisk/glog.h>
+#include <agast/wrap-opencv.h>
+#include <agast/glog.h>
 
 namespace {
 void GetNextUncommentedLine(std::ifstream& infile, std::string* input_line) {

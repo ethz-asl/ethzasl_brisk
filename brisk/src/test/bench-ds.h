@@ -48,7 +48,7 @@
 
 #include <brisk/brisk.h>
 #include <brisk/internal/hamming.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 
 #include "./serialization.h"
 
@@ -76,10 +76,10 @@ class DatasetEntry;
       " other " << OTHER.MEMBER << \
       " at " << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl; \
       ss << "this / other: "\
-      << std::endl << "pt.x:\t" << brisk::KeyPointX(THIS) << "\t"\
-      << brisk::KeyPointX(OTHER) << std::endl\
-      << std::endl << "pt.y:\t" << brisk::KeyPointY(THIS) << "\t"\
-      << brisk::KeyPointY(OTHER) << std::endl << std::endl \
+      << std::endl << "pt.x:\t" << agast::KeyPoint(THIS).x << "\t"\
+      << agast::KeyPoint(OTHER).x << std::endl\
+      << std::endl << "pt.y:\t" << agast::KeyPoint(THIS).y << "\t"\
+      << agast::KeyPoint(OTHER).y << std::endl << std::endl \
       << std::endl << "octave:\t" << THIS.octave << "\t" << OTHER.octave \
       << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
@@ -98,10 +98,10 @@ class DatasetEntry;
       << " other " << OTHER.MEMBER \
       << " at " << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl; \
       ss << "this / other: "\
-      << std::endl << "pt.x:\t" << brisk::KeyPointX(THIS) << "\t"\
-      << brisk::KeyPointX(OTHER) << std::endl\
-      << std::endl << "pt.y:\t" << brisk::KeyPointY(THIS) << "\t"\
-      << brisk::KeyPointY(OTHER) << std::endl << std::endl \
+      << std::endl << "pt.x:\t" << agast::KeyPoint(THIS).x << "\t"\
+      << agast::KeyPoint(OTHER).x << std::endl\
+      << std::endl << "pt.y:\t" << agast::KeyPoint(THIS).y << "\t"\
+      << agast::KeyPoint(OTHER).y << std::endl << std::endl \
       << std::endl << "octave:\t" << THIS.octave << "\t" << OTHER.octave \
       << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
@@ -202,7 +202,7 @@ struct DatasetEntry {
   std::map<std::string, Blob> userdata_;
   std::string path_;
   cv::Mat imgGray_;
-  std::vector<KeyPoint> keypoints_;
+  std::vector<cv::KeyPoint> keypoints_;
   cv::Mat descriptors_;
 
  public:
@@ -221,7 +221,7 @@ struct DatasetEntry {
     return imgGray_;
   }
 
-  const std::vector<KeyPoint>& GetKeyPoints() const {
+  const std::vector<cv::KeyPoint>& GetKeyPoints() const {
     return keypoints_;
   }
 
@@ -237,7 +237,7 @@ struct DatasetEntry {
     return &imgGray_;
   }
 
-  std::vector<KeyPoint>* GetKeyPointsMutable() {
+  std::vector<cv::KeyPoint>* GetKeyPointsMutable() {
     return &keypoints_;
   }
 
@@ -252,7 +252,6 @@ struct DatasetEntry {
     path_ = other.path_;
     imgGray_ = other.imgGray_.clone();
     keypoints_ = other.keypoints_;
-    LOG(WARNING) << "Cloning keypoints " << keypoints_.size();
     descriptors_ = other.descriptors_.clone();
     userdata_ = other.userdata_;
   }
@@ -331,7 +330,7 @@ struct DatasetEntry {
     // location to allow detection and description to be done with blocking type
     // optimizations.
     int kpidx = 0;
-    for (std::vector<KeyPoint>::const_iterator it_this = this->keypoints_
+    for (std::vector<cv::KeyPoint>::const_iterator it_this = this->keypoints_
         .begin(), it_other = other.keypoints_.begin(), end_this = this
         ->keypoints_.end(), end_other = other.keypoints_.end();
         it_this != end_this && it_other != end_other;
@@ -433,10 +432,12 @@ struct DatasetEntry {
   void readImage(const std::string& path) {
     path_ = path;
 #if HAVE_OPENCV
-    cv::Mat imgGray_ = cv::imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
+    imgGray_ = cv::imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
 #else
-    cv::Mat imgGray_ = cv::imread(path_);
+    imgGray_ = cv::imread(path_);
 #endif
+    std::cout << "Done reading image: " << imgGray_.rows << "x" <<
+        imgGray_.cols << std::endl;
   }
 
   // Set the static image name to the current image.

@@ -37,7 +37,7 @@
 
 #include <brisk/internal/image-down-sampling.h>
 #include <brisk/internal/macros.h>
-#include <brisk/glog.h>
+#include <agast/glog.h>
 
 namespace {
 #ifdef __ARM_NEON__

@@ -43,7 +43,7 @@
 
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/brisk-layer.h>
 #include <brisk/internal/macros.h>
 
@@ -58,7 +58,7 @@ class  BriskScaleSpace {
   void ConstructPyramid(const cv::Mat& image, uchar _threshold);
 
   // Get Keypoints.
-  void GetKeypoints(std::vector<KeyPoint>* keypoints);
+  void GetKeypoints(std::vector<cv::KeyPoint>* keypoints);
 
  protected:
   // Nonmax suppression:

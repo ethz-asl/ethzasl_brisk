@@ -45,8 +45,8 @@
 #include <limits>
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
-#include <brisk/glog.h>
+#include <agast/wrap-opencv.h>
+#include <agast/glog.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/scale-space-layer.h>
 
@@ -72,10 +72,9 @@ class ScaleSpaceFeatureDetector {
   }
 
   typedef SCORE_CALCULATOR_T ScoreCalculator_t;
-  void detect(const cv::Mat& image, std::vector<KeyPoint>& keypoints,
+  void detect(const cv::Mat& image, std::vector<cv::KeyPoint>& keypoints,
               const cv::Mat& mask = cv::Mat()) const {
     if (image.empty()) {
-      LOG(WARNING) << "Image is empty in BRISK detect";
       return;
     }
     CHECK(
@@ -87,7 +86,7 @@ class ScaleSpaceFeatureDetector {
 
  protected:
   virtual void detectImpl(const cv::Mat& image,
-                          std::vector<KeyPoint>& keypoints,
+                          std::vector<cv::KeyPoint>& keypoints,
                           const cv::Mat& /*mask*/ = cv::Mat()) const {
     // Find out, if we should use the provided keypoints.
     bool usePassedKeypoints = false;

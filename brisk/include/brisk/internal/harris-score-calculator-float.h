@@ -49,7 +49,7 @@
 
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/score-calculator.h>
 

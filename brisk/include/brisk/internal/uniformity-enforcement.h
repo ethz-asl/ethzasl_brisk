@@ -14,14 +14,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
- notice, this list of conditions and the following disclaimer.
- * Redistributions in binary form must reproduce the above copyright
- notice, this list of conditions and the following disclaimer in the
- documentation and/or other materials provided with the distribution.
- * Neither the name of the <organization> nor the
- names of its contributors may be used to endorse or promote products
- derived from this software without specific prior written permission.
+     * Redistributions of source code must retain the above copyright
+       notice, this list of conditions and the following disclaimer.
+     * Redistributions in binary form must reproduce the above copyright
+       notice, this list of conditions and the following disclaimer in the
+       documentation and/or other materials provided with the distribution.
+     * Neither the name of the <organization> nor the
+       names of its contributors may be used to endorse or promote products
+       derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -35,21 +35,14 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_TEST_BINARY_EQUAL_H_
-#define TEST_TEST_BINARY_EQUAL_H_
-#include <string>
-#include <vector>
+#ifndef BRISK_UNIFORMITY_ENFORCEMENT_H_
+#define BRISK_UNIFORMITY_ENFORCEMENT_H_
 
-namespace brisk {
-void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
-                 const std::string& briskbasepath);
-bool RunVerification(const std::vector<DatasetEntry>& current_dataset,
-                     const std::vector<DatasetEntry>& verification_dataset,
-                     bool do_gtest_checks);
-#if HAVE_OPENCV
-void Draw(std::vector<DatasetEntry>& dataset);  // NOLINT
-#endif  // HAVE_OPENCV
-bool RunValidation(bool do_gtest_checks);
-}  // namespace brisk
+template<typename POINT_WITH_SCORE>
+void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
+                               int imgrows, int imgcols, size_t maxNumKpt,
+                               std::vector<POINT_WITH_SCORE>& points);
 
-#endif  // TEST_TEST_BINARY_EQUAL_H_
+#include "./uniformity-enforcement-inl.h"
+
+#endif  // BRISK_UNIFORMITY_ENFORCEMENT_H_
