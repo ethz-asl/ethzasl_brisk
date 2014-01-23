@@ -252,7 +252,6 @@ struct DatasetEntry {
     path_ = other.path_;
     imgGray_ = other.imgGray_.clone();
     keypoints_ = other.keypoints_;
-    LOG(WARNING) << "Cloning keypoints " << keypoints_.size();
     descriptors_ = other.descriptors_.clone();
     userdata_ = other.userdata_;
   }
@@ -433,10 +432,12 @@ struct DatasetEntry {
   void readImage(const std::string& path) {
     path_ = path;
 #if HAVE_OPENCV
-    cv::Mat imgGray_ = cv::imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
+    imgGray_ = cv::imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
 #else
-    cv::Mat imgGray_ = cv::imread(path_);
+    imgGray_ = cv::imread(path_);
 #endif
+    std::cout << "Done reading image: " << imgGray_.rows << "x" <<
+        imgGray_.cols << std::endl;
   }
 
   // Set the static image name to the current image.

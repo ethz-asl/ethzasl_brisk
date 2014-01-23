@@ -58,7 +58,14 @@ class  BriskFeatureDetector : public cv::FeatureDetector {
   virtual ~BriskFeatureDetector() { }
   int threshold;
   int octaves;
- protected:
+#if !HAVE_OPENCV
+  void detect(const cv::Mat& image,
+              std::vector<KeyPoint>& keypoints,
+              const cv::Mat& mask = cv::Mat()) const {
+    detectImpl(image, keypoints, mask);
+  }
+#endif
+protected:
   virtual void detectImpl(const cv::Mat& image,
                           std::vector<cv::KeyPoint>& keypoints,
                           const cv::Mat& mask = cv::Mat()) const;
