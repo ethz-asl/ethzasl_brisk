@@ -17,8 +17,10 @@ adb push test_downsampling /test/
 adb push test_integral_image /test/
 adb push test_popcnt /test/
 adb push test_serialization /test/
+adb push test_binary_equal /test/
 
 adb shell "cd test && ./test_downsampling"
 adb shell "cd test && ./test_integral_image"
 adb shell "cd test && ./test_popcnt"
 adb shell "cd test && ./test_serialization"
+adb shell "cd test && ./test_binary_equal"

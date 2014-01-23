@@ -42,7 +42,7 @@
 namespace agast {
 void AgastDetector5_8::detect(const unsigned char* im,
                               std::vector<cv::KeyPoint>& corners_all,
-                              const cv::Mat* thrmap) {
+                              const cv::Mat* /*thrmap*/) {
   int total = 0;
   int nExpectedCorners = corners_all.capacity();
   cv::KeyPoint h;

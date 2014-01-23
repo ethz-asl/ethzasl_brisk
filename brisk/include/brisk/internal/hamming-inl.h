@@ -51,13 +51,6 @@ static const char __attribute__((aligned(16))) MASK_4bit[16] =
    0xf};
 static const uint8_t __attribute__((aligned(16))) POPCOUNT_4bit[16] = {0, 1, 1,
   2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4};
-#ifdef __ARM_NEON__
-int8_t tmpmask[16] = {0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-    0x0, 0x0, 0x0, 0x0, 0x0};
-static const int8x16_t shiftval = vld1q_s8(tmpmask);
-#else
-static const __m128i shiftval = _mm_set_epi32(0, 0, 0, 4);
-#endif  // __ARM_NEON__
 #endif  // __GNUC__
 #ifdef _MSC_VER
 __declspec(align(16)) static const char MASK_4bit[16] = {0xf, 0xf, 0xf, 0xf,
@@ -91,6 +84,10 @@ __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
 
   const uint8x16_t* end = signature1 + numberOf128BitWords;
   xmm4 = xmm5;  // xmm4 -- local accumulator.
+
+  const int8_t tmpmask_shift[16] = {0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+      0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0};
+  const int8x16_t shiftval = vld1q_s8(tmpmask_shift);
 
   do {
 //    xmm0 = _mm_xor_si128(*signature1++, *signature2++);
@@ -157,7 +154,7 @@ const int numberOf128BitWords) {
 
   const __m128i* end = signature1 + numberOf128BitWords;
   xmm4 = xmm5;  // xmm4 -- local accumulator.
-
+  const __m128i shiftval = _mm_set_epi32(0, 0, 0, 4);
   do {
     xmm0 = _mm_xor_si128(*signature1++, *signature2++);
     xmm1 = xmm0;
