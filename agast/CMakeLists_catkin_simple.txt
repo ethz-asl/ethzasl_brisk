@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(agast)
+project(agast_new)
 
 find_package(redwood_catkin REQUIRED)
 catkin_simple()

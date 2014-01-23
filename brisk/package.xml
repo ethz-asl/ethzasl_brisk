@@ -14,11 +14,11 @@
   <maintainer email="slynen@ethz.ch">slynen</maintainer>
 
   <!-- Add your dependencies using the build_depend tag -->
-  <build_depend>agast</build_depend>
+  <build_depend>agast_new</build_depend>
   <build_depend>features_2d_helpers</build_depend>
   <build_depend>glog_catkin</build_depend>
   
-  <run_depend>agast</run_depend>
+  <run_depend>agast_new</run_depend>
   <run_depend>features_2d_helpers</run_depend>
   <run_depend>glog_catkin</run_depend>
 
