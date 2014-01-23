@@ -27,97 +27,94 @@
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef CLOSED_FEATURES2D_AGAST_OAST9_16_H
-#define CLOSED_FEATURES2D_AGAST_OAST9_16_H
+#ifndef OAST9_16_H
+#define OAST9_16_H
 
 #include <stdint.h>
-#include <vector>
-#include "./ast-detector.h"
+#include <agast/wrap-opencv.h>
+#include <agast/ast-detector.h>
 
 namespace agast {
 
 class Oast9_16_PatternAccessor {
  public:
-  Oast9_16_PatternAccessor(const unsigned char* img, int width, int height)
-      :
-        img_(img),
-        width_(width),
-        height_(height) { }
-
-  void SetCenter(float x_c, float y_c, float scale = 1.0) {
+  Oast9_16_PatternAccessor(cv::Mat& img) {
+    img_ = &img;
+  }
+  void setCenter(float x_c, float y_c, float scale = 1.0) {
     x_c_ = x_c;
     y_c_ = y_c;
     scale_ = scale;
   }
   unsigned char operator()(unsigned int index);
-   private:
-  // image
-  const unsigned char* img_;
-  int width_;
-  int height_;
-  // center & scale
+ private:
+  cv::Mat* img_;
   float x_c_;
   float y_c_;
   float scale_;
-  // the (unscaled) pattern
+  // The (unscaled) pattern.
   static const int pattern_x[17];
   static const int pattern_y[17];
 };
 
 class OastDetector9_16 : public AstDetector {
  public:
-  OastDetector9_16(int width, int height)
-      : AstDetector(width, height) { }
+  OastDetector9_16()
+      : AstDetector() { }
   OastDetector9_16(int width, int height, int thr)
       : AstDetector(width, height, thr) {
-    InitPattern();
+    init_pattern();
   }
   ~OastDetector9_16() { }
-  void Detect(const unsigned char* im, std::vector<agast::KeyPoint>& keypoints,
-              const unsigned char* thrmap = 0);
-  void Nms(const unsigned char* im,
-           const std::vector<agast::KeyPoint>& keypoints,
-           std::vector<agast::KeyPoint>& keypoints_nms);
-  int GetBorderWidth() { return borderWidth; }
-  int CornerScore(const unsigned char* p);
-  int CornerScore(const unsigned char* img, float x, float y, float scale);
+  void detect(const unsigned char* im, std::vector<cv::KeyPoint>& keypoints,
+              const cv::Mat* thrmap = 0);
+  void nms(const unsigned char* im, const std::vector<cv::KeyPoint>& keypoints,
+           std::vector<cv::KeyPoint>& keypoints_nms);
+  int get_borderWidth() {
+    return borderWidth;
+  }
+  int cornerScore(const unsigned char* p);
+  // Re-centering and re-scaling the FAST mask.
+  int cornerScore(cv::Mat& img, float x, float y, float scale);
+
  private:
   static const int borderWidth = 3;
-  int_fast16_t s_offset0_;
-  int_fast16_t s_offset1_;
-  int_fast16_t s_offset2_;
-  int_fast16_t s_offset3_;
-  int_fast16_t s_offset4_;
-  int_fast16_t s_offset5_;
-  int_fast16_t s_offset6_;
-  int_fast16_t s_offset7_;
-  int_fast16_t s_offset8_;
-  int_fast16_t s_offset9_;
-  int_fast16_t s_offset10_;
-  int_fast16_t s_offset11_;
-  int_fast16_t s_offset12_;
-  int_fast16_t s_offset13_;
-  int_fast16_t s_offset14_;
-  int_fast16_t s_offset15_;
+  int_fast16_t s_offset0;
+  int_fast16_t s_offset1;
+  int_fast16_t s_offset2;
+  int_fast16_t s_offset3;
+  int_fast16_t s_offset4;
+  int_fast16_t s_offset5;
+  int_fast16_t s_offset6;
+  int_fast16_t s_offset7;
+  int_fast16_t s_offset8;
+  int_fast16_t s_offset9;
+  int_fast16_t s_offset10;
+  int_fast16_t s_offset11;
+  int_fast16_t s_offset12;
+  int_fast16_t s_offset13;
+  int_fast16_t s_offset14;
+  int_fast16_t s_offset15;
 
-  void InitPattern() {
-    s_offset0_ = (-3) + (0) * xsize_;
-    s_offset1_ = (-3) + (-1) * xsize_;
-    s_offset2_ = (-2) + (-2) * xsize_;
-    s_offset3_ = (-1) + (-3) * xsize_;
-    s_offset4_ = (0) + (-3) * xsize_;
-    s_offset5_ = (1) + (-3) * xsize_;
-    s_offset6_ = (2) + (-2) * xsize_;
-    s_offset7_ = (3) + (-1) * xsize_;
-    s_offset8_ = (3) + (0) * xsize_;
-    s_offset9_ = (3) + (1) * xsize_;
-    s_offset10_ = (2) + (2) * xsize_;
-    s_offset11_ = (1) + (3) * xsize_;
-    s_offset12_ = (0) + (3) * xsize_;
-    s_offset13_ = (-1) + (3) * xsize_;
-    s_offset14_ = (-2) + (2) * xsize_;
-    s_offset15_ = (-3) + (1) * xsize_;
+  void init_pattern() {
+    s_offset0 = (-3) + (0) * xsize;
+    s_offset1 = (-3) + (-1) * xsize;
+    s_offset2 = (-2) + (-2) * xsize;
+    s_offset3 = (-1) + (-3) * xsize;
+    s_offset4 = (0) + (-3) * xsize;
+    s_offset5 = (1) + (-3) * xsize;
+    s_offset6 = (2) + (-2) * xsize;
+    s_offset7 = (3) + (-1) * xsize;
+    s_offset8 = (3) + (0) * xsize;
+    s_offset9 = (3) + (1) * xsize;
+    s_offset10 = (2) + (2) * xsize;
+    s_offset11 = (1) + (3) * xsize;
+    s_offset12 = (0) + (3) * xsize;
+    s_offset13 = (-1) + (3) * xsize;
+    s_offset14 = (-2) + (2) * xsize;
+    s_offset15 = (-3) + (1) * xsize;
   }
 };
 }  // namespace agast
-#endif  // CLOSED_FEATURES2D_AGAST_OAST9_16_H
+
+#endif  // OAST9_16_H

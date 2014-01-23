@@ -41,8 +41,8 @@
 #include <string>
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
-#include <brisk/glog.h>
+#include <agast/wrap-opencv.h>
+#include <agast/glog.h>
 #include <gtest/gtest.h>
 
 #include "./bench-ds.h"
@@ -159,7 +159,7 @@ void SetRandom(cv::Point_<TYPE>* value, int seed) {
   SetRandom(&value->y, rd());
 }
 
-void SetRandom(brisk::KeyPoint* value, int seed) {
+void SetRandom(cv::KeyPoint* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
   SetRandom(&value->angle, rd());

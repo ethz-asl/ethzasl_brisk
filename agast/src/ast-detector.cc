@@ -28,37 +28,37 @@
 //    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <agast/ast-detector.h>
+#include <agast/wrap-opencv.h>
 
 namespace agast {
-void AstDetector::Score(const unsigned char* i,
-                        const std::vector<agast::KeyPoint>& corners_all) {
+
+void AstDetector::score(const unsigned char* i,
+                        const std::vector<cv::KeyPoint>& corners_all) {
   unsigned int n = 0;
   unsigned int num_corners = corners_all.size();
 
-  if (num_corners > scores_.capacity()) {
-    if (scores_.capacity() == 0) {
-      scores_.reserve(512 > num_corners ? 512 : num_corners);
+  if (num_corners > scores.capacity()) {
+    if (scores.capacity() == 0) {
+      scores.reserve(512 > num_corners ? 512 : num_corners);
     } else {
-      unsigned int nScores = scores_.capacity() * 2;
+      unsigned int nScores = scores.capacity() * 2;
       if (num_corners > nScores)
         nScores = num_corners;
-      scores_.reserve(nScores);
+      scores.reserve(nScores);
     }
   }
 
-  scores_.resize(num_corners);
+  scores.resize(num_corners);
 
   for (; n < num_corners; n++)
-    scores_[n] = CornerScore(i + static_cast<int>(
-        agast::KeyPointY(corners_all[n])) * xsize_ +
-                             static_cast<int>(
-                                 agast::KeyPointX(corners_all[n])));
+    scores[n] = cornerScore(i + static_cast<int>(corners_all[n].pt.y) * xsize +
+                            static_cast<int>(corners_all[n].pt.x));
 }
 
-void AstDetector::Nms(const unsigned char* im,
-                      const std::vector<agast::KeyPoint>& corners_all,
-                      std::vector<agast::KeyPoint>& corners_nms) {
-  Score(im, corners_all);
-  NonMaximumSuppression(corners_all, corners_nms);
+void AstDetector::nms(const unsigned char* im,
+                      const std::vector<cv::KeyPoint>& corners_all,
+                      std::vector<cv::KeyPoint>& corners_nms) {
+  score(im, corners_all);
+  nonMaximumSuppression(corners_all, corners_nms);
 }
 }  // namespace agast

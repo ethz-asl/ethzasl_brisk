@@ -48,7 +48,7 @@
 
 #include <brisk/brisk.h>
 #include <brisk/internal/hamming.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 
 #include "./serialization.h"
 
@@ -76,10 +76,10 @@ class DatasetEntry;
       " other " << OTHER.MEMBER << \
       " at " << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl; \
       ss << "this / other: "\
-      << std::endl << "pt.x:\t" << brisk::KeyPointX(THIS) << "\t"\
-      << brisk::KeyPointX(OTHER) << std::endl\
-      << std::endl << "pt.y:\t" << brisk::KeyPointY(THIS) << "\t"\
-      << brisk::KeyPointY(OTHER) << std::endl << std::endl \
+      << std::endl << "pt.x:\t" << agast::KeyPointX(THIS) << "\t"\
+      << agast::KeyPointX(OTHER) << std::endl\
+      << std::endl << "pt.y:\t" << agast::KeyPointY(THIS) << "\t"\
+      << agast::KeyPointY(OTHER) << std::endl << std::endl \
       << std::endl << "octave:\t" << THIS.octave << "\t" << OTHER.octave \
       << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
@@ -98,10 +98,10 @@ class DatasetEntry;
       << " other " << OTHER.MEMBER \
       << " at " << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl; \
       ss << "this / other: "\
-      << std::endl << "pt.x:\t" << brisk::KeyPointX(THIS) << "\t"\
-      << brisk::KeyPointX(OTHER) << std::endl\
-      << std::endl << "pt.y:\t" << brisk::KeyPointY(THIS) << "\t"\
-      << brisk::KeyPointY(OTHER) << std::endl << std::endl \
+      << std::endl << "pt.x:\t" << agast::KeyPointX(THIS) << "\t"\
+      << agast::KeyPointX(OTHER) << std::endl\
+      << std::endl << "pt.y:\t" << agast::KeyPointY(THIS) << "\t"\
+      << agast::KeyPointY(OTHER) << std::endl << std::endl \
       << std::endl << "octave:\t" << THIS.octave << "\t" << OTHER.octave \
       << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
@@ -110,7 +110,11 @@ class DatasetEntry;
       return false;\
     } } while (0);
 
-std::string DescriptorToString(const __m128i * d, int num128Words);
+#ifdef __ARM_NEON__
+  std::string DescriptorToString(const uint8x16_t* d, int num128Words);
+#else
+  std::string DescriptorToString(const __m128i * d, int num128Words);
+#endif
 
 struct Blob {
   friend void Serialize(const Blob& value, std::ofstream* out);
@@ -198,7 +202,7 @@ struct DatasetEntry {
   std::map<std::string, Blob> userdata_;
   std::string path_;
   cv::Mat imgGray_;
-  std::vector<KeyPoint> keypoints_;
+  std::vector<cv::KeyPoint> keypoints_;
   cv::Mat descriptors_;
 
  public:
@@ -217,7 +221,7 @@ struct DatasetEntry {
     return imgGray_;
   }
 
-  const std::vector<KeyPoint>& GetKeyPoints() const {
+  const std::vector<cv::KeyPoint>& GetKeyPoints() const {
     return keypoints_;
   }
 
@@ -233,7 +237,7 @@ struct DatasetEntry {
     return &imgGray_;
   }
 
-  std::vector<KeyPoint>* GetKeyPointsMutable() {
+  std::vector<cv::KeyPoint>* GetKeyPointsMutable() {
     return &keypoints_;
   }
 
@@ -248,7 +252,6 @@ struct DatasetEntry {
     path_ = other.path_;
     imgGray_ = other.imgGray_.clone();
     keypoints_ = other.keypoints_;
-    LOG(WARNING) << "Cloning keypoints " << keypoints_.size();
     descriptors_ = other.descriptors_.clone();
     userdata_ = other.userdata_;
   }
@@ -327,7 +330,7 @@ struct DatasetEntry {
     // location to allow detection and description to be done with blocking type
     // optimizations.
     int kpidx = 0;
-    for (std::vector<KeyPoint>::const_iterator it_this = this->keypoints_
+    for (std::vector<cv::KeyPoint>::const_iterator it_this = this->keypoints_
         .begin(), it_other = other.keypoints_.begin(), end_this = this
         ->keypoints_.end(), end_other = other.keypoints_.end();
         it_this != end_this && it_other != end_other;
@@ -359,12 +362,21 @@ struct DatasetEntry {
     uint32_t hammdisttolerance = 5;
     int numberof128Blocks = other.descriptors_.step * 8 / 128;
     for (int rowidx = 0; rowidx < this->descriptors_.rows; ++rowidx) {
+#ifdef __ARM_NEON__
+      const uint8x16_t* d1 = reinterpret_cast<const uint8x16_t *>(
+          this->descriptors_.data + this->descriptors_.step * rowidx);
+      const uint8x16_t* d2 = reinterpret_cast<const uint8x16_t *>(
+          other.descriptors_.data + other.descriptors_.step * rowidx);
+      uint32_t hammdist = brisk::Hamming::NEONPopcntofXORed(
+          d1, d2, numberof128Blocks);
+#else
       const __m128i* d1 = reinterpret_cast<const __m128i *>(
           this->descriptors_.data + this->descriptors_.step * rowidx);
       const __m128i* d2 = reinterpret_cast<const __m128i *>(
           other.descriptors_.data + other.descriptors_.step * rowidx);
       uint32_t hammdist = brisk::Hamming::SSSE3PopcntofXORed(
           d1, d2, numberof128Blocks);
+#endif
       if (hammdist > hammdisttolerance) {
         std::cout << "Failed on descriptor " << rowidx << ": Hammdist "
         << hammdist << " " << DescriptorToString(d1, numberof128Blocks) <<
@@ -420,10 +432,12 @@ struct DatasetEntry {
   void readImage(const std::string& path) {
     path_ = path;
 #if HAVE_OPENCV
-    cv::Mat imgGray_ = cv::imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
+    imgGray_ = cv::imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
 #else
-    cv::Mat imgGray_ = cv::imread(path_);
+    imgGray_ = cv::imread(path_);
 #endif
+    std::cout << "Done reading image: " << imgGray_.rows << "x" <<
+        imgGray_.cols << std::endl;
   }
 
   // Set the static image name to the current image.

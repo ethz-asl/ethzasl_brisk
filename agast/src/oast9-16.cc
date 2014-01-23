@@ -27,26 +27,28 @@
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-// Machine generated code
-// Probability of an equal pixel on the Bresenham's circle: 0.33
-// Memory costs: cache=0.2
-//               same line=1
-//               memory=4
+// Machine generated code.
+// Probability of an equal pixel on the Bresenham's circle: 0.33.
+// Memory costs: cache = 0.2.
+//               same line = 1.
+//               memory = 4.
 
 #include <stdint.h>																			
 #include <stdlib.h>
+#include <agast/wrap-opencv.h>
 #include <agast/oast9-16.h>
 
 namespace agast {
-void OastDetector9_16::Detect(const unsigned char* im,
-                              std::vector<agast::KeyPoint>& corners_all,
-                              const unsigned char* thrmap) {
+
+void OastDetector9_16::detect(const unsigned char* im,
+                              std::vector<cv::KeyPoint>& corners_all,
+                              const cv::Mat* thrmap) {
   int total = 0;
   int nExpectedCorners = corners_all.capacity();
-  agast::KeyPoint h;
+  cv::KeyPoint h;
   register int x, y;
-  register int xsizeB = xsize_ - 4;
-  register int ysizeB = ysize_ - 3;
+  register int xsizeB = xsize - 4;
+  register int ysizeB = ysize - 3;
   register int_fast16_t offset0, offset1, offset2, offset3, offset4, offset5,
       offset6, offset7, offset8, offset9, offset10, offset11, offset12,
       offset13, offset14, offset15;
@@ -54,23 +56,23 @@ void OastDetector9_16::Detect(const unsigned char* im,
 
   corners_all.resize(0);
 
-  offset0 = s_offset0_;
-  offset1 = s_offset1_;
-  offset2 = s_offset2_;
-  offset3 = s_offset3_;
-  offset4 = s_offset4_;
-  offset5 = s_offset5_;
-  offset6 = s_offset6_;
-  offset7 = s_offset7_;
-  offset8 = s_offset8_;
-  offset9 = s_offset9_;
-  offset10 = s_offset10_;
-  offset11 = s_offset11_;
-  offset12 = s_offset12_;
-  offset13 = s_offset13_;
-  offset14 = s_offset14_;
-  offset15 = s_offset15_;
-  width = xsize_;
+  offset0 = s_offset0;
+  offset1 = s_offset1;
+  offset2 = s_offset2;
+  offset3 = s_offset3;
+  offset4 = s_offset4;
+  offset5 = s_offset5;
+  offset6 = s_offset6;
+  offset7 = s_offset7;
+  offset8 = s_offset8;
+  offset9 = s_offset9;
+  offset10 = s_offset10;
+  offset11 = s_offset11;
+  offset12 = s_offset12;
+  offset13 = s_offset13;
+  offset14 = s_offset14;
+  offset15 = s_offset15;
+  width = xsize;
 
   int b2;
 
@@ -82,18 +84,16 @@ void OastDetector9_16::Detect(const unsigned char* im,
         break;
       else {
         if (thrmap != 0) {
-          /*b2=int(*(thrmap->data+x+y*width));
-           if(b2==0) continue;*/
-          int thrmapvalue = int(*(thrmap + x + y * width));
+          int thrmapvalue = int(*(thrmap->data + x + y * width));
           if (thrmapvalue < cmpThreshold_)
             continue;
           if (thrmapvalue < lowerThreshold_)
             thrmapvalue = lowerThreshold_;
           if (thrmapvalue > upperThreshold_)
             thrmapvalue = upperThreshold_;
-          b2 = ((thrmapvalue) * (b_)) / 100;
+          b2 = ((thrmapvalue) * (b)) / 100;
         } else
-          b2 = b_;
+          b2 = b;
 
         register const unsigned char* const p = im + y * width + x;
         register const int cb = *p + b2;
@@ -1850,8 +1850,8 @@ void OastDetector9_16::Detect(const unsigned char* im,
           corners_all.reserve(nExpectedCorners);
         }
       }
-      agast::KeyPointX(h) = x;
-      agast::KeyPointY(h) = y;
+      h.pt.x = x;
+      h.pt.y = y;
       corners_all.push_back(h);
       total++;
     }

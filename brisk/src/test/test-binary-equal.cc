@@ -44,9 +44,9 @@
 
 #include <brisk/brisk.h>
 #include <brisk/internal/timer.h>
-#include <brisk/glog.h>
+#include <agast/glog.h>
 #include <gtest/gtest.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 
 #include "./bench-ds.h"
 #include "./image-io.h"
@@ -80,7 +80,7 @@ enum Parameters {
   drawKeypoints = false,
 
   BRISK_absoluteThreshold = 20,
-  BRISK_AstThreshold = 30,
+  BRISK_AstThreshold = 70,
   BRISK_uniformityradius = 30,
   BRISK_octaves = 0,
   BRISK_maxNumKpt = 4294967296,
@@ -140,6 +140,11 @@ bool RunValidation(bool do_gtest_checks, DETECTOR& detector,
 
     std::ofstream ofs(std::string(datasetfullpath).c_str());
     serialization::Serialize(dataset, &ofs);
+
+    std::cout << "Serialized dataset:" << std::endl;
+    for (const DatasetEntry& image : dataset) {
+      std::cout << image.print();
+    }
 
     std::cout << "Done. Now re-run to check against the dataset." << std::endl;
     if (do_gtest_checks) {
@@ -316,9 +321,15 @@ TEST(Brisk, ValidationHarris) {
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
 }
+<<<<<<< HEAD
 #endif
 
 TEST(Brisk, ValidationAGAST) {
+=======
+#endif  // __ARM_NEON__
+
+TEST(Brisk, ValidationAST) {
+>>>>>>> e17983b50952779714e1eef729cd24b8bc2d0da3
   bool do_gtest_checks = true;
 
   // Detection.
@@ -327,7 +338,11 @@ TEST(Brisk, ValidationAGAST) {
   // Extraction.
   brisk::BriskDescriptorExtractor extractor;
 
+<<<<<<< HEAD
   std::string datasetfilename = "brisk_verification_agast.set";
+=======
+  std::string datasetfilename = "brisk_verification_ast.set";
+>>>>>>> e17983b50952779714e1eef729cd24b8bc2d0da3
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
 }

@@ -43,7 +43,7 @@
 
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
@@ -71,7 +71,7 @@ class ScaleSpaceLayer {
   }
 
   // Feature detection.
-  void DetectScaleSpaceMaxima(std::vector<KeyPoint>& keypoints,  // NOLINT
+  void DetectScaleSpaceMaxima(std::vector<cv::KeyPoint>& keypoints,  // NOLINT
                               bool enforceUniformity = true, bool doRefinement =
                                   true,
                               bool usePassedKeypoints = false);

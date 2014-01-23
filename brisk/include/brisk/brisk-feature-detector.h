@@ -43,7 +43,7 @@
 
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
@@ -67,7 +67,7 @@ class  BriskFeatureDetector : public cv::FeatureDetector {
 #endif
 protected:
   virtual void detectImpl(const cv::Mat& image,
-                          std::vector<KeyPoint>& keypoints,
+                          std::vector<cv::KeyPoint>& keypoints,
                           const cv::Mat& mask = cv::Mat()) const;
   bool m_suppressScaleNonmaxima;
 };

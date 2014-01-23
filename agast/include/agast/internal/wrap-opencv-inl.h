@@ -34,33 +34,63 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef BRISK_GLOG_H_
-#define BRISK_GLOG_H_
 
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <cassert>
-#include <iosfwd>
+#ifndef AGAST_WRAP_OPENCV_INL_H_
+#define AGAST_WRAP_OPENCV_INL_H_
 
-struct nullstream {};
-template <typename T>
-inline nullstream & operator<<(nullstream& s, const T&) {
-  return s;
+#include <agast/glog.h>
+#include <agast/wrap-opencv.h>
+
+#if !HAVE_OPENCV
+namespace cv {
+inline cv::Mat::MStep::MStep() {
+  buf[0] = buf[1] = 0;
 }
-inline nullstream & operator<<(nullstream& s, std::ostream&(std::ostream&)) {
-  return s;
+inline cv::Mat::MStep::MStep(size_t s) {
+  buf[0] = s;
+  buf[1] = 0;
 }
-static nullstream logstream;
+inline const size_t& cv::Mat::MStep::operator[](int i) const {
+  return buf[i];
+}
+inline size_t& cv::Mat::MStep::operator[](int i) {
+  return buf[i];
+}
+inline cv::Mat::MStep::operator size_t() const {
+  return buf[0];
+}
+inline cv::Mat::MStep& cv::Mat::MStep::operator =(size_t s) {
+  buf[0] = s;
+  return *this;
+}
 
-#define CHECK_NOTNULL(x) assert(x != nullptr);
-#define CHECK_EQ(x, y) assert(x == y); logstream
-#define CHECK_NE(x, y) assert(x != y); logstream
-#define CHECK_GT(x, y) assert(x > y); logstream
-#define CHECK_LT(x, y) assert(x < y); logstream
-#define CHECK_GE(x, y) assert(x >= y); logstream
-#define CHECK_LE(x, y) assert(x <= y); logstream
-#define CHECK(x) assert(x); logstream
+template<typename _Tp> inline _Tp& cv::Mat::at(int i0, int i1) {
+  return ((_Tp*) (data + step.buf[0] * i0))[i1];
+}
 
-#endif  // HAVE_GLOG
-#endif  // BRISK_GLOG_H_
+template<typename _Tp> inline const _Tp& cv::Mat::at(int i0, int i1) const {
+  return ((const _Tp*) (data + step.buf[0] * i0))[i1];
+}
+
+template<typename _Tp> inline _Tp& cv::Mat::at(int i0) {
+  if (isContinuous() || rows == 1)
+    return ((_Tp*) data)[i0];
+  if (cols == 1)
+    return *(_Tp*) (data + step.buf[0] * i0);
+  int i = i0 / cols, j = i0 - i * cols;
+  return ((_Tp*) (data + step.buf[0] * i))[j];
+}
+
+template<typename _Tp> inline const _Tp& cv::Mat::at(int i0) const {
+  if (isContinuous() || rows == 1)
+    return ((const _Tp*) data)[i0];
+  if (cols == 1)
+    return *(const _Tp*) (data + step.buf[0] * i0);
+  int i = i0 / cols, j = i0 - i * cols;
+  return ((const _Tp*) (data + step.buf[0] * i))[j];
+}
+
+
+}  // namespace cv
+#endif  // !HAVE_OPENCV
+#endif  // AGAST_WRAP_OPENCV_INL_H_

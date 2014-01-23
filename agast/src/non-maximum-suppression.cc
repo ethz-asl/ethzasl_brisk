@@ -28,17 +28,19 @@
 //    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdlib.h>
+#include <agast/wrap-opencv.h>
 #include <agast/ast-detector.h>
 
 namespace agast {
-void AstDetector::NonMaximumSuppression(const std::vector<agast::KeyPoint>& corners_all,
-                                        std::vector<agast::KeyPoint>& corners_nms) {
+
+void AstDetector::nonMaximumSuppression(const std::vector<cv::KeyPoint>& corners_all,
+                                        std::vector<cv::KeyPoint>& corners_nms) {
   int currCorner_ind;
   int lastRow = 0, next_lastRow = 0;
-  std::vector<agast::KeyPoint>::const_iterator currCorner;
+  std::vector<cv::KeyPoint>::const_iterator currCorner;
   int lastRowCorner_ind = 0, next_lastRowCorner_ind = 0;
   std::vector<int>::iterator nmsFlags_p;
-  std::vector<agast::KeyPoint>::iterator currCorner_nms;
+  std::vector<cv::KeyPoint>::iterator currCorner_nms;
   int j;
   int numCorners_all = corners_all.size();
   int nMaxCorners = corners_nms.capacity();
@@ -49,92 +51,89 @@ void AstDetector::NonMaximumSuppression(const std::vector<agast::KeyPoint>& corn
     if (nMaxCorners == 0) {
       nMaxCorners = 512 > numCorners_all ? 512 : numCorners_all;
       corners_nms.reserve(nMaxCorners);
-      nmsFlags_.reserve(nMaxCorners);
+      nmsFlags.reserve(nMaxCorners);
     } else {
       nMaxCorners *= 2;
       if (numCorners_all > nMaxCorners)
         nMaxCorners = numCorners_all;
       corners_nms.reserve(nMaxCorners);
-      nmsFlags_.reserve(nMaxCorners);
+      nmsFlags.reserve(nMaxCorners);
     }
   }
   corners_nms.resize(numCorners_all);
-  nmsFlags_.resize(numCorners_all);
+  nmsFlags.resize(numCorners_all);
 
-  nmsFlags_p = nmsFlags_.begin();
+  nmsFlags_p = nmsFlags.begin();
   currCorner_nms = corners_nms.begin();
 
   // Set all flags to MAXIMUM.
   for (j = numCorners_all; j > 0; j--)
     *nmsFlags_p++ = -1;
-  nmsFlags_p = nmsFlags_.begin();
+  nmsFlags_p = nmsFlags.begin();
 
   for (currCorner_ind = 0; currCorner_ind < numCorners_all; currCorner_ind++) {
     int t;
 
     // Check above.
-    if (lastRow + 1 < KeyPointY(*currCorner)) {
+    if (lastRow + 1 < currCorner->pt.y) {
       lastRow = next_lastRow;
       lastRowCorner_ind = next_lastRowCorner_ind;
     }
-    if (next_lastRow != KeyPointY(*currCorner)) {
-      next_lastRow = KeyPointY(*currCorner);
+    if (next_lastRow != currCorner->pt.y) {
+      next_lastRow = currCorner->pt.y;
       next_lastRowCorner_ind = currCorner_ind;
     }
-    if (lastRow + 1 == KeyPointY(*currCorner)) {
+    if (lastRow + 1 == currCorner->pt.y) {
       // Find the corner above the current one.
-      while ((KeyPointX(corners_all[lastRowCorner_ind]) <
-          KeyPointX(*currCorner))
-          && (KeyPointY(corners_all[lastRowCorner_ind]) == lastRow))
+      while ((corners_all[lastRowCorner_ind].pt.x < currCorner->pt.x)
+          && (corners_all[lastRowCorner_ind].pt.y == lastRow))
         lastRowCorner_ind++;
 
-      if ((KeyPointX(corners_all[lastRowCorner_ind]) ==
-          KeyPointX(*currCorner))
+      if ((corners_all[lastRowCorner_ind].pt.x == currCorner->pt.x)
           && (lastRowCorner_ind != currCorner_ind)) {
         int t = lastRowCorner_ind;
-        while (nmsFlags_[t] != -1)  // Find the maximum in this block.
-          t = nmsFlags_[t];
+        while (nmsFlags[t] != -1)  // Find the maximum in this block.
+          t = nmsFlags[t];
 
-        if (scores_[currCorner_ind] < scores_[t]) {
-          nmsFlags_[currCorner_ind] = t;
+        if (scores[currCorner_ind] < scores[t]) {
+          nmsFlags[currCorner_ind] = t;
         } else
-          nmsFlags_[t] = currCorner_ind;
+          nmsFlags[t] = currCorner_ind;
       }
     }
 
     // Check left.
     t = currCorner_ind - 1;
-    if ((currCorner_ind != 0) &&
-        (KeyPointY(corners_all[t]) == KeyPointY(*currCorner))
-        && (KeyPointX(corners_all[t]) + 1 == KeyPointX(*currCorner))) {
-      int currCornerMaxAbove_ind = nmsFlags_[currCorner_ind];
+    if ((currCorner_ind != 0) && (corners_all[t].pt.y == currCorner->pt.y)
+        && (corners_all[t].pt.x + 1 == currCorner->pt.x)) {
+      int currCornerMaxAbove_ind = nmsFlags[currCorner_ind];
 
-      while (nmsFlags_[t] != -1)  // Find the maximum in that area.
-        t = nmsFlags_[t];
+      while (nmsFlags[t] != -1)  // Find the maximum in that area.
+        t = nmsFlags[t];
 
       if (currCornerMaxAbove_ind == -1)  // No maximum above.
           {
         if (t != currCorner_ind) {
-          if (scores_[currCorner_ind] < scores_[t])
-            nmsFlags_[currCorner_ind] = t;
+          if (scores[currCorner_ind] < scores[t])
+            nmsFlags[currCorner_ind] = t;
           else
-            nmsFlags_[t] = currCorner_ind;
+            nmsFlags[t] = currCorner_ind;
         }
       } else	// Maximum above.
       {
         if (t != currCornerMaxAbove_ind) {
-          if (scores_[currCornerMaxAbove_ind] < scores_[t]) {
-            nmsFlags_[currCornerMaxAbove_ind] = t;
-            nmsFlags_[currCorner_ind] = t;
+          if (scores[currCornerMaxAbove_ind] < scores[t]) {
+            nmsFlags[currCornerMaxAbove_ind] = t;
+            nmsFlags[currCorner_ind] = t;
           } else {
-            nmsFlags_[t] = currCornerMaxAbove_ind;
-            nmsFlags_[currCorner_ind] = currCornerMaxAbove_ind;
+            nmsFlags[t] = currCornerMaxAbove_ind;
+            nmsFlags[currCorner_ind] = currCornerMaxAbove_ind;
           }
         }
       }
     }
 
-    ++currCorner;
+    currCorner++;
   }
 
   // Collecting maximum corners.

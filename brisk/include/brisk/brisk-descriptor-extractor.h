@@ -44,7 +44,7 @@
 #include <string>
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/helper-structures.h>
 #include <brisk/internal/macros.h>
 
@@ -81,12 +81,12 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   // This is the subclass keypoint computation implementation:
   // (not meant to be public - hacked)
   virtual void computeImpl(const cv::Mat& image,
-                           std::vector<KeyPoint>& keypoints,
+                           std::vector<cv::KeyPoint>& keypoints,
                            cv::Mat& descriptors) const;
 
   // Opencv 2.1 {
   virtual void compute(const cv::Mat& image,
-                       std::vector<KeyPoint>& keypoints,
+                       std::vector<cv::KeyPoint>& keypoints,
                        cv::Mat& descriptors) const {
     computeImpl(image, keypoints, descriptors);
   }

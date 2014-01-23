@@ -27,53 +27,53 @@
 //    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 //    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef CLOSED_FEATURES2D_AGAST_AGAST5_8_H
-#define CLOSED_FEATURES2D_AGAST_AGAST5_8_H
+#ifndef AGAST5_8_H
+#define AGAST5_8_H
 
 #include <stdint.h>
-#include <vector>
-#include "./ast-detector.h"
+#include <agast/wrap-opencv.h>
+#include <agast/ast-detector.h>
 
 namespace agast {
-
 class AgastDetector5_8 : public AstDetector {
  public:
-  AgastDetector5_8(int width, int height)
-      : AstDetector(width, height) { }
+  AgastDetector5_8() : AstDetector() { }
   AgastDetector5_8(int width, int height, int thr)
       : AstDetector(width, height, thr) {
-    InitPattern();
+    init_pattern();
   }
   ~AgastDetector5_8() { }
-  void Detect(const unsigned char* im, std::vector<agast::KeyPoint>& keypoints,
-              const unsigned char* thrmap);
-  void Nms(const unsigned char* im,
-           const std::vector<agast::KeyPoint>& keypoints,
-           std::vector<agast::KeyPoint>& keypoints_nms);
-  int GetBorderWidth() { return borderWidth; }
-  int CornerScore(const unsigned char* p);
+  void detect(const unsigned char* im, std::vector<cv::KeyPoint>& keypoints,
+              const cv::Mat* thrmap);
+  void nms(const unsigned char* im, const std::vector<cv::KeyPoint>& keypoints,
+           std::vector<cv::KeyPoint>& keypoints_nms);
+  int get_borderWidth() {
+    return borderWidth;
+  }
+  int cornerScore(const unsigned char* p);
 
  private:
   static const int borderWidth = 1;
-  int_fast16_t s_offset0_;
-  int_fast16_t s_offset1_;
-  int_fast16_t s_offset2_;
-  int_fast16_t s_offset3_;
-  int_fast16_t s_offset4_;
-  int_fast16_t s_offset5_;
-  int_fast16_t s_offset6_;
-  int_fast16_t s_offset7_;
+  int_fast16_t s_offset0;
+  int_fast16_t s_offset1;
+  int_fast16_t s_offset2;
+  int_fast16_t s_offset3;
+  int_fast16_t s_offset4;
+  int_fast16_t s_offset5;
+  int_fast16_t s_offset6;
+  int_fast16_t s_offset7;
 
-  void InitPattern() {
-    s_offset0_ = (-1) + (0) * xsize_;
-    s_offset1_ = (-1) + (-1) * xsize_;
-    s_offset2_ = (0) + (-1) * xsize_;
-    s_offset3_ = (1) + (-1) * xsize_;
-    s_offset4_ = (1) + (0) * xsize_;
-    s_offset5_ = (1) + (1) * xsize_;
-    s_offset6_ = (0) + (1) * xsize_;
-    s_offset7_ = (-1) + (1) * xsize_;
+  void init_pattern() {
+    s_offset0 = (-1) + (0) * xsize;
+    s_offset1 = (-1) + (-1) * xsize;
+    s_offset2 = (0) + (-1) * xsize;
+    s_offset3 = (1) + (-1) * xsize;
+    s_offset4 = (1) + (0) * xsize;
+    s_offset5 = (1) + (1) * xsize;
+    s_offset6 = (0) + (1) * xsize;
+    s_offset7 = (-1) + (1) * xsize;
   }
 };
 }  // namespace agast
-#endif  // CLOSED_FEATURES2D_AGAST_AGAST5_8_H
+
+#endif  // AGAST5_8_H

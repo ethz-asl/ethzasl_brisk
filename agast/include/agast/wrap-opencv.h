@@ -35,11 +35,10 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_OPENCV_H_
-#define BRISK_BRISK_OPENCV_H_
+#ifndef AGAST_WRAP_OPENCV_H_
+#define AGAST_WRAP_OPENCV_H_
 
-#include <brisk/glog.h>
-
+#include <agast/glog.h>
 
 #if HAVE_OPENCV
 #include <opencv2/features2d/features2d.hpp>
@@ -54,7 +53,7 @@ typedef unsigned short ushort;
 #endif
 
 #if HAVE_OPENCV
-namespace brisk {
+namespace agast {
 typedef cv::KeyPoint KeyPoint;
 inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
   return keypoint.pt.x;
@@ -68,7 +67,7 @@ inline const float& KeyPointX(const KeyPoint& keypoint) {
 inline const float& KeyPointY(const KeyPoint& keypoint) {
   return keypoint.pt.y;
 }
-}  // namespace brisk
+}  // namespace agast
 #else
 
 // A minimal opencv subpart with std::shared allocation.
@@ -251,7 +250,7 @@ typedef Point_<int> Point2i;
 cv::Mat imread(const std::string& filename);
 }  // namespace cv
 
-namespace brisk {
+namespace agast {
 typedef features_2d::Keypoint KeyPoint;
 inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
   return keypoint.x;
@@ -265,9 +264,9 @@ inline const float& KeyPointX(const KeyPoint& keypoint) {
 inline const float& KeyPointY(const KeyPoint& keypoint) {
   return keypoint.y;
 }
-}  // namespace brisk
+}  // namespace agast
 
 #endif  // HAVE_OPENCV
 
-#include "./internal/brisk-opencv-inl.h"
-#endif  // BRISK_BRISK_OPENCV_H_
+#include "./internal/wrap-opencv-inl.h"
+#endif  // AGAST_WRAP_OPENCV_H_

@@ -41,7 +41,7 @@
 #include <memory>
 
 #include <brisk/brute-force-matcher.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 
 #if HAVE_OPENCV
 namespace brisk {

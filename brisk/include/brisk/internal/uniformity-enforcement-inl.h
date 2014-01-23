@@ -38,7 +38,7 @@
 #ifndef BRISK_UNIFORMITY_ENFORCEMENT_INL_H_
 #define BRISK_UNIFORMITY_ENFORCEMENT_INL_H_
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/timer.h>
 
 template<typename POINT_WITH_SCORE>
