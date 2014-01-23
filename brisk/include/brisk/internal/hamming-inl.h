@@ -46,8 +46,9 @@
 namespace brisk {
 
 #ifdef __GNUC__
-static const char __attribute__((aligned(16))) MASK_4bit[16] = {0xf, 0xf, 0xf,
-  0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf};
+static const char __attribute__((aligned(16))) MASK_4bit[16] =
+  {0xf, 0xf, 0xf,  0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf,
+   0xf};
 static const uint8_t __attribute__((aligned(16))) POPCOUNT_4bit[16] = {0, 1, 1,
   2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4};
 #ifdef __ARM_NEON__
@@ -56,15 +57,15 @@ uint8_t tmpmask[16] = {0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
 static const uint8x16_t shiftval = vld1q_u8(tmpmask);
 #else
 static const __m128i shiftval = _mm_set_epi32(0, 0, 0, 4);
-#endif
-#endif
+#endif  // __ARM_NEON__
+#endif  // __GNUC__
 #ifdef _MSC_VER
 __declspec(align(16)) static const char MASK_4bit[16] = {0xf, 0xf, 0xf, 0xf,
   0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf};
 __declspec(align(16)) static const uint8_t POPCOUNT_4bit[16] = {0, 1, 1, 2,
   1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4};
 static const __m128i shiftval = _mm_set_epi32(0, 0, 0, 4);
-#endif
+#endif  // _MSC_VER
 
 #ifdef __ARM_NEON__
 __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
@@ -130,7 +131,6 @@ __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
   xmm0 = vreinterpretq_u8_u32(
       vaddq_u32(vreinterpretq_u32_u8(xmm0), vreinterpretq_u32_u8(xmm5)));
 //  result = _mm_cvtsi128_si32(xmm0);
-//  vst1q_lane_u32(&result, vreinterpretq_u32_u8(xmm0), 0);
   result = vgetq_lane_u32(vreinterpretq_u32_u8(xmm0), 0);
   return result;
 }
