@@ -75,21 +75,23 @@ void AstDetector::nonMaximumSuppression(const std::vector<cv::KeyPoint>& corners
     int t;
 
     // Check above.
-    if (lastRow + 1 < currCorner->pt.y) {
+    if (lastRow + 1 < agast::KeyPoint(*currCorner).y) {
       lastRow = next_lastRow;
       lastRowCorner_ind = next_lastRowCorner_ind;
     }
-    if (next_lastRow != currCorner->pt.y) {
-      next_lastRow = currCorner->pt.y;
+    if (next_lastRow != agast::KeyPoint(*currCorner).y) {
+      next_lastRow = agast::KeyPoint(*currCorner).y;
       next_lastRowCorner_ind = currCorner_ind;
     }
-    if (lastRow + 1 == currCorner->pt.y) {
+    if (lastRow + 1 == agast::KeyPoint(*currCorner).y) {
       // Find the corner above the current one.
-      while ((corners_all[lastRowCorner_ind].pt.x < currCorner->pt.x)
-          && (corners_all[lastRowCorner_ind].pt.y == lastRow))
+      while ((agast::KeyPoint(corners_all[lastRowCorner_ind]).x <
+          agast::KeyPoint(*currCorner).x)
+          && (agast::KeyPoint(corners_all[lastRowCorner_ind]).y == lastRow))
         lastRowCorner_ind++;
 
-      if ((corners_all[lastRowCorner_ind].pt.x == currCorner->pt.x)
+      if ((agast::KeyPoint(corners_all[lastRowCorner_ind]).x ==
+          agast::KeyPoint(*currCorner).x)
           && (lastRowCorner_ind != currCorner_ind)) {
         int t = lastRowCorner_ind;
         while (nmsFlags[t] != -1)  // Find the maximum in this block.
@@ -104,8 +106,9 @@ void AstDetector::nonMaximumSuppression(const std::vector<cv::KeyPoint>& corners
 
     // Check left.
     t = currCorner_ind - 1;
-    if ((currCorner_ind != 0) && (corners_all[t].pt.y == currCorner->pt.y)
-        && (corners_all[t].pt.x + 1 == currCorner->pt.x)) {
+    if ((currCorner_ind != 0) && (agast::KeyPoint(corners_all[t]).y ==
+        agast::KeyPoint(*currCorner).y)
+        && (agast::KeyPoint(corners_all[t]).x + 1 == agast::KeyPoint(*currCorner).x)) {
       int currCornerMaxAbove_ind = nmsFlags[currCorner_ind];
 
       while (nmsFlags[t] != -1)  // Find the maximum in that area.

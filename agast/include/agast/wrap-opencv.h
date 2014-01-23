@@ -54,17 +54,11 @@ typedef unsigned short ushort;
 
 #if HAVE_OPENCV
 namespace agast {
-inline float& KeyPointX(cv::KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt.x;
+inline cv::Point2f& KeyPoint(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.pt;
 }
-inline float& KeyPointY(cv::KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt.y;
-}
-inline const float& KeyPointX(const cv::KeyPoint& keypoint) {
-  return keypoint.pt.x;
-}
-inline const float& KeyPointY(const cv::KeyPoint& keypoint) {
-  return keypoint.pt.y;
+inline const cv::Point2f& KeyPoint(const cv::KeyPoint& keypoint) {
+  return keypoint.pt;
 }
 }  // namespace agast
 #else
@@ -247,21 +241,15 @@ typedef Point_<float> Point2f;
 typedef Point_<int> Point2i;
 // Reads a pgm image from file.
 cv::Mat imread(const std::string& filename);
+typedef features_2d::Keypoint KeyPoint;
 }  // namespace cv
 
 namespace agast {
-typedef features_2d::Keypoint KeyPoint;
-inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.x;
+inline cv::KeyPoint& KeyPoint(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint;
 }
-inline float& KeyPointY(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.y;
-}
-inline const float& KeyPointX(const KeyPoint& keypoint) {
-  return keypoint.x;
-}
-inline const float& KeyPointY(const KeyPoint& keypoint) {
-  return keypoint.y;
+inline const cv::KeyPoint& KeyPoint(const cv::KeyPoint& keypoint) {
+  return keypoint;
 }
 }  // namespace agast
 

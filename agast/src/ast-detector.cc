@@ -51,8 +51,9 @@ void AstDetector::score(const unsigned char* i,
   scores.resize(num_corners);
 
   for (; n < num_corners; n++)
-    scores[n] = cornerScore(i + static_cast<int>(corners_all[n].pt.y) * xsize +
-                            static_cast<int>(corners_all[n].pt.x));
+    scores[n] = cornerScore(
+        i + static_cast<int>(agast::KeyPoint(corners_all[n]).y)
+        * xsize + static_cast<int>(agast::KeyPoint(corners_all[n]).x));
 }
 
 void AstDetector::nms(const unsigned char* im,

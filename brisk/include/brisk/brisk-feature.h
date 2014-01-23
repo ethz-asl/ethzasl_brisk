@@ -103,6 +103,7 @@ class BriskFeature : public cv::Feature2D {
   virtual void computeImpl(const cv::Mat& image,
                            std::vector<cv::KeyPoint>& keypoints,
                            cv::Mat& descriptors) const {
+
     _briskExtractor.computeImpl(image, keypoints, descriptors);
   }
 

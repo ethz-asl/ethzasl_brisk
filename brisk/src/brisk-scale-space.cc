@@ -109,8 +109,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
       const int num = agastPoints[i].size();
       for (int n = 0; n < num; n++) {
         const cv::KeyPoint& point = agastPoints.at(0)[n];
-        const float& point_x = agast::KeyPointX(point);
-        const float& point_y = agast::KeyPointY(point);
+        const float& point_x = agast::KeyPoint(point).x;
+        const float& point_y = agast::KeyPoint(point).y;
         // First check if it is a maximum:
         if (!IsMax2D(i, point_x, point_y))
           continue;
@@ -145,8 +145,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
     const int num = agastPoints[0].size();
     for (int n = 0; n < num; n++) {
       const cv::KeyPoint& point = agastPoints.at(0)[n];
-      const float& point_x = agast::KeyPointX(point);
-      const float& point_y = agast::KeyPointY(point);
+      const float& point_x = agast::KeyPoint(point).x;
+      const float& point_y = agast::KeyPoint(point).y;
 
       // First check if it is a maximum:
       if (!IsMax2D(0, point_x, point_y))
@@ -182,8 +182,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
     if (i == layers_ - 1) {
       for (int n = 0; n < num; n++) {
         const cv::KeyPoint& point = agastPoints.at(i)[n];
-        const float& point_x = agast::KeyPointX(point);
-        const float& point_y = agast::KeyPointY(point);
+        const float& point_x = agast::KeyPoint(point).x;
+        const float& point_y = agast::KeyPoint(point).y;
         // Consider only 2D maxima...
         if (!IsMax2D(i, point_x, point_y))
           continue;
@@ -221,8 +221,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
       // Not the last layer:
       for (int n = 0; n < num; n++) {
         const cv::KeyPoint& point = agastPoints.at(i)[n];
-        const float& point_x = agast::KeyPointX(point);
-        const float& point_y = agast::KeyPointY(point);
+        const float& point_x = agast::KeyPoint(point).x;
+        const float& point_y = agast::KeyPoint(point).y;
 
         // First check if it is a maximum:
         if (!IsMax2D(i, point_x, point_y))

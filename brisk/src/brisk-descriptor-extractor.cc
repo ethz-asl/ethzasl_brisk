@@ -354,8 +354,8 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
 
 bool RoiPredicate(const float minX, const float minY, const float maxX,
                   const float maxY, const cv::KeyPoint& keyPt) {
-  return (agast::KeyPointX(keyPt) < minX) || (agast::KeyPointX(keyPt) >= maxX)
-      || (agast::KeyPointY(keyPt) < minY) || (agast::KeyPointY(keyPt) >= maxY);
+  return (agast::KeyPoint(keyPt).x < minX) || (agast::KeyPoint(keyPt).x >= maxX)
+      || (agast::KeyPoint(keyPt).y < minY) || (agast::KeyPoint(keyPt).y >= maxY);
 }
 
 // Computes the descriptor.
@@ -447,8 +447,8 @@ void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
     const int& scale = kscales[k];
     int shifter = 0;
     int* pvalues = _values;
-    const float& x = agast::KeyPointX(kp);
-    const float& y = agast::KeyPointY(kp);
+    const float& x = agast::KeyPoint(kp).x;
+    const float& y = agast::KeyPoint(kp).y;
     if (kp.angle == -1) {
       if (!rotationInvariance) {
         // Don't compute the gradient direction, just assign a rotation of 0°.

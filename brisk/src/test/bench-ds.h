@@ -76,10 +76,10 @@ class DatasetEntry;
       " other " << OTHER.MEMBER << \
       " at " << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl; \
       ss << "this / other: "\
-      << std::endl << "pt.x:\t" << agast::KeyPointX(THIS) << "\t"\
-      << agast::KeyPointX(OTHER) << std::endl\
-      << std::endl << "pt.y:\t" << agast::KeyPointY(THIS) << "\t"\
-      << agast::KeyPointY(OTHER) << std::endl << std::endl \
+      << std::endl << "pt.x:\t" << agast::KeyPoint(THIS).x << "\t"\
+      << agast::KeyPoint(OTHER).x << std::endl\
+      << std::endl << "pt.y:\t" << agast::KeyPoint(THIS).y << "\t"\
+      << agast::KeyPoint(OTHER).y << std::endl << std::endl \
       << std::endl << "octave:\t" << THIS.octave << "\t" << OTHER.octave \
       << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
@@ -98,10 +98,10 @@ class DatasetEntry;
       << " other " << OTHER.MEMBER \
       << " at " << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl; \
       ss << "this / other: "\
-      << std::endl << "pt.x:\t" << agast::KeyPointX(THIS) << "\t"\
-      << agast::KeyPointX(OTHER) << std::endl\
-      << std::endl << "pt.y:\t" << agast::KeyPointY(THIS) << "\t"\
-      << agast::KeyPointY(OTHER) << std::endl << std::endl \
+      << std::endl << "pt.x:\t" << agast::KeyPoint(THIS).x << "\t"\
+      << agast::KeyPoint(OTHER).x << std::endl\
+      << std::endl << "pt.y:\t" << agast::KeyPoint(THIS).y << "\t"\
+      << agast::KeyPoint(OTHER).y << std::endl << std::endl \
       << std::endl << "octave:\t" << THIS.octave << "\t" << OTHER.octave \
       << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \

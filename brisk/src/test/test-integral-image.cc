@@ -36,9 +36,9 @@
  */
 
 #include <agast/glog.h>
+#include <agast/wrap-opencv.h>
 #include <gtest/gtest.h>
 
-#include <agast/wrap-opencv.h>
 #include <brisk/internal/integral-image.h>
 
 #ifndef TEST
