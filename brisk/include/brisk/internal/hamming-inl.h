@@ -52,9 +52,9 @@ static const char __attribute__((aligned(16))) MASK_4bit[16] =
 static const uint8_t __attribute__((aligned(16))) POPCOUNT_4bit[16] = {0, 1, 1,
   2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4};
 #ifdef __ARM_NEON__
-uint8_t tmpmask[16] = {0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+int8_t tmpmask[16] = {0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
     0x0, 0x0, 0x0, 0x0, 0x0};
-static const uint8x16_t shiftval = vld1q_u8(tmpmask);
+static const int8x16_t shiftval = vld1q_s8(tmpmask);
 #else
 static const __m128i shiftval = _mm_set_epi32(0, 0, 0, 4);
 #endif  // __ARM_NEON__
@@ -97,11 +97,11 @@ __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
     xmm0 = veorq_u8(*signature1++, *signature2++);
     xmm1 = xmm0;
 //    xmm1 = _mm_srl_epi16(xmm1, shiftval);
-    xmm1 = vsriq_n_u8(xmm1, shiftval, 0);
+    xmm1 = vshlq_u8(xmm1, shiftval);
 //    xmm0 = _mm_and_si128(xmm0, xmm6);  // xmm0 := lower nibbles.
     xmm0 = vandq_u8(xmm0, xmm6);  // xmm0 := lower nibbles.
 //    xmm1 = _mm_and_si128(xmm1, xmm6);  // xmm1 := higher nibbles.
-    xmm1 = vandq_u8(xmm1, xmm6);  // xmm1 := higher nibbles.
+//    xmm1 = vandq_u8(xmm1, xmm6);  // xmm1 := higher nibbles.
     xmm2 = xmm7;
     xmm3 = xmm7;  // Get popcount.
 //    xmm2 = _mm_shuffle_epi8(xmm2, xmm0);  // For all nibbles.

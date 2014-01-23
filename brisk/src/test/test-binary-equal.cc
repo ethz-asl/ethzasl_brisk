@@ -54,6 +54,10 @@
 #define TEST(a, b) int Test_##a##_##b()
 #endif
 
+#ifdef __ARM_NEON__
+// Not implemented.
+#else
+
 namespace brisk {
 
 enum Parameters {
@@ -289,7 +293,7 @@ void Draw(std::vector<DatasetEntry>& dataset) {  // NOLINT
 
 DatasetEntry* DatasetEntry::current_entry = NULL;
 }  // namespace brisk
-
+#endif  // __ARM_NEON__
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
