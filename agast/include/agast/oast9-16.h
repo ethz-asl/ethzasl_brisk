@@ -21,7 +21,7 @@
 #define OAST9_16_H
 
 #include <stdint.h>
-#include <agast/agast-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <agast/ast-detector.h>
 
 namespace agast {

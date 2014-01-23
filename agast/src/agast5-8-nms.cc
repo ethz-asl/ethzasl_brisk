@@ -19,7 +19,7 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <agast/agast-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <agast/agast5-8.h>
 
 namespace agast {

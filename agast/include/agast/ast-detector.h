@@ -21,7 +21,7 @@
 
 #include <vector>
 #include <iostream>
-#include <agast/agast-opencv.h>
+#include <agast/wrap-opencv.h>
 
 namespace agast {
 

@@ -46,7 +46,7 @@
 
 #include <agast/agast5-8.h>
 #include <agast/oast9-16.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
@@ -67,7 +67,7 @@ class  BriskLayer {
 
   // Fast/Agast without non-max suppression.
   void GetAgastPoints(uint8_t threshold,
-                      std::vector<KeyPoint>* keypoints);
+                      std::vector<cv::KeyPoint>* keypoints);
 
   // Get scores - this is in layer coordinates, not scale=1 coordinates!
   uint8_t GetAgastScore(int x, int y, uint8_t threshold);

@@ -17,7 +17,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <agast/ast-detector.h>
-#include <agast/agast-opencv.h>
+#include <agast/wrap-opencv.h>
 
 namespace agast {
 

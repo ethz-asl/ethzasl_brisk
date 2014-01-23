@@ -97,7 +97,7 @@ BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
 // Fast/Agast.
 // Wraps the agast class.
 void BriskLayer::GetAgastPoints(uint8_t threshold,
-                                std::vector<KeyPoint>* keypoints) {
+                                std::vector<cv::KeyPoint>* keypoints) {
   oastDetector_->set_threshold(threshold, upperThreshold_, lowerThreshold_);
   oastDetector_->detect(img_.data, *keypoints, &thrmap_);
 
@@ -106,8 +106,8 @@ void BriskLayer::GetAgastPoints(uint8_t threshold,
   const int imcols = img_.cols;
 
   for (int i = 0; i < num; i++) {
-    const int offs = brisk::KeyPointX((*keypoints)[i]) +
-        brisk::KeyPointY((*keypoints)[i]) * imcols;
+    const int offs = agast::KeyPointX((*keypoints)[i]) +
+        agast::KeyPointY((*keypoints)[i]) * imcols;
     int thr = *(thrmap_.data + offs);
     oastDetector_->set_threshold(thr);
     *(scores_.data + offs) = oastDetector_->cornerScore(img_.data + offs);

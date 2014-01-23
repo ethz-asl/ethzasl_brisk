@@ -39,21 +39,21 @@
  */
 
 #include <brisk/brisk-feature-detector.h>
-#include <brisk/brisk-opencv.h>
-#include <brisk/glog.h>
+#include <agast/wrap-opencv.h>
+#include <agast/glog.h>
 #include <brisk/internal/brisk-scale-space.h>
 
 namespace {
 void RemoveInvalidKeyPoints(const cv::Mat& mask,
-                            std::vector<brisk::KeyPoint>* keypoints) {
+                            std::vector<cv::KeyPoint>* keypoints) {
   CHECK_NOTNULL(keypoints);
   if (mask.empty())
     return;
 
-  std::function<bool(const brisk::KeyPoint& key_pt)> masking =
-      [&mask](const brisk::KeyPoint& key_pt)->bool {
-        const float& keypoint_x = brisk::KeyPointX(key_pt);
-        const float& keypoint_y = brisk::KeyPointY(key_pt);
+  std::function<bool(const cv::KeyPoint& key_pt)> masking =
+      [&mask](const cv::KeyPoint& key_pt)->bool {
+        const float& keypoint_x = agast::KeyPointX(key_pt);
+        const float& keypoint_y = agast::KeyPointY(key_pt);
         return mask.at<uchar>(static_cast<int>(keypoint_y + 0.5f),
             static_cast<int>(keypoint_x + 0.5f)) == 0;
   };
@@ -73,7 +73,7 @@ BriskFeatureDetector::BriskFeatureDetector(int thresh, int octaves,
 }
 
 void BriskFeatureDetector::detectImpl(const cv::Mat& image,
-                                      std::vector<KeyPoint>& keypoints,
+                                      std::vector<cv::KeyPoint>& keypoints,
                                       const cv::Mat& mask) const {
   brisk::BriskScaleSpace briskScaleSpace(octaves, m_suppressScaleNonmaxima);
   briskScaleSpace.ConstructPyramid(image, threshold);

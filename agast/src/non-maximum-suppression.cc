@@ -20,7 +20,7 @@
 //    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdlib.h>
-#include <agast/agast-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <agast/ast-detector.h>
 
 namespace agast {

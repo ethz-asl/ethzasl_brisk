@@ -44,8 +44,8 @@
 #include <type_traits>
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
-#include <brisk/glog.h>
+#include <agast/wrap-opencv.h>
+#include <agast/glog.h>
 
 namespace serialization {
 
@@ -93,9 +93,9 @@ void DeSerialize(cv::Mat* mat, std::ifstream* in);
 
 void Serialize(const cv::Point2f& pt, std::ofstream* out);
 
-void Serialize(const brisk::KeyPoint& pt, std::ofstream* out);
+void Serialize(const cv::KeyPoint& pt, std::ofstream* out);
 
-void DeSerialize(brisk::KeyPoint* pt, std::ifstream* in);
+void DeSerialize(cv::KeyPoint* pt, std::ifstream* in);
 
 void Serialize(const std::string& value, std::ofstream* out);
 
