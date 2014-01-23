@@ -49,7 +49,9 @@ inline uint8x16_t shuffle_epi8_neon(const uint8x16_t& lhs,
   uint8_t temp2_upper_array[16];
   for (int shuffleidx = 0; shuffleidx < 16; ++shuffleidx) {
     temp2_upper_array[shuffleidx] =
-        (tmp_mask[shuffleidx] & 0x80) ? 0 : value[tmp_mask[shuffleidx] & 0x0F];
+        (tmp_mask[shuffleidx] & 0x80)
+        ? 0 :
+            value[tmp_mask[shuffleidx] & 0x0F];
   }
   return vld1q_u8(&temp2_upper_array[0]);
 }

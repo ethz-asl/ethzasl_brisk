@@ -325,8 +325,8 @@ void BriskLayer::CalculateThresholdMap() {
       min = vminq_u8(min, v11);
 
       // Store data back:
-      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmax + x + y * rowstride), max);
-      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmin + x + y * rowstride), min);
+      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmax.data + x + y * rowstride), max);
+      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmin.data + x + y * rowstride), min);
 #else
       // SSE version.
       __m128i v_1_1 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
@@ -393,7 +393,7 @@ void BriskLayer::CalculateThresholdMap() {
       p -= 4;
       uint8x16_t v_22 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
 
-      p = tmpmax + x + (y - 2) * rowstride;
+      p = tmpmax.data + x + (y - 2) * rowstride;
       uint8x16_t max0_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
       p += 4 * rowstride;
       uint8x16_t max02 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
@@ -402,7 +402,7 @@ void BriskLayer::CalculateThresholdMap() {
       p += 4;
       uint8x16_t max20 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
 
-      p = tmpmin + x + (y - 2) * rowstride;
+      p = tmpmin.data + x + (y - 2) * rowstride;
       uint8x16_t min0_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
       p += 4 * rowstride;
       uint8x16_t min02 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
@@ -431,7 +431,7 @@ void BriskLayer::CalculateThresholdMap() {
 
       // Store the data back:
       uint8x16_t diff = vsubq_u8(max, min);
-      vst1q_u8(reinterpret_cast<uint8_t*> (thrmap_.get() + x + y * rowstride),
+      vst1q_u8(reinterpret_cast<uint8_t*> (thrmap_.data + x + y * rowstride),
                diff);
 #else
       // SSE version.

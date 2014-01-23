@@ -87,7 +87,10 @@ TEST(Brisk, PopCount) {
 
   brisk::Hamming popcnt;
 #if __ARM_NEON__
-  ASSERT_TRUE(false) << "Neon test not implemented";
+  const uint8x16_t* signature1 = reinterpret_cast<const uint8x16_t*>(data1);
+  const uint8x16_t* signature2 = reinterpret_cast<const uint8x16_t*>(data2);
+  unsigned int cnt = popcnt.NEONPopcntofXORed(signature1, signature2,
+                                              num_128_words);
 #else
   const __m128i* signature1 = reinterpret_cast<const __m128i*>(data1);
   const __m128i* signature2 = reinterpret_cast<const __m128i*>(data2);
