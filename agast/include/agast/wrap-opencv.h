@@ -54,17 +54,16 @@ typedef unsigned short ushort;
 
 #if HAVE_OPENCV
 namespace agast {
-typedef cv::KeyPoint KeyPoint;
-inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
+inline float& KeyPointX(cv::KeyPoint& keypoint) {  // NOLINT
   return keypoint.pt.x;
 }
-inline float& KeyPointY(KeyPoint& keypoint) {  // NOLINT
+inline float& KeyPointY(cv::KeyPoint& keypoint) {  // NOLINT
   return keypoint.pt.y;
 }
-inline const float& KeyPointX(const KeyPoint& keypoint) {
+inline const float& KeyPointX(const cv::KeyPoint& keypoint) {
   return keypoint.pt.x;
 }
-inline const float& KeyPointY(const KeyPoint& keypoint) {
+inline const float& KeyPointY(const cv::KeyPoint& keypoint) {
   return keypoint.pt.y;
 }
 }  // namespace agast
