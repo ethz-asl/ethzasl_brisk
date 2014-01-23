@@ -1850,8 +1850,8 @@ void OastDetector9_16::detect(const unsigned char* im,
           corners_all.reserve(nExpectedCorners);
         }
       }
-      h.pt.x = x;
-      h.pt.y = y;
+      agast::KeyPoint(h).x = x;
+      agast::KeyPoint(h).y = y;
       corners_all.push_back(h);
       total++;
     }

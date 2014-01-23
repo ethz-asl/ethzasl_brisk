@@ -208,8 +208,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         points.push_back(
             typename ScoreCalculator_t::PointWithScore(
                 keypoints[k].response,
-                agast::KeyPointX(keypoints[k]),
-                agast::KeyPointY(keypoints[k])));
+                agast::KeyPoint(keypoints[k]).x,
+                agast::KeyPoint(keypoints[k]).y));
       }
     }
   } else {

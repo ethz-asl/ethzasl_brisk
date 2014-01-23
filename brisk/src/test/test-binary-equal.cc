@@ -321,15 +321,9 @@ TEST(Brisk, ValidationHarris) {
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
 }
-<<<<<<< HEAD
-#endif
-
-TEST(Brisk, ValidationAGAST) {
-=======
 #endif  // __ARM_NEON__
 
 TEST(Brisk, ValidationAST) {
->>>>>>> e17983b50952779714e1eef729cd24b8bc2d0da3
   bool do_gtest_checks = true;
 
   // Detection.
@@ -338,11 +332,7 @@ TEST(Brisk, ValidationAST) {
   // Extraction.
   brisk::BriskDescriptorExtractor extractor;
 
-<<<<<<< HEAD
-  std::string datasetfilename = "brisk_verification_agast.set";
-=======
   std::string datasetfilename = "brisk_verification_ast.set";
->>>>>>> e17983b50952779714e1eef729cd24b8bc2d0da3
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
 }

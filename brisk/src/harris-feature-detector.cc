@@ -314,8 +314,8 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
   // Go through the sorted keypoints and reject too close ones.
   for (std::vector<cv::KeyPoint>::iterator it = keypoints.begin();
       it != keypoints.end(); ++it) {
-    const int cy = (agast::KeyPointY(*it) / 2 + 16);
-    const int cx = (agast::KeyPointX(*it) / 2 + 16);
+    const int cy = (agast::KeyPoint(*it).x / 2 + 16);
+    const int cx = (agast::KeyPoint(*it).y / 2 + 16);
 
     // Check if this is a high enough score.
     const double s0 = static_cast<double>(occupancy.at<uchar>(cy, cx));

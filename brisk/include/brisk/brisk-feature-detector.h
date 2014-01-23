@@ -60,7 +60,7 @@ class  BriskFeatureDetector : public cv::FeatureDetector {
   int octaves;
 #if !HAVE_OPENCV
   void detect(const cv::Mat& image,
-              std::vector<KeyPoint>& keypoints,
+              std::vector<cv::KeyPoint>& keypoints,
               const cv::Mat& mask = cv::Mat()) const {
     detectImpl(image, keypoints, mask);
   }
