@@ -603,7 +603,7 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
         // Upper row:
         uint8_t upper[16];
-        vst1q_u8(&upper[0], vhaddq_u8(vhaddq_u8(first, second), first));
+        vst1q_u8(&upper[0], vrhaddq_u8(vrhaddq_u8(first, second), first));
         uint8_t shufuppermask1[16];
         uint8_t shufuppermask2[16];
         for (int shuffleidx = 0; shuffleidx < 16; ++shuffleidx) {
@@ -624,13 +624,13 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
           0 : upper[tmpmask[shuffleidx] & 0x0F];
         }
         uint8x16_t temp2_upper = vld1q_u8(&temp2_upper_array[0]);
-        uint8x16_t result_upper = vhaddq_u8(vhaddq_u8(temp2_upper, temp1_upper),
+        uint8x16_t result_upper = vrhaddq_u8(vrhaddq_u8(temp2_upper, temp1_upper),
             temp2_upper);
 
         // Lower row:
 
         uint8_t lower[16];
-        vst1q_u8(&lower[0], vhaddq_u8(vhaddq_u8(third, second), third));
+        vst1q_u8(&lower[0], vrhaddq_u8(vrhaddq_u8(third, second), third));
         uint8_t shuflowermask1[16];
         uint8_t shuflowermask2[16];
         uint8_t temp2_lower_array[16];
@@ -649,7 +649,7 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
             vld1q_u8(&shuflowermask2[0]));
         uint8x16_t temp2_lower = vld1q_u8(&temp2_lower_array[0]);
 
-        uint8x16_t result_lower = vhaddq_u8(vhaddq_u8(temp2_lower, temp1_lower),
+        uint8x16_t result_lower = vrhaddq_u8(vrhaddq_u8(temp2_lower, temp1_lower),
             temp2_lower);
 
         // Store:
