@@ -80,7 +80,7 @@ enum Parameters {
   drawKeypoints = false,
 
   BRISK_absoluteThreshold = 20,
-  BRISK_AstThreshold = 30,
+  BRISK_AstThreshold = 70,
   BRISK_uniformityradius = 30,
   BRISK_octaves = 0,
   BRISK_maxNumKpt = 4294967296,
@@ -140,6 +140,11 @@ bool RunValidation(bool do_gtest_checks, DETECTOR& detector,
 
     std::ofstream ofs(std::string(datasetfullpath).c_str());
     serialization::Serialize(dataset, &ofs);
+
+    std::cout << "Serialized dataset:" << std::endl;
+    for (const DatasetEntry& image : dataset) {
+      std::cout << image.print();
+    }
 
     std::cout << "Done. Now re-run to check against the dataset." << std::endl;
     if (do_gtest_checks) {
