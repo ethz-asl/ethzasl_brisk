@@ -19,8 +19,8 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <agast/cvWrapper.h>
-#include <agast/agast5_8.h>
+#include <agast/agast-opencv.h>
+#include <agast/agast5-8.h>
 
 namespace agast {
 

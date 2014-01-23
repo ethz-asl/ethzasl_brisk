@@ -21,9 +21,8 @@
 #define OAST9_16_H
 
 #include <stdint.h>
-#include "AstDetector.h"
-
-struct CvPoint;
+#include <agast/agast-opencv.h>
+#include <agast/ast-detector.h>
 
 namespace agast {
 
@@ -57,10 +56,10 @@ class OastDetector9_16 : public AstDetector {
     init_pattern();
   }
   ~OastDetector9_16() { }
-  void detect(const unsigned char* im, std::vector<CvPoint>& keypoints,
+  void detect(const unsigned char* im, std::vector<cv::KeyPoint>& keypoints,
               const cv::Mat* thrmap = 0);
-  void nms(const unsigned char* im, const std::vector<CvPoint>& keypoints,
-           std::vector<CvPoint>& keypoints_nms);
+  void nms(const unsigned char* im, const std::vector<cv::KeyPoint>& keypoints,
+           std::vector<cv::KeyPoint>& keypoints_nms);
   int get_borderWidth() {
     return borderWidth;
   }

@@ -25,17 +25,17 @@
 
 #include <stdint.h>																			
 #include <stdlib.h>
-#include <agast/cvWrapper.h>
-#include <agast/oast9_16.h>
+#include <agast/agast-opencv.h>
+#include <agast/oast9-16.h>
 
 namespace agast {
 
 void OastDetector9_16::detect(const unsigned char* im,
-                              std::vector<CvPoint>& corners_all,
+                              std::vector<cv::KeyPoint>& corners_all,
                               const cv::Mat* thrmap) {
   int total = 0;
   int nExpectedCorners = corners_all.capacity();
-  CvPoint h;
+  cv::KeyPoint h;
   register int x, y;
   register int xsizeB = xsize - 4;
   register int ysizeB = ysize - 3;
@@ -1840,8 +1840,8 @@ void OastDetector9_16::detect(const unsigned char* im,
           corners_all.reserve(nExpectedCorners);
         }
       }
-      h.x = x;
-      h.y = y;
+      h.pt.x = x;
+      h.pt.y = y;
       corners_all.push_back(h);
       total++;
     }

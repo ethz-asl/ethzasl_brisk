@@ -21,9 +21,8 @@
 #define AGAST7_12D_H
 
 #include <stdint.h>
-#include "AstDetector.h"
-
-struct CvPoint;
+#include <agast/agast-opencv.h>
+#include <agast/ast-detector.h>
 
 namespace agast {
 class AgastDetector7_12d : public AstDetector {
@@ -34,10 +33,10 @@ class AgastDetector7_12d : public AstDetector {
     init_pattern();
   }
   ~AgastDetector7_12d() { }
-  void detect(const unsigned char* im, std::vector<CvPoint>& keypoints,
+  void detect(const unsigned char* im, std::vector<cv::KeyPoint>& keypoints,
               const cv::Mat* thrmap);
-  void nms(const unsigned char* im, const std::vector<CvPoint>& keypoints,
-           std::vector<CvPoint>& keypoints_nms);
+  void nms(const unsigned char* im, const std::vector<cv::KeyPoint>& keypoints,
+           std::vector<cv::KeyPoint>& keypoints_nms);
   int get_borderWidth() {
     return borderWidth;
   }

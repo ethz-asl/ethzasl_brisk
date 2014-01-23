@@ -27,16 +27,15 @@
 
 #include <stdint.h>																			
 #include <stdlib.h>
-#include <agast/cvWrapper.h>
-#include <agast/agast5_8.h>
+#include <agast/agast5-8.h>
 
 namespace agast {
 void AgastDetector5_8::detect(const unsigned char* im,
-                              std::vector<CvPoint>& corners_all,
+                              std::vector<cv::KeyPoint>& corners_all,
                               const cv::Mat* thrmap) {
   int total = 0;
   int nExpectedCorners = corners_all.capacity();
-  CvPoint h;
+  cv::KeyPoint h;
   register int x, y;
   register int xsizeB = xsize - 2;
   register int ysizeB = ysize - 1;
@@ -675,8 +674,8 @@ void AgastDetector5_8::detect(const unsigned char* im,
           corners_all.reserve(nExpectedCorners);
         }
       }
-      h.x = x;
-      h.y = y;
+      h.pt.x = x;
+      h.pt.y = y;
       corners_all.push_back(h);
       total++;
       goto homogeneous;
@@ -689,8 +688,8 @@ void AgastDetector5_8::detect(const unsigned char* im,
           corners_all.reserve(nExpectedCorners);
         }
       }
-      h.x = x;
-      h.y = y;
+      h.pt.x = x;
+      h.pt.y = y;
       corners_all.push_back(h);
       total++;
       goto structured;
