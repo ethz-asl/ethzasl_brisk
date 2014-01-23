@@ -44,13 +44,6 @@
 #include <algorithm>
 #include <vector>
 
-#ifdef __ARM_NEON__
-#include <arm_neon.h>
-#else
-#include <emmintrin.h>
-#include <tmmintrin.h>
-#endif  // __ARM_NEON__
-
 #include <brisk/internal/uniformity-enforcement.h>
 #include <brisk/internal/image-down-sampling.h>
 #include <brisk/internal/timer.h>
