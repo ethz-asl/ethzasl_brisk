@@ -1,64 +1,56 @@
 //
-//    AGAST, an adaptive and generic corner detector based on the
-//              accelerated segment test for a 8 pixel mask
+//    oast9 - OAST, an optimal corner detector based on the
+//              accelerated segment test for a 16 pixel mask
 //
 //    Copyright (C) 2010  Elmar Mair
-//    All rights reserved.
 //
-//    Redistribution and use in source and binary forms, with or without
-//    modification, are permitted provided that the following conditions are met:
-//        * Redistributions of source code must retain the above copyright
-//          notice, this list of conditions and the following disclaimer.
-//        * Redistributions in binary form must reproduce the above copyright
-//          notice, this list of conditions and the following disclaimer in the
-//          documentation and/or other materials provided with the distribution.
-//        * Neither the name of the <organization> nor the
-//          names of its contributors may be used to endorse or promote products
-//          derived from this software without specific prior written permission.
+//    This program is free software: you can redistribute it and/or modify
+//    it under the terms of the GNU General Public License as published by
+//    the Free Software Foundation, either version 3 of the License, or
+//    (at your option) any later version.
 //
-//    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-//    ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-//    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-//    DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
-//    DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-//    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-//    LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-//    ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-//    (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-//    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//    This program is distributed in the hope that it will be useful,
+//    but WITHOUT ANY WARRANTY; without even the implied warranty of
+//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//    GNU General Public License for more details.
+//
+//    You should have received a copy of the GNU General Public License
+//    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <cmath>
-#include <agast/oast9-16.h>
+#include <agast/cvWrapper.h>
+#include <agast/oast9_16.h>
 
 namespace agast {
+
 // Using also bisection as propsed by Edward Rosten in FAST,
 // but it is based on the OAST.
-int OastDetector9_16::CornerScore(const unsigned char* p) {
-  int bmin = b_;
+int OastDetector9_16::cornerScore(const unsigned char* p) {
+  int bmin = b;
   int bmax = 255;
   int b_test = (bmax + bmin) / 2;
 
-  register int_fast16_t offset0 = s_offset0_;
-  register int_fast16_t offset1 = s_offset1_;
-  register int_fast16_t offset2 = s_offset2_;
-  register int_fast16_t offset3 = s_offset3_;
-  register int_fast16_t offset4 = s_offset4_;
-  register int_fast16_t offset5 = s_offset5_;
-  register int_fast16_t offset6 = s_offset6_;
-  register int_fast16_t offset7 = s_offset7_;
-  register int_fast16_t offset8 = s_offset8_;
-  register int_fast16_t offset9 = s_offset9_;
-  register int_fast16_t offset10 = s_offset10_;
-  register int_fast16_t offset11 = s_offset11_;
-  register int_fast16_t offset12 = s_offset12_;
-  register int_fast16_t offset13 = s_offset13_;
-  register int_fast16_t offset14 = s_offset14_;
-  register int_fast16_t offset15 = s_offset15_;
+  register int_fast16_t offset0 = s_offset0;
+  register int_fast16_t offset1 = s_offset1;
+  register int_fast16_t offset2 = s_offset2;
+  register int_fast16_t offset3 = s_offset3;
+  register int_fast16_t offset4 = s_offset4;
+  register int_fast16_t offset5 = s_offset5;
+  register int_fast16_t offset6 = s_offset6;
+  register int_fast16_t offset7 = s_offset7;
+  register int_fast16_t offset8 = s_offset8;
+  register int_fast16_t offset9 = s_offset9;
+  register int_fast16_t offset10 = s_offset10;
+  register int_fast16_t offset11 = s_offset11;
+  register int_fast16_t offset12 = s_offset12;
+  register int_fast16_t offset13 = s_offset13;
+  register int_fast16_t offset14 = s_offset14;
+  register int_fast16_t offset15 = s_offset15;
 
   while (1) {
     register const int cb = *p + b_test;
+    //std::cout << offset0 << ".";
     register const int c_b = *p - b_test;
     if (p[offset0] > cb)
       if (p[offset2] > cb)
@@ -1973,24 +1965,24 @@ int OastDetector9_16::CornerScore(const unsigned char* p) {
   }
 }
 
-int OastDetector9_16::CornerScore(const unsigned char* img, float x, float y, float scale) {
+int OastDetector9_16::cornerScore(cv::Mat& img, float x, float y, float scale) {
   // check boundary
   if (floor(x - 3.5 * scale) < 0)
     return 0;
   if (floor(y - 3.5 * scale) < 0)
     return 0;
-  if (ceil(x + 3.5 * scale) >= xsize_)
+  if (ceil(x + 3.5 * scale) >= img.cols)
     return 0;
-  if (ceil(y + 3.5 * scale) >= xsize_)
+  if (ceil(y + 3.5 * scale) >= img.cols)
     return 0;
 
-  int bmin = b_;
+  int bmin = b;
   //std::cout <<int(b)<<":";
   int bmax = 255;
   int b_test = (bmax + bmin) / 2;
 
-  Oast9_16_PatternAccessor accessor(img, xsize_, ysize_);
-  accessor.SetCenter(x, y, scale);
+  Oast9_16_PatternAccessor accessor(img);
+  accessor.setCenter(x, y, scale);
 
   while (1) {
     register const int cb = accessor(16) + b_test;
@@ -3921,8 +3913,8 @@ unsigned char Oast9_16_PatternAccessor::operator()(unsigned int index) {
   // get the position
   const float xf = x_c_ + pattern_x[index] * scale_;
   const float yf = y_c_ + pattern_y[index] * scale_;
-  const unsigned char* image = img_;
-  const int& imagecols = width_;
+  const cv::Mat& image = *img_;
+  const int& imagecols = image.cols;
 
   // get the sigma_half:
   const float sigma_half = std::max(0.5, scale_ / 2.0);
@@ -3964,22 +3956,22 @@ unsigned char Oast9_16_PatternAccessor::operator()(unsigned int index) {
   const int r_y1_i = r_y1 * scaling;
 
   // now the calculation:
-  const unsigned char* ptr = image + x_left + imagecols * y_top;
+  uchar* ptr = image.data + x_left + imagecols * y_top;
   // first row:
   ret_val = A * int(*ptr);
   ptr++;
-  const unsigned char* end1 = ptr + dx;
+  const uchar* end1 = ptr + dx;
   for (; ptr < end1; ptr++) {
     ret_val += r_y_1_i * int(*ptr);
   }
   ret_val += B * int(*ptr);
   // middle ones:
   ptr += imagecols - dx - 1;
-  const unsigned char* end_j = ptr + dy * imagecols;
+  uchar* end_j = ptr + dy * imagecols;
   for (; ptr < end_j; ptr += imagecols - dx - 1) {
     ret_val += r_x_1_i * int(*ptr);
     ptr++;
-    const unsigned char* end2 = ptr + dx;
+    const uchar* end2 = ptr + dx;
     for (; ptr < end2; ptr++) {
       ret_val += int(*ptr) * scaling;
     }
@@ -3988,7 +3980,7 @@ unsigned char Oast9_16_PatternAccessor::operator()(unsigned int index) {
   // last row:
   ret_val += D * int(*ptr);
   ptr++;
-  const unsigned char* end3 = ptr + dx;
+  const uchar* end3 = ptr + dx;
   for (; ptr < end3; ptr++) {
     ret_val += r_y1_i * int(*ptr);
   }
