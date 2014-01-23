@@ -49,13 +49,15 @@ namespace brisk {
 static const char __attribute__((aligned(16))) MASK_4bit[16] =
   {0xf, 0xf, 0xf,  0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf, 0xf,
    0xf};
-static const uint8_t __attribute__((aligned(16))) POPCOUNT_4bit[16] = {0, 1, 1,
-  2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4};
 #ifdef __ARM_NEON__
-int8_t tmpmask[16] = {0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+static const uint8_t __attribute__((aligned(16))) POPCOUNT_4bit[16] =
+{4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0};
+int8_t tmpmask[16] = {0x0, 0x0, 0x0, 0x4, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
     0x0, 0x0, 0x0, 0x0, 0x0};
 static const int8x16_t shiftval = vld1q_s8(tmpmask);
 #else
+static const uint8_t __attribute__((aligned(16))) POPCOUNT_4bit[16] = {0, 1, 1,
+  2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4};
 static const __m128i shiftval = _mm_set_epi32(0, 0, 0, 4);
 #endif  // __ARM_NEON__
 #endif  // __GNUC__
@@ -71,67 +73,20 @@ static const __m128i shiftval = _mm_set_epi32(0, 0, 0, 4);
 __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
                                                const uint8x16_t* signature2,
                                                const int numberOf128BitWords) {
+  CHECK_NOTNULL(signature1);
+  CHECK_NOTNULL(signature2);
   uint32_t result = 0;
 
-  uint8x16_t xmm0;
-  uint8x16_t xmm1;
-  uint8x16_t xmm2;
-  uint8x16_t xmm3;
-  uint8x16_t xmm4;
-  uint8x16_t xmm5;
-  uint8x16_t xmm6;
-  uint8x16_t xmm7;
+  for (int i = 0; i < numberOf128BitWords; ++i) {
+    uint8x16_t xor_result = veorq_u8(signature1[i], signature2[i]);
+    uint8x16_t set_bits = vcntq_u8(xor_result);
+    uint8_t result_popcnt[16];
+    vst1q_u8(result_popcnt, set_bits);
+    for (int j = 0; j < 16; ++j) {
+      result += result_popcnt[j];
+    }
+  }
 
-//  xmm7 = _mm_load_si128(reinterpret_cast<const __m128i*>(POPCOUNT_4bit));
-  xmm7 = vld1q_u8(reinterpret_cast<const uint8_t*>(POPCOUNT_4bit));
-//  xmm6 = _mm_load_si128(reinterpret_cast<const __m128i*>(MASK_4bit));
-  xmm6 = vld1q_u8(reinterpret_cast<const uint8_t*>(MASK_4bit));
-//  xmm5 = _mm_setzero_si128();  // xmm5 -- global accumulator.
-  xmm5 = vdupq_n_u8(0);  // xmm5 -- global accumulator.
-
-  const uint8x16_t* end = signature1 + numberOf128BitWords;
-  xmm4 = xmm5;  // xmm4 -- local accumulator.
-
-  do {
-//    xmm0 = _mm_xor_si128(*signature1++, *signature2++);
-    xmm0 = veorq_u8(*signature1++, *signature2++);
-    xmm1 = xmm0;
-//    xmm1 = _mm_srl_epi16(xmm1, shiftval);
-    xmm1 = vshlq_u8(xmm1, shiftval);
-//    xmm0 = _mm_and_si128(xmm0, xmm6);  // xmm0 := lower nibbles.
-    xmm0 = vandq_u8(xmm0, xmm6);  // xmm0 := lower nibbles.
-//    xmm1 = _mm_and_si128(xmm1, xmm6);  // xmm1 := higher nibbles.
-//    xmm1 = vandq_u8(xmm1, xmm6);  // xmm1 := higher nibbles.
-    xmm2 = xmm7;
-    xmm3 = xmm7;  // Get popcount.
-//    xmm2 = _mm_shuffle_epi8(xmm2, xmm0);  // For all nibbles.
-    xmm2 = brisk::shuffle_epi8_neon(xmm2, xmm0);  // For all nibbles.
-//    xmm3 = _mm_shuffle_epi8(xmm3, xmm1);  // Using PSHUFB.
-    xmm3 = brisk::shuffle_epi8_neon(xmm3, xmm1);  // Using PSHUFB.
-//    xmm4 = _mm_add_epi8(xmm4, xmm2);  // Update local.
-    xmm4 = vaddq_u8(xmm4, xmm2);  // Update local.
-//    xmm4 = _mm_add_epi8(xmm4, xmm3);  // Accumulator.
-    xmm4 = vaddq_u8(xmm4, xmm3);  // Accumulator.
-  }while (signature1 < end);
-  // Update global accumulator(two 32-bits counters).
-//  xmm4 = _mm_sad_epu8(xmm4, xmm5);
-  xmm4 = vabdq_u8(xmm4, xmm5);
-//  xmm5 = _mm_add_epi32(xmm5, xmm4);
-  xmm5 = vreinterpretq_u8_u32(
-      vaddq_u32(vreinterpretq_u32_u8(xmm5), vreinterpretq_u32_u8(xmm4)));
-  // finally add together 32-bits counters stored in global accumulator.
-  // __asm__ volatile(
-  //  "movhlps  %%xmm5, %%xmm0 \n"
-  //  xmm0 = _mm_cvtps_epi32(_mm_movehl_ps(_mm_cvtepi32_ps(xmm0),
-  //      _mm_cvtepi32_ps(xmm5)));
-  int64x1_t upper_xmm5 = vget_high_u64(vreinterpretq_u64_u8(xmm5));
-  int64x1_t upper_xmm0 = vget_high_u64(vreinterpretq_u64_u8(xmm0));
-  xmm0 = vreinterpretq_u8_u64(vcombine_u64(upper_xmm0, upper_xmm5));
-//  xmm0 = _mm_add_epi32(xmm0, xmm5);
-  xmm0 = vreinterpretq_u8_u32(
-      vaddq_u32(vreinterpretq_u32_u8(xmm0), vreinterpretq_u32_u8(xmm5)));
-//  result = _mm_cvtsi128_si32(xmm0);
-  result = vgetq_lane_u32(vreinterpretq_u32_u8(xmm0), 0);
   return result;
 }
 #else
@@ -140,6 +95,9 @@ __inline__ uint32_t Hamming::NEONPopcntofXORed(const uint8x16_t* signature1,
 __inline__ uint32_t Hamming::SSSE3PopcntofXORed(const __m128i* signature1,
 const __m128i*signature2,
 const int numberOf128BitWords) {
+  CHECK_NOTNULL(signature1);
+  CHECK_NOTNULL(signature2);
+
   uint32_t result = 0;
 
   register __m128i xmm0;
