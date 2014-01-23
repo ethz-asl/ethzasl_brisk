@@ -55,10 +55,6 @@
 #define TEST(a, b) int Test_##a##_##b()
 #endif
 
-#ifdef __ARM_NEON__
-// Not implemented.
-#else
-
 namespace brisk {
 
 void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
