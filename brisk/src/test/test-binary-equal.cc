@@ -243,9 +243,6 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
       timerextract.Stop();
     }
   }
-
-  // Output timing.
-  brisk::timing::Timing::Print(std::cout);
 }
 
 bool RunVerification(const std::vector<DatasetEntry>& current_dataset,
@@ -335,6 +332,8 @@ TEST(Brisk, ValidationAST) {
   std::string datasetfilename = "brisk_verification_ast.set";
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
+
+  brisk::timing::Timing::Print(std::cout);
 }
 
 int main(int argc, char** argv) {
