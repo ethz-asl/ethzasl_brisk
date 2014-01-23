@@ -282,15 +282,6 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
     }
   }
 #else
-  // Take care with border...
-  const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
-  // Note: leftoverCols can be zero but this still false...
-  const bool noleftover = (srcimg.cols % 16) == 0;
-
-  // Make sure the destination image is of the right size:
-  assert(srcimg.cols / 2 == dstimg.cols);
-  assert(srcimg.rows / 2 == dstimg.rows);
-
   // Mask needed later:
   register __m128i mask = _mm_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF00FF,
                                         0x00FF00FF);
