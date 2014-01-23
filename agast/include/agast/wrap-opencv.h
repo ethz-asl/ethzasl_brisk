@@ -54,11 +54,10 @@ typedef unsigned short ushort;
 
 #if HAVE_OPENCV
 namespace agast {
-typedef cv::KeyPoint KeyPoint;
-inline cv::Point2f& KeyPoint(KeyPoint& keypoint) {  // NOLINT
+inline cv::Point2f& KeyPoint(cv::KeyPoint& keypoint) {  // NOLINT
   return keypoint.pt;
 }
-inline const cv::Point2f& KeyPoint(const KeyPoint& keypoint) {
+inline const cv::Point2f& KeyPoint(const cv::KeyPoint& keypoint) {
   return keypoint.pt;
 }
 }  // namespace agast
