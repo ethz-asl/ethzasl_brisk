@@ -61,6 +61,8 @@ static nullstream logstream;
 #define CHECK_GE(x, y) assert(x >= y); logstream
 #define CHECK_LE(x, y) assert(x <= y); logstream
 #define CHECK(x) assert(x); logstream
+#define LOG(WARNING) std ::cout
+
 
 #endif  // HAVE_GLOG
 #endif  // BRISK_GLOG_H_
