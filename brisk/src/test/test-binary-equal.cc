@@ -80,6 +80,7 @@ enum Parameters {
   drawKeypoints = false,
 
   BRISK_absoluteThreshold = 20,
+  BRISK_AstThreshold = 30,
   BRISK_uniformityradius = 30,
   BRISK_octaves = 0,
   BRISK_maxNumKpt = 4294967296,
@@ -296,8 +297,10 @@ void Draw(std::vector<DatasetEntry>& dataset) {  // NOLINT
 DatasetEntry* DatasetEntry::current_entry = NULL;
 }  // namespace brisk
 
-
-TEST(Brisk, Validation) {
+#ifdef __ARM_NEON__
+// Harris not implemented, so test not possible.
+#else
+TEST(Brisk, ValidationHarris) {
   bool do_gtest_checks = true;
 
   // Detection.
@@ -309,7 +312,22 @@ TEST(Brisk, Validation) {
   brisk::BriskDescriptorExtractor extractor(brisk::BRISK_rotationestimation,
                                             brisk::BRISK_scaleestimation);
 
-  std::string datasetfilename = "brisk_verification_data.set";
+  std::string datasetfilename = "brisk_verification_harris.set";
+
+  RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
+}
+#endif
+
+TEST(Brisk, ValidationAGAST) {
+  bool do_gtest_checks = true;
+
+  // Detection.
+  brisk::BriskFeatureDetector detector(brisk::BRISK_AstThreshold);
+
+  // Extraction.
+  brisk::BriskDescriptorExtractor extractor;
+
+  std::string datasetfilename = "brisk_verification_agast.set";
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
 }
