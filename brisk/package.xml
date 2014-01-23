@@ -1,12 +1,12 @@
 <?xml version="1.0"?>
 <package>
-  <name>brisk</name>
+  <name>brisk_new</name>
   <version>0.0.0</version>
   <description>The brisk package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <maintainer email="slynen@ethz.ch">slynen</maintainer>
-  <license>CLOSED</license>
+  <license>New BSD</license>
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
   <!-- Authors do not have to be maintianers, but could be -->
