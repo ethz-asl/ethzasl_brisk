@@ -152,7 +152,6 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
     0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
   register uint8x16_t mask = vld1q_u8(&tmpmask[0]);
   // To be added in order to make successive averaging correct:
-  // TODO(slynen): The elements were set to 11 before, which seemed wrong.
   uint8_t tmpones[16] = {0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1,
       0x1, 0x1, 0x1, 0x1, 0x1};
   register uint8x16_t ones = vld1q_u8(&tmpones[0]);
@@ -173,9 +172,9 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
   const unsigned int end = hsize / 2;
   bool half_end;
   if (hsize % 2 == 0)
-  half_end = false;
+    half_end = false;
   else
-  half_end = true;
+    half_end = true;
   while (p2 < p_end) {
     for (unsigned int i = 0; i < end; ++i) {
       // Load the two blocks of memory:
@@ -190,7 +189,7 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
       }
 
       uint8x16_t result1 = vqaddq_u8(upper, ones);
-      result1 = vhaddq_u8(upper, lower);  // Average - halving add.
+      result1 = vrhaddq_u8(upper, lower);  // Average - halving add.
 
       ++p1;
       ++p2;
@@ -199,26 +198,27 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
       upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
       lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
       uint8x16_t result2 = vqaddq_u8(upper, ones);
-      result2 = vhaddq_u8(upper, lower);
+      result2 = vrhaddq_u8(upper, lower);
       // Calculate the shifted versions:
 
       uint8x16_t result1_shifted = shiftrightonebyte(result1);
 
       uint8x16_t result2_shifted = shiftrightonebyte(result2);
+
       // Pack:
       uint8x16_t result = vcombine_u8(
           // AND and saturate to uint8.
-          vmovn_u16(vreinterpretq_u16_u8(vandq_u8(result1, mask))),
+          vqmovn_u16(vreinterpretq_u16_u8(vandq_u8(result1, mask))),
           // Combine.
-          vqmovun_s16(vreinterpretq_s16_u8(vandq_u8(result2, mask))));
+          vqmovn_u16(vreinterpretq_u16_u8(vandq_u8(result2, mask))));
 
       uint8x16_t result_shifted = vcombine_u8(
           // AND and saturate to uint8.
-          vmovn_u16(vreinterpretq_u16_u8(vandq_u8(result1_shifted, mask))),
-          vqmovun_s16(vreinterpretq_s16_u8(vandq_u8(result2_shifted, mask))));
+          vqmovn_u16(vreinterpretq_u16_u8(vandq_u8(result1_shifted, mask))),
+          vqmovn_u16(vreinterpretq_u16_u8(vandq_u8(result2_shifted, mask))));
       // Average for the second time:
 
-      result = vhaddq_u8(result, result_shifted);
+      result = vrhaddq_u8(result, result_shifted);
 
       // Store.
       vst1q_u8(reinterpret_cast<uint8_t*>(p_dest), result);
@@ -241,7 +241,7 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
       }
 
       uint8x16_t result1 = vqaddq_u8(upper, ones);
-      result1 = vhaddq_u8(upper, lower);
+      result1 = vrhaddq_u8(upper, lower);
 
       // Increment the pointers:
       ++p1;
