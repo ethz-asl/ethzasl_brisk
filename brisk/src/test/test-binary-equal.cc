@@ -55,6 +55,10 @@
 #define TEST(a, b) int Test_##a##_##b()
 #endif
 
+#ifdef __ARM_NEON__
+// Not implemented.
+#else
+
 namespace brisk {
 
 void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
@@ -316,9 +320,9 @@ TEST(Brisk, ValidationHarris) {
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
 }
-#endif
+#endif  // __ARM_NEON__
 
-TEST(Brisk, ValidationAGAST) {
+TEST(Brisk, ValidationAST) {
   bool do_gtest_checks = true;
 
   // Detection.
@@ -327,7 +331,7 @@ TEST(Brisk, ValidationAGAST) {
   // Extraction.
   brisk::BriskDescriptorExtractor extractor;
 
-  std::string datasetfilename = "brisk_verification_agast.set";
+  std::string datasetfilename = "brisk_verification_ast.set";
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
 }

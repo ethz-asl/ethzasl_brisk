@@ -46,7 +46,9 @@
 #include <brisk/brisk-opencv.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/vectorized-filters.h>
-
+#ifdef __ARM_NEON__
+// Not implemented.
+#else
 namespace brisk {
 #if HAVE_OPENCV
 class HarrisFeatureDetector : public cv::FeatureDetector {
@@ -77,4 +79,5 @@ class HarrisFeatureDetector {
   cv::Mat _LUT;
 };
 }  // namespace brisk
+#endif  // __ARM_NEON__
 #endif  // BRISK_HARRIS_FEATURE_DETECTOR_H_

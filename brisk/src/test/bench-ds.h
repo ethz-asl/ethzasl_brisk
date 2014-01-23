@@ -110,7 +110,11 @@ class DatasetEntry;
       return false;\
     } } while (0);
 
-std::string DescriptorToString(const __m128i * d, int num128Words);
+#ifdef __ARM_NEON__
+  std::string DescriptorToString(const uint8x16_t* d, int num128Words);
+#else
+  std::string DescriptorToString(const __m128i * d, int num128Words);
+#endif
 
 struct Blob {
   friend void Serialize(const Blob& value, std::ofstream* out);
@@ -359,12 +363,21 @@ struct DatasetEntry {
     uint32_t hammdisttolerance = 5;
     int numberof128Blocks = other.descriptors_.step * 8 / 128;
     for (int rowidx = 0; rowidx < this->descriptors_.rows; ++rowidx) {
+#ifdef __ARM_NEON__
+      const uint8x16_t* d1 = reinterpret_cast<const uint8x16_t *>(
+          this->descriptors_.data + this->descriptors_.step * rowidx);
+      const uint8x16_t* d2 = reinterpret_cast<const uint8x16_t *>(
+          other.descriptors_.data + other.descriptors_.step * rowidx);
+      uint32_t hammdist = brisk::Hamming::NEONPopcntofXORed(
+          d1, d2, numberof128Blocks);
+#else
       const __m128i* d1 = reinterpret_cast<const __m128i *>(
           this->descriptors_.data + this->descriptors_.step * rowidx);
       const __m128i* d2 = reinterpret_cast<const __m128i *>(
           other.descriptors_.data + other.descriptors_.step * rowidx);
       uint32_t hammdist = brisk::Hamming::SSSE3PopcntofXORed(
           d1, d2, numberof128Blocks);
+#endif
       if (hammdist > hammdisttolerance) {
         std::cout << "Failed on descriptor " << rowidx << ": Hammdist "
         << hammdist << " " << DescriptorToString(d1, numberof128Blocks) <<

@@ -39,19 +39,15 @@
  */
 
 #ifdef __ARM_NEON__
-#include <arm_neon.h>
+// Not implemented.
 #else
 #include <emmintrin.h>
-#include <tmmintrin.h>
-#endif  // __ARM_NEON__
 #include <stdint.h>
+#include <tmmintrin.h>
 
 #include <brisk/internal/harris-scores.h>
 
 namespace brisk {
-#ifdef __ARM_NEON__
-// Not implemented.
-#else
 // This is a straightforward harris corner implementation.
 // This is REALLY bad, it performs so many passes through the data...
 void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
@@ -279,6 +275,6 @@ void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
   delete[] DxDy1;
   delete[] DyDy1;
 }
-#endif  // __ARM_NEON__
 }  // namespace brisk
 
+#endif  // __ARM_NEON__

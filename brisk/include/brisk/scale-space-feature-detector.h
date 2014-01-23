@@ -75,7 +75,6 @@ class ScaleSpaceFeatureDetector {
   void detect(const cv::Mat& image, std::vector<KeyPoint>& keypoints,
               const cv::Mat& mask = cv::Mat()) const {
     if (image.empty()) {
-      LOG(WARNING) << "Image is empty in BRISK detect";
       return;
     }
     CHECK(

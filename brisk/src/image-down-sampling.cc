@@ -39,9 +39,24 @@
 #include <brisk/internal/macros.h>
 #include <brisk/glog.h>
 
+namespace {
+#ifdef __ARM_NEON__
+inline uint8x16_t shiftrightonebyte(uint8x16_t& data) {
+  uint64x2_t newval = vreinterpretq_u64_u8(data);
+  uint64x2_t shiftval = vshrq_n_u64(newval, 8);
+  uint8x16_t shiftval8 = vreinterpretq_u8_u64(shiftval);
+  uint8_t lostbyte = vgetq_lane_u8(data, 9);
+  shiftval8 = vsetq_lane_u8(lostbyte, shiftval8, 8);
+  return shiftval8;
+}
+#endif
+}
+
 namespace brisk {
 void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 #ifdef __ARM_NEON__
+  static_cast<void>(srcimg);
+  static_cast<void>(dstimg);
   CHECK(false) << "HalfSample16 not implemented for NEON.";
 #else
   // Make sure the destination image is of the right size:
@@ -125,6 +140,12 @@ void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
 // Half sampling.
 void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
+const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
+const bool noleftover = (srcimg.cols % 16) == 0;
+
+// Make sure the destination image is of the right size:
+CHECK_EQ(srcimg.cols / 2, dstimg.cols);
+CHECK_EQ(srcimg.rows / 2, dstimg.rows);
 #ifdef __ARM_NEON__
   // Mask needed later:
   uint8_t tmpmask[16] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
@@ -137,16 +158,16 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
   register uint8x16_t ones = vld1q_u8(&tmpones[0]);
 
   // Data pointers:
-  const uint8x16_t* p1 = reinterpret_cast<const uint8x16_t*>(srcimg);
+  const uint8x16_t* p1 = reinterpret_cast<const uint8x16_t*>(srcimg.data);
   const uint8x16_t* p2 = reinterpret_cast<const uint8x16_t*>(
-      srcimg + src_width);
-  uint8x16_t* p_dest = reinterpret_cast<uint8x16_t*>(dstimg);
+      srcimg.data + srcimg.cols);
+  uint8x16_t* p_dest = reinterpret_cast<uint8x16_t*>(dstimg.data);
 
   unsigned char* p_dest_char;
 
   // Size:
-  const unsigned int size = (src_width * src_height) / 16;
-  const unsigned int hsize = src_width / 16;
+  const unsigned int size = (srcimg.cols * srcimg.rows) / 16;
+  const unsigned int hsize = srcimg.cols / 16;
   const uint8x16_t* p_end = p1 + size;
   unsigned int row = 0;
   const unsigned int end = hsize / 2;
@@ -200,7 +221,7 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       result = vhaddq_u8(result, result_shifted);
 
       // Store.
-      vst1q_u8(static_cast<uint8_t*>(p_dest), result);
+      vst1q_u8(reinterpret_cast<uint8_t*>(p_dest), result);
 
       ++p1;
       ++p2;
@@ -238,8 +259,8 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
     if (noleftover) {
       ++row;
-      p_dest = reinterpret_cast<uint8x16_t*>(dstimg + row * dst_width);
-      p1 = reinterpret_cast<const uint8x16_t*>(srcimg + 2 * row * src_width);
+      p_dest = reinterpret_cast<uint8x16_t*>(dstimg.data + row * dstimg.cols);
+      p1 = reinterpret_cast<const uint8x16_t*>(srcimg.data + 2 * row * srcimg.cols);
       p2 = p1 + hsize;
     } else {
       const unsigned char* p1_src_char =
@@ -253,22 +274,14 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       }
       // Done with the two rows:
       ++row;
-      p_dest = reinterpret_cast<uint8x16_t*>(dstimg + row * dst_width);
-      p1 = reinterpret_cast<const uint8x16_t*>(srcimg + 2 * row * src_width);
-      p2 = reinterpret_cast<const uint8x16_t*>(srcimg + (2 * row + 1) *
-                                               src_width);
+      p_dest = reinterpret_cast<uint8x16_t*>(dstimg.data + row * dstimg.cols);
+      p1 = reinterpret_cast<const uint8x16_t*>(srcimg.data + 2 * row *
+                                               srcimg.cols);
+      p2 = reinterpret_cast<const uint8x16_t*>(srcimg.data + (2 * row + 1) *
+          srcimg.cols);
     }
   }
 #else
-  // Take care with border...
-  const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
-  // Note: leftoverCols can be zero but this still false...
-  const bool noleftover = (srcimg.cols % 16) == 0;
-
-  // Make sure the destination image is of the right size:
-  assert(srcimg.cols / 2 == dstimg.cols);
-  assert(srcimg.rows / 2 == dstimg.rows);
-
   // Mask needed later:
   register __m128i mask = _mm_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF00FF,
                                         0x00FF00FF);
@@ -394,6 +407,8 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
 void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 #ifdef __ARM_NEON__
+  static_cast<void>(srcimg);
+  static_cast<void>(dstimg);
   CHECK(false) << "Twothirdsample16 not implemented for NEON";
 #else
   assert(srcimg.type() == CV_16UC1);
@@ -551,8 +566,8 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
   const uint16_t leftoverCols = ((srcimg.cols / 3) * 3) % 15;
 
   // Make sure the destination image is of the right size:
-  assert((srcimg.cols / 3) * 2 == dstimg.cols);
-  assert((srcimg.rows / 3) * 2 == dstimg.rows);
+  CHECK_EQ((srcimg.cols / 3) * 2, dstimg.cols);
+  CHECK_EQ((srcimg.rows / 3) * 2, dstimg.rows);
 
   // Data pointers:
   unsigned char* p1 = srcimg.data;
@@ -638,7 +653,7 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
             temp2_lower);
 
         // Store:
-        if (i * 10 + 16 > dst_width) {
+        if (i * 10 + 16 > dstimg.cols) {
           // Mask necessary data to store and mask with data already existing:
           uint8x16_t uppermasked = vorrq_u8(vandq_u8(result_upper, store_mask),
               vld1q_u8(p_dest1));
@@ -687,11 +702,11 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       row_dest += 2;
 
       // Reset pointers:
-      p1 = srcimg + row * src_width;
-      p2 = p1 + src_width;
-      p3 = p2 + src_width;
-      p_dest1 = dstimg + row_dest * dst_width;
-      p_dest2 = p_dest1 + dst_width;
+      p1 = srcimg.data + row * srcimg.cols;
+      p2 = p1 + srcimg.cols;
+      p3 = p2 + srcimg.cols;
+      p_dest1 = dstimg.data + row_dest * dstimg.cols;
+      p_dest2 = p_dest1 + dstimg.cols;
     }
 #else
   // Masks:
