@@ -106,7 +106,6 @@ void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
         static_cast<uint8_t>(ceil(LUT.at<float>(y, 14) * nsc)),
         static_cast<uint8_t>(ceil(LUT.at<float>(y, 15) * nsc))};
       // Lacking the masked storing intrinsics in NEON.
-//        static_cast<uint8_t>(_LUT.at<float>(y, 15) * nsc);
       uint8x16_t mask1 = vld1q_u8(tmpstore_mask1);
 
       const uint8_t tmpstore_mask2[16] = {
@@ -127,7 +126,6 @@ void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
         static_cast<uint8_t>(ceil(LUT.at<float>(y, 30) * nsc)),
         0};
       // Lacking the masked storing intrinsics in NEON.
-//        static_cast<uint8_t>(_LUT.at<float>(y, 30) * nsc);
       uint8x16_t mask2 = vld1q_u8(tmpstore_mask2);
 
       vst1q_u8(&occupancy.at<uint8_t>(cy + y - 15, cx - 15),
