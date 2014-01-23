@@ -39,6 +39,8 @@
 #include <iomanip>
 #include <iostream>  // NOLINT
 #include <list>
+#include <string>
+#include <vector>
 
 #include <brisk/brisk.h>
 #include <brisk/internal/timer.h>
@@ -48,13 +50,25 @@
 
 #include "./bench-ds.h"
 #include "./image-io.h"
-#include "./test-binary-equal.h"
 
 #ifndef TEST
 #define TEST(a, b) int Test_##a##_##b()
 #endif
 
 namespace brisk {
+
+void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
+                 const std::string& briskbasepath);
+bool RunVerification(const std::vector<DatasetEntry>& current_dataset,
+                     const std::vector<DatasetEntry>& verification_dataset,
+                     bool do_gtest_checks);
+#if HAVE_OPENCV
+void Draw(std::vector<DatasetEntry>& dataset);  // NOLINT
+#endif  // HAVE_OPENCV
+template<typename DETECTOR, typename DESCRIPTOR_EXTRACTOR>
+bool RunValidation(bool do_gtest_checks, DETECTOR& detector,
+                   DESCRIPTOR_EXTRACTOR& extractor,
+                   const std::string& datasetfilename);
 
 enum Parameters {
   doKeypointDetection = true,
@@ -73,18 +87,15 @@ enum Parameters {
   BRISK_rotationestimation = true
 };
 
-TEST(Brisk, Validation) {
-  bool do_gtest_checks = true;
-  RunValidation(do_gtest_checks);
-}
-
-bool RunValidation(bool do_gtest_checks) {
+template<typename DETECTOR, typename DESCRIPTOR_EXTRACTOR>
+bool RunValidation(bool do_gtest_checks, DETECTOR& detector,
+                   DESCRIPTOR_EXTRACTOR& extractor,
+                   const std::string& datasetfilename) {
 #ifdef TEST_IN_SOURCE
     std::string imagepath = "src/test/test_data/";
 #else
     std::string imagepath = "./test_data/";
 #endif
-  std::string datasetfilename = "brisk_verification_data.set";
 
   std::string datasetfullpath = imagepath + "/" + datasetfilename;
 
@@ -120,7 +131,7 @@ bool RunValidation(bool do_gtest_checks) {
     }
 
     // Run the pipeline.
-    RunPipeline(dataset, datasetfullpath);
+    RunPipeline(dataset, datasetfullpath, detector, extractor);
 
     // Save the dataset.
     std::cout << "Done handling images from " << imagepath << ". " << std::endl
@@ -158,7 +169,7 @@ bool RunValidation(bool do_gtest_checks) {
       it->clear_processed_data(doDescriptorComputation, doKeypointDetection);
 
     // Run the pipeline on the dataset.
-    RunPipeline(dataset, datasetfullpath);
+    RunPipeline(dataset, datasetfullpath, detector, extractor);
 
     // Run the verification.
     bool verificationOK = RunVerification(dataset, verifyds, do_gtest_checks);
@@ -177,7 +188,7 @@ bool RunValidation(bool do_gtest_checks) {
 
     for (int i = 0; verificationOK && i < 20; ++i) {
       brisk::timing::DebugTimer timerOverall("BRISK overall");
-      RunPipeline(dataset, datasetfullpath);
+      RunPipeline(dataset, datasetfullpath, detector, extractor);
       timerOverall.Stop();
     }
 
@@ -185,13 +196,11 @@ bool RunValidation(bool do_gtest_checks) {
   }
 }
 
+template<typename DETECTOR, typename DESCRIPTOR_EXTRACTOR>
 void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
-                 const std::string& /*briskbasepath*/) {
+                 const std::string& /*briskbasepath*/, DETECTOR& detector,
+                 DESCRIPTOR_EXTRACTOR& extractor) {
   std::cout << "Running the pipeline..." << std::endl;
-
-  // Detection.
-  brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>
-    detector(BRISK_octaves, BRISK_uniformityradius, BRISK_absoluteThreshold);
 
   if (doKeypointDetection || dataset.at(0).GetKeyPoints().empty()) {
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
@@ -216,9 +225,6 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
     }
   }
 
-  // Extraction.
-  brisk::BriskDescriptorExtractor descriptorExtractor(BRISK_rotationestimation,
-                                                      BRISK_scaleestimation);
   if (doDescriptorComputation || dataset.at(0).GetDescriptors().rows == 0) {
     for (std::vector<DatasetEntry>::iterator it = dataset.begin(), end = dataset
         .end(); it != end; ++it) {
@@ -226,7 +232,7 @@ void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
       it->setThisAsCurrentEntry();
       brisk::timing::DebugTimer timerextract(
           DatasetEntry::getCurrentEntry()->GetPath() + "_extract");
-      descriptorExtractor.compute(it->GetImage(), *it->GetKeyPointsMutable(),
+      extractor.compute(it->GetImage(), *it->GetKeyPointsMutable(),
                                   *it->GetDescriptorsMutable());
       timerextract.Stop();
     }
@@ -290,6 +296,23 @@ void Draw(std::vector<DatasetEntry>& dataset) {  // NOLINT
 DatasetEntry* DatasetEntry::current_entry = NULL;
 }  // namespace brisk
 
+
+TEST(Brisk, Validation) {
+  bool do_gtest_checks = true;
+
+  // Detection.
+  brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>
+    detector(brisk::BRISK_octaves, brisk::BRISK_uniformityradius,
+             brisk::BRISK_absoluteThreshold);
+
+  // Extraction.
+  brisk::BriskDescriptorExtractor extractor(brisk::BRISK_rotationestimation,
+                                            brisk::BRISK_scaleestimation);
+
+  std::string datasetfilename = "brisk_verification_data.set";
+
+  RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
+}
 
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
