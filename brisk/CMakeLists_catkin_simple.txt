@@ -37,7 +37,7 @@ redwood_generate_ndk_import_module(${PROJECT_NAME})
 
 # Testing.
 ##########
-if(CATKIN_ENABLE_TESTING)
+if(CATKIN_ENABLE_TESTING AND NOT ANDROID)
   enable_testing()
   file(COPY src/test/test_data DESTINATION ${CMAKE_BINARY_DIR})
 
