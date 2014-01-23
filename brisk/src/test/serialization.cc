@@ -127,7 +127,7 @@ void DeSerialize(cv::KeyPoint* pt, std::ifstream* in) {
 
 void Serialize(const std::string& value, std::ofstream* out) {
   CHECK_NOTNULL(out);
-  size_t length = value.size();
+  uint32_t length = value.size();
   Serialize(length, out);
   out->write(reinterpret_cast<const char*>(value.data()),
              length * sizeof(value[0]));
@@ -136,7 +136,7 @@ void Serialize(const std::string& value, std::ofstream* out) {
 void DeSerialize(std::string* value, std::ifstream* in) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
-  size_t length;
+  uint32_t length;
   DeSerialize(&length, in);
   value->resize(length);
   std::unique_ptr<char[]> mem(new char[length + 1]);
