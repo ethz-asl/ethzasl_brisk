@@ -60,7 +60,7 @@ void BruteForceMatcher::knnMatchImpl(
     const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches,
     int k,
-    const std::vector<Mat>& masks,
+    const std::vector<cv::Mat>& masks,
     bool compactResult) {
   commonKnnMatchImpl(*this, queryDescriptors, matches, k, masks, compactResult);
 }
@@ -69,7 +69,7 @@ void BruteForceMatcher::radiusMatchImpl(
     const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches,
     float maxDistance,
-    const std::vector<Mat>& masks,
+    const std::vector<cv::Mat>& masks,
     bool compactResult) {
   commonRadiusMatchImpl(*this, queryDescriptors, matches, maxDistance, masks,
                         compactResult);
@@ -79,7 +79,7 @@ inline void BruteForceMatcher::commonKnnMatchImpl(
     BruteForceMatcher& matcher, const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches,
     int knn,
-    const std::vector<Mat>& masks,
+    const std::vector<cv::Mat>& masks,
     bool compactResult) {
   typedef brisk::Hamming::ValueType ValueType;
   typedef brisk::Hamming::ResultType DistanceType;
@@ -91,7 +91,7 @@ inline void BruteForceMatcher::commonKnnMatchImpl(
 
   size_t imgCount = matcher.trainDescCollection.size();
   // Distances between one query descriptor and all train descriptors.
-  std::vector<Mat> allDists(imgCount);
+  std::vector<cv::Mat> allDists(imgCount);
   for (size_t i = 0; i < imgCount; i++)
     allDists[i] = cv::Mat(1, matcher.trainDescCollection[i].rows,
                           cv::DataType<DistanceType>::type);
@@ -162,7 +162,7 @@ inline void BruteForceMatcher::commonKnnMatchImpl(
 inline void BruteForceMatcher::commonRadiusMatchImpl(
     BruteForceMatcher& matcher, const cv::Mat& queryDescriptors,
     std::vector<std::vector<cv::DMatch> >& matches, float maxDistance,
-    const std::vector<Mat>& masks, bool compactResult) {
+    const std::vector<cv::Mat>& masks, bool compactResult) {
   typedef brisk::Hamming::ValueType ValueType;
   typedef brisk::Hamming::ResultType DistanceType;
   CV_DbgAssert(!queryDescriptors.empty());
