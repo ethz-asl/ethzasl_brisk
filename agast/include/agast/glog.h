@@ -51,16 +51,15 @@ inline nullstream & operator<<(nullstream& s, const T&) {
 inline nullstream & operator<<(nullstream& s, std::ostream&(std::ostream&)) {
   return s;
 }
-static nullstream logstream;
 
 #define CHECK_NOTNULL(x) assert(x != nullptr);
-#define CHECK_EQ(x, y) assert(x == y); logstream
-#define CHECK_NE(x, y) assert(x != y); logstream
-#define CHECK_GT(x, y) assert(x > y); logstream
-#define CHECK_LT(x, y) assert(x < y); logstream
-#define CHECK_GE(x, y) assert(x >= y); logstream
-#define CHECK_LE(x, y) assert(x <= y); logstream
-#define CHECK(x) assert(x); logstream
+#define CHECK_EQ(x, y) assert(x == y); nullstream()
+#define CHECK_NE(x, y) assert(x != y); nullstream()
+#define CHECK_GT(x, y) assert(x > y); nullstream()
+#define CHECK_LT(x, y) assert(x < y); nullstream()
+#define CHECK_GE(x, y) assert(x >= y); nullstream()
+#define CHECK_LE(x, y) assert(x <= y); nullstream()
+#define CHECK(x) assert(x); nullstream()
 #define LOG(WARNING) std ::cout
 
 #endif  // HAVE_GLOG
