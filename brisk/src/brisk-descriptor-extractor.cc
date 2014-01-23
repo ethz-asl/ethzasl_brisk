@@ -43,7 +43,7 @@
 #include <iostream>  // NOLINT
 
 #include <brisk/brisk-descriptor-extractor.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/helper-structures.h>
 #include <brisk/internal/integral-image.h>
 #include <brisk/internal/macros.h>
@@ -353,14 +353,14 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
 }
 
 bool RoiPredicate(const float minX, const float minY, const float maxX,
-                  const float maxY, const KeyPoint& keyPt) {
-  return (brisk::KeyPointX(keyPt) < minX) || (brisk::KeyPointX(keyPt) >= maxX)
-      || (brisk::KeyPointY(keyPt) < minY) || (brisk::KeyPointY(keyPt) >= maxY);
+                  const float maxY, const cv::KeyPoint& keyPt) {
+  return (agast::KeyPointX(keyPt) < minX) || (agast::KeyPointX(keyPt) >= maxX)
+      || (agast::KeyPointY(keyPt) < minY) || (agast::KeyPointY(keyPt) >= maxY);
 }
 
 // Computes the descriptor.
 void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
-                                           std::vector<KeyPoint>& keypoints,
+                                           std::vector<cv::KeyPoint>& keypoints,
                                            cv::Mat& descriptors) const {
   // Remove keypoints very close to the border.
   size_t ksize = keypoints.size();
@@ -369,7 +369,7 @@ void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
   static const float log2 = 0.693147180559945;
   static const float lb_scalerange = log(scalerange_) / (log2);
 
-  std::vector<KeyPoint> valid_kp;
+  std::vector<cv::KeyPoint> valid_kp;
   std::vector<int> valid_scales;
   valid_kp.reserve(keypoints.size());
   valid_scales.reserve(keypoints.size());
@@ -443,12 +443,12 @@ void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
   uchar* ptr = descriptors.data;
   for (size_t k = 0; k < ksize; k++) {
     int theta;
-    KeyPoint& kp = keypoints[k];
+    cv::KeyPoint& kp = keypoints[k];
     const int& scale = kscales[k];
     int shifter = 0;
     int* pvalues = _values;
-    const float& x = brisk::KeyPointX(kp);
-    const float& y = brisk::KeyPointY(kp);
+    const float& x = agast::KeyPointX(kp);
+    const float& y = agast::KeyPointY(kp);
     if (kp.angle == -1) {
       if (!rotationInvariance) {
         // Don't compute the gradient direction, just assign a rotation of 0°.

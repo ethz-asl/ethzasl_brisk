@@ -49,7 +49,7 @@
 
 namespace brisk {
 
-__inline__ bool compareKeypointScore(KeyPoint kp_i, KeyPoint kp_j) {
+__inline__ bool compareKeypointScore(cv::KeyPoint kp_i, cv::KeyPoint kp_j) {
   return (kp_i.response > kp_j.response);
 }
 
@@ -254,7 +254,7 @@ __inline__ void HarrisFeatureDetector::CornerHarris(const cv::Mat& dxdxSmooth,
 }
 
 inline void HarrisFeatureDetector::NonmaxSuppress(
-    const cv::Mat& scores, std::vector<KeyPoint>& keypoints) {
+    const cv::Mat& scores, std::vector<cv::KeyPoint>& keypoints) {
   // First do the 8-neighbor nonmax suppression.
   const int stride = scores.cols;
   const int rows_end = scores.rows - 2;
@@ -292,18 +292,18 @@ inline void HarrisFeatureDetector::NonmaxSuppress(
         continue;
       const int i = p - p_begin;
       keypoints.push_back(
-          KeyPoint(static_cast<float>(i), static_cast<float>(j),
+          cv::KeyPoint(static_cast<float>(i), static_cast<float>(j),
                    10, -1, *center, 0));
     }
   }
 }
 
 __inline__ void HarrisFeatureDetector::EnforceUniformity(
-    const cv::Mat& scores, std::vector<KeyPoint>& keypoints) const {
+    const cv::Mat& scores, std::vector<cv::KeyPoint>& keypoints) const {
   // Sort.
   std::sort(keypoints.begin(), keypoints.end(), compareKeypointScore);
 
-  std::vector < KeyPoint > keypoints_new;
+  std::vector < cv::KeyPoint > keypoints_new;
   keypoints_new.reserve(keypoints.size());
 
   // Store occupancy.
@@ -312,10 +312,10 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
                              CV_8U);
 
   // Go through the sorted keypoints and reject too close ones.
-  for (std::vector<KeyPoint>::iterator it = keypoints.begin();
+  for (std::vector<cv::KeyPoint>::iterator it = keypoints.begin();
       it != keypoints.end(); ++it) {
-    const int cy = (brisk::KeyPointY(*it) / 2 + 16);
-    const int cx = (brisk::KeyPointX(*it) / 2 + 16);
+    const int cy = (agast::KeyPointY(*it) / 2 + 16);
+    const int cx = (agast::KeyPointX(*it) / 2 + 16);
 
     // Check if this is a high enough score.
     const double s0 = static_cast<double>(occupancy.at<uchar>(cy, cx));
@@ -380,7 +380,7 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
   keypoints.assign(keypoints_new.begin(), keypoints_new.end());
 }
 void HarrisFeatureDetector::detectImpl(const cv::Mat& image,
-                                       std::vector<KeyPoint>& keypoints,
+                                       std::vector<cv::KeyPoint>& keypoints,
                                        const cv::Mat& /*mask*/) const {
   keypoints.resize(0);
   cv::Mat scores;

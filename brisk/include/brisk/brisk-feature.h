@@ -43,7 +43,7 @@
 
 #include <brisk/brisk-descriptor-extractor.h>
 #include <brisk/brisk-feature-detector.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/harris-feature-detector.h>
 #include <brisk/harris-score-calculator.h>
 #include <brisk/scale-space-feature-detector.h>
@@ -71,7 +71,7 @@ class BriskFeature : public cv::Feature2D {
 
   // Inherited from cv::Feature2D interface.
   virtual void operator()(cv::InputArray image, cv::InputArray mask,
-                          std::vector<KeyPoint>& keypoints,
+                          std::vector<cv::KeyPoint>& keypoints,
                           cv::OutputArray descriptors,
                           bool useProvidedKeypoints = false) const {
     if (!useProvidedKeypoints) {
@@ -94,14 +94,14 @@ class BriskFeature : public cv::Feature2D {
  protected:
   // Inherited from cv::FeatureDetector interface.
   virtual void detectImpl(const cv::Mat& image,
-                          std::vector<KeyPoint>& keypoints,
+                          std::vector<cv::KeyPoint>& keypoints,
                           const cv::Mat& mask = cv::Mat()) const {
     _briskDetector.detect(image, keypoints, mask);
   }
 
   // Inherited from cv::DescriptorExtractor interface.
   virtual void computeImpl(const cv::Mat& image,
-                           std::vector<KeyPoint>& keypoints,
+                           std::vector<cv::KeyPoint>& keypoints,
                            cv::Mat& descriptors) const {
     _briskExtractor.computeImpl(image, keypoints, descriptors);
   }

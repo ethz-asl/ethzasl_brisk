@@ -49,7 +49,7 @@
 #endif  // __ARM_NEON__
 #include <stdint.h>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 
 template<int X, int Y>
 __inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLINT

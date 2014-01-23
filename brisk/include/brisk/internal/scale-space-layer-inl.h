@@ -196,7 +196,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::SetUniformityRadius(double radius) {
 // Feature detection.
 template<class SCORE_CALCULATOR_T>
 void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
-    std::vector<KeyPoint>& keypoints, bool enforceUniformity,
+    std::vector<cv::KeyPoint>& keypoints, bool enforceUniformity,
     bool doRefinement, bool usePassedKeypoints) {
   // First get the maxima points inside this layer.
   std::vector<typename ScoreCalculator_t::PointWithScore> points;
@@ -207,8 +207,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         points.push_back(
             typename ScoreCalculator_t::PointWithScore(
                 keypoints[k].response,
-                brisk::KeyPointX(keypoints[k]),
-                brisk::KeyPointY(keypoints[k])));
+                agast::KeyPointX(keypoints[k]),
+                agast::KeyPointY(keypoints[k])));
       }
     }
   } else {
@@ -550,7 +550,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
                  _scoreCalculator.Score(u + 1, v + 1), delta_x, delta_y);
       // TODO(lestefan): 3d refinement.
       keypoints.push_back(
-          KeyPoint(
+          cv::KeyPoint(
               _scale * ((it->x + delta_x) + _offset),
               _scale * ((it->y + delta_y) + _offset),
               _scale * 12.0, -1, it->score, _layerNumber / 2));
@@ -560,7 +560,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         typename ScoreCalculator_t::PointWithScore>::const_iterator it =
         points.begin(); it != points.end(); ++it) {
       keypoints.push_back(
-          KeyPoint(
+          cv::KeyPoint(
               _scale * ((it->x) + _offset),
               _scale * ((it->y) + _offset),
               _scale * 12.0, -1, it->score, _layerNumber / 2));

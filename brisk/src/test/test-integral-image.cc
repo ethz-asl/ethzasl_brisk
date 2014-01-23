@@ -35,10 +35,10 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <brisk/glog.h>
+#include <agast/glog.h>
 #include <gtest/gtest.h>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/integral-image.h>
 
 #ifndef TEST
