@@ -109,8 +109,8 @@ void GetDefaultPatternAsStream(std::stringstream* pattern_stream) {
   << "2.836776e+00 -8.730699e+00 1.436068e+00 " << std::endl
   << "5.395869e+00 -7.426776e+00 1.436068e+00 " << std::endl
   << "7.426776e+00 -5.395869e+00 1.436068e+00 " << std::endl
-  << "8.730699e+00 -2.836776e+00 1.436068e+00 " << std::endl
-  << "384" << std::endl
+  << "8.730699e+00 -2.836776e+00 1.436068e+00 " << std::endl;
+  *pattern_stream << "384" << std::endl
   << "2 1 " << std::endl
   << "3 1 " << std::endl
   << "3 2 " << std::endl
@@ -372,8 +372,8 @@ void GetDefaultPatternAsStream(std::stringstream* pattern_stream) {
   << "45 18 " << std::endl
   << "45 29 " << std::endl
   << "45 30 " << std::endl
-  << "45 31 " << std::endl
-  << "45 32 " << std::endl
+  << "45 31 " << std::endl;
+  *pattern_stream << "45 32 " << std::endl
   << "45 43 " << std::endl
   << "45 44 " << std::endl
   << "46 17 " << std::endl
@@ -743,8 +743,8 @@ void GetDefaultPatternAsStream(std::stringstream* pattern_stream) {
   << "25 22 " << std::endl
   << "25 23 " << std::endl
   << "25 24 " << std::endl
-  << "26 0 " << std::endl
-  << "26 3 " << std::endl
+  << "26 0 " << std::endl;
+  *pattern_stream << "26 3 " << std::endl
   << "26 4 " << std::endl
   << "26 5 " << std::endl
   << "26 6 " << std::endl
@@ -1228,8 +1228,8 @@ void GetDefaultPatternAsStream(std::stringstream* pattern_stream) {
   << "57 24 " << std::endl
   << "57 25 " << std::endl
   << "57 26 " << std::endl
-  << "57 37 " << std::endl
-  << "57 38 " << std::endl
+  << "57 37 " << std::endl;
+  *pattern_stream << "57 38 " << std::endl
   << "57 39 " << std::endl
   << "57 40 " << std::endl
   << "57 41 " << std::endl

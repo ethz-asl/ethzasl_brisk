@@ -5,6 +5,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
+#include <boost/foreach.hpp>
 
 
 #ifdef USE_RDTSC
@@ -48,7 +49,8 @@ std::string Timing::GetTag(size_t handle) {
   std::string tag = "";
 
   // Perform a linear search for the tag.
-  for (typename map_t::value_type current_tag : Instance().tagMap_) {
+//  for (typename map_t::value_type current_tag : Instance().tagMap_) {
+  BOOST_FOREACH(map_t::value_type current_tag, Instance().tagMap_) {
     if (current_tag.second == handle) {
       return current_tag.first;
     }
@@ -84,7 +86,7 @@ void Timer::Start() {
 
   CPUID(); RDTSC(start_);
 #else
-  time_ = std::chrono::system_clock::now();
+  time_ = boost::chrono::system_clock::now();
 #endif
 }
 
@@ -94,10 +96,10 @@ void Timer::Stop() {
   double cycles = (static_cast<double>(COUNTER_DIFF(end_, start_)));
   Timing::Instance().AddCycles(handle_, cycles);
 #else
-  std::chrono::time_point <std::chrono::system_clock> now =
-      std::chrono::system_clock::now();
-  double dt = static_cast<double>(std::chrono::duration_cast
-      <std::chrono::nanoseconds> (now - time_).count())
+  boost::chrono::time_point <boost::chrono::system_clock> now =
+      boost::chrono::system_clock::now();
+  double dt = static_cast<double>(boost::chrono::duration_cast
+      <boost::chrono::nanoseconds> (now - time_).count())
       * kNumSecondsPerNanosecond;
   Timing::Instance().AddTime(handle_, dt);
 #endif
@@ -172,7 +174,7 @@ std::string Timing::SecondsToTimeString(double seconds) {
   minutes -= (hours * 60);
 
 char buffer[256];
-snprintf(buffer, sizeof(buffer),
+/*snprintf(buffer, sizeof(buffer),
 #ifdef BRISK_TIMING_SHOW_HOURS
 "%02d:"
 #endif
@@ -186,7 +188,7 @@ hours,
 #ifdef BRISK_TIMING_SHOW_MINUTES
 minutes,
 #endif
-secs);
+secs);*/
 return buffer;
 }
 
@@ -202,7 +204,8 @@ void Timing::Print(std::ostream& out) {  //NOLINT
   out << "BRISK Timing\n";
 #endif
   out << "-----------\n";
-  for (typename map_t::value_type t : tagMap) {
+  //for (typename map_t::value_type t : tagMap) {
+  BOOST_FOREACH(map_t::value_type t, tagMap) {
     size_t i = t.second;
     out.width((std::streamsize) Instance().maxTagLength_);
     out.setf(std::ios::left, std::ios::adjustfield);

@@ -42,6 +42,8 @@
 #endif
 #include <brisk/internal/image-down-sampling.h>
 
+#include <cstdint>
+
 namespace brisk {
 void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 #ifdef __ARM_NEON__
