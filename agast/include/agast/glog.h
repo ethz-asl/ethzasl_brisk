@@ -44,14 +44,23 @@
 #include <iosfwd>
 #include <iostream>
 
-#define CHECK_NOTNULL(x) assert(x != nullptr);
-#define CHECK_EQ(x, y) assert(x == y); std::cout << __FILE__ << ":" << __LINE__
-#define CHECK_NE(x, y) assert(x != y); std::cout << __FILE__ << ":" << __LINE__
-#define CHECK_GT(x, y) assert(x > y); std::cout << __FILE__ << ":" << __LINE__
-#define CHECK_LT(x, y) assert(x < y); std::cout << __FILE__ << ":" << __LINE__
-#define CHECK_GE(x, y) assert(x >= y); std::cout << __FILE__ << ":" << __LINE__
-#define CHECK_LE(x, y) assert(x <= y); std::cout << __FILE__ << ":" << __LINE__
-#define CHECK(x) assert(x); std::cout << __FILE__ << ":" << __LINE__
+#define CAST_TO_USED(x) static_cast<void>(x)
+
+#define CHECK_NOTNULL(x) assert(x != nullptr) CAST_TO_USED(x);;
+#define CHECK_EQ(x, y) assert(x == y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_NE(x, y) assert(x != y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_GT(x, y) assert(x > y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_LT(x, y) assert(x < y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_GE(x, y) assert(x >= y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_LE(x, y) assert(x <= y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK(x) assert(x); CAST_TO_USED(x); \
+    std::cout << __FILE__ << ":" << __LINE__
 #define LOG(WARNING) std ::cout << __FILE__ << ":" << __LINE__
 
 #endif  // AGAST_GLOG
