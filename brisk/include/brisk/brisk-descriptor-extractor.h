@@ -55,7 +55,8 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
 #else
   class BriskDescriptorExtractor {
 #endif  // HAVE_OPENCV
- public:
+  public:
+    friend class BriskFeature;
     static const unsigned int kDescriptorLength = 384;
   // Create a descriptor with standard pattern.
   BriskDescriptorExtractor(bool rotationInvariant = true,
