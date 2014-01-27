@@ -46,7 +46,7 @@
 
 #define CAST_TO_USED(x) static_cast<void>(x)
 
-#define CHECK_NOTNULL(x) assert(x != nullptr) CAST_TO_USED(x);;
+#define CHECK_NOTNULL(x) assert(x != nullptr); CAST_TO_USED(x);
 #define CHECK_EQ(x, y) assert(x == y); CAST_TO_USED(x); CAST_TO_USED(y); \
     std::cout << __FILE__ << ":" << __LINE__
 #define CHECK_NE(x, y) assert(x != y); CAST_TO_USED(x); CAST_TO_USED(y); \
