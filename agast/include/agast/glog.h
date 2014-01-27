@@ -48,20 +48,20 @@
 
 #define CHECK_NOTNULL(x) assert(x != nullptr); CAST_TO_USED(x);
 #define CHECK_EQ(x, y) assert(x == y); CAST_TO_USED(x); CAST_TO_USED(y); \
-    std::cout << __FILE__ << ":" << __LINE__
+    std::cout << ""
 #define CHECK_NE(x, y) assert(x != y); CAST_TO_USED(x); CAST_TO_USED(y); \
-    std::cout << __FILE__ << ":" << __LINE__
+    std::cout << ""
 #define CHECK_GT(x, y) assert(x > y); CAST_TO_USED(x); CAST_TO_USED(y); \
-    std::cout << __FILE__ << ":" << __LINE__
+    std::cout << ""
 #define CHECK_LT(x, y) assert(x < y); CAST_TO_USED(x); CAST_TO_USED(y); \
-    std::cout << __FILE__ << ":" << __LINE__
+    std::cout << ""
 #define CHECK_GE(x, y) assert(x >= y); CAST_TO_USED(x); CAST_TO_USED(y); \
-    std::cout << __FILE__ << ":" << __LINE__
+    std::cout << ""
 #define CHECK_LE(x, y) assert(x <= y); CAST_TO_USED(x); CAST_TO_USED(y); \
-    std::cout << __FILE__ << ":" << __LINE__
+    std::cout << ""
 #define CHECK(x) assert(x); CAST_TO_USED(x); \
-    std::cout << __FILE__ << ":" << __LINE__
-#define LOG(WARNING) std ::cout << __FILE__ << ":" << __LINE__
+    std::cout << ""
+#define LOG(WARNING) std ::cout
 
 #endif  // AGAST_GLOG
 #endif  // AGAST_GLOG_H_
