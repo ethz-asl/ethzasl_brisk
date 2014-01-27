@@ -44,10 +44,10 @@
 #include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 
-namespace brisk {
 #ifdef __ARM_NEON__
   // Not implemented.
 #else
+namespace brisk {
 // Generic SSE-optimized 2D filter on CV_8U/CV_16S matrices. stores result in
 // CV_16S matrix.
 template<int X, int Y>
@@ -70,7 +70,7 @@ void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst);  // NOLINT
 // 3-by-3 Gaussian filter CV_32F to CV_32F.
 void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst);  // NOLINT
 
+}  // namespace brisk
 #include "./vectorized-filters-inl.h"
 #endif  // __ARM_NEON__
-}  // namespace brisk
 #endif  // INTERNAL_VECTORIZED_FILTERS_H_
