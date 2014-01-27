@@ -9,7 +9,7 @@ if(NOT ANDROID)
   add_definitions("-mssse3")
 endif()
 
-add_definitions(-Wextra -Wall -pedantic)
+add_definitions(-Wextra -Wall -Werror -pedantic)
 
 cs_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                src/brisk-feature-detector.cc   
@@ -37,7 +37,7 @@ redwood_generate_ndk_import_module(${PROJECT_NAME})
 
 # Testing.
 ##########
-if(CATKIN_ENABLE_TESTING)
+if(CATKIN_ENABLE_TESTING AND NOT ANDROID)
   enable_testing()
   file(COPY src/test/test_data DESTINATION ${CMAKE_BINARY_DIR})
 

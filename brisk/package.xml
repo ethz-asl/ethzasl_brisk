@@ -14,7 +14,6 @@
   <author email="lestefan@ethz.ch">Stefan Leutenegger</author>
   <author email="slynen@ethz.ch">Simon Lynen</author>
 
-  <!-- Add your dependencies using the build_depend tag -->
   <build_depend>agast</build_depend>
   <build_depend>eigen_catkin</build_depend>
   <build_depend>features_2d_helpers</build_depend>
