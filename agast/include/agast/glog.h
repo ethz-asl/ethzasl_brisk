@@ -37,30 +37,31 @@
 #ifndef AGAST_GLOG_H_
 #define AGAST_GLOG_H_
 
-#if HAVE_GLOG
+#ifndef AGAST_GLOG
 #include <glog/logging.h>
 #else
 #include <cassert>
 #include <iosfwd>
+#include <iostream>
 
-struct nullstream {};
-template <typename T>
-inline nullstream & operator<<(nullstream& s, const T&) {
-  return s;
-}
-inline nullstream & operator<<(nullstream& s, std::ostream&(std::ostream&)) {
-  return s;
-}
+#define CAST_TO_USED(x) static_cast<void>(x)
 
-#define CHECK_NOTNULL(x) assert(x != nullptr);
-#define CHECK_EQ(x, y) assert(x == y); nullstream()
-#define CHECK_NE(x, y) assert(x != y); nullstream()
-#define CHECK_GT(x, y) assert(x > y); nullstream()
-#define CHECK_LT(x, y) assert(x < y); nullstream()
-#define CHECK_GE(x, y) assert(x >= y); nullstream()
-#define CHECK_LE(x, y) assert(x <= y); nullstream()
-#define CHECK(x) assert(x); nullstream()
-#define LOG(WARNING) std ::cout
+#define CHECK_NOTNULL(x) assert(x != nullptr); CAST_TO_USED(x);
+#define CHECK_EQ(x, y) assert(x == y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_NE(x, y) assert(x != y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_GT(x, y) assert(x > y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_LT(x, y) assert(x < y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_GE(x, y) assert(x >= y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_LE(x, y) assert(x <= y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define CHECK(x) assert(x); CAST_TO_USED(x); \
+    std::cout << __FILE__ << ":" << __LINE__
+#define LOG(WARNING) std ::cout << __FILE__ << ":" << __LINE__
 
-#endif  // HAVE_GLOG
+#endif  // AGAST_GLOG
 #endif  // AGAST_GLOG_H_

@@ -61,7 +61,8 @@ BriskScaleSpace::BriskScaleSpace(uint8_t _octaves,
 }
 BriskScaleSpace::~BriskScaleSpace() { }
 // Construct the image pyramids.
-void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold) {
+void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold,
+                                       uchar overwrite_lower_thres) {
   // Set correct size:
   pyramid_.clear();
 
@@ -70,21 +71,21 @@ void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold) {
 
   // Fill the pyramid:
   pyramid_.push_back(
-      BriskLayer(image.clone(), defaultUpperThreshold, defaultLowerThreshold));
+      BriskLayer(image.clone(), defaultUpperThreshold, overwrite_lower_thres));
   if (layers_ > 1) {
     pyramid_.push_back(
         BriskLayer(pyramid_.back(), BriskLayer::CommonParams::TWOTHIRDSAMPLE,
-                   (defaultUpperThreshold), (defaultLowerThreshold)));
+                   (defaultUpperThreshold), (overwrite_lower_thres)));
   }
   const int octaves2 = layers_;
 
   for (uint8_t i = 2; i < octaves2; i += 2) {
     pyramid_.push_back(
         BriskLayer(pyramid_[i - 2], BriskLayer::CommonParams::HALFSAMPLE,
-                   (defaultUpperThreshold), (defaultLowerThreshold)));
+                   (defaultUpperThreshold), (overwrite_lower_thres)));
     pyramid_.push_back(
         BriskLayer(pyramid_[i - 1], BriskLayer::CommonParams::HALFSAMPLE,
-                   (defaultUpperThreshold), (defaultLowerThreshold)));
+                   (defaultUpperThreshold), (overwrite_lower_thres)));
   }
 }
 

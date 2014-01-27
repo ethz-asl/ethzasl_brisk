@@ -14,7 +14,8 @@
   <depend package="opencv2"/>
 
   <export>
-    <cpp cflags="-I${prefix}/include" lflags=" -L${prefix}/lib -lbrisk"/>
+    <cpp cflags="-I${prefix}/include" 
+        lflags=" -L${prefix}/lib -lbrisk"/>
   </export>
 
 </package>

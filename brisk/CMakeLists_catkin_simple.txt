@@ -9,7 +9,7 @@ if(NOT ANDROID)
   add_definitions("-mssse3")
 endif()
 
-add_definitions(-Wextra -Wall -pedantic -DHAVE_GLOG)
+add_definitions(-Wextra -Wall -pedantic)
 
 cs_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                src/brisk-feature-detector.cc   
@@ -31,7 +31,7 @@ target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARY})
                 
 cs_install()
 
-cs_export()
+cs_export(CFG_EXTRAS export_flags.cmake)
 redwood_generate_ndk_import_module(${PROJECT_NAME})
 
 
