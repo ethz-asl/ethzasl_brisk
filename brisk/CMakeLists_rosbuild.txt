@@ -8,6 +8,9 @@ set(ROS_BUILD_TYPE Release)
 
 rosbuild_init()
 
+find_package(Eigen REQUIRED)
+include_directories(include ${Eigen_INCLUDE_DIRS})
+
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 find_package(GLog)
@@ -48,7 +51,8 @@ rosbuild_add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
 
 rosbuild_add_library(${PROJECT_NAME}_test_lib src/test/serialization.cc
-                                              src/test/bench-ds.cc)
+                                              src/test/bench-ds.cc
+                                              src/opencv-ref.cc)
 
 rosbuild_add_gtest(test_integral_image src/test/test-integral-image.cc)
 target_link_libraries(test_integral_image ${GLOG_LIBRARY} 
@@ -74,3 +78,8 @@ rosbuild_add_gtest(test_serialization src/test/test-serialization.cc)
 target_link_libraries(test_serialization ${GLOG_LIBRARY} 
                                          ${PROJECT_NAME}
                                          ${PROJECT_NAME}_test_lib)
+
+rosbuild_add_gtest(test_match src/test/test-match.cc)
+target_link_libraries(test_match ${GLOG_LIBRARY} 
+                                 ${PROJECT_NAME}
+                                 ${PROJECT_NAME}_test_lib)
