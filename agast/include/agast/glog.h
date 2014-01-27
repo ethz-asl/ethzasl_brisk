@@ -45,21 +45,23 @@
 
 struct nullstream {};
 template <typename T>
-inline nullstream & operator<<(nullstream& s, const T&) {
+inline nullstream& operator<<(nullstream& s, const T&) {
   return s;
 }
-inline nullstream & operator<<(nullstream& s, std::ostream&(std::ostream&)) {
+inline nullstream& operator<<(nullstream& s, std::ostream&(std::ostream&)) {
   return s;
 }
 
+static nullstream debugstream;
+
 #define CHECK_NOTNULL(x) assert(x != nullptr);
-#define CHECK_EQ(x, y) assert(x == y); nullstream()
-#define CHECK_NE(x, y) assert(x != y); nullstream()
-#define CHECK_GT(x, y) assert(x > y); nullstream()
-#define CHECK_LT(x, y) assert(x < y); nullstream()
-#define CHECK_GE(x, y) assert(x >= y); nullstream()
-#define CHECK_LE(x, y) assert(x <= y); nullstream()
-#define CHECK(x) assert(x); nullstream()
+#define CHECK_EQ(x, y) assert(x == y); debugstream
+#define CHECK_NE(x, y) assert(x != y); debugstream
+#define CHECK_GT(x, y) assert(x > y); debugstream
+#define CHECK_LT(x, y) assert(x < y); debugstream
+#define CHECK_GE(x, y) assert(x >= y); debugstream
+#define CHECK_LE(x, y) assert(x <= y); debugstream
+#define CHECK(x) assert(x); debugstream
 #define LOG(WARNING) std ::cout
 
 #endif  // AGAST_GLOG
