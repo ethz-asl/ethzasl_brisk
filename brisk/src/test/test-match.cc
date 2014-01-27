@@ -116,7 +116,7 @@ TEST(Brisk, MatchBitset) {
   }
   ASSERT_LT(outliers, matches.size() / 10) << "Too many outliers";
 
-#if HAVE_OPENCV
+#if DRAW_MATCHES
   cv::Mat image(img1.rows, img1.cols + img2.cols, CV_8UC1);
   image.setTo(0);
   for (int row = 0; row < img1.rows; ++row) {
