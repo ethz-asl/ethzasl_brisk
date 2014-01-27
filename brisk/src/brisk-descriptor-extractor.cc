@@ -413,15 +413,24 @@ void BriskDescriptorExtractor::setDescriptorBits(
 void BriskDescriptorExtractor::computeImpl(
     const cv::Mat& image, std::vector<cv::KeyPoint>& keypoints,
     std::vector<std::bitset<kDescriptorLength> >& descriptors) const {
-  descriptors.resize(keypoints.size());
   doDescriptorComputation(image, keypoints, descriptors);
 }
 
 void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
                                            std::vector<cv::KeyPoint>& keypoints,
                                            cv::Mat& descriptors) const {
-  descriptors = cv::Mat::zeros(keypoints.size(), strings_, CV_8UC1);
   doDescriptorComputation(image, keypoints, descriptors);
+}
+
+void BriskDescriptorExtractor::AllocateDescriptors(size_t count,
+                                                   cv::Mat& descriptors) const {
+  descriptors = cv::Mat::zeros(count, strings_, CV_8UC1);
+}
+
+void BriskDescriptorExtractor::AllocateDescriptors(
+    size_t count,
+    std::vector<std::bitset<kDescriptorLength> >& descriptors) const {
+  descriptors.resize(count);
 }
 
 template<typename DESCRIPTOR_CONTAINER>
@@ -475,6 +484,8 @@ void BriskDescriptorExtractor::doDescriptorComputation(
     keypoints.swap(valid_kp);
     kscales.swap(valid_scales);
     ksize = keypoints.size();
+
+    AllocateDescriptors(keypoints.size(), descriptors);
 
     // First, calculate the integral image over the whole image:
     // current integral image.

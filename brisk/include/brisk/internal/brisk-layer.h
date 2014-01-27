@@ -88,7 +88,12 @@ class  BriskLayer {
   inline float offset() const {
     return offset_;
   }
-
+  int width() const {
+    return img_.cols;
+  }
+  int height() const {
+    return img_.rows;
+  }
  private:
   // Access gray values (smoothed/interpolated).
   uint8_t Value(const cv::Mat& mat, float xf, float yf, float scale);

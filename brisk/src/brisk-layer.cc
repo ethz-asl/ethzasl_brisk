@@ -98,9 +98,11 @@ BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
 // Wraps the agast class.
 void BriskLayer::GetAgastPoints(uint8_t threshold,
                                 std::vector<cv::KeyPoint>* keypoints) {
+  CHECK_NOTNULL(keypoints);
   oastDetector_->set_threshold(threshold, upperThreshold_, lowerThreshold_);
-  oastDetector_->detect(img_.data, *keypoints, &thrmap_);
-
+  if (keypoints->empty()) {
+    oastDetector_->detect(img_.data, *keypoints, &thrmap_);
+  }
   // Also write scores.
   const int num = keypoints->size();
   const int imcols = img_.cols;
