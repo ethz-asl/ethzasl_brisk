@@ -111,6 +111,12 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   void setDescriptorBits(int keypoint_idx, const int* values,
       std::vector<std::bitset<kDescriptorLength> >* descriptors) const;
 
+  void AllocateDescriptors(size_t count, cv::Mat& descriptors) const;
+
+  void AllocateDescriptors(
+      size_t count,
+      std::vector<std::bitset<kDescriptorLength> >& descriptors) const;
+
   template<typename DESCRIPTOR_CONTAINER>
   void doDescriptorComputation(const cv::Mat& image,
                                std::vector<cv::KeyPoint>& keypoints,
