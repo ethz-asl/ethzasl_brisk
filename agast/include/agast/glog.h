@@ -45,14 +45,14 @@
 #include <iostream>
 
 #define CHECK_NOTNULL(x) assert(x != nullptr);
-#define CHECK_EQ(x, y) assert(x == y); std::cout
-#define CHECK_NE(x, y) assert(x != y); std::cout
-#define CHECK_GT(x, y) assert(x > y); std::cout
-#define CHECK_LT(x, y) assert(x < y); std::cout
-#define CHECK_GE(x, y) assert(x >= y); std::cout
-#define CHECK_LE(x, y) assert(x <= y); std::cout
-#define CHECK(x) assert(x); std::cout
-#define LOG(WARNING) std ::cout
+#define CHECK_EQ(x, y) assert(x == y); std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_NE(x, y) assert(x != y); std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_GT(x, y) assert(x > y); std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_LT(x, y) assert(x < y); std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_GE(x, y) assert(x >= y); std::cout << __FILE__ << ":" << __LINE__
+#define CHECK_LE(x, y) assert(x <= y); std::cout << __FILE__ << ":" << __LINE__
+#define CHECK(x) assert(x); std::cout << __FILE__ << ":" << __LINE__
+#define LOG(WARNING) std ::cout << __FILE__ << ":" << __LINE__
 
 #endif  // AGAST_GLOG
 #endif  // AGAST_GLOG_H_
