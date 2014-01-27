@@ -68,6 +68,12 @@ if(CATKIN_ENABLE_TESTING AND NOT ANDROID)
                                           ${PROJECT_NAME}
                                           ${PROJECT_NAME}_test_lib)
 
+  catkin_add_gtest(test_match src/test/test-match.cc
+                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+  target_link_libraries(test_match ${GLOG_LIBRARY} 
+                                   ${PROJECT_NAME}
+                                   ${PROJECT_NAME}_test_lib)
+
   catkin_add_gtest(test_serialization src/test/test-serialization.cc
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   target_link_libraries(test_serialization ${GLOG_LIBRARY} 
