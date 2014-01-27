@@ -42,26 +42,16 @@
 #else
 #include <cassert>
 #include <iosfwd>
-
-struct nullstream {};
-template <typename T>
-inline nullstream& operator<<(nullstream& s, const T&) {
-  return s;
-}
-inline nullstream& operator<<(nullstream& s, std::ostream&(std::ostream&)) {
-  return s;
-}
-
-static nullstream debugstream;
+#include <iostream>
 
 #define CHECK_NOTNULL(x) assert(x != nullptr);
-#define CHECK_EQ(x, y) assert(x == y); debugstream
-#define CHECK_NE(x, y) assert(x != y); debugstream
-#define CHECK_GT(x, y) assert(x > y); debugstream
-#define CHECK_LT(x, y) assert(x < y); debugstream
-#define CHECK_GE(x, y) assert(x >= y); debugstream
-#define CHECK_LE(x, y) assert(x <= y); debugstream
-#define CHECK(x) assert(x); debugstream
+#define CHECK_EQ(x, y) assert(x == y); std::cout
+#define CHECK_NE(x, y) assert(x != y); std::cout
+#define CHECK_GT(x, y) assert(x > y); std::cout
+#define CHECK_LT(x, y) assert(x < y); std::cout
+#define CHECK_GE(x, y) assert(x >= y); std::cout
+#define CHECK_LE(x, y) assert(x <= y); std::cout
+#define CHECK(x) assert(x); std::cout
 #define LOG(WARNING) std ::cout
 
 #endif  // AGAST_GLOG
