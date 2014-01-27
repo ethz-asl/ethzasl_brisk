@@ -5,7 +5,7 @@ project(agast)
 find_package(redwood_catkin REQUIRED)
 catkin_simple()
 
-add_definitions(-Wextra -Wall -pedantic -DHAVE_GLOG)
+add_definitions(-Wextra -Wall -pedantic)
 
 file(GLOB AGAST_SOURCE_FILES  "${PROJECT_SOURCE_DIR}/src/*.cc")
 file(GLOB AGAST_HEADER_FILES  "${PROJECT_SOURCE_DIR}/include/agast/*.h")

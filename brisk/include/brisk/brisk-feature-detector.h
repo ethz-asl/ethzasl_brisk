@@ -65,6 +65,8 @@ class  BriskFeatureDetector : public cv::FeatureDetector {
     detectImpl(image, keypoints, mask);
   }
 #endif
+  void ComputeScale(const cv::Mat& image,
+                    std::vector<cv::KeyPoint>& keypoints) const;
 protected:
   virtual void detectImpl(const cv::Mat& image,
                           std::vector<cv::KeyPoint>& keypoints,

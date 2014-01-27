@@ -38,15 +38,15 @@
 #ifndef AGAST_WRAP_OPENCV_H_
 #define AGAST_WRAP_OPENCV_H_
 
-#include <agast/glog.h>
-
 #if HAVE_OPENCV
+#include <agast/glog.h>
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #else
 #include <fstream>  // NOLINT
 #include <memory>
+#include <glog/logging.h>
 #include <features-2d-helpers/keypoint.h>
 typedef unsigned char uchar;
 typedef unsigned short ushort;
@@ -131,6 +131,14 @@ struct Mat {
     step[0] = 0;
     step[1] = 0;
   }
+  // Wrap user allocated data. Do not take ownership.
+  Mat(int _rows, int _cols, int _type, unsigned char* _data) :
+    rows(_rows), cols(_cols), type_(_type), data(_data) {
+    unsigned int bytedepth = ComputeByteDepth(type_);
+    step.buf[0] = cols * bytedepth;
+    step.buf[1] = 0;
+    // The member img stays uninitialized.
+  }
   Mat& operator=(const Mat& other) {
     rows = other.rows;
     cols = other.cols;
@@ -163,7 +171,8 @@ struct Mat {
       unsigned int bytedepth = ComputeByteDepth(type_);
       unsigned int final_size = rows * cols * bytedepth;
       CHECK(tmp.img);
-      memcpy(tmp.img->data.get(), img->data.get(), final_size);
+      CHECK(data);
+      memcpy(tmp.img->data.get(), data, final_size);
       tmp.data = tmp.img->data.get();
     }
     return tmp;

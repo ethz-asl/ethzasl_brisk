@@ -46,9 +46,14 @@
 #include <vector>
 
 #include <agast/wrap-opencv.h>
-#include <agast/glog.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/scale-space-layer.h>
+
+#if HAVE_OPENCV
+#include <agast/glog.h>
+#else
+#include <glog/logging.h>
+#endif
 
 namespace brisk {
 

@@ -37,7 +37,7 @@
 #ifndef AGAST_GLOG_H_
 #define AGAST_GLOG_H_
 
-#if HAVE_GLOG
+#ifndef AGAST_GLOG
 #include <glog/logging.h>
 #else
 #include <cassert>
@@ -62,5 +62,5 @@ inline nullstream & operator<<(nullstream& s, std::ostream&(std::ostream&)) {
 #define CHECK(x) assert(x); nullstream()
 #define LOG(WARNING) std ::cout
 
-#endif  // HAVE_GLOG
+#endif  // AGAST_GLOG
 #endif  // AGAST_GLOG_H_

@@ -38,7 +38,6 @@
 #ifndef AGAST_WRAP_OPENCV_INL_H_
 #define AGAST_WRAP_OPENCV_INL_H_
 
-#include <agast/glog.h>
 #include <agast/wrap-opencv.h>
 
 #if !HAVE_OPENCV

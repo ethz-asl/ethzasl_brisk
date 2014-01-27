@@ -164,6 +164,8 @@ void BriskDescriptorExtractor::InitFromStream(
   strings_ = static_cast<int>(ceil((static_cast<float>(noShortPairs_))
                                    / 128.0)) * 4 * 4;
 
+  CHECK_EQ(noShortPairs_, kDescriptorLength);
+
   delete[] u_x;
   delete[] u_y;
   delete[] sigma;
@@ -534,7 +536,7 @@ void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
     // Now iterate through all the pairings.
     brisk::timing::DebugTimer timer_assemble_bits(
         "1.3 Brisk Extraction: assemble bits (per keypoint)");
-    brisk::UINT32_ALIAS* ptr2 = (brisk::UINT32_ALIAS*) ptr;
+    brisk::UINT32_ALIAS* ptr2 = reinterpret_cast<brisk::UINT32_ALIAS*>(ptr);
     const brisk::BriskShortPair* max = shortPairs_ + noShortPairs_;
     for (brisk::BriskShortPair* iter = shortPairs_; iter < max; ++iter) {
       t1 = *(_values + iter->i);

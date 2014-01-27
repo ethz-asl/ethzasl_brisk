@@ -46,7 +46,11 @@
 #include <tmmintrin.h>
 #endif  // __ARM_NEON__
 
+#if HAVE_OPENCV
 #include <agast/glog.h>
+#else
+#include <glog/logging.h>
+#endif
 
 namespace brisk {
 void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
