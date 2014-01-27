@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(brisk_new)
+project(brisk)
 
 find_package(redwood_catkin REQUIRED)
 catkin_simple()
@@ -9,7 +9,7 @@ if(NOT ANDROID)
   add_definitions("-mssse3")
 endif()
 
-add_definitions(-Wextra -Wall -pedantic)
+add_definitions(-Wextra -Wall -Werror -pedantic)
 
 cs_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                src/brisk-feature-detector.cc   

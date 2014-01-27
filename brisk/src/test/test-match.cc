@@ -48,15 +48,18 @@
 #endif
 
 TEST(Brisk, MatchBitset) {
+  cv::Mat img1, img2;
 #ifdef TEST_IN_SOURCE
   std::string image1path = "src/test/test_data/img1.pgm";
   std::string image2path = "src/test/test_data/img2.pgm";
+  img1 = cv::imread(image1path, 0);
+  img2 = cv::imread(image2path, 0);
 #else
-  std::string image2path = "./test_data/img1.pgm";
+  std::string image1path = "./test_data/img1.pgm";
   std::string image2path = "./test_data/img2.pgm";
+  img1 = cv::imread(image1path);
+  img2 = cv::imread(image2path);
 #endif
-  cv::Mat img1 = cv::imread(image1path, 0);
-  cv::Mat img2 = cv::imread(image2path, 0);
 
   const unsigned int detection_threshold = 70;
   const unsigned int matching_threshold = 50;
@@ -97,8 +100,8 @@ TEST(Brisk, MatchBitset) {
   double outlier_thres = 5;
 
   for (const Match& match : matches) {
-    cv::Point2f pt1 = keypoints1.at(match.first).pt;
-    cv::Point2f pt2 = keypoints2.at(match.second).pt;
+    auto pt1 = agast::KeyPoint(keypoints1.at(match.first));
+    auto pt2 = agast::KeyPoint(keypoints2.at(match.second));
     Eigen::Matrix<double, 3, 1> norm1, norm2;
     norm1 << pt1.x, pt1.y, 1.0;
     norm2 << pt2.x, pt2.y, 1.0;
