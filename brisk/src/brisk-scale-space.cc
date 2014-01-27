@@ -104,16 +104,21 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
     if (!keypoints->empty()) {
       perform_2d_nonMax = false;
       // Compute the location for this layer:
-      for (const features_2d::Keypoint& keypoint : *keypoints) {
-        features_2d::Keypoint kp;
-        kp.x = (static_cast<float>(keypoint.x)) / l.scale() - l.offset();
-        kp.y = (static_cast<float>(keypoint.y)) / l.scale() - l.offset();
-        if (kp.x < 3 || kp.y < 3 || kp.x > l.width() - 3
-            || kp.y > l.height() - 3) {
+      for (const cv::KeyPoint& keypoint : *keypoints) {
+        cv::KeyPoint kp;
+        agast::KeyPoint(kp).x =
+            (static_cast<float>(agast::KeyPoint(keypoint).x)) /
+            l.scale() - l.offset();
+        agast::KeyPoint(kp).y =
+            (static_cast<float>(agast::KeyPoint(keypoint).y)) /
+            l.scale() - l.offset();
+        if (agast::KeyPoint(kp).x < 3 || agast::KeyPoint(kp).y < 3 ||
+            agast::KeyPoint(kp).x > l.width() - 3 ||
+            agast::KeyPoint(kp).y > l.height() - 3) {
           continue;
         }
         // This calculates and stores the score of this keypoint in the score map.
-        l.GetAgastScore(kp.x, kp.y, 0);
+        l.GetAgastScore(agast::KeyPoint(kp).x, agast::KeyPoint(kp).y, 0);
         agastPoints.at(i).push_back(kp);
       }
     }
