@@ -63,7 +63,7 @@ TEST(Brisk, MatchBitset) {
 
   const unsigned int detection_threshold = 70;
   const unsigned int matching_threshold = 50;
-  brisk::BriskFeatureDetector detector(detection_threshold);
+  brisk::BriskFeatureDetector detector(detection_threshold, 2);
   std::vector<cv::KeyPoint> keypoints1, keypoints2;
   std::vector<std::bitset<384> > descriptors1, descriptors2;
   detector.detect(img1, keypoints1);
@@ -72,6 +72,9 @@ TEST(Brisk, MatchBitset) {
   brisk::BriskDescriptorExtractor extractor;
   extractor.compute(img1, keypoints1, descriptors1);
   extractor.compute(img2, keypoints2, descriptors2);
+
+  std::cout << "Got " << keypoints1.size() << " keypoints" << std::endl;
+  std::cout << "Got " << keypoints2.size() << " keypoints" << std::endl;
 
   typedef std::pair<unsigned int, unsigned int> Match;
   std::vector<Match> matches;
@@ -114,37 +117,9 @@ TEST(Brisk, MatchBitset) {
       ++outliers;
     }
   }
-  ASSERT_LT(outliers, matches.size() / 10) << "Too many outliers";
 
-#if DRAW_MATCHES
-  cv::Mat image(img1.rows, img1.cols + img2.cols, CV_8UC1);
-  image.setTo(0);
-  for (int row = 0; row < img1.rows; ++row) {
-    memcpy(image.data + row * image.cols, img1.data + row * img1.cols,
-        img1.cols);
-    memcpy(image.data + row * image.cols + img1.cols,
-        img2.data + row * img2.cols, img2.cols);
-  }
-
-  for (size_t i = 0; i < keypoints1.size(); ++i) {
-    cv::Point2f pt1 = keypoints1.at(i).pt;
-    cv::circle(image, pt1, 10, cv::Scalar(255, 255, 255));
-  }
-  for (size_t i = 0; i < keypoints2.size(); ++i) {
-    cv::Point2f pt1 = keypoints2.at(i).pt;
-    pt1.x += img1.cols;
-    cv::circle(image, pt1, 10, cv::Scalar(255, 255, 255));
-  }
-
-  for (const Match& match : matches) {
-    cv::Point2f pt1 = keypoints1.at(match.first).pt;
-    cv::Point2f pt2 = keypoints2.at(match.second).pt;
-    pt2.x += img1.cols;
-    cv::line(image, pt1, pt2, cv::Scalar(255, 255, 255));
-  }
-
-  DisplayImageUsingOpencv(image.data, image.rows, image.cols, "matches");
-#endif
+  EXPECT_EQ(outliers, 0u) << "Matching outliers found (" <<
+      outliers << "/" << matches.size() << ")";
 }
 
 int main(int argc, char** argv) {

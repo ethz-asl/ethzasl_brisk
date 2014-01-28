@@ -35,8 +35,12 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <dirent.h>
+#include <fcntl.h>
 #include <fstream>  // NOLINT
+#include <memory>
 #include <string>
+#include <sys/stat.h>
 
 #include <agast/wrap-opencv.h>
 #include <agast/glog.h>
@@ -88,4 +92,52 @@ cv::Mat imread(const std::string& filename) {
   infile.close();
   return img;
 }
+
+bool MakePGMHeader(const cv::Mat& image, unsigned char** pgm_header) {
+  // To use O_DIRECT to write to files, the memory size must be a multiple of
+  // 4096 bytes and aligned to addresses multiples of 4096 at the source
+  if (posix_memalign(reinterpret_cast<void **>(pgm_header), 4096, 4096)) {
+    LOG(ERROR) << "Could not allocate memory for PGM header\n";
+    return false;
+  }
+  memset(*pgm_header, '#', 4096);
+
+  char head[32];
+  int n = snprintf(head, sizeof(head), "P5\n%d %d\n######", image.cols,
+                   image.rows);
+  std::string head_string(head, n);
+  memcpy(*pgm_header, head_string.c_str(), head_string.length());
+
+  std::string foot_string;
+  foot_string = "\n255\n";
+  memcpy(*pgm_header + 4096 - 5, foot_string.c_str(), foot_string.length());
+
+  return true;
+}
+
+ssize_t imwrite(const cv::Mat& image, const std::string& filepath) {
+  ssize_t bytes_written = 0;
+
+  int fd = open(filepath.c_str(), O_CREAT | O_RDWR | O_DIRECT,
+                S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
+  if (fd < 0) {
+    LOG(ERROR) << "Unable to open file " << filepath;
+    return bytes_written;
+  }
+
+  unsigned char* pgm_header = nullptr;
+  MakePGMHeader(image, &pgm_header);
+
+  // The header is always written.
+  bytes_written += write(fd, pgm_header, 4096);
+
+  bytes_written += write(fd, image.data, image.cols * image.rows);
+  if (pgm_header) {
+    free (pgm_header);
+    pgm_header = NULL;
+  }
+  close(fd);
+  return bytes_written;
+}
+
 }  // namespace cv
