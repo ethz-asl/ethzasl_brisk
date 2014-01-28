@@ -7,6 +7,7 @@
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <maintainer email="slynen@ethz.ch">Simon Lynen</maintainer>
   <maintainer email="lestefan@ethz.ch">Stefan Leutenegger</maintainer>
+
   <license>New BSD</license>
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
