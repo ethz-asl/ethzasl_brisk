@@ -61,7 +61,8 @@ BriskScaleSpace::BriskScaleSpace(uint8_t _octaves,
 }
 BriskScaleSpace::~BriskScaleSpace() { }
 // Construct the image pyramids.
-void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold) {
+void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold,
+                                       uchar overwrite_lower_thres) {
   // Set correct size:
   pyramid_.clear();
 
@@ -70,38 +71,62 @@ void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold) {
 
   // Fill the pyramid:
   pyramid_.push_back(
-      BriskLayer(image.clone(), defaultUpperThreshold, defaultLowerThreshold));
+      BriskLayer(image.clone(), defaultUpperThreshold, overwrite_lower_thres));
   if (layers_ > 1) {
     pyramid_.push_back(
         BriskLayer(pyramid_.back(), BriskLayer::CommonParams::TWOTHIRDSAMPLE,
-                   (defaultUpperThreshold), (defaultLowerThreshold)));
+                   (defaultUpperThreshold), (overwrite_lower_thres)));
   }
   const int octaves2 = layers_;
 
   for (uint8_t i = 2; i < octaves2; i += 2) {
     pyramid_.push_back(
         BriskLayer(pyramid_[i - 2], BriskLayer::CommonParams::HALFSAMPLE,
-                   (defaultUpperThreshold), (defaultLowerThreshold)));
+                   (defaultUpperThreshold), (overwrite_lower_thres)));
     pyramid_.push_back(
         BriskLayer(pyramid_[i - 1], BriskLayer::CommonParams::HALFSAMPLE,
-                   (defaultUpperThreshold), (defaultLowerThreshold)));
+                   (defaultUpperThreshold), (overwrite_lower_thres)));
   }
 }
 
 void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
-  // Make sure keypoints is empty.
-  keypoints->resize(0);
-  keypoints->reserve(1000);
-
+  CHECK_NOTNULL(keypoints);
   std::vector<std::vector<cv::KeyPoint> > agastPoints;
   agastPoints.resize(layers_);
 
+  bool perform_2d_nonMax = true;
+
   // Go through the octaves and intra layers and calculate fast corner scores:
-  for (uint8_t i = 0; i < layers_; i++) {
-    // Call OAST16_9 without non-max-suppression.
-    brisk::BriskLayer& l = pyramid_[i];
+  for (uint8_t i = 0; i < layers_; ++i) {
+    BriskLayer& l = pyramid_[i];
+
+    // Compute scores for given keypoints or extract new kepoints.
+    if (!keypoints->empty()) {
+      perform_2d_nonMax = false;
+      // Compute the location for this layer:
+      for (const cv::KeyPoint& keypoint : *keypoints) {
+        cv::KeyPoint kp;
+        agast::KeyPoint(kp).x =
+            (static_cast<float>(agast::KeyPoint(keypoint).x)) /
+            l.scale() - l.offset();
+        agast::KeyPoint(kp).y =
+            (static_cast<float>(agast::KeyPoint(keypoint).y)) /
+            l.scale() - l.offset();
+        if (agast::KeyPoint(kp).x < 3 || agast::KeyPoint(kp).y < 3 ||
+            agast::KeyPoint(kp).x > l.width() - 3 ||
+            agast::KeyPoint(kp).y > l.height() - 3) {
+          continue;
+        }
+        // This calculates and stores the score of this keypoint in the score map.
+        l.GetAgastScore(agast::KeyPoint(kp).x, agast::KeyPoint(kp).y, 0);
+        agastPoints.at(i).push_back(kp);
+      }
+    }
+
     l.GetAgastPoints(threshold_, &agastPoints[i]);
   }
+
+  keypoints->clear();
 
   if (!m_suppressScaleNonmaxima) {
     for (uint8_t i = 0; i < layers_; i++) {
@@ -112,7 +137,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
         const float& point_x = agast::KeyPoint(point).x;
         const float& point_y = agast::KeyPoint(point).y;
         // First check if it is a maximum:
-        if (!IsMax2D(i, point_x, point_y))
+        if (perform_2d_nonMax && !IsMax2D(i, point_x, point_y))
           continue;
 
         // Let's do the subpixel and float scale refinement:
@@ -149,7 +174,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
       const float& point_y = agast::KeyPoint(point).y;
 
       // First check if it is a maximum:
-      if (!IsMax2D(0, point_x, point_y))
+      if (perform_2d_nonMax && !IsMax2D(0, point_x, point_y))
         continue;
 
       // Let's do the subpixel and float scale refinement:
@@ -185,7 +210,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
         const float& point_x = agast::KeyPoint(point).x;
         const float& point_y = agast::KeyPoint(point).y;
         // Consider only 2D maxima...
-        if (!IsMax2D(i, point_x, point_y))
+        if (perform_2d_nonMax && !IsMax2D(i, point_x, point_y))
           continue;
 
         bool ismax;
@@ -225,7 +250,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
         const float& point_y = agast::KeyPoint(point).y;
 
         // First check if it is a maximum:
-        if (!IsMax2D(i, point_x, point_y))
+        if (perform_2d_nonMax && !IsMax2D(i, point_x, point_y))
           continue;
 
         // Let's do the subpixel and float scale refinement:
