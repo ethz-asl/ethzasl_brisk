@@ -167,7 +167,7 @@ struct Mat {
   }
   cv::Mat clone() const {
     cv::Mat tmp(rows, cols, type_);
-    if (img) {
+    if (data) {
       unsigned int bytedepth = ComputeByteDepth(type_);
       unsigned int final_size = rows * cols * bytedepth;
       CHECK(tmp.img);
@@ -250,6 +250,7 @@ typedef Point_<float> Point2f;
 typedef Point_<int> Point2i;
 // Reads a pgm image from file.
 cv::Mat imread(const std::string& filename);
+ssize_t imwrite(const cv::Mat& image, const std::string& filename);
 typedef features_2d::Keypoint KeyPoint;
 }  // namespace cv
 
