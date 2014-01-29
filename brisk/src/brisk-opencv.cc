@@ -53,6 +53,12 @@ void GetNextUncommentedLine(std::ifstream& infile, std::string* input_line) {
     std::getline(infile, *input_line);
   }
 }
+// O_DIRECT writing uses DMA and to achieve this needs the input memory to be
+// memory aligned to multiples of 4096.  This will allocate properly aligned
+// memory. See man 2 memalign for details.
+#ifdef ANDROID
+#define posix_memalign(a, b, c) (((*a) = memalign(b, c)) == NULL)
+#endif
 }  // namespace
 
 namespace cv {
