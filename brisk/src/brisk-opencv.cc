@@ -46,6 +46,7 @@
 #include <agast/wrap-opencv.h>
 #include <agast/glog.h>
 
+#if !HAVE_OPENCV
 namespace {
 void GetNextUncommentedLine(std::ifstream& infile, std::string* input_line) {
   std::getline(infile, *input_line);
@@ -148,3 +149,4 @@ ssize_t imwrite(const cv::Mat& image, const std::string& filepath) {
 }
 
 }  // namespace cv
+#endif  // !HAVE_OPENCV
