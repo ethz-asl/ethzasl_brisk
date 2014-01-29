@@ -39,6 +39,7 @@
 #include <fcntl.h>
 #include <fstream>  // NOLINT
 #include <memory>
+#include <stdlib.h>
 #include <string>
 #include <sys/stat.h>
 
