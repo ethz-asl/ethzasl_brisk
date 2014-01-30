@@ -92,9 +92,9 @@ void Timer::Start() {
   CPUID(); RDTSC(start_);
 #else
 #ifdef _MSC_VER
-using boost::chrono;
+using namespace boost::chrono;
 #else
-using std::chrono;
+using namespace std::chrono;
 #endif  // _MSC_VER
   time_ = chrono::system_clock::now();
 #endif  // USE_RDTSC
@@ -107,9 +107,9 @@ void Timer::Stop() {
   Timing::Instance().AddCycles(handle_, cycles);
 #else
 #ifdef _MSC_VER
-using boost::chrono;
+using namespace boost::chrono;
 #else
-using std::chrono;
+using namespace std::chrono;
 #endif  // _MSC_VER
   chrono::time_point<chrono::system_clock> now =
       chrono::system_clock::now();
