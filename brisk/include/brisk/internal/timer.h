@@ -132,10 +132,10 @@ class Timer {
   boost::chrono::time_point<boost::chrono::system_clock> time_;
 #else
   std::chrono::time_point<std::chrono::system_clock> time_;
-#endif  // _MSC_VER
+#endif
 #if USE_RDTSC
   tsc_counter start_, end_;
-#endif  // USE_RDTSC
+#endif
   bool timing_;
   size_t handle_;
 };
@@ -187,7 +187,7 @@ class Timing {
 typedef Timer DebugTimer;
 #else
 typedef DummyTimer DebugTimer;
-#endif  // ENABLE_BRISK_TIMING
+#endif
 
 }  // namespace timing
 }  // namespace brisk

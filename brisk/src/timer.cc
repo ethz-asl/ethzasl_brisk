@@ -92,11 +92,11 @@ void Timer::Start() {
   CPUID(); RDTSC(start_);
 #else
 #ifdef _MSC_VER
-using namespace boost::chrono;
+using boost::chrono::system_clock;
 #else
-using namespace std::chrono;
+using std::chrono::system_clock;
 #endif  // _MSC_VER
-  time_ = chrono::system_clock::now();
+  time_ = system_clock::now();
 #endif  // USE_RDTSC
 }
 
@@ -107,14 +107,18 @@ void Timer::Stop() {
   Timing::Instance().AddCycles(handle_, cycles);
 #else
 #ifdef _MSC_VER
-using namespace boost::chrono;
+using boost::chrono::time_point;
+using boost::chrono::system_clock;
+using boost::chrono::duration_cast;
+using boost::chrono::nanoseconds;
 #else
-using namespace std::chrono;
+using std::chrono::time_point;
+using std::chrono::system_clock;
+using std::chrono::duration_cast;
+using std::chrono::nanoseconds;
 #endif  // _MSC_VER
-  chrono::time_point<chrono::system_clock> now =
-      chrono::system_clock::now();
-  double dt = static_cast<double>(chrono::duration_cast
-      <chrono::nanoseconds> (now - time_).count())
+  time_point<system_clock> now = system_clock::now();
+  double dt = static_cast<double>(duration_cast<nanoseconds>(now - time_).count())
       * kNumSecondsPerNanosecond;
   Timing::Instance().AddTime(handle_, dt);
 #endif
