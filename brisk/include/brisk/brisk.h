@@ -41,7 +41,6 @@
 #ifndef BRISK_BRISK_H_
 #define BRISK_BRISK_H_
 
-#include <brisk/brute-force-matcher.h>
 #include <brisk/brisk-descriptor-extractor.h>
 #include <brisk/brisk-feature.h>
 #include <brisk/brisk-feature-detector.h>
@@ -57,7 +56,6 @@
 namespace cv {
 typedef brisk::BriskDescriptorExtractor BriskDescriptorExtractor;
 typedef brisk::BriskFeatureDetector BriskFeatureDetector;
-typedef brisk::BruteForceMatcherSse BruteForceMatcherSse;
 }  // namespace cv
 
 namespace brisk {

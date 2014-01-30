@@ -5,22 +5,20 @@
  *      Author: lestefan
  */
 
+#include <iostream>  // NOLINT
+
+#include <agast/wrap-opencv.h>
 #include <brisk/camera-aware-feature.h>
-#include <brisk/brisk-opencv.h>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/calib3d/calib3d.hpp>
 #include <brisk/brisk-feature.h>
-#include <iostream>
+#include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 namespace brisk {
 
-CameraAwareFeature::CameraAwareFeature() {
+CameraAwareFeature::CameraAwareFeature() { }
 
-}
-
-CameraAwareFeature::~CameraAwareFeature() {
-
-}
+CameraAwareFeature::~CameraAwareFeature() { }
 
 CameraAwareFeature::CameraAwareFeature(
     cv::Ptr<const cv::Feature2D> feature2dPtr,
@@ -96,18 +94,18 @@ void CameraAwareFeature::setCameraGeometry(
   // find out into how many different sub-images to split:
   const double angle_x = std::max(
       acos(
-          p_C_00[0] * p_C_w0[0] + p_C_00[1] * p_C_w0[1]
-              + p_C_00[2] * p_C_w0[2]),
+           p_C_00[0] * p_C_w0[0] + p_C_00[1] * p_C_w0[1]
+               + p_C_00[2] * p_C_w0[2]),
       acos(
-          p_C_0h[0] * p_C_wh[0] + p_C_0h[1] * p_C_wh[1]
-              + p_C_0h[2] * p_C_wh[2]));
+           p_C_0h[0] * p_C_wh[0] + p_C_0h[1] * p_C_wh[1]
+               + p_C_0h[2] * p_C_wh[2]));
   const double angle_y = std::max(
       acos(
-          p_C_00[0] * p_C_0h[0] + p_C_00[1] * p_C_0h[1]
-              + p_C_00[2] * p_C_0h[2]),
+           p_C_00[0] * p_C_0h[0] + p_C_00[1] * p_C_0h[1]
+               + p_C_00[2] * p_C_0h[2]),
       acos(
-          p_C_w0[0] * p_C_wh[0] + p_C_w0[1] * p_C_wh[1]
-              + p_C_w0[2] * p_C_wh[2]));
+           p_C_w0[0] * p_C_wh[0] + p_C_w0[1] * p_C_wh[1]
+               + p_C_w0[2] * p_C_wh[2]));
   //std::cout<<angle_x/M_PI*180<<std::endl;
   //std::cout<<angle_y/M_PI*180<<std::endl;
   _N_x = angle_x / 2.0 / _distortionTolerance + 1.0;
@@ -129,7 +127,7 @@ void CameraAwareFeature::setCameraGeometry(
   _cameraModelSelection = cv::Mat::zeros(height, width, CV_8UC1);
 
   // fill normals first
-  std::vector<cv::Vec3d> normals(_N_x * _N_y);
+  std::vector < cv::Vec3d > normals(_N_x * _N_y);
   for (size_t m = 0; m < _N_x; ++m) {
     for (size_t n = 0; n < _N_y; ++n) {
       // index to any of the maps/images
@@ -183,7 +181,8 @@ void CameraAwareFeature::setCameraGeometry(
       // the 3-plane intersections are easy, so do them first, if applicable:
       if (!leftBoundary && !topBoundary) {
         threePlaneIntersection(normals[i], -1.0, normals[i - 1], -1.0,
-                               normals[i - _N_x], -1.0, p_00);
+                               normals[i - _N_x],
+                               -1.0, p_00);
         p_00 = R_Ci_C * p_00;
         //std::cout<<p_00[2]<<" ";
         p_00[0] /= p_00[2];
@@ -191,7 +190,8 @@ void CameraAwareFeature::setCameraGeometry(
       }
       if (!topBoundary && !rightBoundary) {
         threePlaneIntersection(normals[i], -1.0, normals[i - _N_x], -1.0,
-                               normals[i + 1], -1.0, p_10);
+                               normals[i + 1],
+                               -1.0, p_10);
         p_10 = R_Ci_C * p_10;
         //std::cout<<p_10[2]<<" ";
         p_10[0] /= p_10[2];
@@ -199,7 +199,8 @@ void CameraAwareFeature::setCameraGeometry(
       }
       if (!leftBoundary && !bottomBoundary) {
         threePlaneIntersection(normals[i], -1.0, normals[i - 1], -1.0,
-                               normals[i + _N_x], -1.0, p_01);
+                               normals[i + _N_x],
+                               -1.0, p_01);
         p_01 = R_Ci_C * p_01;
         //std::cout<<p_01[2]<<" ";
         p_01[0] /= p_01[2];
@@ -207,7 +208,8 @@ void CameraAwareFeature::setCameraGeometry(
       }
       if (!rightBoundary && !bottomBoundary) {
         threePlaneIntersection(normals[i], -1.0, normals[i + 1], -1.0,
-                               normals[i + _N_x], -1.0, p_11);
+                               normals[i + _N_x],
+                               -1.0, p_11);
         p_11 = R_Ci_C * p_11;
         p_11[0] /= p_11[2];
         //std::cout<<p_11[2]<<" ";
@@ -341,7 +343,8 @@ void CameraAwareFeature::setCameraGeometry(
       }
       // convert to fix point maps
       cv::convertMaps(_distort_x_maps[i], _distort_y_maps[i],
-                      _distort_1_maps[i], _distort_2_maps[i], CV_16SC2);
+                      _distort_1_maps[i],
+                      _distort_2_maps[i], CV_16SC2);
 
       // undistortion maps
       for (size_t x = 0; x < width; ++x) {
@@ -360,21 +363,23 @@ void CameraAwareFeature::setCameraGeometry(
 
       // convert to fix point maps
       cv::convertMaps(_undistort_x_maps[i], _undistort_y_maps[i],
-                      _undistort_1_maps[i], _undistort_2_maps[i], CV_16SC2);
+                      _undistort_1_maps[i],
+                      _undistort_2_maps[i], CV_16SC2);
 
       // store look-up
       cv::Mat img = cv::Mat::ones(pixelsV, pixelsU, CV_8UC1) * (i + 1);
       if (!leftBoundary)
         img.colRange(0, margin).setTo(0);
       if (!topBoundary)
-        img.rowRange(0, margin ).setTo(0);
+        img.rowRange(0, margin).setTo(0);
       if (!rightBoundary)
         img.colRange(img.cols - margin, img.cols).setTo(0);
       if (!bottomBoundary)
         img.rowRange(img.rows - margin, img.rows).setTo(0);
       cv::Mat currentSelection = cv::Mat::zeros(pixelsV, pixelsU, CV_8UC1);
       cv::remap(img, currentSelection, _undistort_1_maps[i],
-                _undistort_2_maps[i], cv::INTER_LINEAR, cv::BORDER_CONSTANT);
+                _undistort_2_maps[i],
+                cv::INTER_LINEAR, cv::BORDER_CONSTANT);
       cv::max(_cameraModelSelection, currentSelection, _cameraModelSelection);
     }
   }
@@ -382,8 +387,10 @@ void CameraAwareFeature::setCameraGeometry(
 }
 
 bool CameraAwareFeature::threePlaneIntersection(const cv::Vec3d& n1, double d1,
-                                                const cv::Vec3d& n2, double d2,
-                                                const cv::Vec3d& n3, double d3,
+                                                const cv::Vec3d& n2,
+                                                double d2,
+                                                const cv::Vec3d& n3,
+                                                double d3,
                                                 cv::Vec3d& result) {
 
   double denom = n1.ddot(n2.cross(n3));
@@ -550,7 +557,7 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   removeBorderKeypoints(2.0, image.getMat(), keypoints);
 
   // group the keypoints / descriptors
-  std::vector<std::vector<cv::KeyPoint> > keypointsVec(_N_x * _N_y);
+  std::vector < std::vector<cv::KeyPoint> > keypointsVec(_N_x * _N_y);
   std::vector<cv::Mat> descriptorsVec(_N_x * _N_y);
   int original_class_id = -1;
   for (size_t k = 0; k < keypoints.size(); ++k) {
@@ -614,7 +621,7 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
                             descriptorsVec.at(0).type());
   size_t start_row = 0;
   for (size_t i = 0; i < keypointsVec.size(); ++i) {
-    if(keypointsVec.at(i).size()>0){
+    if (keypointsVec.at(i).size() > 0) {
       descriptorsVec.at(i).copyTo(
           descriptors_final.rowRange(start_row,
                                      start_row + descriptorsVec.at(i).rows));
