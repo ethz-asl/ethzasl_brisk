@@ -39,7 +39,14 @@
  */
 
 #include <brisk/internal/brisk-layer.h>
+#include <brisk/internal/image-down-sampling.h>
+
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#else
+#include <emmintrin.h>
 #include <tmmintrin.h>
+#endif  // __ARM_NEON__
 
 namespace brisk {
 // Construct a layer.
@@ -69,12 +76,12 @@ BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
 
   if (mode == CommonParams::HALFSAMPLE) {
     img_.create(layer.img().rows / 2, layer.img().cols / 2, CV_8U);
-    HalfSample(layer.img(), img_);
+    Halfsample8(layer.img(), img_);
     scale_ = layer.scale() * 2;
     offset_ = 0.5 * scale_ - 0.5;
   } else {
     img_.create(2 * (layer.img().rows / 3), 2 * (layer.img().cols / 3), CV_8U);
-    TwoThirdSample(layer.img(), img_);
+    Twothirdsample8(layer.img(), img_);
     scale_ = layer.scale() * 1.5;
     offset_ = 0.5 * scale_ - 0.5;
   }
@@ -90,16 +97,19 @@ BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
 // Fast/Agast.
 // Wraps the agast class.
 void BriskLayer::GetAgastPoints(uint8_t threshold,
-                                std::vector<CvPoint>* keypoints) {
+                                std::vector<cv::KeyPoint>* keypoints) {
+  CHECK_NOTNULL(keypoints);
   oastDetector_->set_threshold(threshold, upperThreshold_, lowerThreshold_);
-  oastDetector_->detect(img_.data, *keypoints, &thrmap_);
-
+  if (keypoints->empty()) {
+    oastDetector_->detect(img_.data, *keypoints, &thrmap_);
+  }
   // Also write scores.
   const int num = keypoints->size();
   const int imcols = img_.cols;
 
   for (int i = 0; i < num; i++) {
-    const int offs = (*keypoints)[i].x + (*keypoints)[i].y * imcols;
+    const int offs = agast::KeyPoint((*keypoints)[i]).x +
+        agast::KeyPoint((*keypoints)[i]).y * imcols;
     int thr = *(thrmap_.data + offs);
     oastDetector_->set_threshold(thr);
     *(scores_.data + offs) = oastDetector_->cornerScore(img_.data + offs);
@@ -273,13 +283,54 @@ void BriskLayer::CalculateThresholdMap() {
 
   const int rowstride = img_.cols;
 
-  // SSE version.
-
   for (int y = 1; y < img_.rows - 1; y++) {
     int x = 1;
     while (x + 16 < img_.cols - 1) {
       // Access.
       uchar* p = img_.data + x - 1 + (y - 1) * rowstride;
+#ifdef __ARM_NEON__
+      // NEON version.
+      uint8x16_t v_1_1 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p++;
+      uint8x16_t v0_1 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p++;
+      uint8x16_t v1_1 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += rowstride;
+      uint8x16_t v10 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p--;
+      uint8x16_t v00 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p--;
+      uint8x16_t v_10 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += rowstride;
+      uint8x16_t v_11 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p++;
+      uint8x16_t v01 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p++;
+      uint8x16_t v11 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+
+      // Min/max calculation.
+      uint8x16_t max = vmaxq_u8(v_1_1, v0_1);
+      uint8x16_t min = vminq_u8(v_1_1, v0_1);
+      max = vmaxq_u8(max, v1_1);
+      min = vminq_u8(min, v1_1);
+      max = vmaxq_u8(max, v10);
+      min = vminq_u8(min, v10);
+      max = vmaxq_u8(max, v00);
+      min = vminq_u8(min, v00);
+      max = vmaxq_u8(max, v_10);
+      min = vminq_u8(min, v_10);
+      max = vmaxq_u8(max, v_11);
+      min = vminq_u8(min, v_11);
+      max = vmaxq_u8(max, v01);
+      min = vminq_u8(min, v01);
+      max = vmaxq_u8(max, v11);
+      min = vminq_u8(min, v11);
+
+      // Store data back:
+      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmax.data + x + y * rowstride), max);
+      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmin.data + x + y * rowstride), min);
+#else
+      // SSE version.
       __m128i v_1_1 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p++;
       __m128i v0_1 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
@@ -317,11 +368,11 @@ void BriskLayer::CalculateThresholdMap() {
       min = _mm_min_epu8(min, v11);
 
       // Store.
-      _mm_storeu_si128(reinterpret_cast<__m128i *>(tmpmax.data + x +
-          y * rowstride), max);
-      _mm_storeu_si128(reinterpret_cast<__m128i *>(tmpmin.data + x +
-          y * rowstride), min);
-
+      _mm_storeu_si128(
+          reinterpret_cast<__m128i *>(tmpmax.data + x + y * rowstride), max);
+      _mm_storeu_si128(
+          reinterpret_cast<__m128i *>(tmpmin.data + x + y * rowstride), min);
+#endif  // __ARM_NEON__
       // Next block.
       x += 16;
     }
@@ -332,6 +383,60 @@ void BriskLayer::CalculateThresholdMap() {
     while (x + 16 < img_.cols - 3) {
       // Access.
       uchar* p = img_.data + x + y * rowstride;
+#ifdef __ARM_NEON__
+      // NEON version //
+      uint8x16_t v00 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p -= 2 + 2 * rowstride;
+      uint8x16_t v_2_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4;
+      uint8x16_t v2_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4 * rowstride;
+      uint8x16_t v22 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p -= 4;
+      uint8x16_t v_22 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+
+      p = tmpmax.data + x + (y - 2) * rowstride;
+      uint8x16_t max0_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4 * rowstride;
+      uint8x16_t max02 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p -= 2 * rowstride + 2;
+      uint8x16_t max_20 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4;
+      uint8x16_t max20 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+
+      p = tmpmin.data + x + (y - 2) * rowstride;
+      uint8x16_t min0_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4 * rowstride;
+      uint8x16_t min02 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p -= 2 * rowstride + 2;
+      uint8x16_t min_20 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+      p += 4;
+      uint8x16_t min20 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
+
+      // Min/max.
+      uint8x16_t max = vmaxq_u8(v00, v_2_2);
+      uint8x16_t min = vminq_u8(v00, v_2_2);
+      max = vmaxq_u8(max, v2_2);
+      min = vminq_u8(min, v2_2);
+      max = vmaxq_u8(max, v22);
+      min = vminq_u8(min, v22);
+      max = vmaxq_u8(max, v_22);
+      min = vminq_u8(min, v_22);
+      max = vmaxq_u8(max, max0_2);
+      min = vminq_u8(min, min0_2);
+      max = vmaxq_u8(max, max02);
+      min = vminq_u8(min, min02);
+      max = vmaxq_u8(max, max_20);
+      min = vminq_u8(min, min_20);
+      max = vmaxq_u8(max, max20);
+      min = vminq_u8(min, min20);
+
+      // Store the data back:
+      uint8x16_t diff = vsubq_u8(max, min);
+      vst1q_u8(reinterpret_cast<uint8_t*> (thrmap_.data + x + y * rowstride),
+               diff);
+#else
+      // SSE version.
       __m128i v00 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
       p -= 2 + 2 * rowstride;
       __m128i v_2_2 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
@@ -382,7 +487,7 @@ void BriskLayer::CalculateThresholdMap() {
       __m128i diff = _mm_sub_epi8(max, min);
       _mm_storeu_si128(reinterpret_cast<__m128i *>(thrmap_.data + x +
           y * rowstride), diff);
-
+#endif  // __ARM_NEON__
       // Next block.
       x += 16;
     }
@@ -489,247 +594,6 @@ void BriskLayer::CalculateThresholdMap() {
       // Store.
       *(thrmap_.data + x + y * rowstride) = max - min;
     }
-  }
-}
-
-void BriskLayer::HalfSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
-  // Take care with border...
-  const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
-  // Note: leftoverCols can be zero but this still false...
-  const bool noleftover = (srcimg.cols % 16) == 0;
-
-  // Make sure the destination image is of the right size:
-  assert(srcimg.cols / 2 == dstimg.cols);
-  assert(srcimg.rows / 2 == dstimg.rows);
-
-  // Mask needed later:
-  register __m128i mask = _mm_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF00FF,
-                                        0x00FF00FF);
-  // To be added in order to make successive averaging correct:
-  register __m128i ones = _mm_set_epi8(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                                       1, 1);
-
-  // Data pointers:
-  __m128i* p1 = reinterpret_cast<__m128i *>(srcimg.data);
-  __m128i* p2 = reinterpret_cast<__m128i *>(srcimg.data+srcimg.cols);
-  __m128i* p_dest = reinterpret_cast<__m128i *>(dstimg.data);
-  unsigned char* p_dest_char;
-
-  // Size:
-  const unsigned int size = (srcimg.cols * srcimg.rows) / 16;
-  const unsigned int hsize = srcimg.cols / 16;
-  __m128i* p_end = p1 + size;
-  unsigned int row = 0;
-  const unsigned int end = hsize / 2;
-  bool half_end;
-  if (hsize % 2 == 0)
-    half_end = false;
-  else
-    half_end = true;
-  while (p2 < p_end) {
-    for (unsigned int i = 0; i < end; i++) {
-      // Load the two blocks of memory:
-      __m128i upper;
-      __m128i lower;
-      if (noleftover) {
-        upper = _mm_load_si128(p1);
-        lower = _mm_load_si128(p2);
-      } else {
-        upper = _mm_loadu_si128(p1);
-        lower = _mm_loadu_si128(p2);
-      }
-
-      __m128i result1 = _mm_adds_epu8(upper, ones);
-      result1 = _mm_avg_epu8(upper, lower);
-
-      // Increment the pointers:
-      p1++;
-      p2++;
-
-      // Load the two blocks of memory:
-      upper = _mm_loadu_si128(p1);
-      lower = _mm_loadu_si128(p2);
-      __m128i result2 = _mm_adds_epu8(upper, ones);
-      result2 = _mm_avg_epu8(upper, lower);
-      // Calculate the shifted versions:
-      __m128i result1_shifted = _mm_srli_si128(result1, 1);
-      __m128i result2_shifted = _mm_srli_si128(result2, 1);
-      // Pack:
-      __m128i result = _mm_packus_epi16(_mm_and_si128(result1, mask),
-                                        _mm_and_si128(result2, mask));
-      __m128i result_shifted = _mm_packus_epi16(
-          _mm_and_si128(result1_shifted, mask),
-          _mm_and_si128(result2_shifted, mask));
-      // Average for the second time:
-      result = _mm_avg_epu8(result, result_shifted);
-
-      // Store to memory.
-      _mm_storeu_si128(p_dest, result);
-
-      // Increment the pointers:
-      p1++;
-      p2++;
-      p_dest++;
-    }
-    // If we are not at the end of the row, do the rest:
-    if (half_end) {
-      // Load the two blocks of memory:
-      __m128i upper;
-      __m128i lower;
-      if (noleftover) {
-        upper = _mm_load_si128(p1);
-        lower = _mm_load_si128(p2);
-      } else {
-        upper = _mm_loadu_si128(p1);
-        lower = _mm_loadu_si128(p2);
-      }
-
-      __m128i result1 = _mm_adds_epu8(upper, ones);
-      result1 = _mm_avg_epu8(upper, lower);
-
-      // Increment the pointers:
-      p1++;
-      p2++;
-
-      // Compute horizontal pairwise average and store.
-      p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
-      const UCHAR_ALIAS* result = reinterpret_cast<UCHAR_ALIAS*>(&result1);
-      for (unsigned int j = 0; j < 8; j++) {
-        *(p_dest_char++) = (*(result + 2 * j) + *(result + 2 * j + 1)) / 2;
-      }
-    } else {
-      p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
-    }
-
-    if (noleftover) {
-      row++;
-      p_dest = reinterpret_cast<__m128i*>(dstimg.data + row * dstimg.cols);
-      p1 = reinterpret_cast<__m128i*>(srcimg.data + 2 * row * srcimg.cols);
-      p2 = p1 + hsize;
-    } else {
-      const unsigned char* p1_src_char = reinterpret_cast<unsigned char*>(p1);
-      const unsigned char* p2_src_char = reinterpret_cast<unsigned char*>(p2);
-      for (unsigned int k = 0; k < leftoverCols; k++) {
-        uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
-            + p2_src_char[k] + p2_src_char[k + 1];
-        *(p_dest_char++) = static_cast<unsigned char>(tmp / 4);
-      }
-      // Done with the two rows:
-      row++;
-      p_dest = reinterpret_cast<__m128i *>(dstimg.data + row * dstimg.cols);
-      p1 = reinterpret_cast<__m128i *>(srcimg.data + 2 * row * srcimg.cols);
-      p2 = reinterpret_cast<__m128i *>(srcimg.data + (2 * row + 1) *
-          srcimg.cols);
-    }
-  }
-}
-
-void BriskLayer::TwoThirdSample(const cv::Mat& srcimg, cv::Mat& dstimg) {
-  // Take care with the border...
-  const uint16_t leftoverCols = ((srcimg.cols / 3) * 3) % 15;
-
-  // Make sure the destination image is of the right size:
-  assert((srcimg.cols / 3) * 2 == dstimg.cols);
-  assert((srcimg.rows / 3) * 2 == dstimg.rows);
-
-  // Masks:
-  register __m128i mask1 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                        0x80, 12, 0x80, 10, 0x80, 7, 0x80, 4,
-                                        0x80, 1);
-  register __m128i mask2 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 12,
-                                        0x80, 10, 0x80, 7, 0x80, 4, 0x80, 1,
-                                        0x80);
-  register __m128i mask = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 14,
-                                       12, 11, 9, 8, 6, 5, 3, 2, 0);
-  register __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, 0x80, 0x80, 0x80,
-                                             0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                             0x80);
-
-  // Data pointers:
-  unsigned char* p1 = srcimg.data;
-  unsigned char* p2 = p1 + srcimg.cols;
-  unsigned char* p3 = p2 + srcimg.cols;
-  unsigned char* p_dest1 = dstimg.data;
-  unsigned char* p_dest2 = p_dest1 + dstimg.cols;
-  unsigned char* p_end = p1 + (srcimg.cols * srcimg.rows);
-
-  unsigned int row = 0;
-  unsigned int row_dest = 0;
-  int hsize = srcimg.cols / 15;
-  while (p3 < p_end) {
-    for (int i = 0; i < hsize; i++) {
-      // Load three rows.
-      __m128i first = _mm_loadu_si128(reinterpret_cast<__m128i *>(p1));
-      __m128i second = _mm_loadu_si128(reinterpret_cast<__m128i *>(p2));
-      __m128i third = _mm_loadu_si128(reinterpret_cast<__m128i *>(p3));
-
-      // Upper row:
-      __m128i upper = _mm_avg_epu8(_mm_avg_epu8(first, second), first);
-      __m128i temp1_upper = _mm_or_si128(_mm_shuffle_epi8(upper, mask1),
-                                         _mm_shuffle_epi8(upper, mask2));
-      __m128i temp2_upper = _mm_shuffle_epi8(upper, mask);
-      __m128i result_upper = _mm_avg_epu8(
-          _mm_avg_epu8(temp2_upper, temp1_upper), temp2_upper);
-
-      // Lower row:
-      __m128i lower = _mm_avg_epu8(_mm_avg_epu8(third, second), third);
-      __m128i temp1_lower = _mm_or_si128(_mm_shuffle_epi8(lower, mask1),
-                                         _mm_shuffle_epi8(lower, mask2));
-      __m128i temp2_lower = _mm_shuffle_epi8(lower, mask);
-      __m128i result_lower = _mm_avg_epu8(
-          _mm_avg_epu8(temp2_lower, temp1_lower), temp2_lower);
-
-      // Store:
-      if (i * 10 + 16 > dstimg.cols) {
-        _mm_maskmoveu_si128(result_upper, store_mask,
-                            reinterpret_cast<char*>(p_dest1));
-        _mm_maskmoveu_si128(result_lower, store_mask,
-                            reinterpret_cast<char*>(p_dest2));
-      } else {
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(p_dest1), result_upper);
-        _mm_storeu_si128(reinterpret_cast<__m128i *>(p_dest2), result_lower);
-      }
-
-      // Shift pointers:
-      p1 += 15;
-      p2 += 15;
-      p3 += 15;
-      p_dest1 += 10;
-      p_dest2 += 10;
-    }
-
-    // Fill the remainder:
-    for (unsigned int j = 0; j < leftoverCols; j += 3) {
-      const uint16_t A1 = *(p1++);
-      const uint16_t A2 = *(p1++);
-      const uint16_t A3 = *(p1++);
-      const uint16_t B1 = *(p2++);
-      const uint16_t B2 = *(p2++);
-      const uint16_t B3 = *(p2++);
-      const uint16_t C1 = *(p3++);
-      const uint16_t C2 = *(p3++);
-      const uint16_t C3 = *(p3++);
-
-      *(p_dest1++) = static_cast<unsigned char>(((4 * A1 + 2 * (A2 + B1) + B2)
-          / 9) & 0x00FF);
-      *(p_dest1++) = static_cast<unsigned char>(((4 * A3 + 2 * (A2 + B3) + B2)
-          / 9) & 0x00FF);
-      *(p_dest2++) = static_cast<unsigned char>(((4 * C1 + 2 * (C2 + B1) + B2)
-          / 9) & 0x00FF);
-      *(p_dest2++) = static_cast<unsigned char>(((4 * C3 + 2 * (C2 + B3) + B2)
-          / 9) & 0x00FF);
-    }
-
-    // Increment row counter:
-    row += 3;
-    row_dest += 2;
-
-    // Reset pointers
-    p1 = srcimg.data + row * srcimg.cols;
-    p2 = p1 + srcimg.cols;
-    p3 = p2 + srcimg.cols;
-    p_dest1 = dstimg.data + row_dest * dstimg.cols;
-    p_dest2 = p_dest1 + dstimg.cols;
   }
 }
 }  // namespace brisk

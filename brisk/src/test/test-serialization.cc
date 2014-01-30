@@ -37,16 +37,14 @@
 
 #include <limits>
 #include <list>
+#include <random>
 #include <string>
 #include <vector>
 
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
+#include <agast/wrap-opencv.h>
+#include <agast/glog.h>
 #include <gtest/gtest.h>
-#include <opencv2/core/core.hpp>
+
 #include "./bench-ds.h"
 #include "./serialization.h"
 
@@ -56,109 +54,127 @@
 
 template<typename TYPE>
 void SetRandom(
-    TYPE* value, typename std::enable_if<std::is_integral<TYPE>::value>::type* =
-        0) {
+    TYPE* value, int seed,
+    typename std::enable_if<std::is_integral<TYPE>::value>::type* = 0) {
   CHECK_NOTNULL(value);
-  *value = rand() % std::numeric_limits < TYPE > ::max();
+  std::mt19937 rd(seed);
+  *value = rd() % std::numeric_limits<TYPE>::max();
 }
 
 template<typename TYPE>
 void SetRandom(
-    TYPE* value,
+    TYPE* value, int seed,
     typename std::enable_if<std::is_floating_point<TYPE>::value>::type* = 0) {
   CHECK_NOTNULL(value);
-  *value = static_cast<TYPE>(rand()) / RAND_MAX;
+  std::mt19937 rd(seed);
+  *value = static_cast<TYPE>(rd()) / RAND_MAX;
 }
 
-void SetRandom(uint32_t* value) {
+void SetRandom(uint32_t* value, int seed) {
   CHECK_NOTNULL(value);
-  *value = rand() % std::numeric_limits < uint32_t > ::max();
+  std::mt19937 rd(seed);
+  *value = rd() % std::numeric_limits<uint32_t>::max();
 }
 
-void SetRandom(std::string* value) {
+void SetRandom(std::string* value, int seed) {
   CHECK_NOTNULL(value);
+  std::mt19937 rd(seed);
   size_t size;
-  SetRandom(&size);
+  SetRandom(&size, rd());
   size = size % 20 + 1;
   *value = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
   int pos;
   while (value->size() != size) {
-    pos = ((rand() % (value->size() - 1)));
+    pos = ((rd() % (value->size() - 1)));
     value->erase(pos, 1);
   }
 }
 
-void SetRandom(cv::Mat* value) {
+void SetRandom(cv::Mat* value, int seed) {
   CHECK_NOTNULL(value);
+  std::mt19937 rd(seed);
   int rows;
-  SetRandom(&rows);
+  SetRandom(&rows, rd());
   rows %= 20;
   int cols;
-  SetRandom(&cols);
+  SetRandom(&cols, rd());
   cols %= 20;
   value->create(rows, cols, CV_8UC1);
   // Just using the random memory which is contained in the matrix.
 }
 
 template<typename TYPEA, typename TYPEB>
-void SetRandom(std::pair<TYPEA, TYPEB>* value) {
+void SetRandom(std::pair<TYPEA, TYPEB>* value, int seed) {
   CHECK_NOTNULL(value);
-  SetRandom(&value->first);
-  SetRandom(&value->second);
+  std::mt19937 rd(seed);
+  SetRandom(&value->first, rd());
+  SetRandom(&value->second, rd());
 }
 
 template<typename TYPE>
-void SetRandom(std::vector<TYPE>* value) {
+void SetRandom(std::vector<TYPE>* value, int seed) {
   CHECK_NOTNULL(value);
+  std::mt19937 rd(seed);
   size_t size;
-  SetRandom(&size);
+  SetRandom(&size, rd());
   size %= 20;
   value->resize(size);
   for (TYPE& entry : *value) {
-    SetRandom(&entry);
+    SetRandom(&entry, rd());
   }
 }
 
 template<typename TYPE>
-void SetRandom(std::list<TYPE>* value) {
+void SetRandom(std::list<TYPE>* value, int seed) {
   CHECK_NOTNULL(value);
+  std::mt19937 rd(seed);
   size_t size;
-  SetRandom(&size);
+  SetRandom(&size, rd());
   size %= 20;
   value->resize(size);
   for (TYPE& entry : *value) {
-    SetRandom(&entry);
+    SetRandom(&entry, rd());
   }
 }
 
 template<typename TYPEA, typename TYPEB>
-void SetRandom(std::map<TYPEA, TYPEB>* value) {
+void SetRandom(std::map<TYPEA, TYPEB>* value, int seed) {
   CHECK_NOTNULL(value);
+  std::mt19937 rd(seed);
   size_t size;
-  SetRandom(&size);
+  SetRandom(&size, rd());
   size %= 20;
   for (size_t i = 0; i < size; ++i) {
     std::pair<TYPEA, TYPEB> entry;
-    SetRandom(&entry);
+    SetRandom(&entry, rd());
     value->insert(entry);
   }
 }
 
 template<typename TYPE>
-void SetRandom(cv::Point_<TYPE>* value) {
+void SetRandom(cv::Point_<TYPE>* value, int seed) {
   CHECK_NOTNULL(value);
-  SetRandom(&value->x);
-  SetRandom(&value->y);
+  std::mt19937 rd(seed);
+  SetRandom(&value->x, rd());
+  SetRandom(&value->y, rd());
 }
 
-void SetRandom(cv::KeyPoint* value) {
+void SetRandom(cv::KeyPoint* value, int seed) {
   CHECK_NOTNULL(value);
-  SetRandom(&value->angle);
-  SetRandom(&value->class_id);
-  SetRandom(&value->octave);
-  SetRandom(&value->pt);
-  SetRandom(&value->response);
-  SetRandom(&value->size);
+  std::mt19937 rd(seed);
+  SetRandom(&value->angle, rd());
+#if HAVE_OPENCV
+  SetRandom(&value->class_id, rd());
+#endif  // HAVE_OPENCV
+  SetRandom(&value->octave, rd());
+#if HAVE_OPENCV
+  SetRandom(&value->pt, rd());
+#else
+  SetRandom(&value->x, rd());
+  SetRandom(&value->y, rd());
+#endif  // HAVE_OPENCV
+  SetRandom(&value->response, rd());
+  SetRandom(&value->size, rd());
 }
 
 template<typename TYPE>
@@ -173,7 +189,8 @@ void AssertNotEqual(const TYPE& lhs, const TYPE& rhs) {
 
 template<>
 void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
-  ASSERT_EQ(lhs.size(), rhs.size());
+  ASSERT_EQ(lhs.rows, rhs.rows);
+  ASSERT_EQ(lhs.cols, rhs.cols);
   for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
     CHECK_EQ(lhs.at<unsigned char>(index), rhs.at<unsigned char>(index))
         << "Failed matrix equality for index " << index;
@@ -183,7 +200,8 @@ void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 template<>
 void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
   bool is_same = true;
-  is_same = is_same && lhs.size() == rhs.size();
+  is_same = is_same && lhs.rows == rhs.rows;
+  is_same = is_same && lhs.cols == rhs.cols;
   if (is_same) {
     for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
       if (lhs.at<unsigned char>(index) != rhs.at<unsigned char>(index)) {
@@ -197,12 +215,18 @@ void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 template<typename TYPE>
 void RunSerializationTest() {
   TYPE saved_value, loaded_value;
-  std::string filename = "src/test/test_data/tmp/serialization_file_"
-      + std::string(typeid(TYPE).name()) + "_tmp";
+#ifdef TEST_IN_SOURCE
+    std::string filename = "src/test/test_data/tmp/"
+#else
+    std::string filename = "./"
+#endif
+    "serialization_file_" + std::string(typeid(TYPE).name()) + "_tmp";
+
+  std::mt19937 rd(42);
   {  // Scoping to flush and close file.
     std::ofstream ofs(filename);
-    SetRandom(&saved_value);
-    SetRandom(&loaded_value);
+    SetRandom(&saved_value, rd());
+    SetRandom(&loaded_value, rd());
     AssertNotEqual(saved_value, loaded_value);
     serialization::Serialize(saved_value, &ofs);
   }

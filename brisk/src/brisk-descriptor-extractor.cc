@@ -38,13 +38,15 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <bitset>
 #include <istream>  // NOLINT
 #include <fstream>  // NOLINT
 #include <iostream>  // NOLINT
 
 #include <brisk/brisk-descriptor-extractor.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/helper-structures.h>
+#include <brisk/internal/integral-image.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/pattern-provider.h>
 #include <brisk/internal/timer.h>
@@ -57,10 +59,9 @@ const float BriskDescriptorExtractor::scalerange_ = 30;
 // Discretization of the rotation look-up.
 const unsigned int BriskDescriptorExtractor::n_rot_ = 1024;
 
-void BriskDescriptorExtractor::InitFromStream(
-    bool rotationInvariant,
-    bool scaleInvariant,
-    std::istream& pattern_stream) {
+void BriskDescriptorExtractor::InitFromStream(bool rotationInvariant,
+                                              bool scaleInvariant,
+                                              std::istream& pattern_stream) {
   // Not in use.
   dMax_ = 0;
   dMin_ = 0;
@@ -105,8 +106,8 @@ void BriskDescriptorExtractor::InitFromStream(
     for (size_t rot = 0; rot < n_rot_; ++rot) {
       for (unsigned int i = 0; i < points_; i++) {
         // This is the rotation of the feature.
-        theta = static_cast<double>(rot) * 2 * M_PI /
-            static_cast<double>(n_rot_);
+        theta = static_cast<double>(rot) * 2 * M_PI
+            / static_cast<double>(n_rot_);
         // Feature rotation plus angle of the point.
         patternIterator->x = scaleList_[scale]
             * (u_x[i] * cos(theta) - u_y[i] * sin(theta));
@@ -160,8 +161,14 @@ void BriskDescriptorExtractor::InitFromStream(
   }
 
   // Number of descriptor bits:
-  strings_ = static_cast<int>(ceil((static_cast<float>(noShortPairs_))
-                                   / 128.0)) * 4 * 4;
+  strings_ = static_cast<int>(ceil((static_cast<float>(noShortPairs_)) / 128.0))
+      * 4 * 4;
+
+  CHECK_EQ(noShortPairs_, kDescriptorLength);
+
+  delete[] u_x;
+  delete[] u_y;
+  delete[] sigma;
 }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
@@ -190,8 +197,8 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
     const float key_y, const unsigned int scale, const unsigned int rot,
     const unsigned int point) const {
   // Get the float position.
-  const brisk::BriskPatternPoint& briskPoint =
-      patternPoints_[scale * n_rot_ * points_ + rot * points_ + point];
+  const brisk::BriskPatternPoint& briskPoint = patternPoints_[scale * n_rot_
+      * points_ + rot * points_ + point];
 
   const float xf = briskPoint.x + key_x;
   const float yf = briskPoint.y + key_y;
@@ -211,8 +218,8 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
     const int r_y = (yf - y) * 1024;
     const int r_x_1 = (1024 - r_x);
     const int r_y_1 = (1024 - r_y);
-    ImgPixel_T* ptr = reinterpret_cast<ImgPixel_T*>(image.data) + x +
-        y * imagecols;
+    ImgPixel_T* ptr = reinterpret_cast<ImgPixel_T*>(image.data) + x
+        + y * imagecols;
     // Just interpolate:
     ret_val = (r_x_1 * r_y_1 * IntegralPixel_T(*ptr));
     ptr++;
@@ -261,8 +268,8 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
 
   if (dx + dy > 2) {
     // Now the calculation:
-    ImgPixel_T* ptr = reinterpret_cast<ImgPixel_T*>(image.data) + x_left +
-        imagecols * y_top;
+    ImgPixel_T* ptr = reinterpret_cast<ImgPixel_T*>(image.data) + x_left
+        + imagecols * y_top;
     // First the corners:
     ret_val = A * IntegralPixel_T(*ptr);
     ptr += dx + 1;
@@ -273,9 +280,8 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
     ret_val += D * IntegralPixel_T(*ptr);
 
     // Next the edges:
-    IntegralPixel_T* ptr_integral =
-        reinterpret_cast<IntegralPixel_T*>(integral.data) + x_left
-        + integralcols * y_top + 1;
+    IntegralPixel_T* ptr_integral = reinterpret_cast<IntegralPixel_T*>(integral
+        .data) + x_left + integralcols * y_top + 1;
     // Find a simple path through the different surface corners.
     const IntegralPixel_T tmp1 = (*ptr_integral);
     ptr_integral += dx;
@@ -313,8 +319,8 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
   }
 
   // Now the calculation:
-  ImgPixel_T* ptr = reinterpret_cast<ImgPixel_T*>(image.data) + x_left +
-      imagecols * y_top;
+  ImgPixel_T* ptr = reinterpret_cast<ImgPixel_T*>(image.data) + x_left
+      + imagecols * y_top;
   // First row:
   ret_val = A * IntegralPixel_T(*ptr);
   ptr++;
@@ -349,215 +355,252 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
 
 bool RoiPredicate(const float minX, const float minY, const float maxX,
                   const float maxY, const cv::KeyPoint& keyPt) {
-  const cv::Point2f& pt = keyPt.pt;
-  return (pt.x < minX) || (pt.x >= maxX) || (pt.y < minY) || (pt.y >= maxY);
+  return (agast::KeyPoint(keyPt).x < minX) || (agast::KeyPoint(keyPt).x >= maxX)
+      || (agast::KeyPoint(keyPt).y < minY) || (agast::KeyPoint(keyPt).y >= maxY);
 }
 
-// Computes the descriptor.
+void BriskDescriptorExtractor::setDescriptorBits(int keypoint_idx,
+                                                 const int* values,
+                                                 cv::Mat* descriptors) const {
+  CHECK_NOTNULL(descriptors);
+  uchar* ptr = descriptors->data + strings_ * keypoint_idx;
+
+  // Now iterate through all the pairings.
+  brisk::timing::DebugTimer timer_assemble_bits(
+      "1.3 Brisk Extraction: assemble bits (per keypoint)");
+  brisk::UINT32_ALIAS* ptr2 = reinterpret_cast<brisk::UINT32_ALIAS*>(ptr);
+  const brisk::BriskShortPair* max = shortPairs_ + noShortPairs_;
+  int shifter = 0;
+  for (brisk::BriskShortPair* iter = shortPairs_; iter < max; ++iter) {
+    int t1 = *(values + iter->i);
+    int t2 = *(values + iter->j);
+    if (t1 > t2) {
+      *ptr2 |= ((1) << shifter);
+    }  // Else already initialized with zero.
+    // Take care of the iterators:
+    ++shifter;
+    if (shifter == 32) {
+      shifter = 0;
+      ++ptr2;
+    }
+  }
+  timer_assemble_bits.Stop();
+}
+
+void BriskDescriptorExtractor::setDescriptorBits(
+    int keypoint_idx,
+    const int* values,
+    std::vector<std::bitset<kDescriptorLength> >* descriptors) const {
+  CHECK_NOTNULL(descriptors);
+  std::bitset<kDescriptorLength>& descriptor = descriptors->at(keypoint_idx);
+
+  // Now iterate through all the pairings.
+  brisk::timing::DebugTimer timer_assemble_bits(
+      "1.3 Brisk Extraction: assemble bits (per keypoint)");
+  const brisk::BriskShortPair* max = shortPairs_ + noShortPairs_;
+  int shifter = 0;
+  for (brisk::BriskShortPair* iter = shortPairs_; iter < max; ++iter) {
+    int t1 = *(values + iter->i);
+    int t2 = *(values + iter->j);
+    if (t1 > t2) {
+      descriptor.set(shifter, true);
+    }  // Else already initialized with zero.
+    ++shifter;
+  }
+  timer_assemble_bits.Stop();
+}
+
+void BriskDescriptorExtractor::computeImpl(
+    const cv::Mat& image, std::vector<cv::KeyPoint>& keypoints,
+    std::vector<std::bitset<kDescriptorLength> >& descriptors) const {
+  doDescriptorComputation(image, keypoints, descriptors);
+}
+
 void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
                                            std::vector<cv::KeyPoint>& keypoints,
                                            cv::Mat& descriptors) const {
+  doDescriptorComputation(image, keypoints, descriptors);
+}
+
+void BriskDescriptorExtractor::AllocateDescriptors(size_t count,
+                                                   cv::Mat& descriptors) const {
+  descriptors = cv::Mat::zeros(count, strings_, CV_8UC1);
+}
+
+void BriskDescriptorExtractor::AllocateDescriptors(
+    size_t count,
+    std::vector<std::bitset<kDescriptorLength> >& descriptors) const {
+  descriptors.resize(count);
+}
+
+template<typename DESCRIPTOR_CONTAINER>
+void BriskDescriptorExtractor::doDescriptorComputation(
+    const cv::Mat& image,
+    std::vector<cv::KeyPoint>& keypoints,
+    DESCRIPTOR_CONTAINER& descriptors) const {
   // Remove keypoints very close to the border.
-  size_t ksize = keypoints.size();
-  std::vector<int> kscales;  // Remember the scale per keypoint.
-  kscales.resize(ksize);
-  static const float log2 = 0.693147180559945;
-  static const float lb_scalerange = log(scalerange_) / (log2);
+    size_t ksize = keypoints.size();
+    std::vector<int> kscales;  // Remember the scale per keypoint.
+    kscales.resize(ksize);
+    static const float log2 = 0.693147180559945;
+    static const float lb_scalerange = log(scalerange_) / (log2);
 
-  std::vector<cv::KeyPoint> valid_kp;
-  std::vector<int> valid_scales;
-  valid_kp.reserve(keypoints.size());
-  valid_scales.reserve(keypoints.size());
+    std::vector<cv::KeyPoint> valid_kp;
+    std::vector<int> valid_scales;
+    valid_kp.reserve(keypoints.size());
+    valid_scales.reserve(keypoints.size());
 
-  static const float basicSize06 = basicSize_ * 0.6;
-  unsigned int basicscale = 0;
-  if (!scaleInvariance)
-    basicscale = std::max(
-        static_cast<int>(scales_ / lb_scalerange
-            * (log(1.45 * basicSize_ / (basicSize06)) / log2) + 0.5),
-        0);
-  for (size_t k = 0; k < ksize; k++) {
-    unsigned int scale;
-    if (scaleInvariance) {
-      scale = std::max(
+    static const float basicSize06 = basicSize_ * 0.6;
+    unsigned int basicscale = 0;
+    if (!scaleInvariance)
+      basicscale = std::max(
           static_cast<int>(scales_ / lb_scalerange
-              * (log(keypoints[k].size / (basicSize06)) / log2) + 0.5), 0);
-      // Saturate.
-      if (scale >= scales_)
-        scale = scales_ - 1;
-      kscales[k] = scale;
-    } else {
-      scale = basicscale;
-      kscales[k] = scale;
-    }
-    const int border = sizeList_[scale];
-    const int border_x = image.cols - border;
-    const int border_y = image.rows - border;
-    if (!RoiPredicate(border, border, border_x, border_y, keypoints[k])) {
-      valid_kp.push_back(keypoints[k]);
-      valid_scales.push_back(kscales[k]);
-    }
-  }
-
-  keypoints.swap(valid_kp);
-  kscales.swap(valid_scales);
-  ksize = keypoints.size();
-
-  // First, calculate the integral image over the whole image:
-  // current integral image.
-  brisk::timing::DebugTimer timer_integral_image(
-      "1.0 Brisk Extraction: integral computation");
-  cv::Mat _integral;  // The integral image.
-  cv::Mat imageScaled;
-  if (image.type() == CV_16UC1) {
-    // 16 bit image - convert to float. this is simple but not the fastest...
-    cv::Mat imageCvt;
-    image.convertTo(imageCvt, CV_32FC1);
-    imageScaled = imageCvt / 65536.0;
-    // TODO(slynen): Put in the optimized integral computation.
-    cv::integral(imageScaled, _integral, CV_32F);
-  } else if (image.type() == CV_8UC1) {
-    // TODO(slynen): Put in the optimized integral computation.
-    cv::integral(image, _integral);
-  } else {
-    std::cout << "unsupported image format" << std::endl;
-    std::cout.flush();
-    exit(-1);
-  }
-  timer_integral_image.Stop();
-
-  int* _values = new int[points_];  // For temporary use.
-
-  // Resize the descriptors:
-  descriptors = cv::Mat::zeros(ksize, strings_, CV_8U);
-
-  // Now do the extraction for all keypoints:
-
-  // Temporary variables containing gray values at sample points:
-  int t1;
-  int t2;
-
-  // The feature orientation.
-  int direction0;
-  int direction1;
-
-  uchar* ptr = descriptors.data;
-  for (size_t k = 0; k < ksize; k++) {
-    int theta;
-    cv::KeyPoint& kp = keypoints[k];
-    const int& scale = kscales[k];
-    int shifter = 0;
-    int* pvalues = _values;
-    const float& x = kp.pt.x;
-    const float& y = kp.pt.y;
-    if (kp.angle == -1) {
-      if (!rotationInvariance) {
-        // Don't compute the gradient direction, just assign a rotation of 0°.
-        theta = 0;
+              * (log(1.45 * basicSize_ / (basicSize06)) / log2) + 0.5),
+          0);
+    for (size_t k = 0; k < ksize; k++) {
+      unsigned int scale;
+      if (scaleInvariance) {
+        scale = std::max(
+            static_cast<int>(scales_ / lb_scalerange
+                * (log(keypoints[k].size / (basicSize06)) / log2) + 0.5),
+            0);
+        // Saturate.
+        if (scale >= scales_)
+          scale = scales_ - 1;
+        kscales[k] = scale;
       } else {
-        // Get the gray values in the unrotated pattern.
-        brisk::timing::DebugTimer timer_rotation_determination_sample_points(
-            "1.1.1 Brisk Extraction: rotation determination: sample points "
-            "(per keypoint)");
-        if (image.type() == CV_8UC1) {
-          for (unsigned int i = 0; i < points_; i++) {
-            *(pvalues++) = SmoothedIntensity<uchar, int>(image, _integral, x, y,
-                                                         scale, 0, i);
-          }
+        scale = basicscale;
+        kscales[k] = scale;
+      }
+      const int border = sizeList_[scale];
+      const int border_x = image.cols - border;
+      const int border_y = image.rows - border;
+      if (!RoiPredicate(border, border, border_x, border_y, keypoints[k])) {
+        valid_kp.push_back(keypoints[k]);
+        valid_scales.push_back(kscales[k]);
+      }
+    }
+
+    keypoints.swap(valid_kp);
+    kscales.swap(valid_scales);
+    ksize = keypoints.size();
+
+    AllocateDescriptors(keypoints.size(), descriptors);
+
+    // First, calculate the integral image over the whole image:
+    // current integral image.
+    brisk::timing::DebugTimer timer_integral_image(
+        "1.0 Brisk Extraction: integral computation");
+    cv::Mat _integral;  // The integral image.
+    cv::Mat imageScaled;
+    if (image.type() == CV_16UC1) {
+      IntegralImage16(imageScaled, &_integral);
+    } else if (image.type() == CV_8UC1) {
+      IntegralImage8(image, &_integral);
+    } else {
+      std::cout << "unsupported image format" << std::endl;
+      std::cout.flush();
+      exit(-1);
+    }
+    timer_integral_image.Stop();
+
+    int* _values = new int[points_];  // For temporary use.
+
+    // Now do the extraction for all keypoints:
+    for (size_t k = 0; k < ksize; ++k) {
+      int theta;
+      cv::KeyPoint& kp = keypoints[k];
+      const int& scale = kscales[k];
+      int* pvalues = _values;
+      const float& x = agast::KeyPoint(kp).x;
+      const float& y = agast::KeyPoint(kp).y;
+      if (kp.angle == -1) {
+        if (!rotationInvariance) {
+          // Don't compute the gradient direction, just assign a rotation of 0°.
+          theta = 0;
         } else {
-          for (unsigned int i = 0; i < points_; i++) {
-            *(pvalues++) = static_cast<int>(65536.0
-                    * SmoothedIntensity<float, float>(imageScaled, _integral, x,
-                                                      y, scale, 0, i));
+          // Get the gray values in the unrotated pattern.
+          brisk::timing::DebugTimer timer_rotation_determination_sample_points(
+              "1.1.1 Brisk Extraction: rotation determination: sample points "
+              "(per keypoint)");
+          if (image.type() == CV_8UC1) {
+            for (unsigned int i = 0; i < points_; i++) {
+              *(pvalues++) = SmoothedIntensity<uchar, int>(image, _integral, x, y,
+                                                           scale, 0, i);
+            }
+          } else {
+            for (unsigned int i = 0; i < points_; i++) {
+              *(pvalues++) = static_cast<int>(65536.0
+                  * SmoothedIntensity<float, float>(imageScaled, _integral, x, y,
+                                                    scale, 0, i));
+            }
           }
+          timer_rotation_determination_sample_points.Stop();
+          int direction0 = 0;
+          int direction1 = 0;
+          // Now iterate through the long pairings.
+          brisk::timing::DebugTimer timer_rotation_determination_gradient(
+              "1.1.2 Brisk Extraction: rotation determination: calculate "
+              "gradient (per keypoint)");
+          const brisk::BriskLongPair* max = longPairs_ + noLongPairs_;
+          for (brisk::BriskLongPair* iter = longPairs_; iter < max; ++iter) {
+            int t1 = *(_values + iter->i);
+            int t2 = *(_values + iter->j);
+            const int delta_t = (t1 - t2);
+            // Update the direction:
+            const int tmp0 = delta_t * (iter->weighted_dx) / 1024;
+            const int tmp1 = delta_t * (iter->weighted_dy) / 1024;
+            direction0 += tmp0;
+            direction1 += tmp1;
+          }
+          timer_rotation_determination_gradient.Stop();
+          kp.angle = atan2(static_cast<float>(direction1),
+                           static_cast<float>(direction0)) / M_PI * 180.0;
+          theta = static_cast<int>((n_rot_ * kp.angle) / (360.0) + 0.5);
+          if (theta < 0)
+            theta += n_rot_;
+          if (theta >= static_cast<int>(n_rot_))
+            theta -= n_rot_;
         }
-        timer_rotation_determination_sample_points.Stop();
-        direction0 = 0;
-        direction1 = 0;
-        // Now iterate through the long pairings.
-        brisk::timing::DebugTimer timer_rotation_determination_gradient(
-            "1.1.2 Brisk Extraction: rotation determination: calculate "
-            "gradient (per keypoint)");
-        const brisk::BriskLongPair* max = longPairs_ + noLongPairs_;
-        for (brisk::BriskLongPair* iter = longPairs_; iter < max; ++iter) {
-          t1 = *(_values + iter->i);
-          t2 = *(_values + iter->j);
-          const int delta_t = (t1 - t2);
-          // Update the direction:
-          const int tmp0 = delta_t * (iter->weighted_dx) / 1024;
-          const int tmp1 = delta_t * (iter->weighted_dy) / 1024;
-          direction0 += tmp0;
-          direction1 += tmp1;
-        }
-        timer_rotation_determination_gradient.Stop();
-        kp.angle = atan2(static_cast<float>(direction1),
-                         static_cast<float>(direction0)) / M_PI * 180.0;
-        theta = static_cast<int>((n_rot_ * kp.angle) / (360.0) + 0.5);
-        if (theta < 0)
-          theta += n_rot_;
-        if (theta >= static_cast<int>(n_rot_))
-          theta -= n_rot_;
-      }
-    } else {
-      // Figure out the direction:
-      if (!rotationInvariance) {
-        theta = 0;
       } else {
-        theta = static_cast<int>(n_rot_ * (kp.angle / (360.0)) + 0.5);
-        if (theta < 0)
-          theta += n_rot_;
-        if (theta >= static_cast<int>(n_rot_))
-          theta -= n_rot_;
+        // Figure out the direction:
+        if (!rotationInvariance) {
+          theta = 0;
+        } else {
+          theta = static_cast<int>(n_rot_ * (kp.angle / (360.0)) + 0.5);
+          if (theta < 0)
+            theta += n_rot_;
+          if (theta >= static_cast<int>(n_rot_))
+            theta -= n_rot_;
+        }
       }
+
+      // Now also extract the stuff for the actual direction:
+      // Let us compute the smoothed values.
+      pvalues = _values;
+      // Get the gray values in the rotated pattern.
+      brisk::timing::DebugTimer timer_sample_points(
+          "1.2 Brisk Extraction: sample points (per keypoint)");
+      if (image.type() == CV_8UC1) {
+        for (unsigned int i = 0; i < points_; i++) {
+          *(pvalues++) = SmoothedIntensity<uchar, int>(image, _integral, x, y,
+                                                       scale, theta, i);
+        }
+      } else {
+        for (unsigned int i = 0; i < points_; i++) {
+          *(pvalues++) = static_cast<int>(65536.0
+              * SmoothedIntensity<float, float>(imageScaled, _integral, x, y,
+                                                scale, theta, i));
+        }
+      }
+      timer_sample_points.Stop();
+
+      setDescriptorBits(k, _values, &descriptors);
     }
 
-    // Now also extract the stuff for the actual direction:
-    // Let us compute the smoothed values.
-    shifter = 0;
-    pvalues = _values;
-    // Get the gray values in the rotated pattern.
-    brisk::timing::DebugTimer timer_sample_points(
-        "1.2 Brisk Extraction: sample points (per keypoint)");
-    if (image.type() == CV_8UC1) {
-      for (unsigned int i = 0; i < points_; i++) {
-        *(pvalues++) = SmoothedIntensity<uchar, int>(image, _integral, x, y,
-                                                     scale, theta, i);
-      }
-    } else {
-      for (unsigned int i = 0; i < points_; i++) {
-        *(pvalues++) = static_cast<int>(65536.0
-                * SmoothedIntensity<float, float>(imageScaled, _integral, x, y,
-                                                  scale, theta, i));
-      }
-    }
-    timer_sample_points.Stop();
-
-    // Now iterate through all the pairings.
-    brisk::timing::DebugTimer timer_assemble_bits(
-        "1.3 Brisk Extraction: assemble bits (per keypoint)");
-    brisk::UINT32_ALIAS* ptr2 = (brisk::UINT32_ALIAS*) ptr;
-    const brisk::BriskShortPair* max = shortPairs_ + noShortPairs_;
-    for (brisk::BriskShortPair* iter = shortPairs_; iter < max; ++iter) {
-      t1 = *(_values + iter->i);
-      t2 = *(_values + iter->j);
-      if (t1 > t2) {
-        *ptr2 |= ((1) << shifter);
-      }  // Else already initialized with zero.
-      // Take care of the iterators:
-      ++shifter;
-      if (shifter == 32) {
-        shifter = 0;
-        ++ptr2;
-      }
-    }
-    timer_assemble_bits.Stop();
-
-    ptr += strings_;
-  }
-
-  // Clean-up.
-  _integral.release();
-  delete[] _values;
+    // Clean-up.
+    _integral.release();
+    delete[] _values;
 }
 
 int BriskDescriptorExtractor::descriptorSize() const {

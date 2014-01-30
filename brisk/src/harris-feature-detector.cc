@@ -38,6 +38,9 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifdef __ARM_NEON__
+  // Not implemented.
+#else
 #include <tmmintrin.h>
 #include <mmintrin.h>
 #include <stdint.h>
@@ -96,12 +99,10 @@ __inline__ void HarrisFeatureDetector::GetCovarEntries(const cv::Mat& src,
   const unsigned int maxI = src.rows - 2;
   const unsigned int stride = src.cols;
 
-  __m128i mask_hi = _mm_set_epi8(0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
-                                 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
-                                 0xFF);
-  __m128i mask_lo = _mm_set_epi8(0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
-                                 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
-                                 0x00);
+  __m128i mask_hi = _mm_set_epi8(0, -1, 0, -1, 0, -1, 0, -1,
+                                 0, -1, 0, -1, 0, -1, 0, -1);
+  __m128i mask_lo = _mm_set_epi8(-1, 0, -1, 0, -1, 0, -1, 0,
+                                 -1, 0, -1, 0, -1, 0, -1, 0);
 
   for (unsigned int i = 0; i < maxI; ++i) {
     bool end = false;
@@ -291,7 +292,8 @@ inline void HarrisFeatureDetector::NonmaxSuppress(
         continue;
       const int i = p - p_begin;
       keypoints.push_back(
-          cv::KeyPoint(cv::Point2f(i, j), 10, -1, *center, 0, -1));
+          cv::KeyPoint(static_cast<float>(i), static_cast<float>(j),
+                   10, -1, *center, 0));
     }
   }
 }
@@ -312,8 +314,8 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
   // Go through the sorted keypoints and reject too close ones.
   for (std::vector<cv::KeyPoint>::iterator it = keypoints.begin();
       it != keypoints.end(); ++it) {
-    const int cy = (it->pt.y / 2 + 16);
-    const int cx = (it->pt.x / 2 + 16);
+    const int cy = (agast::KeyPoint(*it).x / 2 + 16);
+    const int cx = (agast::KeyPoint(*it).y / 2 + 16);
 
     // Check if this is a high enough score.
     const double s0 = static_cast<double>(occupancy.at<uchar>(cy, cx));
@@ -379,7 +381,7 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
 }
 void HarrisFeatureDetector::detectImpl(const cv::Mat& image,
                                        std::vector<cv::KeyPoint>& keypoints,
-                                       const cv::Mat& mask) const {
+                                       const cv::Mat& /*mask*/) const {
   keypoints.resize(0);
   cv::Mat scores;
   cv::Mat DxDx1, DyDy1, DxDy1;
@@ -395,3 +397,4 @@ void HarrisFeatureDetector::detectImpl(const cv::Mat& image,
   EnforceUniformity(scores, keypoints);
 }
 }  // namespace brisk
+#endif  // __ARM_NEON__

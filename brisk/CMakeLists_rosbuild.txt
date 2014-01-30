@@ -1,0 +1,89 @@
+cmake_minimum_required(VERSION 2.4.6)
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
+
+include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+
+# Debug RelWithDebInfo Release
+set(ROS_BUILD_TYPE Release)
+
+rosbuild_init()
+
+find_package(Eigen REQUIRED)
+include_directories(include ${Eigen_INCLUDE_DIRS})
+
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+
+find_package(GLog)
+include_directories(GLOG_INCLUDE_DIRS)
+if(${GLOG_FOUND})
+else()
+  set(GLOG_LIBRARY "")
+  add_definitions(-DAGAST_GLOG)
+endif()
+
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+
+add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall -Werror
+                -Wno-overloaded-virtual -Wno-non-virtual-dtor # OpenCV.
+                -std=c++0x -DENABLE_BRISK_TIMING -DTEST_IN_SOURCE
+                -DHAVE_OPENCV)
+
+rosbuild_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
+                                     src/brisk-feature-detector.cc   
+                                     src/brisk-layer.cc
+                                     src/brisk-opencv.cc
+                                     src/brisk-scale-space.cc
+                                     src/brute-force-matcher.cc   
+                                     src/camera-aware-feature.cc
+                                     src/harris-feature-detector.cc
+                                     src/harris-score-calculator.cc
+                                     src/harris-score-calculator-float.cc
+                                     src/harris-scores.cc
+                                     src/image-down-sampling.cc
+                                     src/pattern-provider.cc
+                                     src/vectorized-filters.cc
+                                     src/timer.cc
+                                     src/test/image-io.cc)
+  
+target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARY})
+
+rosbuild_add_executable(demo src/demo.cc)
+target_link_libraries(demo ${PROJECT_NAME})
+
+rosbuild_add_executable(camera src/test-cameras.cc)
+target_link_libraries(camera ${PROJECT_NAME})
+
+rosbuild_add_library(${PROJECT_NAME}_test_lib src/test/serialization.cc
+                                              src/test/bench-ds.cc
+                                              src/opencv-ref.cc)
+
+rosbuild_add_gtest(test_integral_image src/test/test-integral-image.cc)
+target_link_libraries(test_integral_image ${GLOG_LIBRARY} 
+                                          ${PROJECT_NAME}
+                                          ${PROJECT_NAME}_test_lib)
+                                  
+rosbuild_add_gtest(test_popcnt src/test/test-popcount.cc)
+target_link_libraries(test_popcnt ${GLOG_LIBRARY} 
+                                  ${PROJECT_NAME}
+                                  ${PROJECT_NAME}_test_lib)
+
+rosbuild_add_gtest(test_downsampling src/test/test-downsampling.cc)
+target_link_libraries(test_downsampling ${GLOG_LIBRARY} 
+                                        ${PROJECT_NAME}
+                                        ${PROJECT_NAME}_test_lib)
+
+rosbuild_add_gtest(test_binary_equal src/test/test-binary-equal.cc)
+target_link_libraries(test_binary_equal ${GLOG_LIBRARY} 
+                                        ${PROJECT_NAME}
+                                        ${PROJECT_NAME}_test_lib)
+
+rosbuild_add_gtest(test_serialization src/test/test-serialization.cc)
+target_link_libraries(test_serialization ${GLOG_LIBRARY} 
+                                         ${PROJECT_NAME}
+                                         ${PROJECT_NAME}_test_lib)
+
+rosbuild_add_gtest(test_match src/test/test-match.cc)
+target_link_libraries(test_match ${GLOG_LIBRARY} 
+                                 ${PROJECT_NAME}
+                                 ${PROJECT_NAME}_test_lib)

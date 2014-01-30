@@ -43,18 +43,17 @@
 
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
 
 // A generic layer to be used within the ScaleSpace class.
-template<class SCORE_CALCULTAOR_T>
+template<class SCORE_CALCULATOR_T>
 class ScaleSpaceLayer {
  public:
-  typedef SCORE_CALCULTAOR_T ScoreCalculator_t;
-  ScaleSpaceLayer() {
-  }
+  typedef SCORE_CALCULATOR_T ScoreCalculator_t;
+  ScaleSpaceLayer() { }
   ScaleSpaceLayer(const cv::Mat& img, bool initScores = true);  // Octave 0.
   ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
                   bool initScores = true);  // For successive construction.
@@ -80,16 +79,8 @@ class ScaleSpaceLayer {
   // Subsampling.
   // Half sampling.
   static inline bool Halfsample(const cv::Mat& srcimg, cv::Mat& dstimg);
-  // 8 bit.
-  static inline void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
-  // for 16 bit input images.
-  static inline void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
   // Two third sampling.
   static inline bool Twothirdsample(const cv::Mat& srcimg, cv::Mat& dstimg);
-  // 8 bit.
-  static inline void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
-  // for 16 bit input images.
-  static inline void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
 
  protected:
   // Utilities.

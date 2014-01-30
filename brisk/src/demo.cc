@@ -351,7 +351,7 @@ int main(int argc, char ** argv) {
   cv::Ptr<cv::BFMatcher> descriptorMatcher;
 
   if (hamming) {
-    brisk::BruteForceMatcherSse matcher;
+    brisk::BruteForceMatcher matcher;
     matcher.radiusMatch(descriptors2, descriptors, matches, 80.0);
   } else {
     cv::BFMatcher matcher(cv::NORM_L2);

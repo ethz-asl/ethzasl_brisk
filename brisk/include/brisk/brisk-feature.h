@@ -43,13 +43,13 @@
 
 #include <brisk/brisk-descriptor-extractor.h>
 #include <brisk/brisk-feature-detector.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/harris-feature-detector.h>
 #include <brisk/harris-score-calculator.h>
 #include <brisk/scale-space-feature-detector.h>
 
+#if HAVE_OPENCV
 namespace brisk {
-
 class BriskFeature : public cv::Feature2D {
  public:
   BriskFeature(size_t octaves, double uniformityRadius,
@@ -103,6 +103,7 @@ class BriskFeature : public cv::Feature2D {
   virtual void computeImpl(const cv::Mat& image,
                            std::vector<cv::KeyPoint>& keypoints,
                            cv::Mat& descriptors) const {
+
     _briskExtractor.computeImpl(image, keypoints, descriptors);
   }
 
@@ -110,4 +111,5 @@ class BriskFeature : public cv::Feature2D {
   brisk::BriskDescriptorExtractor _briskExtractor;
 };
 }  // namespace brisk
+#endif  // HAVE_OPENCV
 #endif  // BRISK_BRISK_FEATURE_H_
