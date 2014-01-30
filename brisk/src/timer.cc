@@ -5,7 +5,9 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
+#ifdef _MSC_VER
 #include <boost/foreach.hpp>
+#endif
 
 
 #ifdef USE_RDTSC
@@ -49,8 +51,11 @@ std::string Timing::GetTag(size_t handle) {
   std::string tag = "";
 
   // Perform a linear search for the tag.
-//  for (typename map_t::value_type current_tag : Instance().tagMap_) {
+#ifdef _MSC_VER
   BOOST_FOREACH(map_t::value_type current_tag, Instance().tagMap_) {
+#else
+  for (typename map_t::value_type current_tag : Instance().tagMap_) {
+#endif
     if (current_tag.second == handle) {
       return current_tag.first;
     }
@@ -86,8 +91,13 @@ void Timer::Start() {
 
   CPUID(); RDTSC(start_);
 #else
-  time_ = boost::chrono::system_clock::now();
-#endif
+#ifdef _MSC_VER
+using boost::chrono;
+#else
+using std::chrono;
+#endif  // _MSC_VER
+  time_ = chrono::system_clock::now();
+#endif  // USE_RDTSC
 }
 
 void Timer::Stop() {
@@ -96,10 +106,15 @@ void Timer::Stop() {
   double cycles = (static_cast<double>(COUNTER_DIFF(end_, start_)));
   Timing::Instance().AddCycles(handle_, cycles);
 #else
-  boost::chrono::time_point <boost::chrono::system_clock> now =
-      boost::chrono::system_clock::now();
-  double dt = static_cast<double>(boost::chrono::duration_cast
-      <boost::chrono::nanoseconds> (now - time_).count())
+#ifdef _MSC_VER
+using boost::chrono;
+#else
+using std::chrono;
+#endif  // _MSC_VER
+  chrono::time_point<chrono::system_clock> now =
+      chrono::system_clock::now();
+  double dt = static_cast<double>(chrono::duration_cast
+      <chrono::nanoseconds> (now - time_).count())
       * kNumSecondsPerNanosecond;
   Timing::Instance().AddTime(handle_, dt);
 #endif
@@ -167,6 +182,28 @@ double Timing::GetHz(std::string const& tag) {
   return GetHz(GetHandle(tag));
 }
 
+#ifdef _MSC_VER
+#define snprintf c99_snprintf
+
+inline int c99_snprintf(char* str, size_t size, const char* format, ...) {
+  int count;
+  va_list ap;
+  va_start(ap, format);
+  count = c99_vsnprintf(str, size, format, ap);
+  va_end(ap);
+  return count;
+}
+
+inline int c99_vsnprintf(char* str, size_t size, const char* format, va_list ap) {
+  int count = -1;
+  if (size != 0)
+  count = _vsnprintf_s(str, size, _TRUNCATE, format, ap);
+  if (count == -1)
+  count = _vscprintf(format, ap);
+  return count;
+}
+#endif  // _MSC_VER
+
 std::string Timing::SecondsToTimeString(double seconds) {
   double secs = fmod(seconds, 60);
   int minutes = (seconds / 60);
@@ -174,7 +211,7 @@ std::string Timing::SecondsToTimeString(double seconds) {
   minutes -= (hours * 60);
 
 char buffer[256];
-/*snprintf(buffer, sizeof(buffer),
+snprintf(buffer, sizeof(buffer),
 #ifdef BRISK_TIMING_SHOW_HOURS
 "%02d:"
 #endif
@@ -188,7 +225,7 @@ hours,
 #ifdef BRISK_TIMING_SHOW_MINUTES
 minutes,
 #endif
-secs);*/
+secs);
 return buffer;
 }
 
@@ -204,8 +241,12 @@ void Timing::Print(std::ostream& out) {  //NOLINT
   out << "BRISK Timing\n";
 #endif
   out << "-----------\n";
-  //for (typename map_t::value_type t : tagMap) {
+  
+#ifdef _MSC_VER
   BOOST_FOREACH(map_t::value_type t, tagMap) {
+#else
+  for (typename map_t::value_type t : tagMap) {
+#endif  // _MSC_VER
     size_t i = t.second;
     out.width((std::streamsize) Instance().maxTagLength_);
     out.setf(std::ios::left, std::ios::adjustfield);
