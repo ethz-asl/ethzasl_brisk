@@ -41,16 +41,23 @@
 #ifndef BRISK_BRISK_DESCRIPTOR_EXTRACTOR_H_
 #define BRISK_BRISK_DESCRIPTOR_EXTRACTOR_H_
 
+#include <bitset>
 #include <string>
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/helper-structures.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
+#if HAVE_OPENCV
 class BriskDescriptorExtractor : public cv::DescriptorExtractor {
+#else
+  class BriskDescriptorExtractor {
+#endif  // HAVE_OPENCV
  public:
+    friend class BriskFeature;
+    static const unsigned int kDescriptorLength = 384;
   // Create a descriptor with standard pattern.
   BriskDescriptorExtractor(bool rotationInvariant = true,
                            bool scaleInvariant = true);
@@ -74,12 +81,6 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   bool rotationInvariance;
   bool scaleInvariance;
 
-  // This is the subclass keypoint computation implementation:
-  // (not meant to be public - hacked)
-  virtual void computeImpl(const cv::Mat& image,
-                           std::vector<cv::KeyPoint>& keypoints,
-                           cv::Mat& descriptors) const;
-
   // Opencv 2.1 {
   virtual void compute(const cv::Mat& image,
                        std::vector<cv::KeyPoint>& keypoints,
@@ -88,7 +89,39 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   }
   // }  Opencv 2.1
 
+  virtual void compute(
+      const cv::Mat& image,
+      std::vector<cv::KeyPoint>& keypoints,
+      std::vector<std::bitset<kDescriptorLength> >& descriptors) const {
+    computeImpl(image, keypoints, descriptors);
+  }
+
  protected:
+  virtual void computeImpl(const cv::Mat& image,
+                           std::vector<cv::KeyPoint>& keypoints,
+                           cv::Mat& descriptors) const;
+  virtual void computeImpl(
+      const cv::Mat& image,
+      std::vector<cv::KeyPoint>& keypoints,
+      std::vector<std::bitset<kDescriptorLength> >& descriptors) const;
+
+  void setDescriptorBits(int keypoint_idx, const int* values,
+                         cv::Mat* descriptors) const;
+
+  void setDescriptorBits(int keypoint_idx, const int* values,
+      std::vector<std::bitset<kDescriptorLength> >* descriptors) const;
+
+  void AllocateDescriptors(size_t count, cv::Mat& descriptors) const;
+
+  void AllocateDescriptors(
+      size_t count,
+      std::vector<std::bitset<kDescriptorLength> >& descriptors) const;
+
+  template<typename DESCRIPTOR_CONTAINER>
+  void doDescriptorComputation(const cv::Mat& image,
+                               std::vector<cv::KeyPoint>& keypoints,
+                               DESCRIPTOR_CONTAINER& descriptors) const;
+
   void InitFromStream(bool rotationInvariant, bool scaleInvariant,
                       std::istream& pattern_stream);
   template<typename ImgPixel_T, typename IntegralPixel_T>

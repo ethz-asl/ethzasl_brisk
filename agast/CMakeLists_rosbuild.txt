@@ -5,7 +5,7 @@ set(ROS_BUILD_TYPE Release)
 
 rosbuild_init()
 
-add_definitions(-march=native -Wextra -Wall -pedantic
+add_definitions(-march=native -Wextra -Wall -Werror -pedantic
                 -Wno-overloaded-virtual -Wno-non-virtual-dtor #OpenCV
                 -DHAVE_OPENCV)
 

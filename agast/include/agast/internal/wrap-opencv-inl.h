@@ -1,7 +1,4 @@
 /*
- Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
  Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
  Stefan Leutenegger and Simon Lynen.
 
@@ -38,58 +35,61 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_HAMMING_H_
-#define INTERNAL_HAMMING_H_
-#ifdef __ARM_NEON__
-#include <arm_neon.h>
-#else
-#include <emmintrin.h>
-#include <tmmintrin.h>
-#endif  // __ARM_NEON__
+#ifndef AGAST_WRAP_OPENCV_INL_H_
+#define AGAST_WRAP_OPENCV_INL_H_
 
 #include <agast/wrap-opencv.h>
-#include <brisk/internal/macros.h>
 
-namespace brisk {
-// Faster Hamming distance functor - uses SSE
-// bit count of A exclusive XOR'ed with B.
-class  Hamming {
- public:
-  Hamming() { }
+#if !HAVE_OPENCV
+namespace cv {
+inline cv::Mat::MStep::MStep() {
+  buf[0] = buf[1] = 0;
+}
+inline cv::Mat::MStep::MStep(size_t s) {
+  buf[0] = s;
+  buf[1] = 0;
+}
+inline const size_t& cv::Mat::MStep::operator[](int i) const {
+  return buf[i];
+}
+inline size_t& cv::Mat::MStep::operator[](int i) {
+  return buf[i];
+}
+inline cv::Mat::MStep::operator size_t() const {
+  return buf[0];
+}
+inline cv::Mat::MStep& cv::Mat::MStep::operator =(size_t s) {
+  buf[0] = s;
+  return *this;
+}
 
-  // SSSE3 - even faster!
-#ifdef __ARM_NEON__
-  static __inline__ uint32_t NEONPopcntofXORed(const uint8x16_t* signature1,
-                                               const uint8x16_t* signature2,
-                                               const int numberOf128BitWords);
-#else
-  static __inline__ uint32_t SSSE3PopcntofXORed(const __m128i* signature1,
-                                                const __m128i* signature2,
-                                                const int numberOf128BitWords);
-#endif  // __ARM_NEON__
+template<typename _Tp> inline _Tp& cv::Mat::at(int i0, int i1) {
+  return ((_Tp*) (data + step.buf[0] * i0))[i1];
+}
 
-  typedef unsigned char ValueType;
+template<typename _Tp> inline const _Tp& cv::Mat::at(int i0, int i1) const {
+  return ((const _Tp*) (data + step.buf[0] * i0))[i1];
+}
 
-  // Important that this is signed as weird behavior happens in BruteForce if
-  // not.
-  typedef int ResultType;
+template<typename _Tp> inline _Tp& cv::Mat::at(int i0) {
+  if (isContinuous() || rows == 1)
+    return ((_Tp*) data)[i0];
+  if (cols == 1)
+    return *(_Tp*) (data + step.buf[0] * i0);
+  int i = i0 / cols, j = i0 - i * cols;
+  return ((_Tp*) (data + step.buf[0] * i))[j];
+}
 
-  // This will count the bits in a ^ b.
-  ResultType operator()(const unsigned char* a,
-                        const unsigned char* b,
-                        const int size) const {
-#ifdef __ARM_NEON__
-    return NEONPopcntofXORed(reinterpret_cast<const uint8x16_t*>(a),
-                             reinterpret_cast<const uint8x16_t*>(b),
-                             size / 16);
-#else
-    return SSSE3PopcntofXORed(reinterpret_cast<const __m128i*>(a),
-                              reinterpret_cast<const __m128i*>(b),
-                              size / 16);
-#endif  // __ARM_NEON__
-  }
-};
-}  // namespace brisk
-#include <brisk/internal/hamming-inl.h>
-#endif  // INTERNAL_HAMMING_H_
+template<typename _Tp> inline const _Tp& cv::Mat::at(int i0) const {
+  if (isContinuous() || rows == 1)
+    return ((const _Tp*) data)[i0];
+  if (cols == 1)
+    return *(const _Tp*) (data + step.buf[0] * i0);
+  int i = i0 / cols, j = i0 - i * cols;
+  return ((const _Tp*) (data + step.buf[0] * i))[j];
+}
 
+
+}  // namespace cv
+#endif  // !HAVE_OPENCV
+#endif  // AGAST_WRAP_OPENCV_INL_H_

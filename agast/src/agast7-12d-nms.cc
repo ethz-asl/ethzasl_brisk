@@ -29,28 +29,30 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <agast/wrap-opencv.h>
 #include <agast/agast7-12d.h>
 
 namespace agast {
+
 // Using also bisection as propsed by Edward Rosten in FAST,
-// but it is based on the OAST.
-int AgastDetector7_12d::CornerScore(const unsigned char* p) {
-  int bmin = b_;
+// But it is based on the OAST.
+int AgastDetector7_12d::cornerScore(const unsigned char* p) {
+  int bmin = b;
   int bmax = 255;
   int b_test = (bmax + bmin) / 2;
 
-  register int_fast16_t offset0 = s_offset0_;
-  register int_fast16_t offset1 = s_offset1_;
-  register int_fast16_t offset2 = s_offset2_;
-  register int_fast16_t offset3 = s_offset3_;
-  register int_fast16_t offset4 = s_offset4_;
-  register int_fast16_t offset5 = s_offset5_;
-  register int_fast16_t offset6 = s_offset6_;
-  register int_fast16_t offset7 = s_offset7_;
-  register int_fast16_t offset8 = s_offset8_;
-  register int_fast16_t offset9 = s_offset9_;
-  register int_fast16_t offset10 = s_offset10_;
-  register int_fast16_t offset11 = s_offset11_;
+  register int_fast16_t offset0 = s_offset0;
+  register int_fast16_t offset1 = s_offset1;
+  register int_fast16_t offset2 = s_offset2;
+  register int_fast16_t offset3 = s_offset3;
+  register int_fast16_t offset4 = s_offset4;
+  register int_fast16_t offset5 = s_offset5;
+  register int_fast16_t offset6 = s_offset6;
+  register int_fast16_t offset7 = s_offset7;
+  register int_fast16_t offset8 = s_offset8;
+  register int_fast16_t offset9 = s_offset9;
+  register int_fast16_t offset10 = s_offset10;
+  register int_fast16_t offset11 = s_offset11;
 
   while (1) {
     register const int cb = *p + b_test;

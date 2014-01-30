@@ -1,7 +1,4 @@
 /*
- Copyright (C) 2011  The Autonomous Systems Lab, ETH Zurich,
- Stefan Leutenegger, Simon Lynen and Margarita Chli.
-
  Copyright (C) 2013  The Autonomous Systems Lab, ETH Zurich,
  Stefan Leutenegger and Simon Lynen.
 
@@ -37,42 +34,34 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#ifndef AGAST_GLOG_H_
+#define AGAST_GLOG_H_
 
-#ifndef BRISK_BRISK_FEATURE_DETECTOR_H_
-#define BRISK_BRISK_FEATURE_DETECTOR_H_
-
-#include <vector>
-
-#include <agast/wrap-opencv.h>
-#include <brisk/internal/macros.h>
-
-namespace brisk {
-#if HAVE_OPENCV
-class  BriskFeatureDetector : public cv::FeatureDetector {
+#ifndef AGAST_GLOG
+#include <glog/logging.h>
 #else
-  class  BriskFeatureDetector {
-#endif  // HAVE_OPENCV
- public:
-  BriskFeatureDetector(int thresh, int octaves = 3,
-                       bool suppressScaleNonmaxima = true);
-  virtual ~BriskFeatureDetector() { }
-  int threshold;
-  int octaves;
-#if !HAVE_OPENCV
-  void detect(const cv::Mat& image,
-              std::vector<cv::KeyPoint>& keypoints,
-              const cv::Mat& mask = cv::Mat()) const {
-    detectImpl(image, keypoints, mask);
-  }
-#endif
-  void ComputeScale(const cv::Mat& image,
-                    std::vector<cv::KeyPoint>& keypoints) const;
-protected:
-  virtual void detectImpl(const cv::Mat& image,
-                          std::vector<cv::KeyPoint>& keypoints,
-                          const cv::Mat& mask = cv::Mat()) const;
-  bool m_suppressScaleNonmaxima;
-};
-}  // namespace brisk
+#include <cassert>
+#include <iosfwd>
+#include <iostream>
 
-#endif  // BRISK_BRISK_FEATURE_DETECTOR_H_
+#define CAST_TO_USED(x) static_cast<void>(x)
+
+#define CHECK_NOTNULL(x) assert(x != nullptr); CAST_TO_USED(x);
+#define CHECK_EQ(x, y) assert(x == y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << ""
+#define CHECK_NE(x, y) assert(x != y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << ""
+#define CHECK_GT(x, y) assert(x > y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << ""
+#define CHECK_LT(x, y) assert(x < y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << ""
+#define CHECK_GE(x, y) assert(x >= y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << ""
+#define CHECK_LE(x, y) assert(x <= y); CAST_TO_USED(x); CAST_TO_USED(y); \
+    std::cout << ""
+#define CHECK(x) assert(x); CAST_TO_USED(x); \
+    std::cout << ""
+#define LOG(WARNING) std ::cout
+
+#endif  // AGAST_GLOG
+#endif  // AGAST_GLOG_H_

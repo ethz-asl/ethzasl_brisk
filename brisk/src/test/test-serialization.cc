@@ -41,12 +41,8 @@
 #include <string>
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
+#include <agast/wrap-opencv.h>
+#include <agast/glog.h>
 #include <gtest/gtest.h>
 
 #include "./bench-ds.h"
@@ -167,9 +163,16 @@ void SetRandom(cv::KeyPoint* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
   SetRandom(&value->angle, rd());
+#if HAVE_OPENCV
   SetRandom(&value->class_id, rd());
+#endif  // HAVE_OPENCV
   SetRandom(&value->octave, rd());
+#if HAVE_OPENCV
   SetRandom(&value->pt, rd());
+#else
+  SetRandom(&value->x, rd());
+  SetRandom(&value->y, rd());
+#endif  // HAVE_OPENCV
   SetRandom(&value->response, rd());
   SetRandom(&value->size, rd());
 }
@@ -186,7 +189,8 @@ void AssertNotEqual(const TYPE& lhs, const TYPE& rhs) {
 
 template<>
 void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
-  ASSERT_EQ(lhs.size(), rhs.size());
+  ASSERT_EQ(lhs.rows, rhs.rows);
+  ASSERT_EQ(lhs.cols, rhs.cols);
   for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
     CHECK_EQ(lhs.at<unsigned char>(index), rhs.at<unsigned char>(index))
         << "Failed matrix equality for index " << index;
@@ -196,7 +200,8 @@ void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 template<>
 void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
   bool is_same = true;
-  is_same = is_same && lhs.size() == rhs.size();
+  is_same = is_same && lhs.rows == rhs.rows;
+  is_same = is_same && lhs.cols == rhs.cols;
   if (is_same) {
     for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
       if (lhs.at<unsigned char>(index) != rhs.at<unsigned char>(index)) {
@@ -210,8 +215,13 @@ void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 template<typename TYPE>
 void RunSerializationTest() {
   TYPE saved_value, loaded_value;
-  std::string filename = "src/test/test_data/tmp/serialization_file_"
-      + std::string(typeid(TYPE).name()) + "_tmp";
+#ifdef TEST_IN_SOURCE
+    std::string filename = "src/test/test_data/tmp/"
+#else
+    std::string filename = "./"
+#endif
+    "serialization_file_" + std::string(typeid(TYPE).name()) + "_tmp";
+
   std::mt19937 rd(42);
   {  // Scoping to flush and close file.
     std::ofstream ofs(filename);

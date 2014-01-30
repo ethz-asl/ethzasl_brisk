@@ -35,14 +35,10 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
+#include <agast/glog.h>
 #include <gtest/gtest.h>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 
 #include <brisk/internal/image-down-sampling.h>
 
@@ -139,17 +135,19 @@ void PlainTwoThirdSample(const unsigned char* src, unsigned char* dst,
       dst[row * dst_cols + col + 1] = static_cast<unsigned char>(F2 & 0x00FF);
 
       dst[(row + 1) * dst_cols + col] = static_cast<unsigned char>(F3 & 0x00FF);
-      dst[(row + 1) * dst_cols + col + 1] = static_cast<unsigned char>(F4
-          & 0x00FF);
+      dst[(row + 1) * dst_cols + col + 1] = static_cast<unsigned char>(
+          F4 & 0x00FF);
      }
   }
 }
 
 TEST(Brisk, HalfSample) {
-  std::string imagepath = "./src/test/test_data/img1.ppm";
-  cv::Mat imgRGB = cv::imread(imagepath);
-  cv::Mat src_img;
-  cv::cvtColor(imgRGB, src_img, CV_BGR2GRAY);
+#ifdef TEST_IN_SOURCE
+    std::string imagepath = "src/test/test_data/img1.pgm";
+#else
+    std::string imagepath = "./test_data/img1.pgm";
+#endif
+  cv::Mat src_img = cv::imread(imagepath);
 
   static const int source_cols = src_img.cols;
   static const int source_rows = src_img.rows;
@@ -165,10 +163,12 @@ TEST(Brisk, HalfSample) {
 }
 
 TEST(Brisk, TwoThirdSample) {
-  std::string imagepath = "./src/test/test_data/img1.ppm";
-  cv::Mat imgRGB = cv::imread(imagepath);
-  cv::Mat src_img;
-  cv::cvtColor(imgRGB, src_img, CV_BGR2GRAY);
+#ifdef TEST_IN_SOURCE
+    std::string imagepath = "src/test/test_data/img1.pgm";
+#else
+    std::string imagepath = "./test_data/img1.pgm";
+#endif
+  cv::Mat src_img = cv::imread(imagepath);
 
   static const int source_cols = src_img.cols;
   static const int source_rows = src_img.rows;
@@ -182,6 +182,7 @@ TEST(Brisk, TwoThirdSample) {
 
   CheckImageSame(dst_img_a.data, dst_img_b.data, dst_rows, dst_cols);
 }
+
 int main(int argc, char** argv) {
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

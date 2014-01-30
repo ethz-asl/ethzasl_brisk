@@ -35,70 +35,71 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <bitset>
-
-#include <brisk/internal/hamming.h>
 #include <agast/glog.h>
+#include <agast/wrap-opencv.h>
 #include <gtest/gtest.h>
+
+#include <brisk/internal/integral-image.h>
 
 #ifndef TEST
 #define TEST(a, b) int Test_##a##_##b()
 #endif
-  enum {
-    num_128_words = 1,
-    array_length = 16 * num_128_words
-  };
 
-unsigned int PopCountOfXor(const unsigned char* data1,
-                           const unsigned char* data2) {
-  unsigned int count = 0;
-  for (int i = 0; i < array_length; ++i) {
-    unsigned char xor_result = data1[i]^data2[i];
-    for (int bit = 0; bit < 8; ++bit) {
-      count += static_cast<bool>(xor_result & 1 << bit);
+void ComputeReferenceIntegralImage8Bit(const cv::Mat& src, cv::Mat* dest) {
+  CHECK_NOTNULL(dest);
+  int x, y;
+  const int cn = 1;
+  unsigned char var;
+  const int srcstep = static_cast<int>(src.step / sizeof(var));
+
+  dest->create(src.rows + 1, src.cols + 1, CV_32SC1);
+
+  uint32_t var2;
+  const int sumstep = static_cast<int>(dest->step / sizeof(var2));
+
+  uint32_t* sum = (uint32_t*) (dest->data);
+  unsigned char* _src = static_cast<unsigned char*>(src.data);
+
+  memset(sum, 0, (src.cols + cn) * sizeof(sum[0]));
+  sum += sumstep + 1;
+
+  for (y = 0; y < src.rows; y++, _src += srcstep, sum += sumstep) {
+    uint32_t s = sum[-1] = 0;
+    for (x = 0; x < src.cols; ++x) {
+      s += _src[x];
+      sum[x] = sum[x - sumstep] + s;
     }
   }
-  return count;
 }
 
-
-TEST(Brisk, PopCount) {
-  unsigned char data1[array_length];
-  unsigned char data2[array_length];
-
-  memset(data1, 0, array_length);
-  memset(data2, 0, array_length);
-
-  data1[0] = 0x5;
-  data1[3] = 0x2;
-  data1[6] = 0x34;
-  data1[8] = 0x7;
-  data1[10] = 0x23;
-  data1[13] = 0x45;
-  data1[15] = 0x78;
-
-  data2[0] = 0x22;
-  data2[3] = 0x78;
-  data2[6] = 0x12;
-  data2[8] = 0x32;
-  data2[10] = 0x1;
-  data2[13] = 0x23;
-  data2[15] = 0x75;
-
-  brisk::Hamming popcnt;
-#if __ARM_NEON__
-  const uint8x16_t* signature1 = reinterpret_cast<const uint8x16_t*>(data1);
-  const uint8x16_t* signature2 = reinterpret_cast<const uint8x16_t*>(data2);
-  unsigned int cnt = popcnt.NEONPopcntofXORed(signature1, signature2,
-                                              num_128_words);
+TEST(Brisk, IntegralImage8bit) {
+#ifdef TEST_IN_SOURCE
+  std::string imagepath = "src/test/test_data/img1.pgm";
 #else
-  const __m128i* signature1 = reinterpret_cast<const __m128i*>(data1);
-  const __m128i* signature2 = reinterpret_cast<const __m128i*>(data2);
-  unsigned int cnt = popcnt.SSSE3PopcntofXORed(signature1, signature2,
-                                               num_128_words);
-#endif  // __ARM_NEON__
-  unsigned int verification_result = PopCountOfXor(data1, data2);
-  ASSERT_EQ(cnt, verification_result);
+  std::string imagepath = "./test_data/img1.pgm";
+#endif
+  cv::Mat src_img = cv::imread(imagepath);
+
+  cv::Mat integral, integral_verification;
+  ComputeReferenceIntegralImage8Bit(src_img, &integral_verification);
+  brisk::IntegralImage8(src_img, &integral);
+
+  ASSERT_EQ(integral.rows, integral_verification.rows);
+  ASSERT_EQ(integral.cols, integral_verification.cols);
+
+  bool errors = 0;
+  const int kMaxErrors = 10;
+  for (int row = 0; row < integral.rows; ++row) {
+    for (int col = 0; col < integral.cols; ++col) {
+      EXPECT_EQ(integral.at<int>(row, col),
+                integral_verification.at<int>(row, col));
+      if (integral.at<int>(row, col)
+          != integral_verification.at<int>(row, col)) {
+        ++errors;
+        CHECK_LT(errors, kMaxErrors);
+      }
+    }
+  }
 }
 
 int main(int argc, char** argv) {

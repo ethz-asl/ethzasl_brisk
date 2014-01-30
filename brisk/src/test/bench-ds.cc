@@ -39,7 +39,11 @@
 
 namespace brisk {
 
-std::string DescriptorToString(const __m128i * d, int num128Words) {
+#ifdef __ARM_NEON__
+std::string DescriptorToString(const uint8x16_t* d, int num128Words) {
+#else
+  std::string DescriptorToString(const __m128i * d, int num128Words) {
+#endif
   std::stringstream ss;
   ss << "[";
   const unsigned int __attribute__ ((__may_alias__))* data =

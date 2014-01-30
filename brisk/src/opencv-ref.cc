@@ -14,14 +14,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -35,22 +35,15 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef INTERNAL_IMAGE_DOWN_SAMPLING_H_
-#define INTERNAL_IMAGE_DOWN_SAMPLING_H_
-
-#ifdef __ARM_NEON__
-#include <arm_neon.h>
-#else
-#include <emmintrin.h>
-#include <tmmintrin.h>
-#endif  // __ARM_NEON__
-
-#include <agast/wrap-opencv.h>
-
-namespace brisk {
-void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
-void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
-void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
-void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
-}  // namespace brisk
-#endif  // INTERNAL_IMAGE_DOWN_SAMPLING_H_
+#include <brisk/opencv-ref.h>
+#ifdef USE_OPENCV_FOR_DEBUGGING
+#include <opencv2/highgui/highgui.hpp>
+void DisplayImageUsingOpencv(const unsigned char* img, int rows, int cols,
+                             const std::string& window_title) {
+  cv::Mat mat(rows, cols, CV_8UC1);
+  memcpy(mat.data, img, rows * cols);
+  cv::namedWindow(window_title.c_str(), cv::WINDOW_AUTOSIZE);
+  cv::imshow(window_title.c_str(), mat);
+  cv::waitKey(0);
+}
+#endif  // USE_OPENCV_FOR_DEBUGGING

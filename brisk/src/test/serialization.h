@@ -44,17 +44,8 @@
 #include <type_traits>
 #include <vector>
 
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
-
-namespace cv {
-class KeyPoint;
-class Mat;
-template <typename TYPE> class Point_;
-}  // namespace cv
+#include <agast/wrap-opencv.h>
+#include <agast/glog.h>
 
 namespace serialization {
 
@@ -136,7 +127,7 @@ void DeSerialize(std::pair<TYPEA, TYPEB>* value, std::ifstream* in) {
 template<typename TYPEA, typename TYPEB>
 void Serialize(const std::map<TYPEA, TYPEB>& value, std::ofstream* out) {
   CHECK_NOTNULL(out);
-  size_t length = value.size();
+  uint32_t length = value.size();
   Serialize(length, out);
   for (const std::pair<TYPEA, TYPEB>& entry : value) {
     Serialize(entry, out);
@@ -148,9 +139,9 @@ void DeSerialize(std::map<TYPEA, TYPEB>* value, std::ifstream* in) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
   value->clear();
-  size_t length;
+  uint32_t length;
   DeSerialize(&length, in);
-  for (size_t i = 0; i < length; ++i) {
+  for (uint32_t i = 0; i < length; ++i) {
     std::pair<TYPEA, TYPEB> entry;
     DeSerialize(&entry, in);
     value->insert(entry);
@@ -162,7 +153,7 @@ void DeSerialize(std::map<TYPEA, TYPEB>* value, std::ifstream* in) {
 template<typename T>
 void Serialize(const std::vector<T>& value, std::ofstream* out) {
   CHECK_NOTNULL(out);
-  size_t length = value.size();
+  uint32_t length = value.size();
   Serialize(length, out);
   for (const T& entry : value) {
     Serialize(entry, out);
@@ -174,7 +165,7 @@ void DeSerialize(std::vector<T>* value, std::ifstream* in) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
   value->clear();
-  size_t length;
+  uint32_t length;
   DeSerialize(&length, in);
   value->resize(length);
   for (T& entry : *value) {
@@ -185,7 +176,7 @@ void DeSerialize(std::vector<T>* value, std::ifstream* in) {
 template<typename T>
 void Serialize(const std::list<T>& value, std::ofstream* out) {
   CHECK_NOTNULL(out);
-  size_t length = value.size();
+  uint32_t length = value.size();
   Serialize(length, out);
   for (const T& entry : value) {
     Serialize(entry, out);
@@ -197,7 +188,7 @@ void DeSerialize(std::list<T>* value, std::ifstream* in) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
   value->clear();
-  size_t length;
+  uint32_t length;
   DeSerialize(&length, in);
   value->resize(length);
   for (T& entry : *value) {
