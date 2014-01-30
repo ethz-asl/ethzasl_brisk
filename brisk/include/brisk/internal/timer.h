@@ -6,7 +6,7 @@
 #include <boost/chrono.hpp>
 #else
 #include <chrono>
-#endif
+#endif  // _MSC_VER
 #include <limits>
 #include <map>
 #include <string>
@@ -132,10 +132,10 @@ class Timer {
   boost::chrono::time_point<boost::chrono::system_clock> time_;
 #else
   std::chrono::time_point<std::chrono::system_clock> time_;
-#endif
+#endif  // _MSC_VER
 #if USE_RDTSC
   tsc_counter start_, end_;
-#endif
+#endif  // USE_RDTSC
   bool timing_;
   size_t handle_;
 };
@@ -187,7 +187,7 @@ class Timing {
 typedef Timer DebugTimer;
 #else
 typedef DummyTimer DebugTimer;
-#endif
+#endif  // ENABLE_BRISK_TIMING
 
 }  // namespace timing
 }  // namespace brisk
