@@ -51,12 +51,12 @@ namespace brisk {
 class  BriskScaleSpace {
  public:
   // Construct telling the octaves number:
-  BriskScaleSpace(uint8_t _octaves = 3, bool suppressScaleNonmaxima = true);
+  BriskScaleSpace(uint8_t octaves = 3, bool suppress_scale_nonmaxima = true);
   ~BriskScaleSpace();
 
   // Construct the image pyramids.
-  void ConstructPyramid(const cv::Mat& image, uchar _threshold,
-                        uchar overwrite_lower_thres = defaultLowerThreshold);
+  void ConstructPyramid(const cv::Mat& image, uchar threshold,
+                        uchar overwrite_lower_thres = kDefaultLowerThreshold);
 
   // Get Keypoints.
   void GetKeypoints(std::vector<cv::KeyPoint>* keypoints);
@@ -104,18 +104,18 @@ class  BriskScaleSpace {
   uint8_t threshold_;
 
   // Some constant parameters:
-  static const float basicSize_;
+  static const float kBasicSize_;
 
   // Thresholds for the scale determination.
-  static const int dropThreshold_;
-  static const int maxThreshold_;
-  static const int minDrop_;
+  static const int kDropThreshold_;
+  static const int kMaxThreshold_;
+  static const int kMinDrop_;
 
   // Detection thresholds: upper and lower bounds.
-  static const uchar defaultUpperThreshold;
-  static const uchar defaultLowerThreshold;
+  static const uchar kDefaultUpperThreshold;
+  static const uchar kDefaultLowerThreshold;
 
-  bool m_suppressScaleNonmaxima;
+  bool suppressScaleNonmaxima_;
 };
 }  // namespace brisk
 #endif  // INTERNAL_BRISK_SCALE_SPACE_H_
