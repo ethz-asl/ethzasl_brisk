@@ -59,11 +59,11 @@ class  BriskLayer {
     static const int TWOTHIRDSAMPLE = 1;
   };
   // Construct a base layer.
-  BriskLayer(const cv::Mat& img, uchar upperThreshold, uchar lowerThreshold,
+  BriskLayer(const cv::Mat& img, uchar upper_threshold, uchar lower_threshold,
              float scale = 1.0f, float offset = 0.0f);
   // Derive a layer.
-  BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
-             uchar lowerThreshold);
+  BriskLayer(const BriskLayer& layer, int mode, uchar upper_threshold,
+             uchar lower_threshold);
 
   // Fast/Agast without non-max suppression.
   void GetAgastPoints(uint8_t threshold,
@@ -88,10 +88,10 @@ class  BriskLayer {
   inline float offset() const {
     return offset_;
   }
-  int width() const {
+  int cols() const {
     return img_.cols;
   }
-  int height() const {
+  int rows() const {
     return img_.rows;
   }
  private:

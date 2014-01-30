@@ -42,18 +42,18 @@
 #include <brisk/internal/brisk-scale-space.h>
 
 namespace brisk {
-const float BriskScaleSpace::basicSize_ = 12.0;
+const float BriskScaleSpace::kBasicSize_ = 12.0;
 
-const int BriskScaleSpace::maxThreshold_ = 1;
-const int BriskScaleSpace::dropThreshold_ = 5;
-const int BriskScaleSpace::minDrop_ = 15;
-const uchar BriskScaleSpace::defaultLowerThreshold = 10;  // Originally 28.
-const uchar BriskScaleSpace::defaultUpperThreshold = 230;
+const int BriskScaleSpace::kMaxThreshold_ = 1;
+const int BriskScaleSpace::kDropThreshold_ = 5;
+const int BriskScaleSpace::kMinDrop_ = 15;
+const uchar BriskScaleSpace::kDefaultLowerThreshold = 10;  // Originally 28.
+const uchar BriskScaleSpace::kDefaultUpperThreshold = 230;
 
 // Construct telling the octaves number:
 BriskScaleSpace::BriskScaleSpace(uint8_t _octaves,
                                  bool suppressScaleNonmaxima) {
-  m_suppressScaleNonmaxima = suppressScaleNonmaxima;
+  suppressScaleNonmaxima_ = suppressScaleNonmaxima;
   if (_octaves == 0)
     layers_ = 1;
   else
@@ -71,21 +71,21 @@ void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold,
 
   // Fill the pyramid:
   pyramid_.push_back(
-      BriskLayer(image.clone(), defaultUpperThreshold, overwrite_lower_thres));
+      BriskLayer(image.clone(), kDefaultUpperThreshold, overwrite_lower_thres));
   if (layers_ > 1) {
     pyramid_.push_back(
         BriskLayer(pyramid_.back(), BriskLayer::CommonParams::TWOTHIRDSAMPLE,
-                   (defaultUpperThreshold), (overwrite_lower_thres)));
+                   (kDefaultUpperThreshold), (overwrite_lower_thres)));
   }
   const int octaves2 = layers_;
 
   for (uint8_t i = 2; i < octaves2; i += 2) {
     pyramid_.push_back(
         BriskLayer(pyramid_[i - 2], BriskLayer::CommonParams::HALFSAMPLE,
-                   (defaultUpperThreshold), (overwrite_lower_thres)));
+                   (kDefaultUpperThreshold), (overwrite_lower_thres)));
     pyramid_.push_back(
         BriskLayer(pyramid_[i - 1], BriskLayer::CommonParams::HALFSAMPLE,
-                   (defaultUpperThreshold), (overwrite_lower_thres)));
+                   (kDefaultUpperThreshold), (overwrite_lower_thres)));
   }
 }
 
@@ -113,8 +113,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
             (static_cast<float>(agast::KeyPoint(keypoint).y)) /
             l.scale() - l.offset();
         if (agast::KeyPoint(kp).x < 3 || agast::KeyPoint(kp).y < 3 ||
-            agast::KeyPoint(kp).x > l.width() - 3 ||
-            agast::KeyPoint(kp).y > l.height() - 3) {
+            agast::KeyPoint(kp).x > l.cols() - 3 ||
+            agast::KeyPoint(kp).y > l.rows() - 3) {
           continue;
         }
         // This calculates and stores the score of this keypoint in the score map.
@@ -128,7 +128,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
 
   keypoints->clear();
 
-  if (!m_suppressScaleNonmaxima) {
+  if (!suppressScaleNonmaxima_) {
     for (uint8_t i = 0; i < layers_; i++) {
       // Just do a simple 2d subpixel refinement...
       const int num = agastPoints[i].size();
@@ -159,7 +159,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
         cv::KeyPoint kp = keypoint;
         agast::KeyPoint(kp).x = static_cast<float>(point_x) + delta_x;
         agast::KeyPoint(kp).y = static_cast<float>(point_y) + delta_y;
-        kp.size = basicSize_ * l.scale();
+        kp.size = kBasicSize_ * l.scale();
         kp.angle = -1;
         kp.response = max;
         kp.octave = 0;
@@ -199,7 +199,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
       cv::KeyPoint kp = keypoint;
       agast::KeyPoint(kp).x = static_cast<float>(point_x) + delta_x;
       agast::KeyPoint(kp).y = static_cast<float>(point_y) + delta_y;
-      kp.size = basicSize_;
+      kp.size = kBasicSize_;
       kp.angle = -1;
       kp.response = max;
       kp.octave = 0;
@@ -248,7 +248,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
             l.scale() + l.offset();
         agast::KeyPoint(kp).y = (static_cast<float>(point_y) + delta_y) *
             l.scale() + l.offset();
-        kp.size = basicSize_ * l.scale();
+        kp.size = kBasicSize_ * l.scale();
         kp.angle = -1;
         kp.response = max;
         kp.octave = i;
@@ -276,7 +276,7 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
         cv::KeyPoint kp = keypoint;
         agast::KeyPoint(kp).x = x;
         agast::KeyPoint(kp).y = y;
-        kp.size = basicSize_ * scale;
+        kp.size = kBasicSize_ * scale;
         kp.angle = -1;
         kp.response = score;
         kp.octave = i;
@@ -610,14 +610,14 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
 
     // Second derivative needs to be sufficiently large.
     if (layer == 0) {
-      if (s_1_1 - maxThreshold_ <= static_cast<int>(max_above)) {
+      if (s_1_1 - kMaxThreshold_ <= static_cast<int>(max_above)) {
         doScaleRefinement = false;
       }
     } else {
-      if ((s_1_1 - maxThreshold_ < (max_above))
-          || (s_1_1 - maxThreshold_ < (max_below_float))) {
-        if ((s_1_1 - minDrop_ > (max_above))
-            || (s_1_1 - minDrop_ > (max_below_float))) {
+      if ((s_1_1 - kMaxThreshold_ < (max_above))
+          || (s_1_1 - kMaxThreshold_ < (max_below_float))) {
+        if ((s_1_1 - kMinDrop_ > (max_above))
+            || (s_1_1 - kMinDrop_ > (max_below_float))) {
           // This means, it's an edge on the scale axis.
           doScaleRefinement = false;
         } else {
@@ -699,10 +699,10 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
     register int s_2_2 = thisLayer.GetAgastScore(x_layer + 1, y_layer + 1, 1);
 
     // Second derivative needs to be sufficiently large.
-    if ((s_1_1 - maxThreshold_ < (max_above))
-        || (s_1_1 - maxThreshold_ < (max_below))) {
-      if ((s_1_1 - minDrop_ > (max_above))
-          || (s_1_1 - minDrop_ > (max_below))) {
+    if ((s_1_1 - kMaxThreshold_ < (max_above))
+        || (s_1_1 - kMaxThreshold_ < (max_below))) {
+      if ((s_1_1 - kMinDrop_ > (max_above))
+          || (s_1_1 - kMinDrop_ > (max_below))) {
         // This means, it's an edge on the scale axis.
         doScaleRefinement = false;
       } else {
@@ -759,7 +759,7 @@ __inline__ float BriskScaleSpace::GetScoreMaxAbove(const uint8_t layer,
                                                    const int y_layer,
                                                    const int thr, bool& ismax,
                                                    float& dx, float& dy) {
-  int threshold = thr + dropThreshold_;
+  int threshold = thr + kDropThreshold_;
 
   ismax = false;
   // Relevant floating point coordinates.
@@ -919,7 +919,7 @@ __inline__ float BriskScaleSpace::GetScoreMaxBelow(const uint8_t layer,
                                                    const int y_layer,
                                                    const int thr, bool& ismax,
                                                    float& dx, float& dy) {
-  int threshold = thr + dropThreshold_;
+  int threshold = thr + kDropThreshold_;
 
   ismax = false;
 
