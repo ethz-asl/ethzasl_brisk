@@ -157,8 +157,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
 
         // Store:
         cv::KeyPoint kp = keypoint;
-        kp.x = static_cast<float>(point_x) + delta_x;
-        kp.y = static_cast<float>(point_y) + delta_y;
+        agast::KeyPoint(kp).x = static_cast<float>(point_x) + delta_x;
+        agast::KeyPoint(kp).y = static_cast<float>(point_y) + delta_y;
         kp.size = basicSize_ * l.scale();
         kp.angle = -1;
         kp.response = max;
@@ -197,8 +197,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
                              s_2_1, s_2_2, delta_x, delta_y);
       // Store:
       cv::KeyPoint kp = keypoint;
-      kp.x = static_cast<float>(point_x) + delta_x;
-      kp.y = static_cast<float>(point_y) + delta_y;
+      agast::KeyPoint(kp).x = static_cast<float>(point_x) + delta_x;
+      agast::KeyPoint(kp).y = static_cast<float>(point_y) + delta_y;
       kp.size = basicSize_;
       kp.angle = -1;
       kp.response = max;
@@ -244,9 +244,9 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
 
         // Store:
         cv::KeyPoint kp = keypoint;
-        kp.x = (static_cast<float>(point_x) + delta_x) *
+        agast::KeyPoint(kp).x = (static_cast<float>(point_x) + delta_x) *
             l.scale() + l.offset();
-        kp.y = (static_cast<float>(point_y) + delta_y) *
+        agast::KeyPoint(kp).y = (static_cast<float>(point_y) + delta_y) *
             l.scale() + l.offset();
         kp.size = basicSize_ * l.scale();
         kp.angle = -1;
@@ -274,8 +274,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
 
         // Finally store the detected keypoint:
         cv::KeyPoint kp = keypoint;
-        kp.x = x;
-        kp.y = y;
+        agast::KeyPoint(kp).x = x;
+        agast::KeyPoint(kp).y = y;
         kp.size = basicSize_ * scale;
         kp.angle = -1;
         kp.response = score;
