@@ -42,7 +42,8 @@ if(CATKIN_ENABLE_TESTING AND NOT ANDROID)
   file(COPY src/test/test_data DESTINATION ${CMAKE_BINARY_DIR})
 
   cs_add_library(${PROJECT_NAME}_test_lib src/test/serialization.cc
-                                          src/test/bench-ds.cc)
+                                          src/test/bench-ds.cc
+                                          src/opencv-ref.cc)
 
   catkin_add_gtest(test_integral_image src/test/test-integral-image.cc
                    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})

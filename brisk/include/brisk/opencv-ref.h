@@ -39,7 +39,7 @@
 #define OPENCV_REF_H_
 
 #include <string>
-#define USE_OPENCV_FOR_DEBUGGING
+//#define USE_OPENCV_FOR_DEBUGGING
 #ifdef USE_OPENCV_FOR_DEBUGGING
 void DisplayImageUsingOpencv(const unsigned char* img, int rows, int cols, const std::string& window_title);
 #endif  // USE_OPENCV_FOR_DEBUGGING
