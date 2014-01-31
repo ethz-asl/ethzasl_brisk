@@ -1,6 +1,7 @@
 // Copyright 2013 Motorola Mobility LLC. Part of the Trailmix project.
 // CONFIDENTIAL. AUTHORIZED USE ONLY. DO NOT REDISTRIBUTE.
 #include <algorithm>
+#include <cstdarg>
 #include <ostream>  //NOLINT
 #include <sstream>
 #include <stdio.h>
