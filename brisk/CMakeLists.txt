@@ -6,4 +6,3 @@ if (redwood_catkin_FOUND)
 else()
   include(${PROJECT_SOURCE_DIR}/CMakeLists_rosbuild.txt)
 endif()
-
