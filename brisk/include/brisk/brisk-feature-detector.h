@@ -43,23 +43,36 @@
 
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 
-namespace cv {
-class CV_EXPORTS BriskFeatureDetector : public FeatureDetector {
+namespace brisk {
+#if HAVE_OPENCV
+class  BriskFeatureDetector : public cv::FeatureDetector {
+#else
+  class  BriskFeatureDetector {
+#endif  // HAVE_OPENCV
  public:
   BriskFeatureDetector(int thresh, int octaves = 3,
                        bool suppressScaleNonmaxima = true);
   virtual ~BriskFeatureDetector() { }
   int threshold;
   int octaves;
- protected:
+#if !HAVE_OPENCV
+  void detect(const cv::Mat& image,
+              std::vector<cv::KeyPoint>& keypoints,
+              const cv::Mat& mask = cv::Mat()) const {
+    detectImpl(image, keypoints, mask);
+  }
+#endif
+  void ComputeScale(const cv::Mat& image,
+                    std::vector<cv::KeyPoint>& keypoints) const;
+protected:
   virtual void detectImpl(const cv::Mat& image,
                           std::vector<cv::KeyPoint>& keypoints,
                           const cv::Mat& mask = cv::Mat()) const;
   bool m_suppressScaleNonmaxima;
 };
-}  // namespace cv
+}  // namespace brisk
 
 #endif  // BRISK_BRISK_FEATURE_DETECTOR_H_

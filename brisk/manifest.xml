@@ -5,17 +5,17 @@
 
   </description>
   <author>Stefan Leutenegger</author>
-  <license>BSD</license>
-  <review status="unreviewed" notes=""/>
+  <license>New BSD</license>
+  <review status="unreleased" notes=""/>
   <url>http://ros.org/wiki/brisk</url>
 
   <depend package="roscpp"/>
   <depend package="agast"/>
   <depend package="opencv2"/>
-  <depend package="sm_timing"/>
 
   <export>
-    <cpp cflags="-I${prefix}/include" lflags=" -L${prefix}/lib -lbrisk"/>
+    <cpp cflags="-I${prefix}/include" 
+        lflags=" -L${prefix}/lib -lbrisk"/>
   </export>
 
 </package>

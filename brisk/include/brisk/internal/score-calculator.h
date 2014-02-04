@@ -41,11 +41,15 @@
 #ifndef INTERNAL_SCORE_CALCULATOR_H_
 #define INTERNAL_SCORE_CALCULATOR_H_
 
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
+#else
 #include <emmintrin.h>
 #include <tmmintrin.h>
+#endif  // __ARM_NEON__
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {

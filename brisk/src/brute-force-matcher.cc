@@ -41,13 +41,14 @@
 #include <memory>
 
 #include <brisk/brute-force-matcher.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 
-namespace cv {
+#if HAVE_OPENCV
+namespace brisk {
 // Adapted from OpenCV 2.3 features2d/matcher.hpp
-cv::Ptr<DescriptorMatcher> BruteForceMatcherSse::clone(bool emptyTrainData)
+cv::Ptr<cv::DescriptorMatcher> BruteForceMatcher::clone(bool emptyTrainData)
 const {
-  BruteForceMatcherSse* matcher = new BruteForceMatcherSse(distance_);
+  BruteForceMatcher* matcher = new BruteForceMatcher(distance_);
   if (!emptyTrainData) {
     std::transform(trainDescCollection.begin(), trainDescCollection.end(),
                    matcher->trainDescCollection.begin(), clone_op);
@@ -55,52 +56,56 @@ const {
   return matcher;
 }
 
-void BruteForceMatcherSse::knnMatchImpl(const Mat& queryDescriptors,
-                                        vector<vector<DMatch> >& matches,
-                                        int k,
-                                        const vector<Mat>& masks,
-                                        bool compactResult) {
+void BruteForceMatcher::knnMatchImpl(
+    const cv::Mat& queryDescriptors,
+    std::vector<std::vector<cv::DMatch> >& matches,
+    int k,
+    const std::vector<cv::Mat>& masks,
+    bool compactResult) {
   commonKnnMatchImpl(*this, queryDescriptors, matches, k, masks, compactResult);
 }
 
-void BruteForceMatcherSse::radiusMatchImpl(const Mat& queryDescriptors,
-                                           vector<vector<DMatch> >& matches,
-                                           float maxDistance,
-                                           const vector<Mat>& masks,
-                                           bool compactResult) {
+void BruteForceMatcher::radiusMatchImpl(
+    const cv::Mat& queryDescriptors,
+    std::vector<std::vector<cv::DMatch> >& matches,
+    float maxDistance,
+    const std::vector<cv::Mat>& masks,
+    bool compactResult) {
   commonRadiusMatchImpl(*this, queryDescriptors, matches, maxDistance, masks,
                         compactResult);
 }
 
-inline void BruteForceMatcherSse::commonKnnMatchImpl(
-    BruteForceMatcherSse& matcher, const Mat& queryDescriptors,
-    vector<vector<DMatch> >& matches, int knn, const vector<Mat>& masks,
+inline void BruteForceMatcher::commonKnnMatchImpl(
+    BruteForceMatcher& matcher, const cv::Mat& queryDescriptors,
+    std::vector<std::vector<cv::DMatch> >& matches,
+    int knn,
+    const std::vector<cv::Mat>& masks,
     bool compactResult) {
-  typedef brisk::HammingSse::ValueType ValueType;
-  typedef brisk::HammingSse::ResultType DistanceType;
+  typedef brisk::Hamming::ValueType ValueType;
+  typedef brisk::Hamming::ResultType DistanceType;
   assert(!queryDescriptors.empty());
-  assert(DataType<ValueType>::type == queryDescriptors.type());
+  assert(cv::DataType<ValueType>::type == queryDescriptors.type());
 
   int dimension = queryDescriptors.cols;
   matches.reserve(queryDescriptors.rows);
 
   size_t imgCount = matcher.trainDescCollection.size();
   // Distances between one query descriptor and all train descriptors.
-  vector < Mat > allDists(imgCount);
+  std::vector<cv::Mat> allDists(imgCount);
   for (size_t i = 0; i < imgCount; i++)
-    allDists[i] = Mat(1, matcher.trainDescCollection[i].rows,
-                      DataType<DistanceType>::type);
+    allDists[i] = cv::Mat(1, matcher.trainDescCollection[i].rows,
+                          cv::DataType<DistanceType>::type);
 
   for (int qIdx = 0; qIdx < queryDescriptors.rows; qIdx++) {
     if (matcher.isMaskedOut(masks, qIdx)) {
       if (!compactResult)  // Push empty vector.
-        matches.push_back(vector<DMatch>());
+        matches.push_back(std::vector<cv::DMatch>());
     } else {
       // 1. compute distances between i-th query descriptor and all train
       // descriptors.
       for (size_t iIdx = 0; iIdx < imgCount; iIdx++) {
         assert(
-            DataType < ValueType > ::type
+            cv::DataType<ValueType>::type
                 == matcher.trainDescCollection[iIdx].type()
                 || matcher.trainDescCollection[iIdx].empty());
         assert(
@@ -110,7 +115,7 @@ inline void BruteForceMatcherSse::commonKnnMatchImpl(
         const ValueType* d1 = (const ValueType*) (queryDescriptors.data
             + queryDescriptors.step * qIdx);
         allDists[iIdx].setTo(
-            Scalar::all(std::numeric_limits < DistanceType > ::max()));
+            cv::Scalar::all(std::numeric_limits<DistanceType>::max()));
         for (int tIdx = 0; tIdx < matcher.trainDescCollection[iIdx].rows;
             tIdx++) {
           if (masks.empty()
@@ -125,25 +130,26 @@ inline void BruteForceMatcherSse::commonKnnMatchImpl(
       }
 
       // 2. choose k nearest matches for query[i].
-      matches.push_back(vector<DMatch>());
-      vector<vector<DMatch> >::reverse_iterator curMatches = matches.rbegin();
+      matches.push_back(std::vector<cv::DMatch>());
+      std::vector<std::vector<cv::DMatch> >::reverse_iterator curMatches =
+          matches.rbegin();
       for (int k = 0; k < knn; k++) {
-        DMatch bestMatch;
+        cv::DMatch bestMatch;
         bestMatch.distance = std::numeric_limits<float>::max();
         for (size_t iIdx = 0; iIdx < imgCount; iIdx++) {
           if (!allDists[iIdx].empty()) {
             double minVal;
-            Point minLoc;
+            cv::Point minLoc;
             minMaxLoc(allDists[iIdx], &minVal, 0, &minLoc, 0);
             if (minVal < bestMatch.distance)
-              bestMatch = DMatch(qIdx, minLoc.x, static_cast<int>(iIdx),
-                                 static_cast<float>(minVal));
+              bestMatch = cv::DMatch(qIdx, minLoc.x, static_cast<int>(iIdx),
+                                     static_cast<float>(minVal));
           }
         }
         if (bestMatch.trainIdx == -1)
           break;
 
-        allDists[bestMatch.imgIdx].at < DistanceType > (0, bestMatch.trainIdx) =
+        allDists[bestMatch.imgIdx].at<DistanceType> (0, bestMatch.trainIdx) =
             std::numeric_limits < DistanceType > ::max();
         curMatches->push_back(bestMatch);
       }
@@ -153,14 +159,14 @@ inline void BruteForceMatcherSse::commonKnnMatchImpl(
   }
 }
 
-inline void BruteForceMatcherSse::commonRadiusMatchImpl(
-    BruteForceMatcherSse& matcher, const Mat& queryDescriptors,
-    vector<vector<DMatch> >& matches, float maxDistance,
-    const vector<Mat>& masks, bool compactResult) {
-  typedef brisk::HammingSse::ValueType ValueType;
-  typedef brisk::HammingSse::ResultType DistanceType;
+inline void BruteForceMatcher::commonRadiusMatchImpl(
+    BruteForceMatcher& matcher, const cv::Mat& queryDescriptors,
+    std::vector<std::vector<cv::DMatch> >& matches, float maxDistance,
+    const std::vector<cv::Mat>& masks, bool compactResult) {
+  typedef brisk::Hamming::ValueType ValueType;
+  typedef brisk::Hamming::ResultType DistanceType;
   CV_DbgAssert(!queryDescriptors.empty());
-  assert(DataType < ValueType > ::type == queryDescriptors.type());
+  assert(cv::DataType < ValueType > ::type == queryDescriptors.type());
   int dimension = queryDescriptors.cols;
 
   matches.reserve(queryDescriptors.rows);
@@ -169,13 +175,14 @@ inline void BruteForceMatcherSse::commonRadiusMatchImpl(
   for (int qIdx = 0; qIdx < queryDescriptors.rows; qIdx++) {
     if (matcher.isMaskedOut(masks, qIdx)) {
       if (!compactResult)  // Push empty vector.
-        matches.push_back(vector<DMatch>());
+        matches.push_back(std::vector<cv::DMatch>());
     } else {
-      matches.push_back(vector<DMatch>());
-      vector<vector<DMatch> >::reverse_iterator curMatches = matches.rbegin();
+      matches.push_back(std::vector<cv::DMatch>());
+      std::vector<std::vector<cv::DMatch> >::reverse_iterator curMatches =
+          matches.rbegin();
       for (size_t iIdx = 0; iIdx < imgCount; iIdx++) {
         assert(
-            DataType < ValueType > ::type
+            cv::DataType < ValueType > ::type
                 == matcher.trainDescCollection[iIdx].type()
                 || matcher.trainDescCollection[iIdx].empty());
         assert(
@@ -193,8 +200,9 @@ inline void BruteForceMatcherSse::commonRadiusMatchImpl(
                 + matcher.trainDescCollection[iIdx].step * tIdx);
             DistanceType d = matcher.distance_(d1, d2, dimension);
             if (d < maxDistance)
-              curMatches->push_back(DMatch(qIdx, tIdx, static_cast<int>(iIdx),
-                                           static_cast<float>(d)));
+              curMatches->push_back(cv::DMatch(qIdx, tIdx,
+                                               static_cast<int>(iIdx),
+                                               static_cast<float>(d)));
           }
         }
       }
@@ -202,4 +210,5 @@ inline void BruteForceMatcherSse::commonRadiusMatchImpl(
     }
   }
 }
-}  // namespace cv
+}  // namespace brisk
+#endif  // HAVE_OPENCV

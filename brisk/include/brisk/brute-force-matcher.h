@@ -43,45 +43,57 @@
 
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
-#include <brisk/internal/hamming-sse.h>
+#include <agast/wrap-opencv.h>
+#include <brisk/internal/hamming.h>
 #include <brisk/internal/macros.h>
 
-namespace cv {
-class CV_EXPORTS BruteForceMatcherSse : public DescriptorMatcher {
+
+namespace brisk {
+class BruteForceMatcher;
+#if HAVE_OPENCV
+class  BruteForceMatcher : public cv::DescriptorMatcher {
  public:
-  BruteForceMatcherSse(const brisk::HammingSse& distance = brisk::HammingSse())
+  BruteForceMatcher(const brisk::Hamming& distance = brisk::Hamming())
       : distance_(distance) { }
-  virtual ~BruteForceMatcherSse() { }
+  virtual ~BruteForceMatcher() { }
   virtual bool isMaskSupported() const {
     return true;
   }
-  virtual cv::Ptr<DescriptorMatcher> clone(bool emptyTrainData = false) const;
+  virtual cv::Ptr<cv::DescriptorMatcher> clone(bool emptyTrainData = false)
+      const;
 
  protected:
-  virtual void knnMatchImpl(const Mat& queryDescriptors,
-                            vector<vector<DMatch> >& matches, int k,
-                            const vector<Mat>& masks = vector<Mat>(),
+  virtual void knnMatchImpl(const cv::Mat& queryDescriptors,
+                            std::vector<std::vector<cv::DMatch> >& matches,
+                            int k,
+                            const std::vector<cv::Mat>& masks =
+                                std::vector<cv::Mat>(),
                             bool compactResult = false);
-  virtual void radiusMatchImpl(const Mat& queryDescriptors,
-                               vector<vector<DMatch> >& matches,
-                               float maxDistance, const vector<Mat>& masks =
-                                   vector<Mat>(),
+  virtual void radiusMatchImpl(const cv::Mat& queryDescriptors,
+                               std::vector<std::vector<cv::DMatch> >& matches,
+                               float maxDistance,
+                               const std::vector<cv::Mat>& masks =
+                                   std::vector<cv::Mat>(),
                                bool compactResult = false);
 
-  brisk::HammingSse distance_;
+  brisk::Hamming distance_;
 
  private:
   //  Next two methods are used to implement specialization.
-  static void commonKnnMatchImpl(BruteForceMatcherSse& matcher,  // NOLINT
-                                 const Mat& queryDescriptors,
-                                 vector<vector<DMatch> >& matches, int k,
-                                 const vector<Mat>& masks, bool compactResult);
-  static void commonRadiusMatchImpl(BruteForceMatcherSse& matcher,  // NOLINT
-                                    const Mat& queryDescriptors,
-                                    vector<vector<DMatch> >& matches,
-                                    float maxDistance, const vector<Mat>& masks,
-                                    bool compactResult);
+  static void commonKnnMatchImpl(BruteForceMatcher& matcher,  // NOLINT
+                                 const cv::Mat& queryDescriptors,
+                                 std::vector<std::vector<cv::DMatch> >& matches,
+                                 int k,
+                                 const std::vector<cv::Mat>& masks,
+                                 bool compactResult);
+  static void commonRadiusMatchImpl(
+      BruteForceMatcher& matcher,  // NOLINT
+      const cv::Mat& queryDescriptors,
+      std::vector<std::vector<cv::DMatch> >& matches,
+      float maxDistance,
+      const std::vector<cv::Mat>& masks,
+      bool compactResult);
 };
-}  // namespace cv
+#endif  // HAVE_OPENCV
+}  // namespace brisk
 #endif  // BRISK_BRUTE_FORCE_MATCHER_H_
