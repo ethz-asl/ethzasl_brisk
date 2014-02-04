@@ -129,12 +129,12 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     matcher->radiusMatch(descriptorsLast, descriptors, matches, 50);
 
     //convert 8 bit and false color conversion
-    static bool dofalsecolor = false;
+    static bool dofalsecolor = true;
 
     cv::Mat img_mono8_ir, img_mono8;
     img_mono8_ir.create(img.rows, img.cols, CV_8UC1);
 
-    bool doTempScaling = true;
+    bool doTempScaling = false;
     converter_16_8::Instance().convert_to8bit(img, img_mono8_ir, doTempScaling);
     //converter_16_8::Instance().toneMapping(img, img_mono8_ir);
 
@@ -204,7 +204,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
 int main(int argc, char **argv) {
   ros::init(argc, argv, "flir");
   std::string path = ros::package::getPath("brisk");
-  detector = new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculatorFloat>(2, 14, 50);
+  detector = new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculatorFloat>(2, 60, 20);
   extractor = new cv::BriskDescriptorExtractor(path + "/brisk.ptn", false, true);
   matcher = new cv::BruteForceMatcherSse();
 
@@ -216,7 +216,7 @@ int main(int argc, char **argv) {
 
   cvStartWindowThread();
   image_transport::ImageTransport it(nh);
-  image_transport::Subscriber sub = it.subscribe("cam2/image_raw", 1, imageCallback);
+  image_transport::Subscriber sub = it.subscribe("cam0/image_raw", 1, imageCallback);
   ros::spin();
   cvDestroyWindow("Raw");
   cvDestroyWindow("Matches");
