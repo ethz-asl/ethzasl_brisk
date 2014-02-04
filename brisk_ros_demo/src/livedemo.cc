@@ -49,6 +49,7 @@
 #include <opencv2/features2d/features2d.hpp>
 #include <opencv2/nonfree/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <ros/ros.h>
 
 using namespace std;
@@ -328,7 +329,7 @@ class BriskVisualizer {
             // adapt display
             tmp.push_back(cv::Mat(image->rows / 2, image->cols / 2, CV_8U));
             if (sharedData.numRefImages == 2)
-              brisk::BriskLayer::HalfSample(*image, tmp.back());
+              brisk::Halfsample8(*image, tmp.back());
             else
               tmp.push_back(*image);
             //cv::imshow("BRISK Demo",tmp);
@@ -473,32 +474,12 @@ int main(int argc, char ** argv) {
     return 2;
   }
 
-  // contruct features:
-  std::vector<float> rList;
-  std::vector<int> nList;
-  rList.resize(5);
-  nList.resize(5);
-  const double f = 0.85;
-
-  rList[0] = f * 0;
-  //rList[1]=f*1.4;
-  rList[1] = f * 2.9;
-  rList[2] = f * 4.9;
-  rList[3] = f * 7.4;
-  rList[4] = f * 10.8;
-  nList[0] = 1;
-  //nList[1]=6;
-  nList[1] = 10;
-  nList[2] = 14;
-  nList[3] = 15;
-  nList[4] = 20;
-
   // now the extractor:
   cv::Ptr < cv::DescriptorExtractor > descriptorExtractor;
   if (std::string(argv[2]) == "BRISK") {
-    descriptorExtractor = new cv::BriskDescriptorExtractor(rList, nList, true);
+    descriptorExtractor = new cv::BriskDescriptorExtractor(true, true);
   } else if (std::string(argv[2]) == "U-BRISK") {
-    descriptorExtractor = new cv::BriskDescriptorExtractor(rList, nList, false);
+    descriptorExtractor = new cv::BriskDescriptorExtractor(true, false);
   } else if (std::string(argv[2]) == "SURF") {
     descriptorExtractor = new cv::SurfDescriptorExtractor();
   } else if (std::string(argv[2]) == "SIFT") {
@@ -519,7 +500,7 @@ int main(int argc, char ** argv) {
   // match descriptors:
   cv::Ptr < cv::DescriptorMatcher > descriptorMatcher;
   if (std::string(argv[3]) == "BruteForce-HammingSse") {
-    descriptorMatcher = new cv::BruteForceMatcherSse;
+    descriptorMatcher = new brisk::BruteForceMatcherSse;
   } else {
     descriptorMatcher = new cv::BFMatcher(cv::L2<float>::normType);
   }
