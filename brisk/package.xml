@@ -2,7 +2,7 @@
 <package>
   <name>brisk</name>
   <version>2.0.0</version>
-  <description>The brisk package</description>
+  <description>The brisk lib</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <maintainer email="slynen@ethz.ch">Simon Lynen</maintainer>
