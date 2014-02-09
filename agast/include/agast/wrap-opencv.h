@@ -47,7 +47,7 @@
 #include <fstream>  // NOLINT
 #include <memory>
 #include <glog/logging.h>
-#include <features-2d-helpers/keypoint.h>
+#include <NCV/NCVLib/feature_detection_and_matching/keypoint.h>
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 #endif
@@ -59,6 +59,18 @@ inline cv::Point2f& KeyPoint(cv::KeyPoint& keypoint) {  // NOLINT
 }
 inline const cv::Point2f& KeyPoint(const cv::KeyPoint& keypoint) {
   return keypoint.pt;
+}
+inline float& KeyPointAngle(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.angle;
+}
+inline const float& KeyPointAngle(const cv::KeyPoint& keypoint) {
+  return keypoint.angle;
+}
+inline float& KeyPointSize(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.size;
+}
+inline const float& KeyPointSize(const cv::KeyPoint& keypoint) {
+  return keypoint.size;
 }
 }  // namespace agast
 #else
@@ -251,7 +263,7 @@ typedef Point_<int> Point2i;
 // Reads a pgm image from file.
 cv::Mat imread(const std::string& filename);
 ssize_t imwrite(const cv::Mat& image, const std::string& filename);
-typedef features_2d::Keypoint KeyPoint;
+typedef NestorCV::Keypoint KeyPoint;
 }  // namespace cv
 
 namespace agast {
@@ -260,6 +272,18 @@ inline cv::KeyPoint& KeyPoint(cv::KeyPoint& keypoint) {  // NOLINT
 }
 inline const cv::KeyPoint& KeyPoint(const cv::KeyPoint& keypoint) {
   return keypoint;
+}
+inline float& KeyPointAngle(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.orientation;
+}
+inline const float& KeyPointAngle(const cv::KeyPoint& keypoint) {
+  return keypoint.orientation;
+}
+inline float& KeyPointSize(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.scale;
+}
+inline const float& KeyPointSize(const cv::KeyPoint& keypoint) {
+  return keypoint.scale;
 }
 }  // namespace agast
 

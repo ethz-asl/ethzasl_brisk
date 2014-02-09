@@ -38,9 +38,11 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <brisk/brisk-feature-detector.h>
-#include <agast/wrap-opencv.h>
+#include <algorithm>
+
 #include <agast/glog.h>
+#include <agast/wrap-opencv.h>
+#include <brisk/brisk-feature-detector.h>
 #include <brisk/internal/brisk-scale-space.h>
 
 namespace {

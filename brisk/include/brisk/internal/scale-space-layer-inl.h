@@ -197,6 +197,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (usePassedKeypoints) {
     points.reserve(keypoints.size());
     for (size_t k = 0; k < keypoints.size(); ++k) {
+#if HAVE_OPENCV
       if (keypoints[k].response > 1e6) {
         points.push_back(
             typename ScoreCalculator_t::PointWithScore(
@@ -204,6 +205,13 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
                 agast::KeyPoint(keypoints[k]).x,
                 agast::KeyPoint(keypoints[k]).y));
       }
+#else  // HAVE_OPENCV
+      points.push_back(
+          typename ScoreCalculator_t::PointWithScore(
+              1e6,
+              agast::KeyPoint(keypoints[k]).x,
+              agast::KeyPoint(keypoints[k]).y));
+#endif  // HAVE_OPENCV
     }
   } else {
     brisk::timing::DebugTimer timerNonMaxSuppression2d(

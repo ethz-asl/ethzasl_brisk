@@ -159,10 +159,14 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
         cv::KeyPoint kp = keypoint;
         agast::KeyPoint(kp).x = static_cast<float>(point_x) + delta_x;
         agast::KeyPoint(kp).y = static_cast<float>(point_y) + delta_y;
-        kp.size = kBasicSize_ * l.scale();
-        kp.angle = -1;
+        agast::KeyPointSize(kp) = kBasicSize_ * l.scale();
+        agast::KeyPointAngle(kp) = -1;
+#if HAVE_OPENCV
         kp.response = max;
         kp.octave = 0;
+#else
+        static_cast<void>(max);  // TODO(slynen): Store resp, octave.
+#endif  // HAVE_OPENCV
         keypoints->push_back(kp);
       }
     }
@@ -199,10 +203,14 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
       cv::KeyPoint kp = keypoint;
       agast::KeyPoint(kp).x = static_cast<float>(point_x) + delta_x;
       agast::KeyPoint(kp).y = static_cast<float>(point_y) + delta_y;
-      kp.size = kBasicSize_;
-      kp.angle = -1;
+      agast::KeyPointSize(kp) = kBasicSize_;
+      agast::KeyPointAngle(kp) = -1;
+#if HAVE_OPENCV
       kp.response = max;
       kp.octave = 0;
+#else
+        static_cast<void>(max);  // TODO(slynen): Store resp, octave.
+#endif  // HAVE_OPENCV
       keypoints->push_back(kp);
     }
     return;
@@ -248,10 +256,15 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
             l.scale() + l.offset();
         agast::KeyPoint(kp).y = (static_cast<float>(point_y) + delta_y) *
             l.scale() + l.offset();
-        kp.size = kBasicSize_ * l.scale();
-        kp.angle = -1;
+        agast::KeyPointSize(kp) = kBasicSize_ * l.scale();
+        agast::KeyPointAngle(kp) = -1;
+#if HAVE_OPENCV
         kp.response = max;
         kp.octave = i;
+#else
+        static_cast<void>(max);  // TODO(slynen): Store resp, octave.
+        static_cast<void>(score);
+#endif  // HAVE_OPENCV
         keypoints->push_back(kp);
       }
     } else {
@@ -276,10 +289,12 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
         cv::KeyPoint kp = keypoint;
         agast::KeyPoint(kp).x = x;
         agast::KeyPoint(kp).y = y;
-        kp.size = kBasicSize_ * scale;
-        kp.angle = -1;
+        agast::KeyPointSize(kp) = kBasicSize_ * scale;
+        agast::KeyPointAngle(kp) = -1;
+#if HAVE_OPENCV
         kp.response = score;
         kp.octave = i;
+#endif  // HAVE_OPENCV
         keypoints->push_back(kp);
       }
     }
