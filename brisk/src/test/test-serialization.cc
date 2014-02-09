@@ -166,14 +166,10 @@ void SetRandom(cv::KeyPoint* value, int seed) {
 #if HAVE_OPENCV
   SetRandom(&value->class_id, rd());
 #endif  // HAVE_OPENCV
-#if HAVE_OPENCV
-  SetRandom(&value->octave, rd());
-  SetRandom(&value->pt, rd());
-  SetRandom(&value->response, rd());
-#else
-  SetRandom(&value->x, rd());
-  SetRandom(&value->y, rd());
-#endif  // HAVE_OPENCV
+  SetRandom(&agast::KeyPointOctave(*value), rd());
+  SetRandom(&agast::KeyPointX(*value), rd());
+  SetRandom(&agast::KeyPointY(*value), rd());
+  SetRandom(&agast::KeyPointResponse(*value), rd());
   SetRandom(&agast::KeyPointSize(*value), rd());
 }
 

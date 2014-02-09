@@ -47,18 +47,24 @@
 #include <fstream>  // NOLINT
 #include <memory>
 #include <glog/logging.h>
-#include <NCV/NCVLib/feature_detection_and_matching/keypoint.h>
+#include <NCV/NCVLib/feature_detection_and_matching/scale_invariant_feature_detection.h>  // NOLINT
 typedef unsigned char uchar;
 typedef unsigned short ushort;
 #endif
 
 #if HAVE_OPENCV
 namespace agast {
-inline cv::Point2f& KeyPoint(cv::KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt;
+inline float& KeyPointX(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.pt.x;
 }
-inline const cv::Point2f& KeyPoint(const cv::KeyPoint& keypoint) {
-  return keypoint.pt;
+inline const float& KeyPointX(const cv::KeyPoint& keypoint) {
+  return keypoint.pt.x;
+}
+inline float& KeyPointY(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.pt.y;
+}
+inline const float& KeyPointY(const cv::KeyPoint& keypoint) {
+  return keypoint.pt.y;
 }
 inline float& KeyPointAngle(cv::KeyPoint& keypoint) {  // NOLINT
   return keypoint.angle;
@@ -71,6 +77,18 @@ inline float& KeyPointSize(cv::KeyPoint& keypoint) {  // NOLINT
 }
 inline const float& KeyPointSize(const cv::KeyPoint& keypoint) {
   return keypoint.size;
+}
+inline float& KeyPointResponse(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.response;
+}
+inline const float& KeyPointResponse(const cv::KeyPoint& keypoint) {
+  return keypoint.response;
+}
+inline int& KeyPointOctave(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.octave;
+}
+inline const int& KeyPointOctave(const cv::KeyPoint& keypoint) {
+  return keypoint.octave;
 }
 }  // namespace agast
 #else
@@ -263,27 +281,45 @@ typedef Point_<int> Point2i;
 // Reads a pgm image from file.
 cv::Mat imread(const std::string& filename);
 ssize_t imwrite(const cv::Mat& image, const std::string& filename);
-typedef NestorCV::Keypoint KeyPoint;
+typedef NestorCV::SinglePrecisionDoGScaleInvariantDetector::keypoint KeyPoint;
 }  // namespace cv
 
 namespace agast {
-inline cv::KeyPoint& KeyPoint(cv::KeyPoint& keypoint) {  // NOLINT
-  return keypoint;
+inline float& KeyPointX(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.xs;
 }
-inline const cv::KeyPoint& KeyPoint(const cv::KeyPoint& keypoint) {
-  return keypoint;
+inline const float& KeyPointX(const cv::KeyPoint& keypoint) {
+  return keypoint.xs;
+}
+inline float& KeyPointY(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.ys;
+}
+inline const float& KeyPointY(const cv::KeyPoint& keypoint) {
+  return keypoint.ys;
 }
 inline float& KeyPointAngle(cv::KeyPoint& keypoint) {  // NOLINT
-  return keypoint.orientation;
+  return keypoint.angle;
 }
 inline const float& KeyPointAngle(const cv::KeyPoint& keypoint) {
-  return keypoint.orientation;
+  return keypoint.angle;
 }
 inline float& KeyPointSize(cv::KeyPoint& keypoint) {  // NOLINT
-  return keypoint.scale;
+  return keypoint.sigma;
 }
 inline const float& KeyPointSize(const cv::KeyPoint& keypoint) {
-  return keypoint.scale;
+  return keypoint.sigma;
+}
+inline float& KeyPointResponse(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.edge_score;
+}
+inline const float& KeyPointResponse(const cv::KeyPoint& keypoint) {
+  return keypoint.edge_score;
+}
+inline int& KeyPointOctave(cv::KeyPoint& keypoint) {  // NOLINT
+  return keypoint.octave;
+}
+inline const int& KeyPointOctave(const cv::KeyPoint& keypoint) {
+  return keypoint.octave;
 }
 }  // namespace agast
 

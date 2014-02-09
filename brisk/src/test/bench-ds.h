@@ -68,10 +68,11 @@ class DatasetEntry;
       return false;\
     } } while (0);
 
-#define EXPECTSAMETHROWACCESSOR(THIS, OTHER, ACCESSOR) \
+#define EXPECTSAMETHROWACCESSOR(THIS, OTHER, ACCESSOR, KEYPOINTIDX) \
     do { if (ACCESSOR(THIS) != ACCESSOR(OTHER)) { \
       std::stringstream ss; \
-      ss<<  "Failed on " << #ACCESSOR << ": "<< ACCESSOR(THIS) \
+      ss <<  "For Keypoint " << KEYPOINTIDX << " failed on " \
+      <<  "Failed on " << #ACCESSOR << ": "<< ACCESSOR(THIS) \
       << " other " << ACCESSOR(OTHER) << " at " << __PRETTY_FUNCTION__ \
       << " Line: " << __LINE__ << std::endl; \
       CHECK(false) << ss.str(); \
@@ -85,6 +86,17 @@ class DatasetEntry;
       << #MEMBER << ": "<< THIS.MEMBER << \
       " other " << OTHER.MEMBER << \
       " at " << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl; \
+      ss << "this / other: "\
+      << std::endl << "pt.x:\t" << agast::KeyPoint(THIS).x << "\t"\
+      << agast::KeyPoint(OTHER).x << std::endl\
+      << std::endl << "pt.y:\t" << agast::KeyPoint(THIS).y << "\t"\
+      << agast::KeyPoint(OTHER).y << std::endl << std::endl \
+      << std::endl << "octave:\t" << agast::KeyPointOctave(THIS) \
+      << "\t" << agast::KeyPointOctave(OTHER) \
+      << std::endl << "response:\t" << agast::KeyPointResponse(THIS) \
+      << "\t" << agast::KeyPointResponse(OTHER) \
+      << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
+      << std::endl; \
       CHECK(false) << ss.str(); \
       return false;\
     } } while (0);
@@ -98,6 +110,16 @@ class DatasetEntry;
       << " failed on angle" << ": "<< THIS.MEMBER\
       << " other " << OTHER.MEMBER \
       << " at " << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl; \
+      ss << "this / other: "\
+      << std::endl << "pt.x:\t" << agast::KeyPoint(THIS).x << "\t"\
+      << agast::KeyPoint(OTHER).x << std::endl\
+      << std::endl << "pt.y:\t" << agast::KeyPoint(THIS).y << "\t"\
+      << agast::KeyPoint(OTHER).y << std::endl << std::endl \
+      << std::endl << "octave:\t" << agast::KeyPointOctave(THIS) \
+      << "\t" << agast::KeyPointOctave(OTHER) \
+      << std::endl << "response:\t" << agast::KeyPointResponse(THIS) \
+      << "\t" << agast::KeyPointResponse(OTHER) \
+      << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
       << std::endl;\
       CHECK(false) << ss.str(); \
       return false;\
@@ -329,19 +351,14 @@ struct DatasetEntry {
         it_this != end_this && it_other != end_other;
         ++it_this, ++it_other, ++kpidx) {
 #if HAVE_OPENCV
-      CHECKCVKEYPOINTANGLESAME((*it_this), (*it_other), angle, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), octave, kpidx);
       CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), class_id, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), pt.x, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), pt.y, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), response, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), size, kpidx);
-#else
-      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointAngle);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), x, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), y, kpidx);
-      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointSize);
 #endif
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointX, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointY, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointAngle, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointOctave, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointResponse, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointSize, kpidx);
     }
 
     // Check descriptors.

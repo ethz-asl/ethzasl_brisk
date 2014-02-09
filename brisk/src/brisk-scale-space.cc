@@ -106,19 +106,19 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
       // Compute the location for this layer:
       for (const cv::KeyPoint& keypoint : *keypoints) {
         cv::KeyPoint kp = keypoint;
-        agast::KeyPoint(kp).x =
-            (static_cast<float>(agast::KeyPoint(keypoint).x)) /
+        agast::KeyPointX(kp) =
+            (static_cast<float>(agast::KeyPointX(keypoint))) /
             l.scale() - l.offset();
-        agast::KeyPoint(kp).y =
-            (static_cast<float>(agast::KeyPoint(keypoint).y)) /
+        agast::KeyPointY(kp) =
+            (static_cast<float>(agast::KeyPointY(keypoint))) /
             l.scale() - l.offset();
-        if (agast::KeyPoint(kp).x < 3 || agast::KeyPoint(kp).y < 3 ||
-            agast::KeyPoint(kp).x > l.cols() - 3 ||
-            agast::KeyPoint(kp).y > l.rows() - 3) {
+        if (agast::KeyPointX(kp) < 3 || agast::KeyPointY(kp) < 3 ||
+            agast::KeyPointX(kp) > l.cols() - 3 ||
+            agast::KeyPointY(kp) > l.rows() - 3) {
           continue;
         }
         // This calculates and stores the score of this keypoint in the score map.
-        l.GetAgastScore(agast::KeyPoint(kp).x, agast::KeyPoint(kp).y, 0);
+        l.GetAgastScore(agast::KeyPointX(kp), agast::KeyPointY(kp), 0);
         agastPoints.at(i).push_back(kp);
       }
     }
@@ -134,8 +134,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
       const int num = agastPoints[i].size();
       for (int n = 0; n < num; n++) {
         const cv::KeyPoint& keypoint = agastPoints.at(0)[n];
-        const float& point_x = agast::KeyPoint(keypoint).x;
-        const float& point_y = agast::KeyPoint(keypoint).y;
+        const float& point_x = agast::KeyPointX(keypoint);
+        const float& point_y = agast::KeyPointY(keypoint);
         // First check if it is a maximum:
         if (perform_2d_nonMax && !IsMax2D(i, point_x, point_y))
           continue;
@@ -157,16 +157,12 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
 
         // Store:
         cv::KeyPoint kp = keypoint;
-        agast::KeyPoint(kp).x = static_cast<float>(point_x) + delta_x;
-        agast::KeyPoint(kp).y = static_cast<float>(point_y) + delta_y;
+        agast::KeyPointX(kp) = static_cast<float>(point_x) + delta_x;
+        agast::KeyPointY(kp) = static_cast<float>(point_y) + delta_y;
         agast::KeyPointSize(kp) = kBasicSize_ * l.scale();
         agast::KeyPointAngle(kp) = -1;
-#if HAVE_OPENCV
-        kp.response = max;
-        kp.octave = 0;
-#else
-        static_cast<void>(max);  // TODO(slynen): Store resp, octave.
-#endif  // HAVE_OPENCV
+        agast::KeyPointResponse(kp) = max;
+        agast::KeyPointOctave(kp) = 0;
         keypoints->push_back(kp);
       }
     }
@@ -178,8 +174,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
     const int num = agastPoints[0].size();
     for (int n = 0; n < num; n++) {
       const cv::KeyPoint& keypoint = agastPoints.at(0)[n];
-      const float& point_x = agast::KeyPoint(keypoint).x;
-      const float& point_y = agast::KeyPoint(keypoint).y;
+      const float& point_x = agast::KeyPointX(keypoint);
+      const float& point_y = agast::KeyPointY(keypoint);
 
       // First check if it is a maximum:
       if (perform_2d_nonMax && !IsMax2D(0, point_x, point_y))
@@ -201,16 +197,12 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
                              s_2_1, s_2_2, delta_x, delta_y);
       // Store:
       cv::KeyPoint kp = keypoint;
-      agast::KeyPoint(kp).x = static_cast<float>(point_x) + delta_x;
-      agast::KeyPoint(kp).y = static_cast<float>(point_y) + delta_y;
+      agast::KeyPointX(kp) = static_cast<float>(point_x) + delta_x;
+      agast::KeyPointY(kp) = static_cast<float>(point_y) + delta_y;
       agast::KeyPointSize(kp) = kBasicSize_;
       agast::KeyPointAngle(kp) = -1;
-#if HAVE_OPENCV
-      kp.response = max;
-      kp.octave = 0;
-#else
-        static_cast<void>(max);  // TODO(slynen): Store resp, octave.
-#endif  // HAVE_OPENCV
+      agast::KeyPointResponse(kp) = max;
+      agast::KeyPointOctave(kp) = 0;
       keypoints->push_back(kp);
     }
     return;
@@ -223,8 +215,8 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
     if (i == layers_ - 1) {
       for (int n = 0; n < num; n++) {
         const cv::KeyPoint& keypoint = agastPoints.at(i)[n];
-        const float& point_x = agast::KeyPoint(keypoint).x;
-        const float& point_y = agast::KeyPoint(keypoint).y;
+        const float& point_x = agast::KeyPointX(keypoint);
+        const float& point_y = agast::KeyPointY(keypoint);
         // Consider only 2D maxima...
         if (perform_2d_nonMax && !IsMax2D(i, point_x, point_y))
           continue;
@@ -252,27 +244,22 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
 
         // Store:
         cv::KeyPoint kp = keypoint;
-        agast::KeyPoint(kp).x = (static_cast<float>(point_x) + delta_x) *
+        agast::KeyPointX(kp) = (static_cast<float>(point_x) + delta_x) *
             l.scale() + l.offset();
-        agast::KeyPoint(kp).y = (static_cast<float>(point_y) + delta_y) *
+        agast::KeyPointY(kp) = (static_cast<float>(point_y) + delta_y) *
             l.scale() + l.offset();
         agast::KeyPointSize(kp) = kBasicSize_ * l.scale();
         agast::KeyPointAngle(kp) = -1;
-#if HAVE_OPENCV
-        kp.response = max;
-        kp.octave = i;
-#else
-        static_cast<void>(max);  // TODO(slynen): Store resp, octave.
-        static_cast<void>(score);
-#endif  // HAVE_OPENCV
+        agast::KeyPointResponse(kp) = max;
+        agast::KeyPointOctave(kp) = i;
         keypoints->push_back(kp);
       }
     } else {
       // Not the last layer:
       for (int n = 0; n < num; n++) {
         const cv::KeyPoint& keypoint = agastPoints.at(i)[n];
-        const float& point_x = agast::KeyPoint(keypoint).x;
-        const float& point_y = agast::KeyPoint(keypoint).y;
+        const float& point_x = agast::KeyPointX(keypoint);
+        const float& point_y = agast::KeyPointY(keypoint);
 
         // First check if it is a maximum:
         if (perform_2d_nonMax && !IsMax2D(i, point_x, point_y))
@@ -287,14 +274,12 @@ void BriskScaleSpace::GetKeypoints(std::vector<cv::KeyPoint>* keypoints) {
 
         // Finally store the detected keypoint:
         cv::KeyPoint kp = keypoint;
-        agast::KeyPoint(kp).x = x;
-        agast::KeyPoint(kp).y = y;
+        agast::KeyPointX(kp) = x;
+        agast::KeyPointY(kp) = y;
         agast::KeyPointSize(kp) = kBasicSize_ * scale;
         agast::KeyPointAngle(kp) = -1;
-#if HAVE_OPENCV
-        kp.response = score;
-        kp.octave = i;
-#endif  // HAVE_OPENCV
+        agast::KeyPointResponse(kp) = score;
+        agast::KeyPointOctave(kp) = i;
         keypoints->push_back(kp);
       }
     }

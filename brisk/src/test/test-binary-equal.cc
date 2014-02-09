@@ -302,7 +302,6 @@ DatasetEntry* DatasetEntry::current_entry = NULL;
 #ifdef __ARM_NEON__
 // Harris not implemented, so test not possible.
 #else
-#if HAVE_OPENCV
 TEST(Brisk, ValidationHarris) {
   bool do_gtest_checks = true;
 
@@ -319,7 +318,6 @@ TEST(Brisk, ValidationHarris) {
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
 }
-#endif  // HAVE_OPENCV
 #endif  // __ARM_NEON__
 
 TEST(Brisk, ValidationAST) {
