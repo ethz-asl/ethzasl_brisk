@@ -599,9 +599,6 @@ void BriskDescriptorExtractor::doDescriptorComputation(
 
       setDescriptorBits(k, _values, &descriptors);
     }
-
-    // Clean-up.
-    _integral.release();
     delete[] _values;
 }
 
