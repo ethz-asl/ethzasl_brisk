@@ -373,7 +373,7 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
 
       // Compute horizontal pairwise average and store.
       p_dest_char = reinterpret_cast<unsigned char*>(p_dest);
-      const uchar* result = reinterpret_cast<unsigned char*>(&result1);
+      const unsigned char* result = reinterpret_cast<unsigned char*>(&result1);
       for (unsigned int j = 0; j < 8; ++j) {
         *(p_dest_char++) = (*(result + 2 * j) + *(result + 2 * j + 1)) / 2;
       }

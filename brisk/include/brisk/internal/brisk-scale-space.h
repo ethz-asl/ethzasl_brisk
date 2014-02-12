@@ -55,8 +55,8 @@ class  BriskScaleSpace {
   ~BriskScaleSpace();
 
   // Construct the image pyramids.
-  void ConstructPyramid(const cv::Mat& image, uchar threshold,
-                        uchar overwrite_lower_thres = kDefaultLowerThreshold);
+  void ConstructPyramid(const cv::Mat& image, unsigned char threshold,
+                        unsigned char overwrite_lower_thres = kDefaultLowerThreshold);
 
   // Get Keypoints.
   void GetKeypoints(std::vector<cv::KeyPoint>* keypoints);
@@ -112,8 +112,8 @@ class  BriskScaleSpace {
   static const int kMinDrop_;
 
   // Detection thresholds: upper and lower bounds.
-  static const uchar kDefaultUpperThreshold;
-  static const uchar kDefaultLowerThreshold;
+  static const unsigned char kDefaultUpperThreshold;
+  static const unsigned char kDefaultLowerThreshold;
 
   bool suppressScaleNonmaxima_;
 };

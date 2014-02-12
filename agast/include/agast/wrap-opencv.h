@@ -48,8 +48,6 @@
 #include <memory>
 #include <glog/logging.h>
 #include <features-2d-helpers/keypoint.h>
-typedef unsigned char uchar;
-typedef unsigned short ushort;
 #endif
 
 #if HAVE_OPENCV

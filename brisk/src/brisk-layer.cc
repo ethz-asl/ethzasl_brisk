@@ -50,8 +50,8 @@
 
 namespace brisk {
 // Construct a layer.
-BriskLayer::BriskLayer(const cv::Mat& img, uchar upperThreshold,
-                       uchar lowerThreshold, float scale, float offset) {
+BriskLayer::BriskLayer(const cv::Mat& img, unsigned char upperThreshold,
+                       unsigned char lowerThreshold, float scale, float offset) {
   upperThreshold_ = upperThreshold;
   lowerThreshold_ = lowerThreshold;
 
@@ -69,8 +69,8 @@ BriskLayer::BriskLayer(const cv::Mat& img, uchar upperThreshold,
   CalculateThresholdMap();
 }
 // Derive a layer.
-BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
-                       uchar lowerThreshold) {
+BriskLayer::BriskLayer(const BriskLayer& layer, int mode, unsigned char upperThreshold,
+                       unsigned char lowerThreshold) {
   upperThreshold_ = upperThreshold;
   lowerThreshold_ = lowerThreshold;
 
@@ -195,7 +195,7 @@ uint8_t BriskLayer::Value(const cv::Mat& mat, float xf, float yf, float scale) {
     const int r_y = (yf - y) * 1024;
     const int r_x_1 = (1024 - r_x);
     const int r_y_1 = (1024 - r_y);
-    uchar* ptr = image.data + x + y * imagecols;
+    unsigned char* ptr = image.data + x + y * imagecols;
     // Just interpolate:
     ret_val = (r_x_1 * r_y_1 * static_cast<int>(*ptr));
     ptr++;
@@ -241,22 +241,22 @@ uint8_t BriskLayer::Value(const cv::Mat& mat, float xf, float yf, float scale) {
   const int r_y1_i = r_y1 * scaling;
 
   // Now the calculation:
-  uchar* ptr = image.data + x_left + imagecols * y_top;
+  unsigned char* ptr = image.data + x_left + imagecols * y_top;
   // First row:
   ret_val = A * static_cast<int>(*ptr);
   ptr++;
-  const uchar* end1 = ptr + dx;
+  const unsigned char* end1 = ptr + dx;
   for (; ptr < end1; ptr++) {
     ret_val += r_y_1_i * static_cast<int>(*ptr);
   }
   ret_val += B * static_cast<int>(*ptr);
   // Middle ones:
   ptr += imagecols - dx - 1;
-  uchar* end_j = ptr + dy * imagecols;
+  unsigned char* end_j = ptr + dy * imagecols;
   for (; ptr < end_j; ptr += imagecols - dx - 1) {
     ret_val += r_x_1_i * static_cast<int>(*ptr);
     ptr++;
-    const uchar* end2 = ptr + dx;
+    const unsigned char* end2 = ptr + dx;
     for (; ptr < end2; ptr++) {
       ret_val += static_cast<int>(*ptr) * scaling;
     }
@@ -265,7 +265,7 @@ uint8_t BriskLayer::Value(const cv::Mat& mat, float xf, float yf, float scale) {
   // Last row:
   ret_val += D * static_cast<int>(*ptr);
   ptr++;
-  const uchar* end3 = ptr + dx;
+  const unsigned char* end3 = ptr + dx;
   for (; ptr < end3; ptr++) {
     ret_val += r_y1_i * static_cast<int>(*ptr);
   }
@@ -287,7 +287,7 @@ void BriskLayer::CalculateThresholdMap() {
     int x = 1;
     while (x + 16 < img_.cols - 1) {
       // Access.
-      uchar* p = img_.data + x - 1 + (y - 1) * rowstride;
+      unsigned char* p = img_.data + x - 1 + (y - 1) * rowstride;
 #ifdef __ARM_NEON__
       // NEON version.
       uint8x16_t v_1_1 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
@@ -382,7 +382,7 @@ void BriskLayer::CalculateThresholdMap() {
     int x = 3;
     while (x + 16 < img_.cols - 3) {
       // Access.
-      uchar* p = img_.data + x + y * rowstride;
+      unsigned char* p = img_.data + x + y * rowstride;
 #ifdef __ARM_NEON__
       // NEON version //
       uint8x16_t v00 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
@@ -497,7 +497,7 @@ void BriskLayer::CalculateThresholdMap() {
       x++) {
     for (int y = 1; y < img_.rows - 1; y++) {
       // Access.
-      uchar* p = img_.data + x - 1 + (y - 1) * rowstride;
+      unsigned char* p = img_.data + x - 1 + (y - 1) * rowstride;
       int v_1_1 = *p;
       p++;
       int v0_1 = *p;
@@ -544,7 +544,7 @@ void BriskLayer::CalculateThresholdMap() {
       x++) {
     for (int y = 3; y < img_.rows - 3; y++) {
       // Access.
-      uchar* p = img_.data + x + y * rowstride;
+      unsigned char* p = img_.data + x + y * rowstride;
       int v00 = *p;
       p -= 2 + 2 * rowstride;
       int v_2_2 = *p;

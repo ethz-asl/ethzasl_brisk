@@ -148,7 +148,7 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   static const unsigned int n_rot_;
 
   // Pairs.
-  // Number of uchars the descriptor consists of.
+  // Number of unsigned chars the descriptor consists of.
   int strings_;
   // Short pair maximum distance.
   float dMax_;

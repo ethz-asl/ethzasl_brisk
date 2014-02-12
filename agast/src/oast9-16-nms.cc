@@ -3966,22 +3966,22 @@ unsigned char Oast9_16_PatternAccessor::operator()(unsigned int index) {
   const int r_y1_i = r_y1 * scaling;
 
   // now the calculation:
-  uchar* ptr = image.data + x_left + imagecols * y_top;
+  unsigned char* ptr = image.data + x_left + imagecols * y_top;
   // first row:
   ret_val = A * int(*ptr);
   ptr++;
-  const uchar* end1 = ptr + dx;
+  const unsigned char* end1 = ptr + dx;
   for (; ptr < end1; ptr++) {
     ret_val += r_y_1_i * int(*ptr);
   }
   ret_val += B * int(*ptr);
   // middle ones:
   ptr += imagecols - dx - 1;
-  uchar* end_j = ptr + dy * imagecols;
+  unsigned char* end_j = ptr + dy * imagecols;
   for (; ptr < end_j; ptr += imagecols - dx - 1) {
     ret_val += r_x_1_i * int(*ptr);
     ptr++;
-    const uchar* end2 = ptr + dx;
+    const unsigned char* end2 = ptr + dx;
     for (; ptr < end2; ptr++) {
       ret_val += int(*ptr) * scaling;
     }
@@ -3990,7 +3990,7 @@ unsigned char Oast9_16_PatternAccessor::operator()(unsigned int index) {
   // last row:
   ret_val += D * int(*ptr);
   ptr++;
-  const uchar* end3 = ptr + dx;
+  const unsigned char* end3 = ptr + dx;
   for (; ptr < end3; ptr++) {
     ret_val += r_y1_i * int(*ptr);
   }

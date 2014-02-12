@@ -47,8 +47,8 @@ const float BriskScaleSpace::kBasicSize_ = 12.0;
 const int BriskScaleSpace::kMaxThreshold_ = 1;
 const int BriskScaleSpace::kDropThreshold_ = 5;
 const int BriskScaleSpace::kMinDrop_ = 15;
-const uchar BriskScaleSpace::kDefaultLowerThreshold = 10;  // Originally 28.
-const uchar BriskScaleSpace::kDefaultUpperThreshold = 230;
+const unsigned char BriskScaleSpace::kDefaultLowerThreshold = 10;  // Originally 28.
+const unsigned char BriskScaleSpace::kDefaultUpperThreshold = 230;
 
 // Construct telling the octaves number:
 BriskScaleSpace::BriskScaleSpace(uint8_t _octaves,
@@ -61,8 +61,8 @@ BriskScaleSpace::BriskScaleSpace(uint8_t _octaves,
 }
 BriskScaleSpace::~BriskScaleSpace() { }
 // Construct the image pyramids.
-void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, uchar threshold,
-                                       uchar overwrite_lower_thres) {
+void BriskScaleSpace::ConstructPyramid(const cv::Mat& image, unsigned char threshold,
+                                       unsigned char overwrite_lower_thres) {
   // Set correct size:
   pyramid_.clear();
 
@@ -432,32 +432,32 @@ __inline__ bool BriskScaleSpace::IsMax2D(const uint8_t layer, const int x_layer,
   const cv::Mat& scores = pyramid_[layer].scores();
   brisk::BriskLayer& l = pyramid_[layer];
   const int scorescols = scores.cols;
-  uchar* data = scores.data + y_layer * scorescols + x_layer;
+  unsigned char* data = scores.data + y_layer * scorescols + x_layer;
   // Decision tree:
-  const uchar center = (*data);
+  const unsigned char center = (*data);
 
-  const uchar s_10 = l.GetAgastScore(x_layer - 1, y_layer, center);
+  const unsigned char s_10 = l.GetAgastScore(x_layer - 1, y_layer, center);
   if (center < s_10)
     return false;
-  const uchar s10 = l.GetAgastScore(x_layer + 1, y_layer, center);
+  const unsigned char s10 = l.GetAgastScore(x_layer + 1, y_layer, center);
   if (center < s10)
     return false;
-  const uchar s0_1 = l.GetAgastScore(x_layer, y_layer - 1, center);
+  const unsigned char s0_1 = l.GetAgastScore(x_layer, y_layer - 1, center);
   if (center < s0_1)
     return false;
-  const uchar s01 = l.GetAgastScore(x_layer, y_layer + 1, center);
+  const unsigned char s01 = l.GetAgastScore(x_layer, y_layer + 1, center);
   if (center < s01)
     return false;
-  const uchar s_11 = l.GetAgastScore(x_layer - 1, y_layer + 1, center);
+  const unsigned char s_11 = l.GetAgastScore(x_layer - 1, y_layer + 1, center);
   if (center < s_11)
     return false;
-  const uchar s11 = l.GetAgastScore(x_layer + 1, y_layer + 1, center);
+  const unsigned char s11 = l.GetAgastScore(x_layer + 1, y_layer + 1, center);
   if (center < s11)
     return false;
-  const uchar s1_1 = l.GetAgastScore(x_layer + 1, y_layer - 1, center);
+  const unsigned char s1_1 = l.GetAgastScore(x_layer + 1, y_layer - 1, center);
   if (center < s1_1)
     return false;
-  const uchar s_1_1 = l.GetAgastScore(x_layer - 1, y_layer - 1, center);
+  const unsigned char s_1_1 = l.GetAgastScore(x_layer - 1, y_layer - 1, center);
   if (center < s_1_1)
     return false;
 
@@ -556,7 +556,7 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
     float delta_x_below, delta_y_below;
     float max_below_float;
     if (layer == 0) {
-      uchar max_below_uchar = 0;
+      unsigned char max_below_uchar = 0;
       // Guess the lower intra octave...
       BriskLayer& l = pyramid_[0];
       register int s_0_0 = l.GetAgastScore_5_8(x_layer - 1, y_layer - 1, 1);
