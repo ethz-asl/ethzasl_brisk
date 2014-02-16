@@ -74,7 +74,7 @@ void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
   __m128i const_10_epi16 = _mm_set_epi16(10, 10, 10, 10, 10, 10, 10, 10);
 
   // Calculate gradients and products.
-  const uchar* data = src.data;
+  const unsigned char* data = src.data;
   for (int i = 1; i < rows - 1; ++i) {
     bool end = false;
     for (int j = 1; j < cols - 1;) {

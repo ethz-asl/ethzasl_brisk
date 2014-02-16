@@ -59,11 +59,11 @@ class  BriskLayer {
     static const int TWOTHIRDSAMPLE = 1;
   };
   // Construct a base layer.
-  BriskLayer(const cv::Mat& img, uchar upper_threshold, uchar lower_threshold,
+  BriskLayer(const cv::Mat& img, unsigned char upper_threshold, unsigned char lower_threshold,
              float scale = 1.0f, float offset = 0.0f);
   // Derive a layer.
-  BriskLayer(const BriskLayer& layer, int mode, uchar upper_threshold,
-             uchar lower_threshold);
+  BriskLayer(const BriskLayer& layer, int mode, unsigned char upper_threshold,
+             unsigned char lower_threshold);
 
   // Fast/Agast without non-max suppression.
   void GetAgastPoints(uint8_t threshold,
@@ -112,8 +112,8 @@ class  BriskLayer {
   std::shared_ptr<agast::OastDetector9_16> oastDetector_;
   std::shared_ptr<agast::AgastDetector5_8> agastDetector_5_8_;
 
-  uchar upperThreshold_;
-  uchar lowerThreshold_;
+  unsigned char upperThreshold_;
+  unsigned char lowerThreshold_;
 };
 }  // namespace brisk
 #endif  // INTERNAL_BRISK_LAYER_H_

@@ -363,7 +363,7 @@ void BriskDescriptorExtractor::setDescriptorBits(int keypoint_idx,
                                                  const int* values,
                                                  cv::Mat* descriptors) const {
   CHECK_NOTNULL(descriptors);
-  uchar* ptr = descriptors->data + strings_ * keypoint_idx;
+  unsigned char* ptr = descriptors->data + strings_ * keypoint_idx;
 
   // Now iterate through all the pairings.
   brisk::timing::DebugTimer timer_assemble_bits(
@@ -525,7 +525,7 @@ void BriskDescriptorExtractor::doDescriptorComputation(
               "(per keypoint)");
           if (image.type() == CV_8UC1) {
             for (unsigned int i = 0; i < points_; i++) {
-              *(pvalues++) = SmoothedIntensity<uchar, int>(image, _integral, x, y,
+              *(pvalues++) = SmoothedIntensity<unsigned char, int>(image, _integral, x, y,
                                                            scale, 0, i);
             }
           } else {
@@ -585,7 +585,7 @@ void BriskDescriptorExtractor::doDescriptorComputation(
           "1.2 Brisk Extraction: sample points (per keypoint)");
       if (image.type() == CV_8UC1) {
         for (unsigned int i = 0; i < points_; i++) {
-          *(pvalues++) = SmoothedIntensity<uchar, int>(image, _integral, x, y,
+          *(pvalues++) = SmoothedIntensity<unsigned char, int>(image, _integral, x, y,
                                                        scale, theta, i);
         }
       } else {

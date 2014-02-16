@@ -153,7 +153,7 @@ void HarrisScoreCalculatorFloat::GetCovarEntries(const cv::Mat& src,
           __m128 mult_dy = _mm_setr_ps(m_dy, m_dy, m_dy, m_dy);
           __m128 i0;
           if (jump == 1) {
-            const uchar* p = &src.at < uchar > (i + y, x + j);
+            const unsigned char* p = &src.at < unsigned char > (i + y, x + j);
             i0 = _mm_setr_ps(static_cast<float>(*p),
                              static_cast<float>(*(p + 1)),
                              static_cast<float>(*(p + 2)),

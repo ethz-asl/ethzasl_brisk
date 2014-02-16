@@ -120,7 +120,7 @@ __inline__ void HarrisFeatureDetector::GetCovarEntries(const cv::Mat& src,
                                           m_dx, m_dx);
           __m128i mult_dy = _mm_set_epi16(m_dy, m_dy, m_dy, m_dy, m_dy, m_dy,
                                           m_dy, m_dy);
-          uchar* p = (src.data + (stride * (i + y)) + x + j);
+          unsigned char* p = (src.data + (stride * (i + y)) + x + j);
           __m128i i0 = _mm_loadu_si128(reinterpret_cast<__m128i*>(p));
           __m128i i0_hi = _mm_and_si128(i0, mask_hi);
           __m128i i0_lo = _mm_srli_si128(_mm_and_si128(i0, mask_lo), 1);
@@ -157,22 +157,22 @@ __inline__ void HarrisFeatureDetector::GetCovarEntries(const cv::Mat& src,
           _mm_mulhi_epi16(result_lo_dy, result_lo_dx), 4);
 
       // Store.
-      uchar* p_lo_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
-      uchar* p_hi_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
+      unsigned char* p_lo_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
+      unsigned char* p_hi_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
       _mm_storeu_si128(reinterpret_cast<__m128i*>(p_hi_dxdx),
                        _mm_unpackhi_epi16(i_hi_dx_dx, i_lo_dx_dx));
       _mm_storeu_si128(reinterpret_cast<__m128i*>(p_lo_dxdx),
                        _mm_unpacklo_epi16(i_hi_dx_dx, i_lo_dx_dx));
-      uchar* p_lo_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
-      uchar* p_hi_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
+      unsigned char* p_lo_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
+      unsigned char* p_hi_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
       _mm_storeu_si128(reinterpret_cast<__m128i*>(p_hi_dydy),
                        _mm_unpackhi_epi16(i_hi_dy_dy, i_lo_dy_dy));
       _mm_storeu_si128(reinterpret_cast<__m128i*>(p_lo_dydy),
                        _mm_unpacklo_epi16(i_hi_dy_dy, i_lo_dy_dy));
-      uchar* p_lo_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
-      uchar* p_hi_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
+      unsigned char* p_lo_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
+      unsigned char* p_hi_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
       _mm_storeu_si128(reinterpret_cast<__m128i*>(p_hi_dxdy),
                        _mm_unpackhi_epi16(i_hi_dx_dy, i_lo_dx_dy));
@@ -329,7 +329,7 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
     const int cx = (agast::KeyPointY(*it) / 2 + 16);
 
     // Check if this is a high enough score.
-    const double s0 = static_cast<double>(occupancy.at<uchar>(cy, cx));
+    const double s0 = static_cast<double>(occupancy.at<unsigned char>(cy, cx));
     const double s1 = s0 * s0;
     if (static_cast<int16_t>(agast::KeyPointResponse(*it)) < s1 * s1) {
       continue;
@@ -339,10 +339,10 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
     const float nsc = sqrt(sqrt(agast::KeyPointResponse(*it)));
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       __m128i mem1 = _mm_loadu_si128(
-          reinterpret_cast<__m128i*>(&occupancy.at<uchar>(cy + y - 15,
+          reinterpret_cast<__m128i*>(&occupancy.at<unsigned char>(cy + y - 15,
                                                           cx - 15)));
       __m128i mem2 = _mm_loadu_si128(
-          reinterpret_cast<__m128i*>(&occupancy.at<uchar>(cy + y - 15,
+          reinterpret_cast<__m128i*>(&occupancy.at<unsigned char>(cy + y - 15,
                                                           cx + 1)));
       __m128i mask1 = _mm_set_epi8(_LUT.at<float>(y, 15) * nsc,
                                    _LUT.at<float>(y, 14) * nsc,
@@ -376,11 +376,11 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
                                    _LUT.at<float>(y, 17) * nsc,
                                    _LUT.at<float>(y, 16) * nsc);
       _mm_storeu_si128(
-          reinterpret_cast<__m128i*>(&occupancy.at<uchar>(cy + y - 15,
+          reinterpret_cast<__m128i*>(&occupancy.at<unsigned char>(cy + y - 15,
                                                           cx - 15)),
           _mm_adds_epu8(mem1, mask1));
       _mm_storeu_si128(
-          reinterpret_cast<__m128i*>(&occupancy.at<uchar>(cy + y - 15,
+          reinterpret_cast<__m128i*>(&occupancy.at<unsigned char>(cy + y - 15,
                                                           cx + 1)),
           _mm_adds_epu8(mem2, mask2));
     }

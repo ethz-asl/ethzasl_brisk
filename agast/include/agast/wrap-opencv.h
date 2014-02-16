@@ -48,8 +48,6 @@
 #include <memory>
 #include <glog/logging.h>
 #include <NCV/NCVLib/feature_detection_and_matching/scale_invariant_feature_detection.h>  // NOLINT
-typedef unsigned char uchar;
-typedef unsigned short ushort;
 #endif
 
 #if HAVE_OPENCV

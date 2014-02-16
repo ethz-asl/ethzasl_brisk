@@ -56,7 +56,7 @@ void RemoveInvalidKeyPoints(const cv::Mat& mask,
       [&mask](const cv::KeyPoint& key_pt)->bool {
         const float& keypoint_x = agast::KeyPointX(key_pt);
         const float& keypoint_y = agast::KeyPointY(key_pt);
-        return mask.at<uchar>(static_cast<int>(keypoint_y + 0.5f),
+        return mask.at<unsigned char>(static_cast<int>(keypoint_y + 0.5f),
             static_cast<int>(keypoint_x + 0.5f)) == 0;
   };
 
