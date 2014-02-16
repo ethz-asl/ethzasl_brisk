@@ -263,7 +263,8 @@ struct Mat {
     } else if (type == CV_32FC1) {
       bytedepth = 4;
     }
-    CHECK_NE(bytedepth, 0u) << "Unknown type to compute bytedepth from.";
+    CHECK_NE(bytedepth, 0u) << "Unknown type to compute bytedepth from: "
+                            << type;
     return bytedepth;
   }
 };
