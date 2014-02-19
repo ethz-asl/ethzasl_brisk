@@ -38,7 +38,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef __ARM_NEON__
+#ifdef __ARM__
 // Not implemented.
 #else
 
@@ -245,4 +245,4 @@ void HarrisScoreCalculatorFloat::CornerHarris(const cv::Mat& dxdxSmooth,
   }
 }
 }  // namespace brisk
-#endif  // __ARM_NEON__
+#endif  // __ARM__

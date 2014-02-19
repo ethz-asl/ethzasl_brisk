@@ -45,7 +45,7 @@
 #include <brisk/internal/macros.h>
 #include <brisk/internal/score-calculator.h>
 
-#ifdef __ARM_NEON__
+#ifdef __ARM__
 // Not implemented.
 #else
 namespace brisk {
@@ -89,5 +89,5 @@ class HarrisScoreCalculator : public ScoreCalculator<int> {
                            const cv::Mat& dxdySmooth, cv::Mat& score);
 };
 }  // namespace brisk
-#endif  // __ARM_NEON__
+#endif  // __ARM__
 #endif  // BRISK_HARRIS_SCORE_CALCULATOR_H_

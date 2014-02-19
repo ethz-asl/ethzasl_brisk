@@ -38,7 +38,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef __ARM_NEON__
+#ifdef __ARM__
 // Not implemented.
 #else
 #include <emmintrin.h>
@@ -277,4 +277,4 @@ void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
 }
 }  // namespace brisk
 
-#endif  // __ARM_NEON__
+#endif  // __ARM__

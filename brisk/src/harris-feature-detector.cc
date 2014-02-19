@@ -38,7 +38,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifdef __ARM_NEON__
+#ifdef __ARM__
   // Not implemented.
 #else
 #include <tmmintrin.h>
@@ -397,4 +397,4 @@ void HarrisFeatureDetector::detectImpl(const cv::Mat& image,
   EnforceUniformity(scores, keypoints);
 }
 }  // namespace brisk
-#endif  // __ARM_NEON__
+#endif  // __ARM__

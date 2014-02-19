@@ -49,7 +49,7 @@
 #include <brisk/scale-space-feature-detector.h>
 
 #if HAVE_OPENCV
-#ifndef __ARM_NEON__
+#ifndef __ARM__
 namespace brisk {
 class BriskFeature : public cv::Feature2D {
  public:
@@ -112,6 +112,6 @@ class BriskFeature : public cv::Feature2D {
   brisk::BriskDescriptorExtractor _briskExtractor;
 };
 }  // namespace brisk
-#endif  // __ARM_NEON__
+#endif  // __ARM__
 #endif  // HAVE_OPENCV
 #endif  // BRISK_BRISK_FEATURE_H_
