@@ -47,7 +47,7 @@
 #include <tmmintrin.h>
 #endif  // __ARM_NEON__
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 
 namespace brisk {
@@ -58,8 +58,8 @@ class  Hamming {
   Hamming() { }
 
 #ifdef __ARM_NEON__
-  static __inline__ uint32_t NEONPopcntofXORed(const vld1q_u8* signature1,
-                                               const vld1q_u8* signature2,
+  static __inline__ uint32_t NEONPopcntofXORed(const uint8x16_t* signature1,
+                                               const uint8x16_t* signature2,
                                                const int numberOf128BitWords);
   static __inline__ uint32_t PopcntofXORed(const unsigned char* signature1,
                                            const unsigned char* signature2,
@@ -102,8 +102,8 @@ class  Hamming {
                         const unsigned char* b,
                         const int size) const {
 #ifdef __ARM_NEON__
-    return NEONPopcntofXORed(reinterpret_cast<const vld1q_u8*>(a),
-                             reinterpret_cast<const vld1q_u8*>(b),
+    return NEONPopcntofXORed(reinterpret_cast<const uint8x16_t*>(a),
+                             reinterpret_cast<const uint8x16_t*>(b),
                              size / 16);
 #else
     return SSSE3PopcntofXORed(reinterpret_cast<const __m128i*>(a),

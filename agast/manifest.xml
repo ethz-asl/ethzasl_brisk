@@ -10,7 +10,7 @@
   <url>http://ros.org/wiki/agast</url>
   <depend package="opencv2"/>
    <export>
-    <cpp cflags="-I${prefix}/include -DHAVE_OPENCV" 
+    <cpp cflags="-I${prefix}/include -DHAVE_OPENCV -DAGAST_GLOG" 
         lflags=" -L${prefix}/lib -lagast"/>
   </export>
 

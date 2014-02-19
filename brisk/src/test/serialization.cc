@@ -35,12 +35,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <brisk/brisk-opencv.h>
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
+#include <agast/glog.h>
+#include <agast/wrap-opencv.h>
 #include <gtest/gtest.h>
 
 #include "./serialization.h"
@@ -91,9 +87,19 @@ void Serialize(const cv::Point2f& pt, std::ofstream* out) {
 void Serialize(const cv::KeyPoint& pt, std::ofstream* out) {
   CHECK_NOTNULL(out);
   Serialize(pt.angle, out);
+#ifdef HAVE_OPENCV
   Serialize(pt.class_id, out);
+#else
+  int class_id = 0;
+  Serialize(class_id, out);
+#endif  // HAVE_OPENCV
   Serialize(pt.octave, out);
+#ifdef HAVE_OPENCV
   Serialize(pt.pt, out);
+#else
+  Serialize(pt.x, out);
+  Serialize(pt.y, out);
+#endif  // HAVE_OPENCV
   Serialize(pt.response, out);
   Serialize(pt.size, out);
 }
@@ -102,16 +108,26 @@ void DeSerialize(cv::KeyPoint* pt, std::ifstream* in) {
   CHECK_NOTNULL(pt);
   CHECK_NOTNULL(in);
   DeSerialize(&pt->angle, in);
+#ifdef HAVE_OPENCV
   DeSerialize(&pt->class_id, in);
+#else
+  int class_id = 0;
+  DeSerialize(&class_id, in);
+#endif
   DeSerialize(&pt->octave, in);
+#ifdef HAVE_OPENCV
   DeSerialize(&pt->pt, in);
+#else
+  DeSerialize(&pt->x, in);
+  DeSerialize(&pt->y, in);
+#endif
   DeSerialize(&pt->response, in);
   DeSerialize(&pt->size, in);
 }
 
 void Serialize(const std::string& value, std::ofstream* out) {
   CHECK_NOTNULL(out);
-  size_t length = value.size();
+  uint32_t length = value.size();
   Serialize(length, out);
   out->write(reinterpret_cast<const char*>(value.data()),
              length * sizeof(value[0]));
@@ -120,7 +136,7 @@ void Serialize(const std::string& value, std::ofstream* out) {
 void DeSerialize(std::string* value, std::ifstream* in) {
   CHECK_NOTNULL(value);
   CHECK_NOTNULL(in);
-  size_t length;
+  uint32_t length;
   DeSerialize(&length, in);
   value->resize(length);
   std::unique_ptr<char[]> mem(new char[length + 1]);

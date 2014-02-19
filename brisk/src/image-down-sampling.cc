@@ -35,18 +35,30 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#if HAVE_GLOG
-#include <glog/logging.h>
-#else
-#include <brisk/glog_replace.h>
-#endif
-#include <brisk/internal/image-down-sampling.h>
-
 #include <cstdint>
+
+#include <brisk/internal/image-down-sampling.h>
+#include <brisk/internal/macros.h>
+#include <agast/glog.h>
+
+namespace {
+#ifdef __ARM_NEON__
+inline uint8x16_t shiftrightonebyte(uint8x16_t& data) {
+  uint64x2_t newval = vreinterpretq_u64_u8(data);
+  uint64x2_t shiftval = vshrq_n_u64(newval, 8);
+  uint8x16_t shiftval8 = vreinterpretq_u8_u64(shiftval);
+  uint8_t lostbyte = vgetq_lane_u8(data, 9);
+  shiftval8 = vsetq_lane_u8(lostbyte, shiftval8, 8);
+  return shiftval8;
+}
+#endif
+}  // namespace
 
 namespace brisk {
 void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 #ifdef __ARM_NEON__
+  static_cast<void>(srcimg);
+  static_cast<void>(dstimg);
   CHECK(false) << "HalfSample16 not implemented for NEON.";
 #else
   // Make sure the destination image is of the right size:
@@ -130,36 +142,41 @@ void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
 // Half sampling.
 void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
+const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
+const bool noleftover = (srcimg.cols % 16) == 0;
+
+// Make sure the destination image is of the right size:
+CHECK_EQ(srcimg.cols / 2, dstimg.cols);
+CHECK_EQ(srcimg.rows / 2, dstimg.rows);
 #ifdef __ARM_NEON__
   // Mask needed later:
   uint8_t tmpmask[16] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
     0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
   register uint8x16_t mask = vld1q_u8(&tmpmask[0]);
   // To be added in order to make successive averaging correct:
-  // TODO(slynen): The elements were set to 11 before, which seemed wrong.
   uint8_t tmpones[16] = {0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1,
       0x1, 0x1, 0x1, 0x1, 0x1};
   register uint8x16_t ones = vld1q_u8(&tmpones[0]);
 
   // Data pointers:
-  const uint8x16_t* p1 = reinterpret_cast<const uint8x16_t*>(srcimg);
+  const uint8x16_t* p1 = reinterpret_cast<const uint8x16_t*>(srcimg.data);
   const uint8x16_t* p2 = reinterpret_cast<const uint8x16_t*>(
-      srcimg + src_width);
-  uint8x16_t* p_dest = reinterpret_cast<uint8x16_t*>(dstimg);
+      srcimg.data + srcimg.cols);
+  uint8x16_t* p_dest = reinterpret_cast<uint8x16_t*>(dstimg.data);
 
   unsigned char* p_dest_char;
 
   // Size:
-  const unsigned int size = (src_width * src_height) / 16;
-  const unsigned int hsize = src_width / 16;
+  const unsigned int size = (srcimg.cols * srcimg.rows) / 16;
+  const unsigned int hsize = srcimg.cols / 16;
   const uint8x16_t* p_end = p1 + size;
   unsigned int row = 0;
   const unsigned int end = hsize / 2;
   bool half_end;
   if (hsize % 2 == 0)
-  half_end = false;
+    half_end = false;
   else
-  half_end = true;
+    half_end = true;
   while (p2 < p_end) {
     for (unsigned int i = 0; i < end; ++i) {
       // Load the two blocks of memory:
@@ -174,7 +191,7 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       }
 
       uint8x16_t result1 = vqaddq_u8(upper, ones);
-      result1 = vhaddq_u8(upper, lower);  // Average - halving add.
+      result1 = vrhaddq_u8(upper, lower);  // Average - halving add.
 
       ++p1;
       ++p2;
@@ -183,29 +200,30 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
       lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
       uint8x16_t result2 = vqaddq_u8(upper, ones);
-      result2 = vhaddq_u8(upper, lower);
+      result2 = vrhaddq_u8(upper, lower);
       // Calculate the shifted versions:
 
       uint8x16_t result1_shifted = shiftrightonebyte(result1);
 
       uint8x16_t result2_shifted = shiftrightonebyte(result2);
+
       // Pack:
       uint8x16_t result = vcombine_u8(
           // AND and saturate to uint8.
-          vmovn_u16(vreinterpretq_u16_u8(vandq_u8(result1, mask))),
+          vqmovn_u16(vreinterpretq_u16_u8(vandq_u8(result1, mask))),
           // Combine.
-          vqmovun_s16(vreinterpretq_s16_u8(vandq_u8(result2, mask))));
+          vqmovn_u16(vreinterpretq_u16_u8(vandq_u8(result2, mask))));
 
       uint8x16_t result_shifted = vcombine_u8(
           // AND and saturate to uint8.
-          vmovn_u16(vreinterpretq_u16_u8(vandq_u8(result1_shifted, mask))),
-          vqmovun_s16(vreinterpretq_s16_u8(vandq_u8(result2_shifted, mask))));
+          vqmovn_u16(vreinterpretq_u16_u8(vandq_u8(result1_shifted, mask))),
+          vqmovn_u16(vreinterpretq_u16_u8(vandq_u8(result2_shifted, mask))));
       // Average for the second time:
 
-      result = vhaddq_u8(result, result_shifted);
+      result = vrhaddq_u8(result, result_shifted);
 
       // Store.
-      vst1q_u8(static_cast<uint8_t*>(p_dest), result);
+      vst1q_u8(reinterpret_cast<uint8_t*>(p_dest), result);
 
       ++p1;
       ++p2;
@@ -225,7 +243,7 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       }
 
       uint8x16_t result1 = vqaddq_u8(upper, ones);
-      result1 = vhaddq_u8(upper, lower);
+      result1 = vrhaddq_u8(upper, lower);
 
       // Increment the pointers:
       ++p1;
@@ -243,8 +261,8 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
     if (noleftover) {
       ++row;
-      p_dest = reinterpret_cast<uint8x16_t*>(dstimg + row * dst_width);
-      p1 = reinterpret_cast<const uint8x16_t*>(srcimg + 2 * row * src_width);
+      p_dest = reinterpret_cast<uint8x16_t*>(dstimg.data + row * dstimg.cols);
+      p1 = reinterpret_cast<const uint8x16_t*>(srcimg.data + 2 * row * srcimg.cols);
       p2 = p1 + hsize;
     } else {
       const unsigned char* p1_src_char =
@@ -258,22 +276,14 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       }
       // Done with the two rows:
       ++row;
-      p_dest = reinterpret_cast<uint8x16_t*>(dstimg + row * dst_width);
-      p1 = reinterpret_cast<const uint8x16_t*>(srcimg + 2 * row * src_width);
-      p2 = reinterpret_cast<const uint8x16_t*>(srcimg + (2 * row + 1) *
-                                               src_width);
+      p_dest = reinterpret_cast<uint8x16_t*>(dstimg.data + row * dstimg.cols);
+      p1 = reinterpret_cast<const uint8x16_t*>(srcimg.data + 2 * row *
+                                               srcimg.cols);
+      p2 = reinterpret_cast<const uint8x16_t*>(srcimg.data + (2 * row + 1) *
+          srcimg.cols);
     }
   }
 #else
-  // Take care with border...
-  const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
-  // Note: leftoverCols can be zero but this still false...
-  const bool noleftover = (srcimg.cols % 16) == 0;
-
-  // Make sure the destination image is of the right size:
-  assert(srcimg.cols / 2 == dstimg.cols);
-  assert(srcimg.rows / 2 == dstimg.rows);
-
   // Mask needed later:
   register __m128i mask = _mm_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF00FF,
                                         0x00FF00FF);
@@ -399,6 +409,8 @@ void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
 void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 #ifdef __ARM_NEON__
+  static_cast<void>(srcimg);
+  static_cast<void>(dstimg);
   CHECK(false) << "Twothirdsample16 not implemented for NEON";
 #else
   assert(srcimg.type() == CV_16UC1);
@@ -505,22 +517,22 @@ void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
       result2p = _mm_add_epi32(result2p, result1);
 
       // Divide by 9 - not sure if this is very safe...
-      (reinterpret_cast<int*>(&result0p))[0] /= 9;
-      (reinterpret_cast<int*>(&result0p))[1] /= 9;
-      (reinterpret_cast<int*>(&result0p))[2] /= 9;
-      (reinterpret_cast<int*>(&result0p))[3] /= 9;
-      (reinterpret_cast<int*>(&result2p))[0] /= 9;
-      (reinterpret_cast<int*>(&result2p))[1] /= 9;
-      (reinterpret_cast<int*>(&result2p))[2] /= 9;
-      (reinterpret_cast<int*>(&result2p))[3] /= 9;
-      (reinterpret_cast<int*>(&result0))[0] /= 9;
-      (reinterpret_cast<int*>(&result0))[1] /= 9;
-      (reinterpret_cast<int*>(&result0))[2] /= 9;
-      (reinterpret_cast<int*>(&result0))[3] /= 9;
-      (reinterpret_cast<int*>(&result2))[0] /= 9;
-      (reinterpret_cast<int*>(&result2))[1] /= 9;
-      (reinterpret_cast<int*>(&result2))[2] /= 9;
-      (reinterpret_cast<int*>(&result2))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0p))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2p))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result0))[3] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[0] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[1] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[2] /= 9;
+      (reinterpret_cast<INT32_ALIAS*>(&result2))[3] /= 9;
 
       // Pack.
       __m128i store0 = _mm_packs_epi32(result0, result0p);
@@ -556,8 +568,8 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
   const uint16_t leftoverCols = ((srcimg.cols / 3) * 3) % 15;
 
   // Make sure the destination image is of the right size:
-  assert((srcimg.cols / 3) * 2 == dstimg.cols);
-  assert((srcimg.rows / 3) * 2 == dstimg.rows);
+  CHECK_EQ((srcimg.cols / 3) * 2, dstimg.cols);
+  CHECK_EQ((srcimg.rows / 3) * 2, dstimg.rows);
 
   // Data pointers:
   unsigned char* p1 = srcimg.data;
@@ -593,7 +605,7 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
 
         // Upper row:
         uint8_t upper[16];
-        vst1q_u8(&upper[0], vhaddq_u8(vhaddq_u8(first, second), first));
+        vst1q_u8(&upper[0], vrhaddq_u8(vrhaddq_u8(first, second), first));
         uint8_t shufuppermask1[16];
         uint8_t shufuppermask2[16];
         for (int shuffleidx = 0; shuffleidx < 16; ++shuffleidx) {
@@ -614,13 +626,13 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
           0 : upper[tmpmask[shuffleidx] & 0x0F];
         }
         uint8x16_t temp2_upper = vld1q_u8(&temp2_upper_array[0]);
-        uint8x16_t result_upper = vhaddq_u8(vhaddq_u8(temp2_upper, temp1_upper),
+        uint8x16_t result_upper = vrhaddq_u8(vrhaddq_u8(temp2_upper, temp1_upper),
             temp2_upper);
 
         // Lower row:
 
         uint8_t lower[16];
-        vst1q_u8(&lower[0], vhaddq_u8(vhaddq_u8(third, second), third));
+        vst1q_u8(&lower[0], vrhaddq_u8(vrhaddq_u8(third, second), third));
         uint8_t shuflowermask1[16];
         uint8_t shuflowermask2[16];
         uint8_t temp2_lower_array[16];
@@ -639,11 +651,11 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
             vld1q_u8(&shuflowermask2[0]));
         uint8x16_t temp2_lower = vld1q_u8(&temp2_lower_array[0]);
 
-        uint8x16_t result_lower = vhaddq_u8(vhaddq_u8(temp2_lower, temp1_lower),
+        uint8x16_t result_lower = vrhaddq_u8(vrhaddq_u8(temp2_lower, temp1_lower),
             temp2_lower);
 
         // Store:
-        if (i * 10 + 16 > dst_width) {
+        if (i * 10 + 16 > dstimg.cols) {
           // Mask necessary data to store and mask with data already existing:
           uint8x16_t uppermasked = vorrq_u8(vandq_u8(result_upper, store_mask),
               vld1q_u8(p_dest1));
@@ -692,25 +704,25 @@ void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
       row_dest += 2;
 
       // Reset pointers:
-      p1 = srcimg + row * src_width;
-      p2 = p1 + src_width;
-      p3 = p2 + src_width;
-      p_dest1 = dstimg + row_dest * dst_width;
-      p_dest2 = p_dest1 + dst_width;
+      p1 = srcimg.data + row * srcimg.cols;
+      p2 = p1 + srcimg.cols;
+      p3 = p2 + srcimg.cols;
+      p_dest1 = dstimg.data + row_dest * dstimg.cols;
+      p_dest2 = p_dest1 + dstimg.cols;
     }
 #else
   // Masks:
-  register __m128i mask1 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                        0x80, 13, 0x80, 10, 0x80, 7, 0x80, 4,
-                                        0x80, 1);
-  register __m128i mask2 = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                        13, 0x80, 10, 0x80, 7, 0x80, 4, 0x80,
-                                        1, 0x80);
-  register __m128i mask = _mm_set_epi8(0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 14,
+  register __m128i mask1 = _mm_set_epi8(-128, -128, -128, -128, -128, -128,
+                                        -128, 13, -128, 10, -128, 7, -128, 4,
+                                        -128, 1);
+  register __m128i mask2 = _mm_set_epi8(-128, -128, -128, -128, -128, -128,
+                                        13, -128, 10, -128, 7, -128, 4, -128,
+                                        1, -128);
+  register __m128i mask = _mm_set_epi8(-128, -128, -128, -128, -128, -128, 14,
                                        12, 11, 9, 8, 6, 5, 3, 2, 0);
-  register __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, 0x80, 0x80, 0x80,
-                                             0x80, 0x80, 0x80, 0x80, 0x80, 0x80,
-                                             0x80);
+  register __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, -128, -128, -128,
+                                             -128, -128, -128, -128, -128, -128,
+                                             -128);
 
   while (p3 < p_end) {
     for (int i = 0; i < hsize; ++i) {

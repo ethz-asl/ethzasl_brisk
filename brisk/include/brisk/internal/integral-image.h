@@ -37,14 +37,19 @@
 
 #ifndef INTERNAL_INTEGRAL_IMAGE_H_
 #define INTERNAL_INTEGRAL_IMAGE_H_
-#include <emmintrin.h>
-#include <tmmintrin.h>
-#include <pmmintrin.h>
 
-#if HAVE_GLOG
-#include <glog/logging.h>
+#ifdef __ARM_NEON__
+#include <arm_neon.h>
 #else
-#include <brisk/glog_replace.h>
+#include <emmintrin.h>
+#include <pmmintrin.h>
+#include <tmmintrin.h>
+#endif  // __ARM_NEON__
+
+#if HAVE_OPENCV
+#include <agast/glog.h>
+#else
+#include <glog/logging.h>
 #endif
 
 namespace brisk {
@@ -54,7 +59,7 @@ void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
   const int cn = 1;
   const int srcstep = static_cast<int>(src.step / sizeof(unsigned char));
 
-  dest->create(cv::Size(src.cols + 1, src.rows + 1), CV_MAKETYPE(CV_32S, 1));
+  dest->create(src.rows + 1, src.cols + 1, CV_MAKETYPE(CV_32S, 1));
 
   const int sumstep = static_cast<int>(dest->step / sizeof(int32_t));
 
@@ -82,11 +87,19 @@ void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
       const int s2 = s1 + _src[x2];
       const int s3 = s2 + _src[x3];
       s = s3;
+#ifdef __ARM_NEON__
+      int tmp1[4] = {s0, s1, s2, s3};
+      int32x4_t  __src0 = vld1q_s32(tmp1);
+      int32x4_t    __sum = vld1q_s32(&sum[x - sumstep]);
+      __sum = vaddq_s32(__src0, __sum);
+      vst1q_s32(&sum[x], __sum);
+#else
       __m128i    __src0 = _mm_set_epi32(s3, s2, s1, s0);
       __m128i    __sum =
           _mm_lddqu_si128(reinterpret_cast<__m128i *>(&sum[x - sumstep]));
       __sum = _mm_add_epi32(__src0, __sum);
       _mm_storeu_si128(reinterpret_cast<__m128i *>(&sum[x]), __sum);
+#endif
 
       const unsigned char * __src = _src + srcstep;
       const int s0_1 = ss + __src[x];
@@ -94,9 +107,16 @@ void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
       const int s2_1 = s1_1 + __src[x2];
       const int s3_1 = s2_1 + __src[x3];
       ss = s3_1;
+#ifdef __ARM_NEON__
+      int tmp2[4] = {s0_1, s1_1, s2_1, s3_1};
+      __src0 = vld1q_s32(tmp2);
+      __sum = vaddq_s32(__src0, __sum);
+      vst1q_s32(&sum[x + sumstep], __sum);
+#else
       __src0 = _mm_set_epi32(s3_1, s2_1, s1_1, s0_1);
       __sum = _mm_add_epi32(__src0, __sum);
       _mm_storeu_si128(reinterpret_cast<__m128i *>(&sum[x + sumstep]), __sum);
+#endif
     }
 
     // Finish the row.
@@ -117,14 +137,22 @@ void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
       const int s2 = s1 + _src[x + 2];
       const int s3 = s2 + _src[x + 3];
       s = s3;
+#ifdef __ARM_NEON__
+      int tmp3[4] = {s0, s1, s2, s3};
+      int32x4_t __src0 = vld1q_s32(tmp3);
+      int32x4_t  __sum = vld1q_s32(&sum[x - sumstep]);
+      __sum = vaddq_s32(__src0, __sum);
+      vst1q_s32(&sum[x], __sum);
+#else
       __m128i     __src0 = _mm_set_epi32(s3, s2, s1, s0);
       __m128i     __sum =
           _mm_lddqu_si128(reinterpret_cast<__m128i *>(&sum[x - sumstep]));
       __sum = _mm_add_epi32(__src0, __sum);
       _mm_storeu_si128(reinterpret_cast<__m128i *>(&sum[x]), __sum);
+#endif
     }
 
-    // finish the row
+    // Finish the row.
     for (int _x = x; _x < src.cols; ++_x) {
       s += _src[_x];
       sum[_x] = sum[_x - sumstep] + s;
@@ -138,7 +166,7 @@ void IntegralImage16(const cv::Mat& src, cv::Mat* dest) {
   const int cn = 1;
   const int srcstep = static_cast<int>(src.step / sizeof(uint16_t));
 
-  dest->create(cv::Size(src.cols + 1, src.rows + 1), CV_MAKETYPE(CV_32F, 1));
+  dest->create(src.rows + 1, src.cols + 1, CV_MAKETYPE(CV_32F, 1));
 
   float float_val;
   const int sumstep = static_cast<int>(dest->step / sizeof(float_val));
@@ -165,11 +193,20 @@ void IntegralImage16(const cv::Mat& src, cv::Mat* dest) {
       float s2 = s1 + _src[x2] * cvtScale;
       float s3 = s2 + _src[x3] * cvtScale;
       s = s3;
+#ifdef __ARM_NEON__
+      float tmp1[4] = {s0, s1, s2, s3};
+      float32x4_t  __src0 = vld1q_f32(tmp1);
+
+      float32x4_t  __sum = vld1q_f32(&sum[x - sumstep]);
+      __sum = vaddq_f32(__src0, __sum);
+      vst1q_f32(&sum[x], __sum);
+#else
       __m128  __src0 = _mm_set_ps(s3, s2, s1, s0);
 
       __m128  __sum = _mm_loadu_ps(&sum[x - sumstep]);
       __sum = _mm_add_ps(__src0, __sum);
       _mm_storeu_ps(&sum[x], __sum);
+#endif
     }
 
     // Finish the row.

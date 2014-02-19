@@ -97,20 +97,22 @@ BriskLayer::BriskLayer(const BriskLayer& layer, int mode, uchar upperThreshold,
 // Fast/Agast.
 // Wraps the agast class.
 void BriskLayer::GetAgastPoints(uint8_t threshold,
-                                std::vector<brisk::KeyPoint>* keypoints) {
-  oastDetector_->SetThreshold(threshold, upperThreshold_, lowerThreshold_);
-  oastDetector_->Detect(img_.data, *keypoints, thrmap_.data);
-
+                                std::vector<cv::KeyPoint>* keypoints) {
+  CHECK_NOTNULL(keypoints);
+  oastDetector_->set_threshold(threshold, upperThreshold_, lowerThreshold_);
+  if (keypoints->empty()) {
+    oastDetector_->detect(img_.data, *keypoints, &thrmap_);
+  }
   // Also write scores.
   const int num = keypoints->size();
   const int imcols = img_.cols;
 
   for (int i = 0; i < num; i++) {
-    const int offs = brisk::KeyPointX((*keypoints)[i]) +
-        brisk::KeyPointY((*keypoints)[i]) * imcols;
+    const int offs = agast::KeyPoint((*keypoints)[i]).x +
+        agast::KeyPoint((*keypoints)[i]).y * imcols;
     int thr = *(thrmap_.data + offs);
-    oastDetector_->SetThreshold(thr);
-    *(scores_.data + offs) = oastDetector_->CornerScore(img_.data + offs);
+    oastDetector_->set_threshold(thr);
+    *(scores_.data + offs) = oastDetector_->cornerScore(img_.data + offs);
   }
 }
 uint8_t BriskLayer::GetAgastScore(int x, int y, uint8_t threshold) {
@@ -122,8 +124,8 @@ uint8_t BriskLayer::GetAgastScore(int x, int y, uint8_t threshold) {
   if (score > 2) {
     return score;
   }
-  oastDetector_->SetThreshold(threshold - 1);
-  score = oastDetector_->CornerScore(img_.data + x + y * img_.cols);
+  oastDetector_->set_threshold(threshold - 1);
+  score = oastDetector_->cornerScore(img_.data + x + y * img_.cols);
   if (score < threshold)
     score = 0;
   return score;
@@ -134,8 +136,8 @@ uint8_t BriskLayer::GetAgastScore_5_8(int x, int y, uint8_t threshold) {
     return 0;
   if (x >= img_.cols - 2 || y >= img_.rows - 2)
     return 0;
-  agastDetector_5_8_->SetThreshold(threshold - 1);
-  uint8_t score = agastDetector_5_8_->CornerScore(
+  agastDetector_5_8_->set_threshold(threshold - 1);
+  uint8_t score = agastDetector_5_8_->cornerScore(
       img_.data + x + y * img_.cols);
   if (score < threshold)
     score = 0;
@@ -325,8 +327,8 @@ void BriskLayer::CalculateThresholdMap() {
       min = vminq_u8(min, v11);
 
       // Store data back:
-      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmax + x + y * rowstride), max);
-      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmin + x + y * rowstride), min);
+      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmax.data + x + y * rowstride), max);
+      vst1q_u8(reinterpret_cast<uint8_t*>(tmpmin.data + x + y * rowstride), min);
 #else
       // SSE version.
       __m128i v_1_1 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
@@ -393,7 +395,7 @@ void BriskLayer::CalculateThresholdMap() {
       p -= 4;
       uint8x16_t v_22 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
 
-      p = tmpmax + x + (y - 2) * rowstride;
+      p = tmpmax.data + x + (y - 2) * rowstride;
       uint8x16_t max0_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
       p += 4 * rowstride;
       uint8x16_t max02 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
@@ -402,7 +404,7 @@ void BriskLayer::CalculateThresholdMap() {
       p += 4;
       uint8x16_t max20 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
 
-      p = tmpmin + x + (y - 2) * rowstride;
+      p = tmpmin.data + x + (y - 2) * rowstride;
       uint8x16_t min0_2 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
       p += 4 * rowstride;
       uint8x16_t min02 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
@@ -431,7 +433,7 @@ void BriskLayer::CalculateThresholdMap() {
 
       // Store the data back:
       uint8x16_t diff = vsubq_u8(max, min);
-      vst1q_u8(reinterpret_cast<uint8_t*> (thrmap_.get() + x + y * rowstride),
+      vst1q_u8(reinterpret_cast<uint8_t*> (thrmap_.data + x + y * rowstride),
                diff);
 #else
       // SSE version.

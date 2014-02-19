@@ -45,16 +45,26 @@
 #include <limits>
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/scale-space-layer.h>
+
+#if HAVE_OPENCV
+#include <agast/glog.h>
+#else
+#include <glog/logging.h>
+#endif
 
 namespace brisk {
 
 // Uses the common feature interface to construct a generic
 // scale space detector from a given ScoreCalculator.
-template<class SCORE_CALCULTAOR_T>
+template<class SCORE_CALCULATOR_T>
+#if HAVE_OPENCV
 class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
+#else
+class ScaleSpaceFeatureDetector {
+#endif  // HAVE_OPENCV
  public:
   ScaleSpaceFeatureDetector(
       size_t octaves, double uniformityRadius, double absoluteThreshold = 0,
@@ -66,21 +76,23 @@ class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
     scaleSpaceLayers.resize(std::max(_octaves * 2, size_t(1)));
   }
 
-  typedef SCORE_CALCULTAOR_T ScoreCalculator_t;
+  typedef SCORE_CALCULATOR_T ScoreCalculator_t;
   void detect(const cv::Mat& image, std::vector<cv::KeyPoint>& keypoints,
               const cv::Mat& mask = cv::Mat()) const {
-    if (image.empty())
+    if (image.empty()) {
       return;
-    CV_Assert(
+    }
+    CHECK(
         mask.empty()
-            || (mask.type() == CV_8UC1 && mask.size() == image.size()));
+            || (mask.type() == CV_8UC1 && mask.rows == image.rows
+                && mask.cols == image.cols));
     detectImpl(image, keypoints, mask);
   }
 
  protected:
   virtual void detectImpl(const cv::Mat& image,
                           std::vector<cv::KeyPoint>& keypoints,
-                          const cv::Mat& mask = cv::Mat()) const {
+                          const cv::Mat& /*mask*/ = cv::Mat()) const {
     // Find out, if we should use the provided keypoints.
     bool usePassedKeypoints = false;
     if (keypoints.size() > 0)

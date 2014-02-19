@@ -35,52 +35,14 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef BRISK_BRISK_OPENCV_H_
-#define BRISK_BRISK_OPENCV_H_
+#ifndef BRISK_UNIFORMITY_ENFORCEMENT_H_
+#define BRISK_UNIFORMITY_ENFORCEMENT_H_
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/nonfree/nonfree.hpp>
+template<typename POINT_WITH_SCORE>
+void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
+                               int imgrows, int imgcols, size_t maxNumKpt,
+                               std::vector<POINT_WITH_SCORE>& points);
 
-#if HAVE_OPENCV
-#include <opencv2/features2d/features2d.hpp>
-#else
-#include <features-2d-helpers/keypoint.h>
-#endif
+#include "./uniformity-enforcement-inl.h"
 
-namespace brisk {
-
-#if HAVE_OPENCV
-typedef cv::KeyPoint KeyPoint;
-inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt.x;
-}
-inline float& KeyPointY(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.pt.y;
-}
-inline const float& KeyPointX(const KeyPoint& keypoint) {
-  return keypoint.pt.x;
-}
-inline const float& KeyPointY(const KeyPoint& keypoint) {
-  return keypoint.pt.y;
-}
-#else
-typedef features_2d::Keypoint KeyPoint;
-inline float& KeyPointX(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.x;
-}
-inline float& KeyPointY(KeyPoint& keypoint) {  // NOLINT
-  return keypoint.y;
-}
-inline const float& KeyPointX(const KeyPoint& keypoint) {
-  return keypoint.x;
-}
-inline const float& KeyPointY(const KeyPoint& keypoint) {
-  return keypoint.y;
-}
-#endif  // HAVE_OPENCV
-
-}  // namespace brisk
-
-#endif  // BRISK_BRISK_OPENCV_H_
+#endif  // BRISK_UNIFORMITY_ENFORCEMENT_H_

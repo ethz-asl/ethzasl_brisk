@@ -41,8 +41,9 @@
 #include <memory>
 
 #include <brisk/brute-force-matcher.h>
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 
+#if HAVE_OPENCV
 namespace brisk {
 // Adapted from OpenCV 2.3 features2d/matcher.hpp
 cv::Ptr<cv::DescriptorMatcher> BruteForceMatcher::clone(bool emptyTrainData)
@@ -210,3 +211,4 @@ inline void BruteForceMatcher::commonRadiusMatchImpl(
   }
 }
 }  // namespace brisk
+#endif  // HAVE_OPENCV

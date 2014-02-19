@@ -43,11 +43,14 @@
 
 #include <vector>
 
-#include <brisk/brisk-opencv.h>
+#include <agast/wrap-opencv.h>
 #include <brisk/internal/hamming.h>
 #include <brisk/internal/macros.h>
 
+
 namespace brisk {
+class BruteForceMatcher;
+#if HAVE_OPENCV
 class  BruteForceMatcher : public cv::DescriptorMatcher {
  public:
   BruteForceMatcher(const brisk::Hamming& distance = brisk::Hamming())
@@ -91,5 +94,6 @@ class  BruteForceMatcher : public cv::DescriptorMatcher {
       const std::vector<cv::Mat>& masks,
       bool compactResult);
 };
+#endif  // HAVE_OPENCV
 }  // namespace brisk
 #endif  // BRISK_BRUTE_FORCE_MATCHER_H_

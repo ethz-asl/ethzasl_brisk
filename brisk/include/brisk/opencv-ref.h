@@ -35,19 +35,12 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef TEST_TEST_BINARY_EQUAL_H_
-#define TEST_TEST_BINARY_EQUAL_H_
+#ifndef OPENCV_REF_H_
+#define OPENCV_REF_H_
+
 #include <string>
-#include <vector>
-
-namespace brisk {
-void RunPipeline(std::vector<DatasetEntry>& dataset,  // NOLINT
-                 const std::string& briskbasepath);
-bool RunVerification(const std::vector<DatasetEntry>& current_dataset,
-                     const std::vector<DatasetEntry>& verification_dataset,
-                     bool do_gtest_checks);
-void Draw(std::vector<DatasetEntry>& dataset);  // NOLINTr
-bool RunValidation(bool do_gtest_checks);
-}  // namespace brisk
-
-#endif  // TEST_TEST_BINARY_EQUAL_H_
+//#define USE_OPENCV_FOR_DEBUGGING
+#ifdef USE_OPENCV_FOR_DEBUGGING
+void DisplayImageUsingOpencv(const unsigned char* img, int rows, int cols, const std::string& window_title);
+#endif  // USE_OPENCV_FOR_DEBUGGING
+#endif  // OPENCV_REF_H_

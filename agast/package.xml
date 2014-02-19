@@ -5,8 +5,8 @@
   <description>The agast package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
-  <maintainer email="slynen@ethz.ch">slynen</maintainer>
-  <license>CLOSED</license>
+  <maintainer email="slynen@ethz.ch">Simon Lynen</maintainer>
+  <license>New BSD</license>
 
   <!-- Author tags are optional, mutiple are allowed, one per tag -->
   <!-- Authors do not have to be maintianers, but could be -->
@@ -15,6 +15,9 @@
   <!-- Add your dependencies using the build_depend tag -->
   <build_depend>features_2d_helpers</build_depend>
   <build_depend>glog_catkin</build_depend>
+  
+  <run_depend>features_2d_helpers</run_depend>
+  <run_depend>glog_catkin</run_depend>
   
   <!-- Use buildtool_depend for build tool packages: -->
   <buildtool_depend>catkin</buildtool_depend>
