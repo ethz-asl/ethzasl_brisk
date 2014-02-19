@@ -57,15 +57,38 @@ class  Hamming {
  public:
   Hamming() { }
 
-  // SSSE3 - even faster!
 #ifdef __ARM_NEON__
   static __inline__ uint32_t NEONPopcntofXORed(const vld1q_u8* signature1,
                                                const vld1q_u8* signature2,
                                                const int numberOf128BitWords);
+  static __inline__ uint32_t PopcntofXORed(const unsigned char* signature1,
+                                           const unsigned char* signature2,
+                                           const int numberOf128BitWords) {
+    return NEONPopcntofXORed(reinterpret_cast<const uint8x16_t*>(signature1),
+                             reinterpret_cast<const uint8x16_t*>(signature2),
+                             numberOf128BitWords);
+  }
+  static __inline__ uint32_t PopcntofXORed(const uint8x16_t* signature1,
+                                           const uint8x16_t* signature2,
+                                           const int numberOf128BitWords) {
+    return NEONPopcntofXORed(signature1, signature2, numberOf128BitWords);
+  }
 #else
   static __inline__ uint32_t SSSE3PopcntofXORed(const __m128i* signature1,
                                                 const __m128i* signature2,
                                                 const int numberOf128BitWords);
+  static __inline__ uint32_t PopcntofXORed(const __m128i* signature1,
+                                           const __m128i* signature2,
+                                           const int numberOf128BitWords) {
+    return SSSE3PopcntofXORed(signature1, signature2, numberOf128BitWords);
+  }
+  static __inline__ uint32_t PopcntofXORed(const unsigned char* signature1,
+                                           const unsigned char* signature2,
+                                           const int numberOf128BitWords) {
+    return SSSE3PopcntofXORed(reinterpret_cast<const __m128i*>(signature1),
+                              reinterpret_cast<const __m128i*>(signature2),
+                              numberOf128BitWords);
+  }
 #endif  // __ARM_NEON__
 
   typedef unsigned char ValueType;
