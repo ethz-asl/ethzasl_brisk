@@ -92,11 +92,7 @@ template<typename DETECTOR, typename DESCRIPTOR_EXTRACTOR>
 bool RunValidation(bool do_gtest_checks, DETECTOR& detector,
                    DESCRIPTOR_EXTRACTOR& extractor,
                    const std::string& datasetfilename) {
-#ifdef TEST_IN_SOURCE
-    std::string imagepath = "src/test/test_data/";
-#else
-    std::string imagepath = "./test_data/";
-#endif
+  std::string imagepath = "./test_data/";
 
   std::string datasetfullpath = imagepath + "/" + datasetfilename;
 

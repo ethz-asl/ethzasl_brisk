@@ -73,12 +73,8 @@ void ComputeReferenceIntegralImage8Bit(const cv::Mat& src, cv::Mat* dest) {
 }
 
 TEST(Brisk, IntegralImage8bit) {
-#ifdef TEST_IN_SOURCE
-  std::string imagepath = "src/test/test_data/img1.pgm";
-#else
   std::string imagepath = "./test_data/img1.pgm";
-#endif
-  cv::Mat src_img = cv::imread(imagepath);
+  cv::Mat src_img = cv::imread(imagepath, CV_LOAD_IMAGE_GRAYSCALE);
 
   cv::Mat integral, integral_verification;
   ComputeReferenceIntegralImage8Bit(src_img, &integral_verification);
