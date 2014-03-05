@@ -50,7 +50,7 @@
 namespace brisk {
 
 __inline__ bool compareKeypointScore(cv::KeyPoint kp_i, cv::KeyPoint kp_j) {
-  return (agast::KeyPointResponse(kp_i) > agast::KeyPointResponse(kp_j));
+  return (kp_i.response > kp_j.response);
 }
 
 HarrisFeatureDetector::HarrisFeatureDetector(double radius) {
@@ -291,20 +291,9 @@ inline void HarrisFeatureDetector::NonmaxSuppress(
       if (*(p2 - 1) > *center)
         continue;
       const int i = p - p_begin;
-#if HAVE_OPENCV
       keypoints.push_back(
           cv::KeyPoint(static_cast<float>(i), static_cast<float>(j),
                    10, -1, *center, 0));
-#else  // HAVE_OPENCV
-      cv::KeyPoint keypoint;
-      keypoint.xs = static_cast<float>(i);
-      keypoint.ys = static_cast<float>(j);
-      keypoint.sigma = 10;
-      keypoint.angle = -1;
-      keypoint.edge_score = *center;
-      keypoint.octave = 0;
-      keypoints.push_back(keypoint);
-#endif  // HAVE_OPENCV
     }
   }
 }
@@ -325,18 +314,18 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
   // Go through the sorted keypoints and reject too close ones.
   for (std::vector<cv::KeyPoint>::iterator it = keypoints.begin();
       it != keypoints.end(); ++it) {
-    const int cy = (agast::KeyPointX(*it) / 2 + 16);
-    const int cx = (agast::KeyPointY(*it) / 2 + 16);
+    const int cy = (agast::KeyPoint(*it).x / 2 + 16);
+    const int cx = (agast::KeyPoint(*it).y / 2 + 16);
 
     // Check if this is a high enough score.
     const double s0 = static_cast<double>(occupancy.at<unsigned char>(cy, cx));
     const double s1 = s0 * s0;
-    if (static_cast<int16_t>(agast::KeyPointResponse(*it)) < s1 * s1) {
+    if (static_cast<int16_t>(it->response) < s1 * s1) {
       continue;
     }
 
     // Masks.
-    const float nsc = sqrt(sqrt(agast::KeyPointResponse(*it)));
+    const float nsc = sqrt(sqrt(it->response));
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       __m128i mem1 = _mm_loadu_si128(
           reinterpret_cast<__m128i*>(&occupancy.at<unsigned char>(cy + y - 15,

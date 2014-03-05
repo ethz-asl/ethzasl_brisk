@@ -162,15 +162,19 @@ void SetRandom(cv::Point_<TYPE>* value, int seed) {
 void SetRandom(cv::KeyPoint* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
-  SetRandom(&agast::KeyPointAngle(*value), rd());
+  SetRandom(&value->angle, rd());
 #if HAVE_OPENCV
   SetRandom(&value->class_id, rd());
 #endif  // HAVE_OPENCV
-  SetRandom(&agast::KeyPointOctave(*value), rd());
-  SetRandom(&agast::KeyPointX(*value), rd());
-  SetRandom(&agast::KeyPointY(*value), rd());
-  SetRandom(&agast::KeyPointResponse(*value), rd());
-  SetRandom(&agast::KeyPointSize(*value), rd());
+  SetRandom(&value->octave, rd());
+#if HAVE_OPENCV
+  SetRandom(&value->pt, rd());
+#else
+  SetRandom(&value->x, rd());
+  SetRandom(&value->y, rd());
+#endif  // HAVE_OPENCV
+  SetRandom(&value->response, rd());
+  SetRandom(&value->size, rd());
 }
 
 template<typename TYPE>

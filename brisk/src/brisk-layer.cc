@@ -108,8 +108,8 @@ void BriskLayer::GetAgastPoints(uint8_t threshold,
   const int imcols = img_.cols;
 
   for (int i = 0; i < num; i++) {
-    const int offs = agast::KeyPointX((*keypoints)[i]) +
-        agast::KeyPointY((*keypoints)[i]) * imcols;
+    const int offs = agast::KeyPoint((*keypoints)[i]).x +
+        agast::KeyPoint((*keypoints)[i]).y * imcols;
     int thr = *(thrmap_.data + offs);
     oastDetector_->set_threshold(thr);
     *(scores_.data + offs) = oastDetector_->cornerScore(img_.data + offs);

@@ -13,10 +13,10 @@
   <author email="elmar.mair@dlr.de">Elmar Mair</author>
 
   <!-- Add your dependencies using the build_depend tag -->
-  <build_depend>cvflyby</build_depend>
+  <build_depend>features_2d_helpers</build_depend>
   <build_depend>glog_catkin</build_depend>
   
-  <run_depend>cvflyby</run_depend>
+  <run_depend>features_2d_helpers</run_depend>
   <run_depend>glog_catkin</run_depend>
   
   <!-- Use buildtool_depend for build tool packages: -->

@@ -86,35 +86,43 @@ void Serialize(const cv::Point2f& pt, std::ofstream* out) {
 
 void Serialize(const cv::KeyPoint& pt, std::ofstream* out) {
   CHECK_NOTNULL(out);
-  Serialize(agast::KeyPointAngle(pt), out);
+  Serialize(pt.angle, out);
 #ifdef HAVE_OPENCV
   Serialize(pt.class_id, out);
 #else
-  int class_id = 0;  // Discarded.
+  int class_id = 0;
   Serialize(class_id, out);
 #endif  // HAVE_OPENCV
   Serialize(pt.octave, out);
-  Serialize(agast::KeyPointX(pt), out);
-  Serialize(agast::KeyPointY(pt), out);
-  Serialize(agast::KeyPointResponse(pt), out);
-  Serialize(agast::KeyPointSize(pt), out);
+#ifdef HAVE_OPENCV
+  Serialize(pt.pt, out);
+#else
+  Serialize(pt.x, out);
+  Serialize(pt.y, out);
+#endif  // HAVE_OPENCV
+  Serialize(pt.response, out);
+  Serialize(pt.size, out);
 }
 
 void DeSerialize(cv::KeyPoint* pt, std::ifstream* in) {
   CHECK_NOTNULL(pt);
   CHECK_NOTNULL(in);
-  DeSerialize(&agast::KeyPointAngle(*pt), in);
+  DeSerialize(&pt->angle, in);
 #ifdef HAVE_OPENCV
   DeSerialize(&pt->class_id, in);
 #else
-  int class_id = 0;  // Discarded.
+  int class_id = 0;
   DeSerialize(&class_id, in);
 #endif
-  DeSerialize(&agast::KeyPointOctave(*pt), in);
-  DeSerialize(&agast::KeyPointX(*pt), in);
-  DeSerialize(&agast::KeyPointY(*pt), in);
-  DeSerialize(&agast::KeyPointResponse(*pt), in);
-  DeSerialize(&agast::KeyPointSize(*pt), in);
+  DeSerialize(&pt->octave, in);
+#ifdef HAVE_OPENCV
+  DeSerialize(&pt->pt, in);
+#else
+  DeSerialize(&pt->x, in);
+  DeSerialize(&pt->y, in);
+#endif
+  DeSerialize(&pt->response, in);
+  DeSerialize(&pt->size, in);
 }
 
 void Serialize(const std::string& value, std::ofstream* out) {
