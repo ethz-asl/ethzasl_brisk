@@ -355,8 +355,8 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
 
 bool RoiPredicate(const float minX, const float minY, const float maxX,
                   const float maxY, const cv::KeyPoint& keyPt) {
-  return (agast::KeyPoint(keyPt).x < minX) || (agast::KeyPoint(keyPt).x >= maxX)
-      || (agast::KeyPoint(keyPt).y < minY) || (agast::KeyPoint(keyPt).y >= maxY);
+  return (agast::KeyPointX(keyPt) < minX) || (agast::KeyPointX(keyPt) >= maxX)
+      || (agast::KeyPointY(keyPt) < minY) || (agast::KeyPointY(keyPt) >= maxY);
 }
 
 void BriskDescriptorExtractor::setDescriptorBits(int keypoint_idx,
@@ -462,7 +462,7 @@ void BriskDescriptorExtractor::doDescriptorComputation(
       if (scaleInvariance) {
         scale = std::max(
             static_cast<int>(scales_ / lb_scalerange
-                * (log(keypoints[k].size / (basicSize06)) / log2) + 0.5),
+                * (log(agast::KeyPointSize(keypoints[k]) / (basicSize06)) / log2) + 0.5),
             0);
         // Saturate.
         if (scale >= scales_)
@@ -512,9 +512,9 @@ void BriskDescriptorExtractor::doDescriptorComputation(
       cv::KeyPoint& kp = keypoints[k];
       const int& scale = kscales[k];
       int* pvalues = _values;
-      const float& x = agast::KeyPoint(kp).x;
-      const float& y = agast::KeyPoint(kp).y;
-      if (kp.angle == -1) {
+      const float& x = agast::KeyPointX(kp);
+      const float& y = agast::KeyPointY(kp);
+      if (agast::KeyPointAngle(kp) == -1) {
         if (!rotationInvariance) {
           // Don't compute the gradient direction, just assign a rotation of 0°.
           theta = 0;
@@ -554,9 +554,10 @@ void BriskDescriptorExtractor::doDescriptorComputation(
             direction1 += tmp1;
           }
           timer_rotation_determination_gradient.Stop();
-          kp.angle = atan2(static_cast<float>(direction1),
+          agast::KeyPointAngle(kp) = atan2(static_cast<float>(direction1),
                            static_cast<float>(direction0)) / M_PI * 180.0;
-          theta = static_cast<int>((n_rot_ * kp.angle) / (360.0) + 0.5);
+          theta = static_cast<int>((n_rot_ * agast::KeyPointAngle(kp)) /
+                                   (360.0) + 0.5);
           if (theta < 0)
             theta += n_rot_;
           if (theta >= static_cast<int>(n_rot_))
@@ -567,7 +568,8 @@ void BriskDescriptorExtractor::doDescriptorComputation(
         if (!rotationInvariance) {
           theta = 0;
         } else {
-          theta = static_cast<int>(n_rot_ * (kp.angle / (360.0)) + 0.5);
+          theta = static_cast<int>(n_rot_ * (agast::KeyPointAngle(kp) /
+              (360.0)) + 0.5);
           if (theta < 0)
             theta += n_rot_;
           if (theta >= static_cast<int>(n_rot_))
@@ -597,9 +599,6 @@ void BriskDescriptorExtractor::doDescriptorComputation(
 
       setDescriptorBits(k, _values, &descriptors);
     }
-
-    // Clean-up.
-    _integral.release();
     delete[] _values;
 }
 

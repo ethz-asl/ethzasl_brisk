@@ -197,12 +197,12 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (usePassedKeypoints) {
     points.reserve(keypoints.size());
     for (size_t k = 0; k < keypoints.size(); ++k) {
-      if (keypoints[k].response > 1e6) {
+      if (agast::KeyPointResponse(keypoints[k]) > 1e6) {
         points.push_back(
             typename ScoreCalculator_t::PointWithScore(
-                keypoints[k].response,
-                agast::KeyPoint(keypoints[k]).x,
-                agast::KeyPoint(keypoints[k]).y));
+                agast::KeyPointResponse(keypoints[k]),
+                agast::KeyPointX(keypoints[k]),
+                agast::KeyPointY(keypoints[k])));
       }
     }
   } else {
@@ -396,21 +396,27 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
                  _scoreCalculator.Score(u, v + 1),
                  _scoreCalculator.Score(u + 1, v + 1), delta_x, delta_y);
       // TODO(lestefan): 3d refinement.
-      keypoints.push_back(
-          cv::KeyPoint(
-              _scale * ((it->x + delta_x) + _offset),
-              _scale * ((it->y + delta_y) + _offset),
-              _scale * 12.0, -1, it->score, _layerNumber / 2));
+      cv::KeyPoint keypoint;
+      agast::KeyPointX(keypoint) = _scale * ((it->x + delta_x) + _offset);
+      agast::KeyPointY(keypoint) = _scale * ((it->y + delta_y) + _offset);
+      agast::KeyPointSize(keypoint) = _scale * 12.0;
+      agast::KeyPointAngle(keypoint) = -1;
+      agast::KeyPointResponse(keypoint) = it->score;
+      agast::KeyPointOctave(keypoint) = _layerNumber / 2;
+      keypoints.push_back(keypoint);
     }
   } else {
     for (typename std::vector<
         typename ScoreCalculator_t::PointWithScore>::const_iterator it =
         points.begin(); it != points.end(); ++it) {
-      keypoints.push_back(
-          cv::KeyPoint(
-              _scale * ((it->x) + _offset),
-              _scale * ((it->y) + _offset),
-              _scale * 12.0, -1, it->score, _layerNumber / 2));
+      cv::KeyPoint keypoint;
+      agast::KeyPointX(keypoint) = _scale * ((it->x) + _offset);
+      agast::KeyPointY(keypoint) = _scale * ((it->y) + _offset);
+      agast::KeyPointSize(keypoint) = _scale * 12.0;
+      agast::KeyPointAngle(keypoint) = -1;
+      agast::KeyPointResponse(keypoint) = it->score;
+      agast::KeyPointOctave(keypoint) = _layerNumber / 2;
+      keypoints.push_back(keypoint);
     }
   }
   timer_subpixel_refinement.Stop();
