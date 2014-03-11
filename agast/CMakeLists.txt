@@ -8,6 +8,7 @@ catkin_package(
     CATKIN_DEPENDS roscpp
     INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
     LIBRARIES agast
+    CFG_EXTRAS export_flags.cmake
 )
 find_package(OpenCV REQUIRED)
 
