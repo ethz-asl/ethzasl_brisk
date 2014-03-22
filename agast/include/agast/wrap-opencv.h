@@ -52,8 +52,11 @@
 
 #if HAVE_OPENCV
 namespace agast {
-typedef cv::KeyPoint KeyPoint;
-typedef cv::Mat Mat;
+using cv::KeyPoint;
+using cv::Point2f;
+using cv::Point_;
+using cv::imread;
+using cv::Mat;
 
 inline float& KeyPointX(agast::KeyPoint& keypoint) {  // NOLINT
   return keypoint.pt.x;
