@@ -62,14 +62,14 @@ void GetNextUncommentedLine(std::ifstream& infile, std::string* input_line) {
 #endif
 }  // namespace
 
-namespace cv {
+namespace agast {
 // Reads a pgm image from file.
-cv::Mat imread(const std::string& filename) {
+agast::Mat imread(const std::string& filename) {
   std::ifstream infile;
   infile.open(filename.c_str());
   if (infile.fail()) {
     infile.close();
-    return cv::Mat();
+    return agast::Mat();
   }
 
   std::string input_line;
@@ -85,14 +85,14 @@ cv::Mat imread(const std::string& filename) {
   }
 
   if (!cols || !rows) {
-    return cv::Mat();
+    return agast::Mat();
   }
 
   // Encoding
   GetNextUncommentedLine(infile, &input_line);
 
   // Create image and read in data.
-  cv::Mat img(rows, cols, CV_8UC1);
+  agast::Mat img(rows, cols, CV_8UC1);
   size_t size = rows * cols * img.elemSize();
   CHECK_NOTNULL(img.data);
   infile.read(reinterpret_cast<char*>(img.data), size);
@@ -101,7 +101,7 @@ cv::Mat imread(const std::string& filename) {
   return img;
 }
 
-bool MakePGMHeader(const cv::Mat& image, unsigned char** pgm_header) {
+bool MakePGMHeader(const agast::Mat& image, unsigned char** pgm_header) {
   // To use O_DIRECT to write to files, the memory size must be a multiple of
   // 4096 bytes and aligned to addresses multiples of 4096 at the source
   if (posix_memalign(reinterpret_cast<void **>(pgm_header), 4096, 4096)) {
@@ -123,7 +123,7 @@ bool MakePGMHeader(const cv::Mat& image, unsigned char** pgm_header) {
   return true;
 }
 
-ssize_t imwrite(const cv::Mat& image, const std::string& filepath) {
+ssize_t imwrite(const agast::Mat& image, const std::string& filepath) {
   ssize_t bytes_written = 0;
 
   int fd = open(filepath.c_str(), O_CREAT | O_RDWR | O_DIRECT,
@@ -148,5 +148,5 @@ ssize_t imwrite(const cv::Mat& image, const std::string& filepath) {
   return bytes_written;
 }
 
-}  // namespace cv
+}  // namespace agast
 #endif  // !HAVE_OPENCV

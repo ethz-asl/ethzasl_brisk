@@ -43,10 +43,10 @@ class AgastDetector7_12s : public AstDetector {
     init_pattern();
   }
   ~AgastDetector7_12s() { }
-  void detect(const unsigned char* im, std::vector<cv::KeyPoint>& keypoints,
-              const cv::Mat* thrmap);
-  void nms(const unsigned char* im, const std::vector<cv::KeyPoint>& keypoints,
-           std::vector<cv::KeyPoint>& keypoints_nms);
+  void detect(const unsigned char* im, std::vector<agast::KeyPoint>& keypoints,
+              const agast::Mat* thrmap);
+  void nms(const unsigned char* im, const std::vector<agast::KeyPoint>& keypoints,
+           std::vector<agast::KeyPoint>& keypoints_nms);
   int get_borderWidth() {
     return borderWidth;
   }

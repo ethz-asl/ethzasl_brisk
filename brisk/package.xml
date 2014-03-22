@@ -2,7 +2,7 @@
 <package>
   <name>brisk</name>
   <version>2.0.0</version>
-  <description>The brisk package</description>
+  <description>The brisk lib</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <maintainer email="slynen@ethz.ch">Simon Lynen</maintainer>
@@ -17,12 +17,10 @@
 
   <build_depend>agast</build_depend>
   <build_depend>eigen_catkin</build_depend>
-  <build_depend>features_2d_helpers</build_depend>
   <build_depend>glog_catkin</build_depend>
   
   <run_depend>agast</run_depend>
   <run_depend>eigen_catkin</run_depend>
-  <run_depend>features_2d_helpers</run_depend>
   <run_depend>glog_catkin</run_depend>
 
   <!-- Use buildtool_depend for build tool packages: -->

@@ -51,24 +51,24 @@ namespace brisk {
 // Generic SSE-optimized 2D filter on CV_8U/CV_16S matrices. stores result in
 // CV_16S matrix.
 template<int X, int Y>
-__inline__ void Filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
+__inline__ void Filter2D(agast::Mat& src, agast::Mat& dst, agast::Mat& kernel);  // NOLINT
 
 // Generic SSE-optimized 2D filter CV_8U to CV_16S.
 template<int X, int Y>
-__inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
+__inline__ void Filter2D8U(agast::Mat& src, agast::Mat& dst, agast::Mat& kernel);  // NOLINT
 
 // Generic SSE-optimized 2D filter CV_16S to CV_16S.
 template<int X, int Y>
-__inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel);  // NOLINT
+__inline__ void Filter2D16S(agast::Mat& src, agast::Mat& dst, agast::Mat& kernel);  // NOLINT
 
 // 3-by-3 box filter CV_16S to CV_16S.
-__inline__ void FilterBox3by316S(cv::Mat& src, cv::Mat& dst);  // NOLINT
+__inline__ void FilterBox3by316S(agast::Mat& src, agast::Mat& dst);  // NOLINT
 
 // 3-by-3 Gaussian filter CV_16S to CV_16S.
-void FilterGauss3by316S(cv::Mat& src, cv::Mat& dst);  // NOLINT
+void FilterGauss3by316S(agast::Mat& src, agast::Mat& dst);  // NOLINT
 
 // 3-by-3 Gaussian filter CV_32F to CV_32F.
-void FilterGauss3by332F(cv::Mat& src, cv::Mat& dst);  // NOLINT
+void FilterGauss3by332F(agast::Mat& src, agast::Mat& dst);  // NOLINT
 
 }  // namespace brisk
 #include "./vectorized-filters-inl.h"

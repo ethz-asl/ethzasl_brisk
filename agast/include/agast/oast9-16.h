@@ -38,7 +38,7 @@ namespace agast {
 
 class Oast9_16_PatternAccessor {
  public:
-  Oast9_16_PatternAccessor(cv::Mat& img) {
+  Oast9_16_PatternAccessor(agast::Mat& img) {
     img_ = &img;
   }
   void setCenter(float x_c, float y_c, float scale = 1.0) {
@@ -48,7 +48,7 @@ class Oast9_16_PatternAccessor {
   }
   unsigned char operator()(unsigned int index);
  private:
-  cv::Mat* img_;
+  agast::Mat* img_;
   float x_c_;
   float y_c_;
   float scale_;
@@ -66,16 +66,16 @@ class OastDetector9_16 : public AstDetector {
     init_pattern();
   }
   ~OastDetector9_16() { }
-  void detect(const unsigned char* im, std::vector<cv::KeyPoint>& keypoints,
-              const cv::Mat* thrmap = 0);
-  void nms(const unsigned char* im, const std::vector<cv::KeyPoint>& keypoints,
-           std::vector<cv::KeyPoint>& keypoints_nms);
+  void detect(const unsigned char* im, std::vector<agast::KeyPoint>& keypoints,
+              const agast::Mat* thrmap = 0);
+  void nms(const unsigned char* im, const std::vector<agast::KeyPoint>& keypoints,
+           std::vector<agast::KeyPoint>& keypoints_nms);
   int get_borderWidth() {
     return borderWidth;
   }
   int cornerScore(const unsigned char* p);
   // Re-centering and re-scaling the FAST mask.
-  int cornerScore(cv::Mat& img, float x, float y, float scale);
+  int cornerScore(agast::Mat& img, float x, float y, float scale);
 
  private:
   static const int borderWidth = 3;

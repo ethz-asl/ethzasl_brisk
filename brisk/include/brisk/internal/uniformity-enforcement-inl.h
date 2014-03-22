@@ -42,7 +42,7 @@
 #include <brisk/internal/timer.h>
 
 template<typename POINT_WITH_SCORE>
-void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
+void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
                                int imgrows, int imgcols, size_t maxNumKpt,
                                std::vector<POINT_WITH_SCORE>& points) {
   brisk::timing::DebugTimer timer_sort_keypoints(
@@ -58,9 +58,9 @@ void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
   pt_tmp.reserve(points.size());  // Allow appending.
 
       // Store occupancy.
-  cv::Mat occupancy;
+  agast::Mat occupancy;
   const float scaling = 15.0 / static_cast<float>(radius);
-  occupancy = cv::Mat::zeros((imgrows) * ceil(scaling) + 32,
+  occupancy = agast::Mat::zeros((imgrows) * ceil(scaling) + 32,
                              (imgcols) * ceil(scaling) + 32, CV_8U);
 
   brisk::timing::DebugTimer timer_uniformity_enforcement(
@@ -73,7 +73,7 @@ void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
     const int cx = (it->x * scaling + 16);
 
     // Check if this is a high enough score.
-    const double s0 = static_cast<double>(occupancy.at<uchar>(cy, cx));
+    const double s0 = static_cast<double>(occupancy.at<unsigned char>(cy, cx));
     const float nsc1 = sqrtf(sqrtf(it->score / maxScore)) * 255.0f;
 
     if (nsc1 < s0)
@@ -135,11 +135,11 @@ void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
 # else
       __m128i mem1 =
           _mm_loadu_si128(
-              reinterpret_cast<__m128i *>(&occupancy.at<uchar>(cy + y - 15,
+              reinterpret_cast<__m128i *>(&occupancy.at<unsigned char>(cy + y - 15,
                                                                cx - 15)));
       __m128i mem2 =
           _mm_loadu_si128(
-              reinterpret_cast<__m128i *>(&occupancy.at<uchar>(cy + y - 15,
+              reinterpret_cast<__m128i *>(&occupancy.at<unsigned char>(cy + y - 15,
                                                                cx + 1)));
       __m128i mask1 = _mm_set_epi8(ceil(LUT.at<float>(y, 15) * nsc),
                                    ceil(LUT.at<float>(y, 14) * nsc),
@@ -173,10 +173,10 @@ void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
                                    ceil(LUT.at<float>(y, 17) * nsc),
                                    ceil(LUT.at<float>(y, 16) * nsc));
       _mm_storeu_si128(
-          reinterpret_cast<__m128i *>(&occupancy.at<uchar>(cy + y - 15, cx - 15)),
+          reinterpret_cast<__m128i *>(&occupancy.at<unsigned char>(cy + y - 15, cx - 15)),
           _mm_adds_epu8(mem1, mask1));
       _mm_storeu_si128(
-          reinterpret_cast<__m128i *>(&occupancy.at<uchar>(cy + y - 15, cx + 1)),
+          reinterpret_cast<__m128i *>(&occupancy.at<unsigned char>(cy + y - 15, cx + 1)),
           _mm_adds_epu8(mem2, mask2));
 #endif  // __ARM_NEON__
     }
