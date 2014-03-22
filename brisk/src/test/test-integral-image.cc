@@ -45,7 +45,7 @@
 #define TEST(a, b) int Test_##a##_##b()
 #endif
 
-void ComputeReferenceIntegralImage8Bit(const cv::Mat& src, cv::Mat* dest) {
+void ComputeReferenceIntegralImage8Bit(const agast::Mat& src, agast::Mat* dest) {
   CHECK_NOTNULL(dest);
   int x, y;
   const int cn = 1;
@@ -78,9 +78,9 @@ TEST(Brisk, IntegralImage8bit) {
 #else
   std::string imagepath = "./test_data/img1.pgm";
 #endif
-  cv::Mat src_img = cv::imread(imagepath);
+  agast::Mat src_img = agast::imread(imagepath);
 
-  cv::Mat integral, integral_verification;
+  agast::Mat integral, integral_verification;
   ComputeReferenceIntegralImage8Bit(src_img, &integral_verification);
   brisk::IntegralImage8(src_img, &integral);
 

@@ -48,7 +48,7 @@
 #endif
 
 TEST(Brisk, MatchBitset) {
-  cv::Mat img1, img2;
+  agast::Mat img1, img2;
 #ifdef TEST_IN_SOURCE
   std::string image1path = "src/test/test_data/img1.pgm";
   std::string image2path = "src/test/test_data/img2.pgm";
@@ -57,14 +57,14 @@ TEST(Brisk, MatchBitset) {
 #else
   std::string image1path = "./test_data/img1.pgm";
   std::string image2path = "./test_data/img2.pgm";
-  img1 = cv::imread(image1path);
-  img2 = cv::imread(image2path);
+  img1 = agast::imread(image1path);
+  img2 = agast::imread(image2path);
 #endif
 
   const unsigned int detection_threshold = 70;
   const unsigned int matching_threshold = 50;
   brisk::BriskFeatureDetector detector(detection_threshold, 2);
-  std::vector<cv::KeyPoint> keypoints1, keypoints2;
+  std::vector<agast::KeyPoint> keypoints1, keypoints2;
   std::vector<std::bitset<384> > descriptors1, descriptors2;
   detector.detect(img1, keypoints1);
   detector.detect(img2, keypoints2);

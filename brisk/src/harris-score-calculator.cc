@@ -106,11 +106,11 @@ void HarrisScoreCalculator::Get2dMaxima(std::vector<PointWithScore>& points,  //
 }
 
 // X and Y denote the size of the mask.
-void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
-                                            cv::Mat& dydy, cv::Mat& dxdy) {
+void HarrisScoreCalculator::GetCovarEntries(const agast::Mat& src, agast::Mat& dxdx,
+                                            agast::Mat& dydy, agast::Mat& dxdy) {
   // Sanity check.
   assert(src.type() == CV_8U);
-  cv::Mat kernel = cv::Mat::zeros(3, 3, CV_16S);
+  agast::Mat kernel = agast::Mat::zeros(3, 3, CV_16S);
   kernel.at<int16_t>(0, 0) = 3 * 8;
   kernel.at<int16_t>(1, 0) = 10 * 8;
   kernel.at<int16_t>(2, 0) = 3 * 8;
@@ -124,9 +124,9 @@ void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
   const unsigned int cy = 1;
 
   // Dest will be 16 bit.
-  dxdx = cv::Mat::zeros(src.rows, src.cols, CV_16S);
-  dydy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
-  dxdy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
+  dxdx = agast::Mat::zeros(src.rows, src.cols, CV_16S);
+  dydy = agast::Mat::zeros(src.rows, src.cols, CV_16S);
+  dxdy = agast::Mat::zeros(src.rows, src.cols, CV_16S);
 
   const unsigned int maxJ = ((src.cols - 2) / 16) * 16;
   const unsigned int maxI = src.rows - 2;
@@ -224,12 +224,12 @@ void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
   }
 }
 
-void HarrisScoreCalculator::CornerHarris(const cv::Mat& dxdxSmooth,
-                                         const cv::Mat& dydySmooth,
-                                         const cv::Mat& dxdySmooth,
-                                         cv::Mat& dst) {
+void HarrisScoreCalculator::CornerHarris(const agast::Mat& dxdxSmooth,
+                                         const agast::Mat& dydySmooth,
+                                         const agast::Mat& dxdySmooth,
+                                         agast::Mat& dst) {
   // Dest will be 16 bit.
-  dst = cv::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32S);
+  dst = agast::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32S);
   const unsigned int maxJ = ((dxdxSmooth.cols - 2) / 8) * 8;
   const unsigned int maxI = dxdxSmooth.rows - 2;
   const unsigned int stride = dxdxSmooth.cols;

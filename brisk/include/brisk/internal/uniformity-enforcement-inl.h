@@ -42,7 +42,7 @@
 #include <brisk/internal/timer.h>
 
 template<typename POINT_WITH_SCORE>
-void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
+void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
                                int imgrows, int imgcols, size_t maxNumKpt,
                                std::vector<POINT_WITH_SCORE>& points) {
   brisk::timing::DebugTimer timer_sort_keypoints(
@@ -58,9 +58,9 @@ void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
   pt_tmp.reserve(points.size());  // Allow appending.
 
       // Store occupancy.
-  cv::Mat occupancy;
+  agast::Mat occupancy;
   const float scaling = 15.0 / static_cast<float>(radius);
-  occupancy = cv::Mat::zeros((imgrows) * ceil(scaling) + 32,
+  occupancy = agast::Mat::zeros((imgrows) * ceil(scaling) + 32,
                              (imgcols) * ceil(scaling) + 32, CV_8U);
 
   brisk::timing::DebugTimer timer_uniformity_enforcement(

@@ -43,9 +43,9 @@
 
 namespace serialization {
 
-void Serialize(const cv::Mat& mat, std::ofstream* out) {
+void Serialize(const agast::Mat& mat, std::ofstream* out) {
   CHECK_NOTNULL(out);
-  cv::Mat mat_cont;
+  agast::Mat mat_cont;
   if (!mat.isContinuous()) {
     mat_cont = mat.clone();
   } else {
@@ -63,7 +63,7 @@ void Serialize(const cv::Mat& mat, std::ofstream* out) {
              element_size * mat_cont.rows * mat_cont.cols);
 }
 
-void DeSerialize(cv::Mat* mat, std::ifstream* in) {
+void DeSerialize(agast::Mat* mat, std::ifstream* in) {
   CHECK_NOTNULL(mat);
   CHECK_NOTNULL(in);
   int rows;
@@ -78,13 +78,13 @@ void DeSerialize(cv::Mat* mat, std::ifstream* in) {
   in->read(reinterpret_cast<char*>(mat->data), element_size * rows * cols);
 }
 
-void Serialize(const cv::Point2f& pt, std::ofstream* out) {
+void Serialize(const agast::Point2f& pt, std::ofstream* out) {
   CHECK_NOTNULL(out);
   Serialize(pt.x, out);
   Serialize(pt.y, out);
 }
 
-void Serialize(const cv::KeyPoint& pt, std::ofstream* out) {
+void Serialize(const agast::KeyPoint& pt, std::ofstream* out) {
   CHECK_NOTNULL(out);
   Serialize(agast::KeyPointAngle(pt), out);
 #ifdef HAVE_OPENCV
@@ -100,7 +100,7 @@ void Serialize(const cv::KeyPoint& pt, std::ofstream* out) {
   Serialize(agast::KeyPointSize(pt), out);
 }
 
-void DeSerialize(cv::KeyPoint* pt, std::ifstream* in) {
+void DeSerialize(agast::KeyPoint* pt, std::ifstream* in) {
   CHECK_NOTNULL(pt);
   CHECK_NOTNULL(in);
   DeSerialize(&agast::KeyPointAngle(*pt), in);

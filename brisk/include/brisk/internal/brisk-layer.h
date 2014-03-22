@@ -59,7 +59,7 @@ class  BriskLayer {
     static const int TWOTHIRDSAMPLE = 1;
   };
   // Construct a base layer.
-  BriskLayer(const cv::Mat& img, unsigned char upper_threshold, unsigned char lower_threshold,
+  BriskLayer(const agast::Mat& img, unsigned char upper_threshold, unsigned char lower_threshold,
              float scale = 1.0f, float offset = 0.0f);
   // Derive a layer.
   BriskLayer(const BriskLayer& layer, int mode, unsigned char upper_threshold,
@@ -67,7 +67,7 @@ class  BriskLayer {
 
   // Fast/Agast without non-max suppression.
   void GetAgastPoints(uint8_t threshold,
-                      std::vector<cv::KeyPoint>* keypoints);
+                      std::vector<agast::KeyPoint>* keypoints);
 
   // Get scores - this is in layer coordinates, not scale=1 coordinates!
   uint8_t GetAgastScore(int x, int y, uint8_t threshold);
@@ -76,10 +76,10 @@ class  BriskLayer {
                         float scale = 1.0f);
 
   // Accessors.
-  inline const cv::Mat& img() const {
+  inline const agast::Mat& img() const {
     return img_;
   }
-  inline const cv::Mat& scores() const {
+  inline const agast::Mat& scores() const {
     return scores_;
   }
   inline float scale() const {
@@ -96,15 +96,15 @@ class  BriskLayer {
   }
  private:
   // Access gray values (smoothed/interpolated).
-  uint8_t Value(const cv::Mat& mat, float xf, float yf, float scale);
+  uint8_t Value(const agast::Mat& mat, float xf, float yf, float scale);
   // Calculate threshold map.
   void CalculateThresholdMap();
   // The image.
-  cv::Mat img_;
+  agast::Mat img_;
   // Its Fast scores.
-  cv::Mat scores_;
+  agast::Mat scores_;
   // Its threshold map.
-  cv::Mat thrmap_;
+  agast::Mat thrmap_;
   // coordinate transformation.
   float scale_;
   float offset_;

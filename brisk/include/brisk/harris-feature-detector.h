@@ -60,23 +60,23 @@ class HarrisFeatureDetector {
   void SetRadius(double radius);
 
  protected:
-  static __inline__ void GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
-                                         cv::Mat& dydy, cv::Mat& dxdy);
-  static __inline__ void CornerHarris(const cv::Mat& dxdxSmooth,
-                                      const cv::Mat& dydySmooth,
-                                      const cv::Mat& dxdySmooth,
-                                      cv::Mat& score);
-  static __inline__ void NonmaxSuppress(const cv::Mat& scores,
-                                        std::vector<cv::KeyPoint>& keypoints);
-  __inline__ void EnforceUniformity(const cv::Mat& scores,
-                                    std::vector<cv::KeyPoint>& keypoints) const;
+  static __inline__ void GetCovarEntries(const agast::Mat& src, agast::Mat& dxdx,
+                                         agast::Mat& dydy, agast::Mat& dxdy);
+  static __inline__ void CornerHarris(const agast::Mat& dxdxSmooth,
+                                      const agast::Mat& dydySmooth,
+                                      const agast::Mat& dxdySmooth,
+                                      agast::Mat& score);
+  static __inline__ void NonmaxSuppress(const agast::Mat& scores,
+                                        std::vector<agast::KeyPoint>& keypoints);
+  __inline__ void EnforceUniformity(const agast::Mat& scores,
+                                    std::vector<agast::KeyPoint>& keypoints) const;
 
-  virtual void detectImpl(const cv::Mat& image,
-                          std::vector<cv::KeyPoint>& keypoints,
-                          const cv::Mat& mask = cv::Mat()) const;
+  virtual void detectImpl(const agast::Mat& image,
+                          std::vector<agast::KeyPoint>& keypoints,
+                          const agast::Mat& mask = agast::Mat()) const;
 
   double _radius;
-  cv::Mat _LUT;
+  agast::Mat _LUT;
 };
 }  // namespace brisk
 #endif  // __ARM_NEON__

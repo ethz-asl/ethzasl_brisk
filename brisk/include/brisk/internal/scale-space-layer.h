@@ -54,11 +54,11 @@ class ScaleSpaceLayer {
  public:
   typedef SCORE_CALCULATOR_T ScoreCalculator_t;
   ScaleSpaceLayer() { }
-  ScaleSpaceLayer(const cv::Mat& img, bool initScores = true);  // Octave 0.
+  ScaleSpaceLayer(const agast::Mat& img, bool initScores = true);  // Octave 0.
   ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
                   bool initScores = true);  // For successive construction.
 
-  void Create(const cv::Mat& img, bool initScores = true);  // Octave 0.
+  void Create(const agast::Mat& img, bool initScores = true);  // Octave 0.
   void Create(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores =
                   true);  // For successive construction.
 
@@ -71,16 +71,16 @@ class ScaleSpaceLayer {
   }
 
   // Feature detection.
-  void DetectScaleSpaceMaxima(std::vector<cv::KeyPoint>& keypoints,  // NOLINT
+  void DetectScaleSpaceMaxima(std::vector<agast::KeyPoint>& keypoints,  // NOLINT
                               bool enforceUniformity = true, bool doRefinement =
                                   true,
                               bool usePassedKeypoints = false);
 
   // Subsampling.
   // Half sampling.
-  static inline bool Halfsample(const cv::Mat& srcimg, cv::Mat& dstimg);
+  static inline bool Halfsample(const agast::Mat& srcimg, agast::Mat& dstimg);
   // Two third sampling.
-  static inline bool Twothirdsample(const cv::Mat& srcimg, cv::Mat& dstimg);
+  static inline bool Twothirdsample(const agast::Mat& srcimg, agast::Mat& dstimg);
 
  protected:
   // Utilities.
@@ -106,7 +106,7 @@ class ScaleSpaceLayer {
   int _layerNumber;
 
   // Have a reference to the image for convenience:
-  cv::Mat _img;
+  agast::Mat _img;
 
   // The score calculation.
   ScoreCalculator_t _scoreCalculator;
@@ -125,7 +125,7 @@ class ScaleSpaceLayer {
   double _radius;
   size_t _maxNumKpt;
   double _absoluteThreshold;
-  cv::Mat _LUT;
+  agast::Mat _LUT;
 };
 }  // namespace brisk
 

@@ -53,7 +53,7 @@ inline uint8x16_t shiftrightonebyte(uint8x16_t& data) {
 }
 
 namespace brisk {
-void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
+void Halfsample16(const agast::Mat& srcimg, agast::Mat& dstimg) {
 #ifdef __ARM_NEON__
   static_cast<void>(srcimg);
   static_cast<void>(dstimg);
@@ -139,7 +139,7 @@ void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 }
 
 // Half sampling.
-void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
+void Halfsample8(const agast::Mat& srcimg, agast::Mat& dstimg) {
 const uint16_t leftoverCols = ((srcimg.cols % 16) / 2);
 const bool noleftover = (srcimg.cols % 16) == 0;
 
@@ -405,7 +405,7 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
 #endif  // __ARM_NEON__
 }
 
-void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
+void Twothirdsample16(const agast::Mat& srcimg, agast::Mat& dstimg) {
 #ifdef __ARM_NEON__
   static_cast<void>(srcimg);
   static_cast<void>(dstimg);
@@ -561,7 +561,7 @@ void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg) {
 #endif
 }
 
-void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg) {
+void Twothirdsample8(const agast::Mat& srcimg, agast::Mat& dstimg) {
   // Take care with border...
   const uint16_t leftoverCols = ((srcimg.cols / 3) * 3) % 15;
 

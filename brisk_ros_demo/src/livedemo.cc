@@ -56,16 +56,16 @@ using namespace std;
 const int NUM_REF_IMG = 1;
 
 ///DEBUG
-cv::Mat outimg;
+agast::Mat outimg;
 std::vector<std::vector<cv::DMatch> > matchesdbg1;
 std::vector<std::vector<cv::DMatch> > matchesdbg2;
 
 // image with descriptors
 class DescribedImage {
  public:
-  cv::Mat image;
-  std::vector<cv::KeyPoint> keypoints;
-  cv::Mat descriptors;
+  agast::Mat image;
+  std::vector<agast::KeyPoint> keypoints;
+  agast::Mat descriptors;
   // provide a deep copy:
   DescribedImage() {
   }
@@ -105,10 +105,10 @@ struct SharedData {
   float timeleft;
 
   // display images
-  cv::Mat imgRGB;  // the display matrix
-  cv::Mat imgRGBmain;  // the main section of the display
-  std::vector<cv::Mat> imgRGBref;  // reference images section of display
-  std::vector<cv::Mat> imgRGBref2;  // reference images - not painted into
+  agast::Mat imgRGB;  // the display matrix
+  agast::Mat imgRGBmain;  // the main section of the display
+  std::vector<agast::Mat> imgRGBref;  // reference images section of display
+  std::vector<agast::Mat> imgRGBref2;  // reference images - not painted into
 };
 
 SharedData sharedData;
@@ -164,7 +164,7 @@ class ImageSubscriber {
 
     //std::cout<<":";cout.flush();
     // create the image from the message
-    cv::Mat img(msg->height, msg->width, CV_8U,
+    agast::Mat img(msg->height, msg->width, CV_8U,
                 const_cast<uint8_t*>(&(msg->data[0])));
 
     // current image buffer
@@ -253,7 +253,7 @@ class BriskVisualizer {
  private:
 
   void visualize() {
-    std::vector < cv::Mat > tmp;
+    std::vector < agast::Mat > tmp;
     char key = 0;
     long int frameCounter = 0;
     cv::namedWindow("BRISK Demo");
@@ -268,7 +268,7 @@ class BriskVisualizer {
       }
     }
     // make the display matrix have the right size:
-    cv::Mat* image;
+    agast::Mat* image;
     DescribedImage* descImage;
     if (sharedData.frameID % 2 == 0) {
       image = &sharedData.image2.image;
@@ -326,7 +326,7 @@ class BriskVisualizer {
             // save into shared data
             sharedData.referenceImage.push_back(*descImage);
             // adapt display
-            tmp.push_back(cv::Mat(image->rows / 2, image->cols / 2, CV_8U));
+            tmp.push_back(agast::Mat(image->rows / 2, image->cols / 2, CV_8U));
             if (sharedData.numRefImages == 2)
               brisk::BriskLayer::HalfSample(*image, tmp.back());
             else
@@ -358,7 +358,7 @@ class BriskVisualizer {
         key = cv::waitKey(2);
       }
 
-      //cv::Mat t1,t2;
+      //agast::Mat t1,t2;
       //cv::cvtColor(p_descImage->image, t1, CV_GRAY2RGB);
       //cv::cvtColor(sharedData.referenceImage[0].image, t2, CV_GRAY2RGB);
       /*cv::drawMatches(
@@ -435,7 +435,7 @@ int main(int argc, char ** argv) {
     videoFname = "";
 
   // run FAST in first image
-  std::vector<cv::KeyPoint> keypoints, keypoints2;
+  std::vector<agast::KeyPoint> keypoints, keypoints2;
   int threshold;
 
   // create the detector:
@@ -595,7 +595,7 @@ int main(int argc, char ** argv) {
 
     if (!imagesInitialized) {
       // init shared images
-      sharedData.imgRGB = cv::Mat::zeros(
+      sharedData.imgRGB = agast::Mat::zeros(
           currentImage->image.rows
               + currentImage->image.rows / sharedData.numRefImages,
           currentImage->image.cols, CV_8UC3);
@@ -616,7 +616,7 @@ int main(int argc, char ** argv) {
                     (i + 1) * currentImage->image.cols
                         / sharedData.numRefImages)));
         sharedData.imgRGBref2.push_back(
-            cv::Mat::zeros(currentImage->image.rows / sharedData.numRefImages,
+            agast::Mat::zeros(currentImage->image.rows / sharedData.numRefImages,
                            currentImage->image.cols / sharedData.numRefImages,
                            CV_8UC3));
       }
@@ -749,9 +749,9 @@ int main(int argc, char ** argv) {
   visualizer.stop();
 
   /*/ the image:
-   cv::Mat imgGray;
-   cv::Mat imgGrayKey;
-   cv::Mat imgRGB;
+   agast::Mat imgGray;
+   agast::Mat imgGrayKey;
+   agast::Mat imgRGB;
 
    imgGray.create(480,752,CV_8U);
 
@@ -768,7 +768,7 @@ int main(int argc, char ** argv) {
    cvStartWindowThread();
    ros::AsyncSpinner spinner(0);
    spinner.start();
-   cv::Mat descriptors;
+   agast::Mat descriptors;
    char k=0;
    for(int i=0; i<NUM_REF_IMG; i++){
    k=0;
@@ -794,10 +794,10 @@ int main(int argc, char ** argv) {
    imgGrayKey=imgGray.clone();
    imgGrayKey.resize(480);
    }
-   cv::Mat someZeros=cv::Mat::zeros(5,imgGray.cols,CV_8U);
+   agast::Mat someZeros=agast::Mat::zeros(5,imgGray.cols,CV_8U);
    const unsigned int ksize=keypoints.size();
    while(k!=27){
-   cv::Mat descriptors2;
+   agast::Mat descriptors2;
    //if(imageSubscriber.ctr>0) std::cout<<imageSubscriber.ctr<<" frame(s) lost."<<std::endl;
    imageSubscriber.getNextImg(imgGray,k);
 

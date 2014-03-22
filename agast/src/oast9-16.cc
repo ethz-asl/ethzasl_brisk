@@ -41,11 +41,11 @@
 namespace agast {
 
 void OastDetector9_16::detect(const unsigned char* im,
-                              std::vector<cv::KeyPoint>& corners_all,
-                              const cv::Mat* thrmap) {
+                              std::vector<agast::KeyPoint>& corners_all,
+                              const agast::Mat* thrmap) {
   int total = 0;
   int nExpectedCorners = corners_all.capacity();
-  cv::KeyPoint h;
+  agast::KeyPoint h;
   register int x, y;
   register int xsizeB = xsize - 4;
   register int ysizeB = ysize - 3;

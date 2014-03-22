@@ -49,7 +49,7 @@
 
 namespace brisk {
 
-__inline__ bool compareKeypointScore(cv::KeyPoint kp_i, cv::KeyPoint kp_j) {
+__inline__ bool compareKeypointScore(agast::KeyPoint kp_i, agast::KeyPoint kp_j) {
   return (agast::KeyPointResponse(kp_i) > agast::KeyPointResponse(kp_j));
 }
 
@@ -60,7 +60,7 @@ void HarrisFeatureDetector::SetRadius(double radius) {
   _radius = radius;
 
   // Generic mask.
-  _LUT = cv::Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
+  _LUT = agast::Mat::zeros(2 * 16 - 1, 2 * 16 - 1, CV_32F);
   for (int x = 0; x < 2 * 16 - 1; ++x) {
     for (int y = 0; y < 2 * 16 - 1; ++y) {
       _LUT.at<float>(y, x) = std::max(
@@ -72,12 +72,12 @@ void HarrisFeatureDetector::SetRadius(double radius) {
 }
 
 // X and Y denote the size of the mask.
-__inline__ void HarrisFeatureDetector::GetCovarEntries(const cv::Mat& src,
-                                                       cv::Mat& dxdx,
-                                                       cv::Mat& dydy,
-                                                       cv::Mat& dxdy) {
+__inline__ void HarrisFeatureDetector::GetCovarEntries(const agast::Mat& src,
+                                                       agast::Mat& dxdx,
+                                                       agast::Mat& dydy,
+                                                       agast::Mat& dxdy) {
   // Sanity check.
-  cv::Mat kernel = cv::Mat::zeros(3, 3, CV_8S);
+  agast::Mat kernel = agast::Mat::zeros(3, 3, CV_8S);
   kernel.at<char>(0, 0) = 3 * 8;
   kernel.at<char>(1, 0) = 10 * 8;
   kernel.at<char>(2, 0) = 3 * 8;
@@ -91,9 +91,9 @@ __inline__ void HarrisFeatureDetector::GetCovarEntries(const cv::Mat& src,
   const unsigned int cy = 1;
 
   // Dest will be 16 bit.
-  dxdx = cv::Mat::zeros(src.rows, src.cols, CV_16S);
-  dydy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
-  dxdy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
+  dxdx = agast::Mat::zeros(src.rows, src.cols, CV_16S);
+  dydy = agast::Mat::zeros(src.rows, src.cols, CV_16S);
+  dxdy = agast::Mat::zeros(src.rows, src.cols, CV_16S);
 
   const unsigned int maxJ = ((src.cols - 2) / 16) * 16;
   const unsigned int maxI = src.rows - 2;
@@ -189,12 +189,12 @@ __inline__ void HarrisFeatureDetector::GetCovarEntries(const cv::Mat& src,
   }
 }
 
-__inline__ void HarrisFeatureDetector::CornerHarris(const cv::Mat& dxdxSmooth,
-                                                    const cv::Mat& dydySmooth,
-                                                    const cv::Mat& dxdySmooth,
-                                                    cv::Mat& dst) {
+__inline__ void HarrisFeatureDetector::CornerHarris(const agast::Mat& dxdxSmooth,
+                                                    const agast::Mat& dydySmooth,
+                                                    const agast::Mat& dxdySmooth,
+                                                    agast::Mat& dst) {
   // Dest will be 16 bit.
-  dst = cv::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32S);
+  dst = agast::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32S);
   const unsigned int maxJ = ((dxdxSmooth.cols - 2) / 8) * 8;
   const unsigned int maxI = dxdxSmooth.rows - 2;
   const unsigned int stride = dxdxSmooth.cols;
@@ -254,7 +254,7 @@ __inline__ void HarrisFeatureDetector::CornerHarris(const cv::Mat& dxdxSmooth,
 }
 
 inline void HarrisFeatureDetector::NonmaxSuppress(
-    const cv::Mat& scores, std::vector<cv::KeyPoint>& keypoints) {
+    const agast::Mat& scores, std::vector<agast::KeyPoint>& keypoints) {
   // First do the 8-neighbor nonmax suppression.
   const int stride = scores.cols;
   const int rows_end = scores.rows - 2;
@@ -293,10 +293,10 @@ inline void HarrisFeatureDetector::NonmaxSuppress(
       const int i = p - p_begin;
 #if HAVE_OPENCV
       keypoints.push_back(
-          cv::KeyPoint(static_cast<float>(i), static_cast<float>(j),
+          agast::KeyPoint(static_cast<float>(i), static_cast<float>(j),
                    10, -1, *center, 0));
 #else  // HAVE_OPENCV
-      cv::KeyPoint keypoint;
+      agast::KeyPoint keypoint;
       keypoint.xs = static_cast<float>(i);
       keypoint.ys = static_cast<float>(j);
       keypoint.sigma = 10;
@@ -310,20 +310,20 @@ inline void HarrisFeatureDetector::NonmaxSuppress(
 }
 
 __inline__ void HarrisFeatureDetector::EnforceUniformity(
-    const cv::Mat& scores, std::vector<cv::KeyPoint>& keypoints) const {
+    const agast::Mat& scores, std::vector<agast::KeyPoint>& keypoints) const {
   // Sort.
   std::sort(keypoints.begin(), keypoints.end(), compareKeypointScore);
 
-  std::vector < cv::KeyPoint > keypoints_new;
+  std::vector < agast::KeyPoint > keypoints_new;
   keypoints_new.reserve(keypoints.size());
 
   // Store occupancy.
-  cv::Mat occupancy;
-  occupancy = cv::Mat::zeros((scores.rows) / 2 + 32, (scores.cols) / 2 + 32,
+  agast::Mat occupancy;
+  occupancy = agast::Mat::zeros((scores.rows) / 2 + 32, (scores.cols) / 2 + 32,
                              CV_8U);
 
   // Go through the sorted keypoints and reject too close ones.
-  for (std::vector<cv::KeyPoint>::iterator it = keypoints.begin();
+  for (std::vector<agast::KeyPoint>::iterator it = keypoints.begin();
       it != keypoints.end(); ++it) {
     const int cy = (agast::KeyPointX(*it) / 2 + 16);
     const int cx = (agast::KeyPointY(*it) / 2 + 16);
@@ -390,13 +390,13 @@ __inline__ void HarrisFeatureDetector::EnforceUniformity(
   }
   keypoints.assign(keypoints_new.begin(), keypoints_new.end());
 }
-void HarrisFeatureDetector::detectImpl(const cv::Mat& image,
-                                       std::vector<cv::KeyPoint>& keypoints,
-                                       const cv::Mat& /*mask*/) const {
+void HarrisFeatureDetector::detectImpl(const agast::Mat& image,
+                                       std::vector<agast::KeyPoint>& keypoints,
+                                       const agast::Mat& /*mask*/) const {
   keypoints.resize(0);
-  cv::Mat scores;
-  cv::Mat DxDx1, DyDy1, DxDy1;
-  cv::Mat DxDx, DyDy, DxDy;
+  agast::Mat scores;
+  agast::Mat DxDx1, DyDy1, DxDy1;
+  agast::Mat DxDx, DyDy, DxDy;
 
   // Pipeline.
   GetCovarEntries(image, DxDx1, DyDy1, DxDy1);

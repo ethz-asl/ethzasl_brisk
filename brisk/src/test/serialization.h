@@ -87,22 +87,22 @@ void Serialize(const uint32_t& value, std::ofstream* out);
 
 void DeSerialize(uint32_t* value, std::ifstream* in);
 
-void Serialize(const cv::Mat& mat, std::ofstream* out);
+void Serialize(const agast::Mat& mat, std::ofstream* out);
 
-void DeSerialize(cv::Mat* mat, std::ifstream* in);
+void DeSerialize(agast::Mat* mat, std::ifstream* in);
 
-void Serialize(const cv::Point2f& pt, std::ofstream* out);
+void Serialize(const agast::Point2f& pt, std::ofstream* out);
 
-void Serialize(const cv::KeyPoint& pt, std::ofstream* out);
+void Serialize(const agast::KeyPoint& pt, std::ofstream* out);
 
-void DeSerialize(cv::KeyPoint* pt, std::ifstream* in);
+void DeSerialize(agast::KeyPoint* pt, std::ifstream* in);
 
 void Serialize(const std::string& value, std::ofstream* out);
 
 void DeSerialize(std::string* value, std::ifstream* in);
 
 template<typename TYPE>
-void DeSerialize(cv::Point_<TYPE>* pt, std::ifstream* in) {
+void DeSerialize(agast::Point_<TYPE>* pt, std::ifstream* in) {
   CHECK_NOTNULL(pt);
   CHECK_NOTNULL(in);
   DeSerialize(&pt->x, in);

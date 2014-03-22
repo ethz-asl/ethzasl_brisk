@@ -59,18 +59,18 @@ class  BriskFeatureDetector : public cv::FeatureDetector {
   int threshold;
   int octaves;
 #if !HAVE_OPENCV
-  void detect(const cv::Mat& image,
-              std::vector<cv::KeyPoint>& keypoints,
-              const cv::Mat& mask = cv::Mat()) const {
+  void detect(const agast::Mat& image,
+              std::vector<agast::KeyPoint>& keypoints,
+              const agast::Mat& mask = agast::Mat()) const {
     detectImpl(image, keypoints, mask);
   }
 #endif
-  void ComputeScale(const cv::Mat& image,
-                    std::vector<cv::KeyPoint>& keypoints) const;
+  void ComputeScale(const agast::Mat& image,
+                    std::vector<agast::KeyPoint>& keypoints) const;
 protected:
-  virtual void detectImpl(const cv::Mat& image,
-                          std::vector<cv::KeyPoint>& keypoints,
-                          const cv::Mat& mask = cv::Mat()) const;
+  virtual void detectImpl(const agast::Mat& image,
+                          std::vector<agast::KeyPoint>& keypoints,
+                          const agast::Mat& mask = agast::Mat()) const;
   bool m_suppressScaleNonmaxima;
 };
 }  // namespace brisk

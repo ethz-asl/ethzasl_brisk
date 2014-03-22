@@ -193,7 +193,7 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
 // Simple alternative:
 template<typename ImgPixel_T, typename IntegralPixel_T>
 __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
-    const cv::Mat& image, const cv::Mat& integral, const float key_x,
+    const agast::Mat& image, const agast::Mat& integral, const float key_x,
     const float key_y, const unsigned int scale, const unsigned int rot,
     const unsigned int point) const {
   // Get the float position.
@@ -354,14 +354,14 @@ __inline__ IntegralPixel_T BriskDescriptorExtractor::SmoothedIntensity(
 }
 
 bool RoiPredicate(const float minX, const float minY, const float maxX,
-                  const float maxY, const cv::KeyPoint& keyPt) {
+                  const float maxY, const agast::KeyPoint& keyPt) {
   return (agast::KeyPointX(keyPt) < minX) || (agast::KeyPointX(keyPt) >= maxX)
       || (agast::KeyPointY(keyPt) < minY) || (agast::KeyPointY(keyPt) >= maxY);
 }
 
 void BriskDescriptorExtractor::setDescriptorBits(int keypoint_idx,
                                                  const int* values,
-                                                 cv::Mat* descriptors) const {
+                                                 agast::Mat* descriptors) const {
   CHECK_NOTNULL(descriptors);
   unsigned char* ptr = descriptors->data + strings_ * keypoint_idx;
 
@@ -411,20 +411,20 @@ void BriskDescriptorExtractor::setDescriptorBits(
 }
 
 void BriskDescriptorExtractor::computeImpl(
-    const cv::Mat& image, std::vector<cv::KeyPoint>& keypoints,
+    const agast::Mat& image, std::vector<agast::KeyPoint>& keypoints,
     std::vector<std::bitset<kDescriptorLength> >& descriptors) const {
   doDescriptorComputation(image, keypoints, descriptors);
 }
 
-void BriskDescriptorExtractor::computeImpl(const cv::Mat& image,
-                                           std::vector<cv::KeyPoint>& keypoints,
-                                           cv::Mat& descriptors) const {
+void BriskDescriptorExtractor::computeImpl(const agast::Mat& image,
+                                           std::vector<agast::KeyPoint>& keypoints,
+                                           agast::Mat& descriptors) const {
   doDescriptorComputation(image, keypoints, descriptors);
 }
 
 void BriskDescriptorExtractor::AllocateDescriptors(size_t count,
-                                                   cv::Mat& descriptors) const {
-  descriptors = cv::Mat::zeros(count, strings_, CV_8UC1);
+                                                   agast::Mat& descriptors) const {
+  descriptors = agast::Mat::zeros(count, strings_, CV_8UC1);
 }
 
 void BriskDescriptorExtractor::AllocateDescriptors(
@@ -435,8 +435,8 @@ void BriskDescriptorExtractor::AllocateDescriptors(
 
 template<typename DESCRIPTOR_CONTAINER>
 void BriskDescriptorExtractor::doDescriptorComputation(
-    const cv::Mat& image,
-    std::vector<cv::KeyPoint>& keypoints,
+    const agast::Mat& image,
+    std::vector<agast::KeyPoint>& keypoints,
     DESCRIPTOR_CONTAINER& descriptors) const {
   // Remove keypoints very close to the border.
     size_t ksize = keypoints.size();
@@ -445,7 +445,7 @@ void BriskDescriptorExtractor::doDescriptorComputation(
     static const float log2 = 0.693147180559945;
     static const float lb_scalerange = log(scalerange_) / (log2);
 
-    std::vector<cv::KeyPoint> valid_kp;
+    std::vector<agast::KeyPoint> valid_kp;
     std::vector<int> valid_scales;
     valid_kp.reserve(keypoints.size());
     valid_scales.reserve(keypoints.size());
@@ -491,8 +491,8 @@ void BriskDescriptorExtractor::doDescriptorComputation(
     // current integral image.
     brisk::timing::DebugTimer timer_integral_image(
         "1.0 Brisk Extraction: integral computation");
-    cv::Mat _integral;  // The integral image.
-    cv::Mat imageScaled;
+    agast::Mat _integral;  // The integral image.
+    agast::Mat imageScaled;
     if (image.type() == CV_16UC1) {
       IntegralImage16(imageScaled, &_integral);
     } else if (image.type() == CV_8UC1) {
@@ -509,7 +509,7 @@ void BriskDescriptorExtractor::doDescriptorComputation(
     // Now do the extraction for all keypoints:
     for (size_t k = 0; k < ksize; ++k) {
       int theta;
-      cv::KeyPoint& kp = keypoints[k];
+      agast::KeyPoint& kp = keypoints[k];
       const int& scale = kscales[k];
       int* pvalues = _values;
       const float& x = agast::KeyPointX(kp);

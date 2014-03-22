@@ -1975,7 +1975,7 @@ int OastDetector9_16::cornerScore(const unsigned char* p) {
   }
 }
 
-int OastDetector9_16::cornerScore(cv::Mat& img, float x, float y, float scale) {
+int OastDetector9_16::cornerScore(agast::Mat& img, float x, float y, float scale) {
   // check boundary
   if (floor(x - 3.5 * scale) < 0)
     return 0;
@@ -3923,7 +3923,7 @@ unsigned char Oast9_16_PatternAccessor::operator()(unsigned int index) {
   // get the position
   const float xf = x_c_ + pattern_x[index] * scale_;
   const float yf = y_c_ + pattern_y[index] * scale_;
-  const cv::Mat& image = *img_;
+  const agast::Mat& image = *img_;
   const int& imagecols = image.cols;
 
   // get the sigma_half:

@@ -33,7 +33,7 @@
 namespace agast {
 
 void AstDetector::score(const unsigned char* i,
-                        const std::vector<cv::KeyPoint>& corners_all) {
+                        const std::vector<agast::KeyPoint>& corners_all) {
   unsigned int n = 0;
   unsigned int num_corners = corners_all.size();
 
@@ -57,8 +57,8 @@ void AstDetector::score(const unsigned char* i,
 }
 
 void AstDetector::nms(const unsigned char* im,
-                      const std::vector<cv::KeyPoint>& corners_all,
-                      std::vector<cv::KeyPoint>& corners_nms) {
+                      const std::vector<agast::KeyPoint>& corners_all,
+                      std::vector<agast::KeyPoint>& corners_nms) {
   score(im, corners_all);
   nonMaximumSuppression(corners_all, corners_nms);
 }

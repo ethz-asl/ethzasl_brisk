@@ -77,8 +77,8 @@ class ScaleSpaceFeatureDetector {
   }
 
   typedef SCORE_CALCULATOR_T ScoreCalculator_t;
-  void detect(const cv::Mat& image, std::vector<cv::KeyPoint>& keypoints,
-              const cv::Mat& mask = cv::Mat()) const {
+  void detect(const agast::Mat& image, std::vector<agast::KeyPoint>& keypoints,
+              const agast::Mat& mask = agast::Mat()) const {
     if (image.empty()) {
       return;
     }
@@ -90,9 +90,9 @@ class ScaleSpaceFeatureDetector {
   }
 
  protected:
-  virtual void detectImpl(const cv::Mat& image,
-                          std::vector<cv::KeyPoint>& keypoints,
-                          const cv::Mat& /*mask*/ = cv::Mat()) const {
+  virtual void detectImpl(const agast::Mat& image,
+                          std::vector<agast::KeyPoint>& keypoints,
+                          const agast::Mat& /*mask*/ = agast::Mat()) const {
     // Find out, if we should use the provided keypoints.
     bool usePassedKeypoints = false;
     if (keypoints.size() > 0)

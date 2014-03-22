@@ -216,9 +216,9 @@ struct DatasetEntry {
  private:
   std::map<std::string, Blob> userdata_;
   std::string path_;
-  cv::Mat imgGray_;
-  std::vector<cv::KeyPoint> keypoints_;
-  cv::Mat descriptors_;
+  agast::Mat imgGray_;
+  std::vector<agast::KeyPoint> keypoints_;
+  agast::Mat descriptors_;
 
  public:
   DatasetEntry() = default;
@@ -232,15 +232,15 @@ struct DatasetEntry {
     return path_;
   }
 
-  const cv::Mat& GetImage() const {
+  const agast::Mat& GetImage() const {
     return imgGray_;
   }
 
-  const std::vector<cv::KeyPoint>& GetKeyPoints() const {
+  const std::vector<agast::KeyPoint>& GetKeyPoints() const {
     return keypoints_;
   }
 
-  const cv::Mat& GetDescriptors() const {
+  const agast::Mat& GetDescriptors() const {
     return descriptors_;
   }
 
@@ -248,20 +248,20 @@ struct DatasetEntry {
     return &path_;
   }
 
-  cv::Mat* GetImgMutable() {
+  agast::Mat* GetImgMutable() {
     return &imgGray_;
   }
 
-  std::vector<cv::KeyPoint>* GetKeyPointsMutable() {
+  std::vector<agast::KeyPoint>* GetKeyPointsMutable() {
     return &keypoints_;
   }
 
-  cv::Mat* GetDescriptorsMutable() {
+  agast::Mat* GetDescriptorsMutable() {
     return &descriptors_;
   }
 
   /*
-   * especially do a deep copy of the cv::Mats
+   * especially do a deep copy of the agast::Mats
    */
   DatasetEntry(const DatasetEntry& other) {
     path_ = other.path_;
@@ -345,7 +345,7 @@ struct DatasetEntry {
     // location to allow detection and description to be done with blocking type
     // optimizations.
     int kpidx = 0;
-    for (std::vector<cv::KeyPoint>::const_iterator it_this = this->keypoints_
+    for (std::vector<agast::KeyPoint>::const_iterator it_this = this->keypoints_
         .begin(), it_other = other.keypoints_.begin(), end_this = this
         ->keypoints_.end(), end_other = other.keypoints_.end();
         it_this != end_this && it_other != end_other;
@@ -433,7 +433,7 @@ struct DatasetEntry {
   // Remove processing results so we can re-run the pipeline on this image.
   void clear_processed_data(bool clearDescriptors, bool clearKeypoints) {
     if (clearDescriptors) {
-      descriptors_ = cv::Mat::zeros(0, 0, CV_8U);
+      descriptors_ = agast::Mat::zeros(0, 0, CV_8U);
     }
     if (clearKeypoints) {
       keypoints_.clear();
@@ -446,7 +446,7 @@ struct DatasetEntry {
 #if HAVE_OPENCV
     imgGray_ = cv::imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
 #else
-    imgGray_ = cv::imread(path_);
+    imgGray_ = agast::imread(path_);
 #endif
     std::cout << "Done reading image: " << imgGray_.rows << "x" <<
         imgGray_.cols << std::endl;

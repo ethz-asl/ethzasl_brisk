@@ -55,11 +55,11 @@ class  BriskScaleSpace {
   ~BriskScaleSpace();
 
   // Construct the image pyramids.
-  void ConstructPyramid(const cv::Mat& image, unsigned char threshold,
+  void ConstructPyramid(const agast::Mat& image, unsigned char threshold,
                         unsigned char overwrite_lower_thres = kDefaultLowerThreshold);
 
   // Get Keypoints.
-  void GetKeypoints(std::vector<cv::KeyPoint>* keypoints);
+  void GetKeypoints(std::vector<agast::KeyPoint>* keypoints);
 
  protected:
   // Nonmax suppression:

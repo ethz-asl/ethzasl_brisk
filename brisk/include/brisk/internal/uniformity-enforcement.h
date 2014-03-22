@@ -39,7 +39,7 @@
 #define BRISK_UNIFORMITY_ENFORCEMENT_H_
 
 template<typename POINT_WITH_SCORE>
-void EnforceKeyPointUniformity(const cv::Mat& LUT, double radius,
+void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
                                int imgrows, int imgcols, size_t maxNumKpt,
                                std::vector<POINT_WITH_SCORE>& points);
 

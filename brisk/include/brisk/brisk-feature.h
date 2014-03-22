@@ -71,7 +71,7 @@ class BriskFeature : public cv::Feature2D {
 
   // Inherited from cv::Feature2D interface.
   virtual void operator()(cv::InputArray image, cv::InputArray mask,
-                          std::vector<cv::KeyPoint>& keypoints,
+                          std::vector<agast::KeyPoint>& keypoints,
                           cv::OutputArray descriptors,
                           bool useProvidedKeypoints = false) const {
     if (!useProvidedKeypoints) {
@@ -79,9 +79,9 @@ class BriskFeature : public cv::Feature2D {
     }
 
     // Convert input output arrays:
-    cv::Mat descriptors_;
-    cv::Mat image_ = image.getMat();
-    cv::Mat mask_ = mask.getMat();
+    agast::Mat descriptors_;
+    agast::Mat image_ = image.getMat();
+    agast::Mat mask_ = mask.getMat();
 
     // Run the detection. Take provided keypoints.
     _briskDetector.detect(image_, keypoints, mask_);
@@ -93,16 +93,16 @@ class BriskFeature : public cv::Feature2D {
 
  protected:
   // Inherited from cv::FeatureDetector interface.
-  virtual void detectImpl(const cv::Mat& image,
-                          std::vector<cv::KeyPoint>& keypoints,
-                          const cv::Mat& mask = cv::Mat()) const {
+  virtual void detectImpl(const agast::Mat& image,
+                          std::vector<agast::KeyPoint>& keypoints,
+                          const agast::Mat& mask = agast::Mat()) const {
     _briskDetector.detect(image, keypoints, mask);
   }
 
   // Inherited from cv::DescriptorExtractor interface.
-  virtual void computeImpl(const cv::Mat& image,
-                           std::vector<cv::KeyPoint>& keypoints,
-                           cv::Mat& descriptors) const {
+  virtual void computeImpl(const agast::Mat& image,
+                           std::vector<agast::KeyPoint>& keypoints,
+                           agast::Mat& descriptors) const {
 
     _briskExtractor.computeImpl(image, keypoints, descriptors);
   }

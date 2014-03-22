@@ -88,10 +88,10 @@ class HarrisScoreCalculatorFloat : public ScoreCalculator<float> {
   virtual void InitializeScores();
 
   // Harris specific.
-  static void GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx, cv::Mat& dydy,
-                              cv::Mat& dxdy);
-  static void CornerHarris(const cv::Mat& dxdxSmooth, const cv::Mat& dydySmooth,
-                           const cv::Mat& dxdySmooth, cv::Mat& score);
+  static void GetCovarEntries(const agast::Mat& src, agast::Mat& dxdx, agast::Mat& dydy,
+                              agast::Mat& dxdy);
+  static void CornerHarris(const agast::Mat& dxdxSmooth, const agast::Mat& dydySmooth,
+                           const agast::Mat& dxdySmooth, agast::Mat& score);
 };
 }  // namespace brisk
 #endif  // __ARM_NEON__

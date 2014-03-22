@@ -50,7 +50,7 @@
 namespace brisk {
 // This is a straightforward harris corner implementation.
 // This is REALLY bad, it performs so many passes through the data...
-void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
+void HarrisScoresSSE(const agast::Mat& src, agast::Mat& scores) {
   const int cols = src.cols;
   const int rows = src.rows;
   const int stride = src.step[0];
@@ -58,7 +58,7 @@ void HarrisScoresSSE(const cv::Mat& src, cv::Mat& scores) {
 
   // Allocate stuff.
   int16_t *DxDx1, *DyDy1, *DxDy1;
-  scores = cv::Mat::zeros(rows, cols, CV_32S);
+  scores = agast::Mat::zeros(rows, cols, CV_32S);
   DxDx1 = new int16_t[rows * cols];
   DxDy1 = new int16_t[rows * cols];
   DyDy1 = new int16_t[rows * cols];

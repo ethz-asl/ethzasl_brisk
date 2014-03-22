@@ -40,7 +40,7 @@
 #include <opencv2/highgui/highgui.hpp>
 void DisplayImageUsingOpencv(const unsigned char* img, int rows, int cols,
                              const std::string& window_title) {
-  cv::Mat mat(rows, cols, CV_8UC1);
+  agast::Mat mat(rows, cols, CV_8UC1);
   memcpy(mat.data, img, rows * cols);
   cv::namedWindow(window_title.c_str(), cv::WINDOW_AUTOSIZE);
   cv::imshow(window_title.c_str(), mat);
