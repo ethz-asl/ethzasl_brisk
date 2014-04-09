@@ -35,6 +35,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <cstdint>
+
 #include <brisk/internal/image-down-sampling.h>
 #include <brisk/internal/macros.h>
 #include <agast/glog.h>
@@ -50,7 +52,7 @@ inline uint8x16_t shiftrightonebyte(uint8x16_t& data) {
   return shiftval8;
 }
 #endif
-}
+}  // namespace
 
 namespace brisk {
 void Halfsample16(const agast::Mat& srcimg, agast::Mat& dstimg) {

@@ -368,7 +368,7 @@ void BriskDescriptorExtractor::setDescriptorBits(int keypoint_idx,
   // Now iterate through all the pairings.
   brisk::timing::DebugTimer timer_assemble_bits(
       "1.3 Brisk Extraction: assemble bits (per keypoint)");
-  brisk::UINT32_ALIAS* ptr2 = reinterpret_cast<brisk::UINT32_ALIAS*>(ptr);
+  UINT32_ALIAS* ptr2 = reinterpret_cast<UINT32_ALIAS*>(ptr);
   const brisk::BriskShortPair* max = shortPairs_ + noShortPairs_;
   int shifter = 0;
   for (brisk::BriskShortPair* iter = shortPairs_; iter < max; ++iter) {

@@ -2,7 +2,11 @@
 #define BRISK_TIMING_TIMER_H_
 
 #include <algorithm>
+#ifdef _MSC_VER
+#include <boost/chrono.hpp>
+#else
 #include <chrono>
+#endif  // _MSC_VER
 #include <limits>
 #include <map>
 #include <string>
@@ -124,7 +128,11 @@ class Timer {
   bool IsTiming() const;
   size_t GetHandle() const;
  private:
+#ifdef _MSC_VER
+  boost::chrono::time_point<boost::chrono::system_clock> time_;
+#else
   std::chrono::time_point<std::chrono::system_clock> time_;
+#endif
 #if USE_RDTSC
   tsc_counter start_, end_;
 #endif
