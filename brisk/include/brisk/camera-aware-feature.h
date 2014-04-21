@@ -29,7 +29,9 @@ class CameraAwareFeature : public cv::Feature2D {
   void setCameraGeometry(
       const/*CAMERA_GEOMETRY_T*/cv::Ptr<cameras::CameraGeometryBase> cameraGeometryPtr);
   void setDistortionTolerance(double distortionTolerance);
-  void setExtractionDirection(const cameras::Point3d& e_C);
+  void setExtractionDirection(const cameras::Vec3d& e_C) {
+    _e_C=e_C*1.0/sqrt(e_C.dot(e_C)); // set normalized...
+  }
 
   /* cv::Feature2d  interface */
   virtual void operator()(cv::InputArray image, cv::InputArray mask,
@@ -87,10 +89,14 @@ class CameraAwareFeature : public cv::Feature2D {
   std::vector<cameras::PinholeCameraGeometry<cameras::NoDistortion> > _undistortedModels;
 
  private:
-  void distortKeypoints(size_t modelIdx,
-                        std::vector<cv::KeyPoint>& keypoints) const;
-  void undistortKeypoints(size_t modelIdx,
-                          std::vector<cv::KeyPoint>& keypoints) const;
+  void distortPoint(
+      size_t modelIdx,
+      const cameras::Point2d& point_undistorted_in,
+      cameras::Point2d& point_distorted_out) const;
+  void undistortPoint(
+      size_t modelIdx,
+      const cameras::Point2d& point_distorted_in,
+      cameras::Point2d& point_undistorted_out) const;
   void distortKeypoints(
       size_t modelIdx,
       const std::vector<cv::KeyPoint>& keypoints_undistorted_in,

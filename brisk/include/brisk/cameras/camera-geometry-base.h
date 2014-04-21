@@ -16,6 +16,8 @@ namespace cameras {
 // some useful types
 typedef cv::Vec2d Point2d;
 typedef cv::Vec3d Point3d;
+typedef cv::Vec2d Vec2d;
+typedef cv::Vec3d Vec3d;
 typedef cv::Vec4d HPoint4d;
 typedef cv::Matx<double, 2, 2> Matx22d;
 typedef cv::Matx<double, 2, 3> Matx23d;

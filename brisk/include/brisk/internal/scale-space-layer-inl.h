@@ -106,8 +106,8 @@ template<class SCORE_CALCULATOR_T>
 void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(
     ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores) {
   // For successive construction.
-  brisk::timing::Timer timerDownsample(
-      "0.0 BRISK Detection: Creation&Downsampling (per layer)");
+  //brisk::timing::Timer timerDownsample(
+      //"0.0 BRISK Detection: Creation&Downsampling (per layer)");
   int type = layerBelow->_img.type();
   if (layerBelow->_isOctave) {
     if (layerBelow->_layerNumber >= 2) {
@@ -154,7 +154,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(
     _scale = pow(2.0, static_cast<double>(_layerNumber / 2)) * 1.5;
     _offset = _scale * 0.5 - 0.5;
   }
-  timerDownsample.Stop();
+  //timerDownsample.Stop();
 
   // By default no uniformity radius.
   _radius = 1;

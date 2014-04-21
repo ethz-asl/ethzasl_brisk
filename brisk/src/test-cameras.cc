@@ -59,11 +59,15 @@ int main(int argc, char ** argv) {
 
   cv::Ptr<cv::Feature2D> briskFeaturePtr = new brisk::BriskFeature(2, 30.0,
                                                                    200.0, 400,
-                                                                   true, true);
+                                                                   false, true);
   brisk::CameraAwareFeature camera0AwareFeature(briskFeaturePtr,
                                                 cameraGeometry0Ptr, 2e-1);
   brisk::CameraAwareFeature camera1AwareFeature(briskFeaturePtr,
                                                 cameraGeometry1Ptr, 2e-1);
+
+  // try out the extraction direction...
+  camera0AwareFeature.setExtractionDirection(brisk::cameras::Vec3d(0,1,0));
+  camera1AwareFeature.setExtractionDirection(brisk::cameras::Vec3d(0,1,0));
 
   // read imgates
   cv::Mat img0, img1;
@@ -100,8 +104,10 @@ int main(int argc, char ** argv) {
 
   // do the thing again with conventional feature:
   kpts0.clear();
+  descriptors0.setTo(0);
   briskFeaturePtr->operator ()(img0, cv::Mat(), kpts0, descriptors0);
   kpts1.clear();
+  descriptors1.setTo(0);
   briskFeaturePtr->operator ()(img1, cv::Mat(), kpts1, descriptors1);
 
   // match

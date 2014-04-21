@@ -16,7 +16,7 @@
 
 namespace brisk {
 
-CameraAwareFeature::CameraAwareFeature() { }
+CameraAwareFeature::CameraAwareFeature():_e_C(0,0,0){}
 
 CameraAwareFeature::~CameraAwareFeature() { }
 
@@ -24,7 +24,7 @@ CameraAwareFeature::CameraAwareFeature(
     cv::Ptr<const cv::Feature2D> feature2dPtr,
     const/*CAMERA_GEOMETRY_T*/cv::Ptr<cameras::CameraGeometryBase> cameraGeometryPtr,
     double distortionTolerance)
-    : _distortionTolerance(distortionTolerance) {
+    : _distortionTolerance(distortionTolerance), _e_C(0,0,0) {
   setFeature2d(feature2dPtr);
   setCameraGeometry(cameraGeometryPtr);
 }
@@ -592,6 +592,32 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
     undistortKeypoints(i, keypointsVec[i], undistortedKeypoints);
     std::vector<cv::KeyPoint> undistortedKeypoints_bkp = undistortedKeypoints;  // back up, since compute might secretly delete...
 
+    // override extraction direction, if requested:
+    if(_e_C.dot(_e_C)!=0.0){
+      for(size_t k=0; k<undistortedKeypoints.size(); ++k){
+        // FIXME: this is still very dumb and inefficient, could be done wiht look-ups...
+        cameras::Vec2d e_orig;
+        cameras::Point3d p_C;
+        cameras::Matx23d J_23;
+        cameras::Point2d kp_orig_dummy;
+        cameras::Point2d kp_orig(keypointsVec[i][k].pt.x,keypointsVec[i][k].pt.y);
+        _cameraGeometryPtr->keypointToEuclidean(kp_orig,p_C);
+        _cameraGeometryPtr->euclideanToKeypoint(p_C,kp_orig_dummy,J_23);
+        cameras::Vec2d e_kp_orig = J_23*_e_C;
+        double length = sqrt(e_kp_orig.dot(e_kp_orig));
+        if(length<0.1)
+          continue; // leave original angle, or, to be set in the descriptor extraction as BRISK will...
+        e_kp_orig=e_kp_orig*1.0/length; // normalize...
+        //std::cout<<atan2(e_kp_orig[1],e_kp_orig[0])*180.0/M_PI<<std::endl;
+        cameras::Point2d kp_orig_2 = kp_orig+keypointsVec[i][k].size*e_kp_orig;
+        cameras::Point2d kp_2;
+        undistortPoint(i,kp_orig_2,kp_2);
+        cameras::Vec2d e_kp = kp_2-cameras::Point2d(undistortedKeypoints[k].pt.x,undistortedKeypoints[k].pt.y);
+        //std::cout<<kp_orig.t()<<" "<<kp_orig_2.t()<<std::endl;
+        undistortedKeypoints[k].angle=atan2(e_kp[1],e_kp[0])*180.0/M_PI;
+      }
+    }
+
     // extraction - on undistorted image
     cv::Mat descriptors_;
     _feature2dPtr->compute(undistorted_image, undistortedKeypoints,
@@ -601,16 +627,28 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
     //std::cout<<descriptors_.row(0)<<std::endl;
 
     /*cv::Mat out;
-     cv::drawKeypoints(undistorted_image,undistortedKeypoints,out);
-     cv::imshow("undistorted_image",out);
-     cv::waitKey();*/
+    cv::drawKeypoints(undistorted_image,undistortedKeypoints,out,cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+    cv::imshow("undistorted_image",out);
+    cv::waitKey();*/
 
     numFeatures += undistortedKeypoints.size();
 
     // also restore keypoints output
     for (size_t k = 0; k < undistortedKeypoints.size(); ++k) {
+      const cv::KeyPoint& kp=undistortedKeypoints[k];
       keypoints.push_back(keypoints_tmp[undistortedKeypoints[k].class_id]);
       keypoints.back().class_id = original_class_id;
+      // transform angle
+      cameras::Point2d ptkp(kp.pt.x, kp.pt.y);
+      cameras::Point2d ptkp_orig(keypoints.back().pt.x, keypoints.back().pt.y);
+      cameras::Vec2d e_kp(cos(kp.angle/180.0*M_PI),sin(kp.angle/180.0*M_PI));
+      cameras::Point2d ptkp_2=ptkp+kp.size*e_kp; // use the size to equalize nonlinearity
+      cameras::Point2d ptkp_2_orig;
+      distortPoint(i,ptkp_2,ptkp_2_orig);
+      cameras::Vec2d e_kp_orig = ptkp_2_orig-ptkp_orig;
+      keypoints.back().angle=atan2(e_kp_orig[1],e_kp_orig[0])*180.0/M_PI;
+      //std::cout<<keypoints.back().angle<<" "<<kp.angle<<std::endl;
+      //std::cout<<atan2(e_kp[1],e_kp[0])*180.0/M_PI<<" "<<kp.angle<<std::endl;
     }
   }
 
@@ -650,57 +688,60 @@ void CameraAwareFeature::detectImpl(const cv::Mat& image,
   removeBorderKeypoints(2.0, image, keypoints);
 }
 
-void CameraAwareFeature::distortKeypoints(
-    size_t modelIdx, std::vector<cv::KeyPoint>& keypoints) const {
-  for (size_t k = 0; k < keypoints.size(); ++k) {
+void CameraAwareFeature::distortPoint(
+    size_t modelIdx,
+    const cameras::Point2d& point_undistorted_in,
+    cameras::Point2d& point_distorted_out) const{
+  // bilinear interpolation :
+  const size_t x_i = size_t(point_undistorted_in[0]);  // floor x
+  const float r_x = (point_undistorted_in[0] - x_i);  // ratio x
+  const size_t y_i = size_t(point_undistorted_in[1]);  // floor y
+  const float r_y = (point_undistorted_in[01] - y_i);  // ratio y
 
-    // bilinear interpolation :
-    const size_t x_i = size_t(keypoints[k].pt.x);  // floor x
-    const float r_x = (keypoints[k].pt.x - x_i);  // ratio x
-    const size_t y_i = size_t(keypoints[k].pt.y);  // floor y
-    const float r_y = (keypoints[k].pt.y - y_i);  // ratio y
+  cv::Point2f p_00(_distort_x_maps[modelIdx].at<float>(y_i, x_i),
+                  _distort_y_maps[modelIdx].at<float>(y_i, x_i));
+  cv::Point2f p_10(_distort_x_maps[modelIdx].at<float>(y_i, x_i + 1),
+                  _distort_y_maps[modelIdx].at<float>(y_i, x_i + 1));
+  cv::Point2f p_01(_distort_x_maps[modelIdx].at<float>(y_i + 1, x_i),
+                  _distort_y_maps[modelIdx].at<float>(y_i + 1, x_i));
+  cv::Point2f p_11(_distort_x_maps[modelIdx].at<float>(y_i + 1, x_i + 1),
+                  _distort_y_maps[modelIdx].at<float>(y_i + 1, x_i + 1));
 
-    cv::Point2f p_00(_distort_x_maps[modelIdx].at<float>(y_i, x_i),
-                     _distort_y_maps[modelIdx].at<float>(y_i, x_i));
-    cv::Point2f p_10(_distort_x_maps[modelIdx].at<float>(y_i, x_i + 1),
-                     _distort_y_maps[modelIdx].at<float>(y_i, x_i + 1));
-    cv::Point2f p_01(_distort_x_maps[modelIdx].at<float>(y_i + 1, x_i),
-                     _distort_y_maps[modelIdx].at<float>(y_i + 1, x_i));
-    cv::Point2f p_11(_distort_x_maps[modelIdx].at<float>(y_i + 1, x_i + 1),
-                     _distort_y_maps[modelIdx].at<float>(y_i + 1, x_i + 1));
+  // bilinear interpolation
+  cv::Point2f p_x0 = (p_00 + r_x * (p_10 - p_00));
+  cv::Point2f p_x1 = (p_01 + r_x * (p_11 - p_01));
 
-    // bilinear interpolation
-    cv::Point2f p_x0 = (p_00 + r_x * (p_10 - p_00));
-    cv::Point2f p_x1 = (p_01 + r_x * (p_11 - p_01));
-    keypoints[k].pt = p_x0 + r_y * (p_x1 - p_x0);
-  }
+  cv::Point2f p_out = p_x0 + r_y * (p_x1 - p_x0);
+  point_distorted_out=cameras::Point2d(p_out.x,p_out.y);
 }
 
-void CameraAwareFeature::undistortKeypoints(
-    size_t modelIdx, std::vector<cv::KeyPoint>& keypoints) const {
-  for (size_t k = 0; k < keypoints.size(); ++k) {
+void CameraAwareFeature::undistortPoint(
+    size_t modelIdx,
+    const cameras::Point2d& point_distorted_in,
+    cameras::Point2d& point_undistorted_out) const{
+  // bilinear interpolation :
+  const size_t x_i = size_t(point_distorted_in[0]);  // floor x
+  const float r_x = (point_distorted_in[0] - x_i);  // ratio x
+  const size_t y_i = size_t(point_distorted_in[1]);  // floor y
+  const float r_y = (point_distorted_in[1] - y_i);  // ratio y
 
-    // bilinear interpolation :
-    const size_t x_i = size_t(keypoints[k].pt.x);  // floor x
-    const float r_x = (keypoints[k].pt.x - x_i);  // ratio x
-    const size_t y_i = size_t(keypoints[k].pt.y);  // floor y
-    const float r_y = (keypoints[k].pt.y - y_i);  // ratio y
+  cv::Point2f p_00(_undistort_x_maps[modelIdx].at<float>(y_i, x_i),
+                   _undistort_y_maps[modelIdx].at<float>(y_i, x_i));
+  cv::Point2f p_10(_undistort_x_maps[modelIdx].at<float>(y_i, x_i + 1),
+                   _undistort_y_maps[modelIdx].at<float>(y_i, x_i + 1));
+  cv::Point2f p_01(_undistort_x_maps[modelIdx].at<float>(y_i + 1, x_i),
+                   _undistort_y_maps[modelIdx].at<float>(y_i + 1, x_i));
+  cv::Point2f p_11(_undistort_x_maps[modelIdx].at<float>(y_i + 1, x_i + 1),
+                   _undistort_y_maps[modelIdx].at<float>(y_i + 1, x_i + 1));
 
-    cv::Point2f p_00(_undistort_x_maps[modelIdx].at<float>(y_i, x_i),
-                     _undistort_y_maps[modelIdx].at<float>(y_i, x_i));
-    cv::Point2f p_10(_undistort_x_maps[modelIdx].at<float>(y_i, x_i + 1),
-                     _undistort_y_maps[modelIdx].at<float>(y_i, x_i + 1));
-    cv::Point2f p_01(_undistort_x_maps[modelIdx].at<float>(y_i + 1, x_i),
-                     _undistort_y_maps[modelIdx].at<float>(y_i + 1, x_i));
-    cv::Point2f p_11(_undistort_x_maps[modelIdx].at<float>(y_i + 1, x_i + 1),
-                     _undistort_y_maps[modelIdx].at<float>(y_i + 1, x_i + 1));
+  // bilinear interpolation
+  cv::Point2f p_x0 = (p_00 + r_x * (p_10 - p_00));
+  cv::Point2f p_x1 = (p_01 + r_x * (p_11 - p_01));
 
-    // bilinear interpolation
-    cv::Point2f p_x0 = (p_00 + r_x * (p_10 - p_00));
-    cv::Point2f p_x1 = (p_01 + r_x * (p_11 - p_01));
-    keypoints[k].pt = p_x0 + r_y * (p_x1 - p_x0);
-  }
+  cv::Point2f p_out = p_x0 + r_y * (p_x1 - p_x0);
+  point_undistorted_out=cameras::Point2d(p_out.x,p_out.y);
 }
+
 
 void CameraAwareFeature::distortKeypoints(
     size_t modelIdx, const std::vector<cv::KeyPoint>& keypoints_undistorted_in,
