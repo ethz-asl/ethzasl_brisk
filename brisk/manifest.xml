@@ -15,6 +15,8 @@
 
   <export>
     <cpp cflags="-I${prefix}/include -std=c++0x -DHAVE_OPENCV" lflags=" -L${prefix}/lib -lbrisk"/>
+    <cpp os="ubuntu" cflags="-msse2 -mssse3"/>
+    <cpp os="linaro" cflags="-mfpu=neon -mfloat-abi=hard"/>
   </export>
 
 </package>

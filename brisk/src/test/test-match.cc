@@ -48,7 +48,7 @@
 #endif
 
 TEST(Brisk, MatchBitset) {
-  cv::Mat img1, img2;
+  agast::Mat img1, img2;
 #ifdef TEST_IN_SOURCE
   std::string image1path = "src/test/test_data/img1.pgm";
   std::string image2path = "src/test/test_data/img2.pgm";
@@ -57,14 +57,14 @@ TEST(Brisk, MatchBitset) {
 #else
   std::string image1path = "./test_data/img1.pgm";
   std::string image2path = "./test_data/img2.pgm";
-  img1 = cv::imread(image1path);
-  img2 = cv::imread(image2path);
+  img1 = agast::imread(image1path);
+  img2 = agast::imread(image2path);
 #endif
 
   const unsigned int detection_threshold = 70;
   const unsigned int matching_threshold = 50;
   brisk::BriskFeatureDetector detector(detection_threshold, 2);
-  std::vector<cv::KeyPoint> keypoints1, keypoints2;
+  std::vector<agast::KeyPoint> keypoints1, keypoints2;
   std::vector<std::bitset<384> > descriptors1, descriptors2;
   detector.detect(img1, keypoints1);
   detector.detect(img2, keypoints2);
@@ -103,11 +103,11 @@ TEST(Brisk, MatchBitset) {
   double outlier_thres = 5;
 
   for (const Match& match : matches) {
-    auto pt1 = agast::KeyPoint(keypoints1.at(match.first));
-    auto pt2 = agast::KeyPoint(keypoints2.at(match.second));
     Eigen::Matrix<double, 3, 1> norm1, norm2;
-    norm1 << pt1.x, pt1.y, 1.0;
-    norm2 << pt2.x, pt2.y, 1.0;
+    norm1 << agast::KeyPointX(keypoints1.at(match.first)),
+        agast::KeyPointY(keypoints1.at(match.first)), 1.0;
+    norm2 << agast::KeyPointX(keypoints2.at(match.second)),
+        agast::KeyPointY(keypoints2.at(match.second)), 1.0;
 
     Eigen::Matrix<double, 3, 1> norm1_hat = H_1to2 * norm1;
     norm1_hat /= norm1_hat(2);

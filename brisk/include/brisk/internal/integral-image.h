@@ -53,7 +53,7 @@
 #endif
 
 namespace brisk {
-void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
+void IntegralImage8(const agast::Mat& src, agast::Mat* dest) {
   CHECK_NOTNULL(dest);
   int x, y;
   const int cn = 1;
@@ -160,7 +160,7 @@ void IntegralImage8(const cv::Mat& src, cv::Mat* dest) {
   }
 }
 
-void IntegralImage16(const cv::Mat& src, cv::Mat* dest) {
+void IntegralImage16(const agast::Mat& src, agast::Mat* dest) {
   CHECK_NOTNULL(dest);
   int x, y;
   const int cn = 1;
