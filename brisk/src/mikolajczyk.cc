@@ -178,6 +178,18 @@ int main(int argc, char ** argv) {
   } else if (strncmp("ORB", argv[3], 3) == 0) {
     threshold = atoi(argv[3] + 3);
     detector = new cv::OrbFeatureDetector(threshold);
+  } else if (strncmp("S-BRISKOLD", argv[3], 10) == 0) {
+    threshold = atoi(argv[3] + 10);
+    if (threshold == 0)
+      threshold = 50;
+    detector =
+        new brisk::BriskFeatureDetector(threshold, 0);
+  } else if (strncmp("BRISKOLD", argv[3], 8) == 0) {
+    threshold = atoi(argv[3] + 8);
+    if (threshold == 0)
+      threshold = 50;
+    detector =
+        new brisk::BriskFeatureDetector(threshold, 3);
   } else if (strncmp("S-BRISK", argv[3], 7) == 0) {
     threshold = atoi(argv[3] + 7);
     if (threshold == 0)
@@ -266,11 +278,13 @@ int main(int argc, char ** argv) {
     detector->detect(imgGray2, keypoints2);
   }
 
+
   float repeatability;
   int count;
   cv::evaluateFeatureDetector(imgGray2, imgGray1, H, &keypoints, &keypoints2,
                               repeatability, count, detector);
   std::cout << "detection repeatability:" << repeatability << std::endl;
+
 
   // now the extractor:
   bool hamming = true;
@@ -323,18 +337,12 @@ int main(int argc, char ** argv) {
     return 4;
   }
 
-  cv::Ptr<cv::DescriptorExtractor> freakExtractor = new cv::FREAK(false,false);
-
   // get the descriptors
   cv::Mat descriptors, descriptors2;
   std::vector<cv::DMatch> indices;
   // first image
-  freakExtractor->compute(imgGray2, keypoints2, descriptors2);
-  descriptors2=cv::Mat();
   descriptorExtractor->compute(imgGray2, keypoints2, descriptors2);
   // and the second one
-  freakExtractor->compute(imgGray1, keypoints, descriptors);
-  descriptors=cv::Mat();
   descriptorExtractor->compute(imgGray1, keypoints, descriptors);
 
   if (!intVals)

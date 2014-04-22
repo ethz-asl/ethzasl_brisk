@@ -55,6 +55,9 @@ target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARY})
 rosbuild_add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
 
+rosbuild_add_executable(mikolajczyk src/mikolajczyk.cc)
+target_link_libraries(mikolajczyk ${PROJECT_NAME})
+
 rosbuild_add_executable(camera src/test-cameras.cc)
 target_link_libraries(camera ${PROJECT_NAME})
 

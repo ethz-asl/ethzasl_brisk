@@ -43,6 +43,8 @@
 #include <fstream>  // NOLINT
 #include <iostream>  // NOLINT
 
+#include <stdexcept>
+
 #include <brisk/brisk-descriptor-extractor.h>
 #include <agast/wrap-opencv.h>
 #include <brisk/internal/helper-structures.h>
@@ -58,6 +60,122 @@ const unsigned int BriskDescriptorExtractor::scales_ = 64;
 const float BriskDescriptorExtractor::scalerange_ = 30;
 // Discretization of the rotation look-up.
 const unsigned int BriskDescriptorExtractor::n_rot_ = 1024;
+
+// legacy BRISK 1.0
+void BriskDescriptorExtractor::generateKernel(std::vector<float> &radiusList,
+                                              std::vector<int> &numberList,
+                                              float dMax, float dMin,
+                                              std::vector<int> indexChange) {
+
+  dMax_ = dMax;
+  dMin_ = dMin;
+
+  // get the total number of points
+  const int rings = radiusList.size();
+  assert(radiusList.size() != 0 && radiusList.size() == numberList.size());
+  points_ = 0;  // remember the total number of points
+  for (int ring = 0; ring < rings; ring++) {
+    points_ += numberList[ring];
+  }
+  // set up the patterns
+  patternPoints_ = new BriskPatternPoint[points_ * scales_ * n_rot_];
+  BriskPatternPoint* patternIterator = patternPoints_;
+
+  // define the scale discretization:
+  static const float lb_scale = log(scalerange_) / log(2.0);
+  static const float lb_scale_step = lb_scale / (scales_);
+
+  scaleList_ = new float[scales_];
+  sizeList_ = new unsigned int[scales_];
+
+  const float sigma_scale = 1.3;
+
+  for (unsigned int scale = 0; scale < scales_; ++scale) {
+    scaleList_[scale] = pow((double) 2.0, (double) (scale * lb_scale_step));
+    sizeList_[scale] = 0;
+
+    // generate the pattern points look-up
+    double alpha, theta;
+    for (size_t rot = 0; rot < n_rot_; ++rot) {
+      theta = double(rot) * 2 * M_PI / double(n_rot_);  // this is the rotation of the feature
+      for (int ring = 0; ring < rings; ++ring) {
+        for (int num = 0; num < numberList[ring]; ++num) {
+          // the actual coordinates on the circle
+          alpha = (double(num)) * 2 * M_PI / double(numberList[ring]);
+          patternIterator->x = scaleList_[scale] * radiusList[ring]
+              * cos(alpha + theta);  // feature rotation plus angle of the point
+          patternIterator->y = scaleList_[scale] * radiusList[ring]
+              * sin(alpha + theta);
+          // and the gaussian kernel sigma
+          if (ring == 0) {
+            patternIterator->sigma = sigma_scale * scaleList_[scale] * 0.5;
+          } else {
+            patternIterator->sigma = sigma_scale * scaleList_[scale]
+                * (double(radiusList[ring])) * sin(M_PI / numberList[ring]);
+          }
+
+          // adapt the sizeList if necessary
+          const unsigned int size = ceil(
+              ((scaleList_[scale] * radiusList[ring]) + patternIterator->sigma))
+              + 1;
+          if (sizeList_[scale] < size) {
+            sizeList_[scale] = size;
+          }
+
+          // increment the iterator
+          ++patternIterator;
+        }
+      }
+    }
+  }
+
+  // now also generate pairings
+  shortPairs_ = new BriskShortPair[points_ * (points_ - 1) / 2];
+  longPairs_ = new BriskLongPair[points_ * (points_ - 1) / 2];
+  noShortPairs_ = 0;
+  noLongPairs_ = 0;
+
+  // fill indexChange with 0..n if empty
+  unsigned int indSize = indexChange.size();
+  if (indSize == 0) {
+    indexChange.resize(points_ * (points_ - 1) / 2);
+    indSize = indexChange.size();
+    for (unsigned int i = 0; i < indSize; i++) {
+      indexChange[i] = i;
+    }
+  }
+  const float dMin_sq = dMin_ * dMin_;
+  const float dMax_sq = dMax_ * dMax_;
+  for (unsigned int i = 1; i < points_; i++) {
+    for (unsigned int j = 0; j < i; j++) {  //(find all the pairs)
+      // point pair distance:
+      const float dx = patternPoints_[j].x - patternPoints_[i].x;
+      const float dy = patternPoints_[j].y - patternPoints_[i].y;
+      const float norm_sq = (dx * dx + dy * dy);
+      if (norm_sq > dMin_sq) {
+        // save to long pairs
+        BriskLongPair& longPair = longPairs_[noLongPairs_];
+        longPair.weighted_dx = int((dx / (norm_sq)) * 2048.0 + 0.5);
+        longPair.weighted_dy = int((dy / (norm_sq)) * 2048.0 + 0.5);
+        longPair.i = i;
+        longPair.j = j;
+        ++noLongPairs_;
+      }
+      if (norm_sq < dMax_sq) {
+        // save to short pairs
+        assert(noShortPairs_ < indSize);  // make sure the user passes something sensible
+        BriskShortPair& shortPair = shortPairs_[indexChange[noShortPairs_]];
+        shortPair.j = j;
+        shortPair.i = i;
+        ++noShortPairs_;
+      }
+    }
+  }
+
+// no bits:
+strings_=(int)ceil((float(noShortPairs_))/128.0)*4*4;
+
+}
 
 void BriskDescriptorExtractor::InitFromStream(bool rotationInvariant,
                                               bool scaleInvariant,
@@ -172,11 +290,39 @@ void BriskDescriptorExtractor::InitFromStream(bool rotationInvariant,
 }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
-                                                   bool scaleInvariant) {
-  std::stringstream ss;
-  brisk::GetDefaultPatternAsStream(&ss);
+                                                   bool scaleInvariant, int version) {
+  CHECK(version==Version::briskV1 || version==Version::briskV2);
+  if(version==Version::briskV2){
+    std::stringstream ss;
+    brisk::GetDefaultPatternAsStream(&ss);
+    InitFromStream(rotationInvariant, scaleInvariant, ss);
+  } else if(version==Version::briskV1){
+    std::vector<float> rList;
+    std::vector<int> nList;
 
-  InitFromStream(rotationInvariant, scaleInvariant, ss);
+    // this is the standard pattern found to be suitable also
+    rList.resize(5);
+    nList.resize(5);
+    const double f = 0.85;
+
+    rList[0] = f * 0;
+    rList[1] = f * 2.9;
+    rList[2] = f * 4.9;
+    rList[3] = f * 7.4;
+    rList[4] = f * 10.8;
+
+    nList[0] = 1;
+    nList[1] = 10;
+    nList[2] = 14;
+    nList[3] = 15;
+    nList[4] = 20;
+
+    rotationInvariance = rotationInvariant;
+    scaleInvariance = scaleInvariant;
+    generateKernel(rList, nList, 5.85 , 8.2 );
+  } else {
+    throw std::runtime_error("only Version::briskV1 or Version::briskV2 supported!");
+  }
 }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
@@ -499,9 +645,7 @@ void BriskDescriptorExtractor::doDescriptorComputation(
     } else if (image.type() == CV_8UC1) {
       IntegralImage8(image, &_integral);
     } else {
-      std::cout << "unsupported image format" << std::endl;
-      std::cout.flush();
-      exit(-1);
+      throw std::runtime_error("Unsupported image format. Must be CV_16UC1 or CV_8UC1.");
     }
     //timer_integral_image.Stop();
 
