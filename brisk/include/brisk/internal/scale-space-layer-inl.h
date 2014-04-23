@@ -49,6 +49,22 @@
 #include <brisk/internal/timer.h>
 
 namespace brisk {
+
+template<class SCORE_CALCULATOR_T>
+float ScaleSpaceLayer<SCORE_CALCULATOR_T>::max9(
+    float i0, float i1, float i2, float i3, float i4, float i5, float i6, float i7,float i8){
+  float max=i0;
+  if(i1>max) max=i1;
+  if(i2>max) max=i2;
+  if(i3>max) max=i3;
+  if(i4>max) max=i4;
+  if(i5>max) max=i5;
+  if(i6>max) max=i6;
+  if(i7>max) max=i7;
+  if(i8>max) max=i8;
+  return max;
+}
+
 template<class SCORE_CALCULATOR_T>
 ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScaleSpaceLayer(const agast::Mat& img,
                                                      bool initScores) {
@@ -223,6 +239,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       pt_tmp.reserve(points.size());
       const float one_over_scale_above = 1.0 / _scale_above;
       const float one_over_scale_below = 1.0 / _scale_below;
+      //std::cout<<"_scale_below:"<<_scale_below<<", _scale:"<<_scale<<", _scale_above:"<<_scale_above<<std::endl;
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
@@ -328,7 +345,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
       const float one_over_scale_below = 1.0 / _scale_below;
-      //std::cout<<"one_over_scale_below:"<<one_over_scale_below<<std::endl;
+      //std::cout<<"_scale_below:"<<_scale_below<<std::endl;
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
@@ -388,20 +405,98 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       const int v = it->y;
       float delta_x;
       float delta_y;
-      Subpixel2D(_scoreCalculator.Score(u - 1, v - 1),
-                 _scoreCalculator.Score(u, v - 1),
-                 _scoreCalculator.Score(u + 1, v - 1),
-                 _scoreCalculator.Score(u - 1, v),
-                 _scoreCalculator.Score(u, v),
-                 _scoreCalculator.Score(u + 1, v),
-                 _scoreCalculator.Score(u - 1, v + 1),
-                 _scoreCalculator.Score(u, v + 1),
-                 _scoreCalculator.Score(u + 1, v + 1), delta_x, delta_y);
-      // TODO(lestefan): 3d refinement.
+
+      const double s_1_1 = _scoreCalculator.Score(u - 1, v - 1);
+      const double s0_1 = _scoreCalculator.Score(u , v - 1);
+      const double s1_1 = _scoreCalculator.Score(u + 1, v - 1);
+      const double s_10 = _scoreCalculator.Score(u - 1, v);
+      const double s00 = _scoreCalculator.Score(u , v );
+      const double s10 = _scoreCalculator.Score(u + 1, v );
+      const double s_11 = _scoreCalculator.Score(u - 1, v + 1);
+      const double s01 = _scoreCalculator.Score(u , v + 1);
+      const double s11 = _scoreCalculator.Score(u + 1, v + 1);
+
+      //std::cout<<s_1_1<<","<<s0_1<<","<<s1_1<<std::endl;
+      //std::cout<<s_10<<","<<s00<<","<<s10<<std::endl;
+      //std::cout<<s_11<<","<<s01<<","<<s11<<std::endl;
+
+      Subpixel2D(s_1_1, s0_1, s1_1,
+                 s_10, s00, s10,
+                 s_11, s01, s11,
+                 delta_x,
+                 delta_y);
+
+      if(delta_x>0.99 || delta_x<-0.99 || delta_y>0.99 || delta_y<-0.99){
+        delta_x=0.0;
+        delta_y=0.0;
+      }
+
+      // scale refinement, if possible:
+      float scale_refinement = 1.0f;
+      // this does not seem to have a positive influence:
+      /*if (_aboveLayer_ptr != 0 && _belowLayer_ptr != 0) {
+        const float one_over_scale_above = 1.0 / _scale_above;
+        const float one_over_scale_below = 1.0 / _scale_below;
+
+        // get patch above
+        const double a_1_1 = ScoreAbove(u - one_over_scale_above, v - one_over_scale_above);
+        const double a0_1 = ScoreAbove(u, v - one_over_scale_above);
+        const double a1_1 = ScoreAbove(u + one_over_scale_above, v - one_over_scale_above);
+        const double a_10 = ScoreAbove(u - one_over_scale_above, v);
+        const double a00 = ScoreAbove(u , v);
+        const double a10 = ScoreAbove(u + one_over_scale_above, v);
+        const double a_11 = ScoreAbove(u - one_over_scale_above, v + one_over_scale_above);
+        const double a01 = ScoreAbove(u, v + one_over_scale_above);
+        const double a11 = ScoreAbove(u + one_over_scale_above, v + one_over_scale_above);
+        // get patch below
+        const double b_1_1 = ScoreBelow(u - one_over_scale_below, v - one_over_scale_below);
+        const double b0_1 = ScoreBelow(u, v - one_over_scale_below);
+        const double b1_1 = ScoreBelow(u + one_over_scale_below, v - one_over_scale_below);
+        const double b_10 = ScoreBelow(u - one_over_scale_below, v);
+        const double b00 = ScoreBelow(u , v);
+        const double b10 = ScoreBelow(u + one_over_scale_below, v);
+        const double b_11 = ScoreBelow(u - one_over_scale_below, v + one_over_scale_below);
+        const double b01 = ScoreBelow(u, v + one_over_scale_below);
+        const double b11 = ScoreBelow(u + one_over_scale_below, v + one_over_scale_below);
+
+        // refine above:
+        float a_delta_x, a_delta_y;
+        float a =  max9(a_1_1, a0_1, a1_1, a_10, a00, a10, a_11, a01, a11);
+        Subpixel2D(a_1_1, a0_1, a1_1, a_10, a00, a10, a_11, a01, a11, a_delta_x, a_delta_y);
+
+        // refine below:
+        float b_delta_x, b_delta_y;
+        float b = max9(b_1_1, b0_1, b1_1, b_10, b00, b10, b_11, b01, b11);
+        Subpixel2D(b_1_1, b0_1, b1_1,b_10, b00, b10,b_11, b01, b11,b_delta_x,b_delta_y);
+
+        // refine scale
+        float s_max;
+        if(_scale_above>0.7) // 1.333
+          scale_refinement=Refine1D_1(b,s00,a,s_max);
+        else
+          scale_refinement=Refine1D(b,s00,a,s_max); // 1.5
+
+        // interpolate coordinates
+        if(scale_refinement>1.0){
+          delta_x=(scale_refinement-1.0f)/(one_over_scale_above-1.0f)*a_delta_x*one_over_scale_above+
+              (2.0f-scale_refinement)/(one_over_scale_above-1.0f)*delta_x;
+          delta_y=(scale_refinement-1.0f)/(one_over_scale_above-1.0f)*a_delta_y*one_over_scale_above+
+              (2.0f-scale_refinement)/(one_over_scale_above-1.0f)*delta_y;
+        } else {
+          delta_x=(scale_refinement)/(1.0f-one_over_scale_below)*b_delta_x*one_over_scale_below+
+              (1.0f-scale_refinement)/(1.0f-one_over_scale_below)*delta_x;
+          delta_y=(scale_refinement)/(1.0f-one_over_scale_below)*b_delta_y*one_over_scale_below+
+              (1.0f-scale_refinement)/(1.0f-one_over_scale_below)*delta_y;
+        }
+        //std::cout<<b<<", "<<s00<<", "<<a<<", scale_refinement"<<scale_refinement<<std::endl;
+        //scale_refinement=1.0;
+      }*/
+
+      //std::cout<<delta_x<<" , "<<delta_y<<std::endl;
       agast::KeyPoint keypoint;
       agast::KeyPointX(keypoint) = _scale * ((it->x + delta_x) + _offset);
       agast::KeyPointY(keypoint) = _scale * ((it->y + delta_y) + _offset);
-      agast::KeyPointSize(keypoint) = _scale * 12.0;
+      agast::KeyPointSize(keypoint) = _scale * scale_refinement * 12.0;
       agast::KeyPointAngle(keypoint) = -1;
       agast::KeyPointResponse(keypoint) = it->score;
       agast::KeyPointOctave(keypoint) = _layerNumber / 2;

@@ -58,6 +58,36 @@ void help(char** argv) {
       << std::endl;
 }
 
+cv::Mat outimg;
+cv::Mat imgRGB1;
+cv::Mat imgRGB2;
+cv::Mat imgRGB3;
+std::vector<cv::KeyPoint> keypoints, keypoints2;
+cv::Mat descriptors, descriptors2;
+cv::Ptr<cv::DescriptorMatcher> descriptorMatcher;
+std::vector<std::vector<cv::DMatch> > matches;
+double alpha=0.01;
+int alpha_slider=1;
+int alpha_slider_max = 100;
+bool hamming = true;
+
+void on_trackbar( int, void* )
+{
+ alpha = (double) alpha_slider/alpha_slider_max ;
+
+ if (hamming)
+   descriptorMatcher->radiusMatch(descriptors, descriptors2, matches, alpha*float(alpha_slider_max));
+ else
+   descriptorMatcher->radiusMatch(descriptors, descriptors2, matches, alpha);
+
+ drawMatches(imgRGB1, keypoints, imgRGB2, keypoints2, matches,outimg,
+             cv::Scalar(0, 255, 0), cv::Scalar(0, 0, 255),
+             std::vector<std::vector<char> >(),
+             cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+
+ cv::imshow("Matches", outimg);
+}
+
 int main(int argc, char ** argv) {
 
   // process command line args
@@ -69,9 +99,7 @@ int main(int argc, char ** argv) {
   // names of the two image files
   std::string fname1;
   std::string fname2;
-  cv::Mat imgRGB1;
-  cv::Mat imgRGB2;
-  cv::Mat imgRGB3;
+
   bool do_rot = false;
   if (strncmp("rot-", argv[1], 4) == 0) {
     do_rot = true;
@@ -165,7 +193,6 @@ int main(int argc, char ** argv) {
   }
 
   // run FAST in first image
-  std::vector<cv::KeyPoint> keypoints, keypoints2;
   int threshold;
 
   // create the detector:
@@ -301,7 +328,6 @@ int main(int argc, char ** argv) {
 
 
   // now the extractor:
-  bool hamming = true;
   cv::Ptr<cv::DescriptorExtractor> descriptorExtractor;
   // now the extractor:
   bool intVals = false;
@@ -368,7 +394,6 @@ int main(int argc, char ** argv) {
   }
 
   // get the descriptors
-  cv::Mat descriptors, descriptors2;
   std::vector<cv::DMatch> indices;
   // first image
   descriptorExtractor->compute(imgGray2, keypoints2, descriptors2);
@@ -487,46 +512,20 @@ int main(int argc, char ** argv) {
             << std::endl << "Matlab/Mikolajczyk/file2.txt" << std::endl
             << "Matlab/Mikolajczyk/info.m" << std::endl;
 
-  std::vector<std::vector<cv::DMatch> > matches;
-  cv::Ptr<cv::DescriptorMatcher> descriptorMatcher;
-  if (hamming)
+  if (hamming){
     descriptorMatcher = new brisk::BruteForceMatcherSse;
+    alpha_slider = descriptors.cols;
+    alpha_slider_max = descriptors.cols*8; // bits
+  }
   else
     descriptorMatcher = new cv::BFMatcher(cv::NORM_L2);
-  if (hamming)
-    descriptorMatcher->radiusMatch(descriptors2, descriptors, matches, descriptors.cols);
-  else
-    descriptorMatcher->radiusMatch(descriptors2, descriptors, matches, 0.21);
-  cv::Mat outimg;
-  std::vector<cv::Point2f> srcPoint;
-  std::vector<cv::Point2f> dstPoint;
-  for (unsigned int i = 0; i < matches.size(); i++) {
-    if (matches[i].size() == 0)
-      continue;
-    srcPoint.push_back(keypoints.at(matches[i][0].trainIdx).pt);
-    dstPoint.push_back(keypoints2.at(matches[i][0].queryIdx).pt);
-    //std::cout << srcPoint.back() << dstPoint.back() << std::endl;
-  }
-  /*cv::Mat H1 =
-   cv::findHomography(cv::Mat(srcPoint),cv::Mat(dstPoint),cv::RANSAC,2);
-   std::cout<<"Homography found:"<<std::endl;
-   std::cout<<H1.at<double>(0,0)<<" "<<H1.at<double>(0,1)<<
-   " "<<H1.at<double>(0,2)<<std::endl;
-   std::cout<<H1.at<double>(1,0)<<" "<<H1.at<double>(1,1)<<
-   " "<<H1.at<double>(1,2)<<std::endl;
-   std::cout<<H1.at<double>(2,0)<<" "<<H1.at<double>(2,1)<<
-   " "<<H1.at<double>(2,2)<<std::endl;
-   cv::warpPerspective(imgRGB1, imgRGB3, H1, cv::Size(imgRGB1.cols,imgRGB1.rows));
-   cv::namedWindow("warped");
-   cv::imshow("warped", imgRGB3);
-   cv::namedWindow("original");
-   cv::imshow("original", imgRGB2);*/
-   drawMatches(imgRGB2, keypoints2, imgRGB1, keypoints,matches,outimg,
-               cv::Scalar(0, 255, 0), cv::Scalar(0, 0, 255),
-               std::vector<std::vector<char> >(),
-               cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-   cv::namedWindow("Matches");
-   cv::imshow("Matches", outimg);
+
+  // Create Trackbar
+  cv::namedWindow("Matches");
+  cv::createTrackbar( "Matching Threshold", "Matches", &alpha_slider, alpha_slider_max, on_trackbar );
+
+  // Show matches
+  on_trackbar( alpha_slider, 0 );
 
    char key=0;
    while(key!=27){
