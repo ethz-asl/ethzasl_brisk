@@ -48,14 +48,14 @@ class AstDetector {
         b(thr) { }
   virtual ~AstDetector() { }
   virtual void detect(const unsigned char* im,
-                      std::vector<cv::KeyPoint>& corners_all,
-                      const cv::Mat* thrmap = 0) = 0;
+                      std::vector<agast::KeyPoint>& corners_all,
+                      const agast::Mat* thrmap = 0) = 0;
   virtual int get_borderWidth() = 0;
-  void nms(const unsigned char* im, const std::vector<cv::KeyPoint>& corners_all,
-           std::vector<cv::KeyPoint>& corners_nms);
+  void nms(const unsigned char* im, const std::vector<agast::KeyPoint>& corners_all,
+           std::vector<agast::KeyPoint>& corners_nms);
   void processImage(const unsigned char* im,
-                    std::vector<cv::KeyPoint>& keypoints_nms) {
-    std::vector<cv::KeyPoint> keypoints;
+                    std::vector<agast::KeyPoint>& keypoints_nms) {
+    std::vector<agast::KeyPoint> keypoints;
     detect(im, keypoints, 0);
     nms(im, keypoints, keypoints_nms);
   }
@@ -75,9 +75,9 @@ class AstDetector {
 
  protected:
   virtual void init_pattern()=0;
-  void score(const unsigned char* i, const std::vector<cv::KeyPoint>& corners_all);
-  void nonMaximumSuppression(const std::vector<cv::KeyPoint>& corners_all,
-                             std::vector<cv::KeyPoint>& corners_nms);
+  void score(const unsigned char* i, const std::vector<agast::KeyPoint>& corners_all);
+  void nonMaximumSuppression(const std::vector<agast::KeyPoint>& corners_all,
+                             std::vector<agast::KeyPoint>& corners_nms);
   std::vector<int> scores;
   std::vector<int> nmsFlags;
   int xsize, ysize;

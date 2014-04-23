@@ -90,7 +90,7 @@ void SetRandom(std::string* value, int seed) {
   }
 }
 
-void SetRandom(cv::Mat* value, int seed) {
+void SetRandom(agast::Mat* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
   int rows;
@@ -152,29 +152,25 @@ void SetRandom(std::map<TYPEA, TYPEB>* value, int seed) {
 }
 
 template<typename TYPE>
-void SetRandom(cv::Point_<TYPE>* value, int seed) {
+void SetRandom(agast::Point_<TYPE>* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
   SetRandom(&value->x, rd());
   SetRandom(&value->y, rd());
 }
 
-void SetRandom(cv::KeyPoint* value, int seed) {
+void SetRandom(agast::KeyPoint* value, int seed) {
   CHECK_NOTNULL(value);
   std::mt19937 rd(seed);
-  SetRandom(&value->angle, rd());
+  SetRandom(&agast::KeyPointAngle(*value), rd());
 #if HAVE_OPENCV
   SetRandom(&value->class_id, rd());
 #endif  // HAVE_OPENCV
-  SetRandom(&value->octave, rd());
-#if HAVE_OPENCV
-  SetRandom(&value->pt, rd());
-#else
-  SetRandom(&value->x, rd());
-  SetRandom(&value->y, rd());
-#endif  // HAVE_OPENCV
-  SetRandom(&value->response, rd());
-  SetRandom(&value->size, rd());
+  SetRandom(&agast::KeyPointOctave(*value), rd());
+  SetRandom(&agast::KeyPointX(*value), rd());
+  SetRandom(&agast::KeyPointY(*value), rd());
+  SetRandom(&agast::KeyPointResponse(*value), rd());
+  SetRandom(&agast::KeyPointSize(*value), rd());
 }
 
 template<typename TYPE>
@@ -188,7 +184,7 @@ void AssertNotEqual(const TYPE& lhs, const TYPE& rhs) {
 }
 
 template<>
-void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
+void AssertEqual(const agast::Mat& lhs, const agast::Mat& rhs) {
   ASSERT_EQ(lhs.rows, rhs.rows);
   ASSERT_EQ(lhs.cols, rhs.cols);
   for (int index = 0, size = lhs.rows * lhs.cols; index < size; ++index) {
@@ -198,7 +194,7 @@ void AssertEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
 }
 
 template<>
-void AssertNotEqual(const cv::Mat& lhs, const cv::Mat& rhs) {
+void AssertNotEqual(const agast::Mat& lhs, const agast::Mat& rhs) {
   bool is_same = true;
   is_same = is_same && lhs.rows == rhs.rows;
   is_same = is_same && lhs.cols == rhs.cols;
@@ -312,7 +308,7 @@ TEST(Serialization, MapStringString) {
 }
 
 TEST(Serialization, CvMat) {
-  RunSerializationTest<cv::Mat>();
+  RunSerializationTest<agast::Mat>();
 }
 
 int main(int argc, char** argv) {

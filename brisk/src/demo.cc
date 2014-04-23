@@ -98,9 +98,9 @@ int main(int argc, char ** argv) {
   // Names of the two image files.
   std::string fname1;
   std::string fname2;
-  cv::Mat imgRGB1;
-  cv::Mat imgRGB2;
-  cv::Mat imgRGB3;
+  agast::Mat imgRGB1;
+  agast::Mat imgRGB2;
+  agast::Mat imgRGB3;
   bool do_rot = false;
   // Standard file extensions.
   std::vector < std::string > fextensions;
@@ -181,15 +181,15 @@ int main(int argc, char ** argv) {
   }
 
   // Convert to grayscale.
-  cv::Mat imgGray1;
+  agast::Mat imgGray1;
   cv::cvtColor(imgRGB1, imgGray1, CV_BGR2GRAY);
-  cv::Mat imgGray2;
+  agast::Mat imgGray2;
   if (!do_rot) {
     cv::cvtColor(imgRGB2, imgGray2, CV_BGR2GRAY);
   }
 
   // Run FAST in first image.
-  std::vector<cv::KeyPoint> keypoints, keypoints2;
+  std::vector<agast::KeyPoint> keypoints, keypoints2;
   int threshold;
 
   // Create the detector:
@@ -264,7 +264,7 @@ int main(int argc, char ** argv) {
       strstrm1 >> y;
       strstrm1 >> a;
       float r = sqrt(1.0 / a);
-      keypoints.push_back(cv::KeyPoint(x, y, 4.0 * r));
+      keypoints.push_back(agast::KeyPoint(x, y, 4.0 * r));
     }
     std::string str2;
     std::stringstream strstrm2;
@@ -278,7 +278,7 @@ int main(int argc, char ** argv) {
       strstrm2 >> y;
       strstrm2 >> a;
       float r = sqrt(1.0 / a);
-      keypoints2.push_back(cv::KeyPoint(x, y, 4.0 * r));
+      keypoints2.push_back(agast::KeyPoint(x, y, 4.0 * r));
     }
 
     // Clean up.
@@ -326,7 +326,7 @@ int main(int argc, char ** argv) {
   }
 
   // Get the descriptors.
-  cv::Mat descriptors, descriptors2;
+  agast::Mat descriptors, descriptors2;
   std::vector < cv::DMatch > indices;
   int testits = 100;
   // First image.
@@ -357,7 +357,7 @@ int main(int argc, char ** argv) {
     cv::BFMatcher matcher(cv::NORM_L2);
     matcher.radiusMatch(descriptors2, descriptors, matches, 0.21);
   }
-  cv::Mat outimg;
+  agast::Mat outimg;
 
   // Drawing.
   drawMatches(imgRGB2, keypoints2, imgRGB1, keypoints, matches, outimg,

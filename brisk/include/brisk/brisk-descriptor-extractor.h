@@ -82,51 +82,51 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   bool scaleInvariance;
 
   // Opencv 2.1 {
-  virtual void compute(const cv::Mat& image,
-                       std::vector<cv::KeyPoint>& keypoints,
-                       cv::Mat& descriptors) const {
+  virtual void compute(const agast::Mat& image,
+                       std::vector<agast::KeyPoint>& keypoints,
+                       agast::Mat& descriptors) const {
     computeImpl(image, keypoints, descriptors);
   }
   // }  Opencv 2.1
 
   virtual void compute(
-      const cv::Mat& image,
-      std::vector<cv::KeyPoint>& keypoints,
+      const agast::Mat& image,
+      std::vector<agast::KeyPoint>& keypoints,
       std::vector<std::bitset<kDescriptorLength> >& descriptors) const {
     computeImpl(image, keypoints, descriptors);
   }
 
  protected:
-  virtual void computeImpl(const cv::Mat& image,
-                           std::vector<cv::KeyPoint>& keypoints,
-                           cv::Mat& descriptors) const;
+  virtual void computeImpl(const agast::Mat& image,
+                           std::vector<agast::KeyPoint>& keypoints,
+                           agast::Mat& descriptors) const;
   virtual void computeImpl(
-      const cv::Mat& image,
-      std::vector<cv::KeyPoint>& keypoints,
+      const agast::Mat& image,
+      std::vector<agast::KeyPoint>& keypoints,
       std::vector<std::bitset<kDescriptorLength> >& descriptors) const;
 
   void setDescriptorBits(int keypoint_idx, const int* values,
-                         cv::Mat* descriptors) const;
+                         agast::Mat* descriptors) const;
 
   void setDescriptorBits(int keypoint_idx, const int* values,
       std::vector<std::bitset<kDescriptorLength> >* descriptors) const;
 
-  void AllocateDescriptors(size_t count, cv::Mat& descriptors) const;
+  void AllocateDescriptors(size_t count, agast::Mat& descriptors) const;
 
   void AllocateDescriptors(
       size_t count,
       std::vector<std::bitset<kDescriptorLength> >& descriptors) const;
 
   template<typename DESCRIPTOR_CONTAINER>
-  void doDescriptorComputation(const cv::Mat& image,
-                               std::vector<cv::KeyPoint>& keypoints,
+  void doDescriptorComputation(const agast::Mat& image,
+                               std::vector<agast::KeyPoint>& keypoints,
                                DESCRIPTOR_CONTAINER& descriptors) const;
 
   void InitFromStream(bool rotationInvariant, bool scaleInvariant,
                       std::istream& pattern_stream);
   template<typename ImgPixel_T, typename IntegralPixel_T>
-  __inline__ IntegralPixel_T SmoothedIntensity(const cv::Mat& image,
-                                               const cv::Mat& integral,
+  __inline__ IntegralPixel_T SmoothedIntensity(const agast::Mat& image,
+                                               const agast::Mat& integral,
                                                const float key_x,
                                                const float key_y,
                                                const unsigned int scale,
@@ -148,7 +148,7 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   static const unsigned int n_rot_;
 
   // Pairs.
-  // Number of uchars the descriptor consists of.
+  // Number of unsigned chars the descriptor consists of.
   int strings_;
   // Short pair maximum distance.
   float dMax_;

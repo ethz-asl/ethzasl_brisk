@@ -68,6 +68,17 @@ class DatasetEntry;
       return false;\
     } } while (0);
 
+#define EXPECTSAMETHROWACCESSOR(THIS, OTHER, ACCESSOR, KEYPOINTIDX) \
+    do { if (ACCESSOR(THIS) != ACCESSOR(OTHER)) { \
+      std::stringstream ss; \
+      ss <<  "For Keypoint " << KEYPOINTIDX << " failed on " \
+      <<  "Failed on " << #ACCESSOR << ": "<< ACCESSOR(THIS) \
+      << " other " << ACCESSOR(OTHER) << " at " << __PRETTY_FUNCTION__ \
+      << " Line: " << __LINE__ << std::endl; \
+      CHECK(false) << ss.str(); \
+      return false;\
+    } } while (0);
+
 #define CHECKCVKEYPOINTMEMBERSAME(THIS, OTHER, MEMBER, KEYPOINTIDX) \
     do { if (THIS.MEMBER != OTHER.MEMBER) { \
       std::stringstream ss; \
@@ -76,12 +87,14 @@ class DatasetEntry;
       " other " << OTHER.MEMBER << \
       " at " << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl; \
       ss << "this / other: "\
-      << std::endl << "pt.x:\t" << agast::KeyPoint(THIS).x << "\t"\
-      << agast::KeyPoint(OTHER).x << std::endl\
-      << std::endl << "pt.y:\t" << agast::KeyPoint(THIS).y << "\t"\
-      << agast::KeyPoint(OTHER).y << std::endl << std::endl \
-      << std::endl << "octave:\t" << THIS.octave << "\t" << OTHER.octave \
-      << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
+      << std::endl << "pt.x:\t" << agast::KeyPointX(THIS) << "\t"\
+      << agast::KeyPointX(OTHER) << std::endl\
+      << std::endl << "pt.y:\t" << agast::KeyPointY(THIS) << "\t"\
+      << agast::KeyPointY(OTHER) << std::endl << std::endl \
+      << std::endl << "octave:\t" << agast::KeyPointOctave(THIS) \
+      << "\t" << agast::KeyPointOctave(OTHER) \
+      << std::endl << "response:\t" << agast::KeyPointResponse(THIS) \
+      << "\t" << agast::KeyPointResponse(OTHER) \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
       << std::endl; \
       CHECK(false) << ss.str(); \
@@ -98,12 +111,14 @@ class DatasetEntry;
       << " other " << OTHER.MEMBER \
       << " at " << __PRETTY_FUNCTION__ << " Line: " << __LINE__ << std::endl; \
       ss << "this / other: "\
-      << std::endl << "pt.x:\t" << agast::KeyPoint(THIS).x << "\t"\
-      << agast::KeyPoint(OTHER).x << std::endl\
-      << std::endl << "pt.y:\t" << agast::KeyPoint(THIS).y << "\t"\
-      << agast::KeyPoint(OTHER).y << std::endl << std::endl \
-      << std::endl << "octave:\t" << THIS.octave << "\t" << OTHER.octave \
-      << std::endl << "response:\t" << THIS.response << "\t" << OTHER.response \
+      << std::endl << "pt.x:\t" << agast::KeyPointX(THIS) << "\t"\
+      << agast::KeyPointX(OTHER) << std::endl\
+      << std::endl << "pt.y:\t" << agast::KeyPointY(THIS) << "\t"\
+      << agast::KeyPointY(OTHER) << std::endl << std::endl \
+      << std::endl << "octave:\t" << agast::KeyPointOctave(THIS) \
+      << "\t" << agast::KeyPointOctave(OTHER) \
+      << std::endl << "response:\t" << agast::KeyPointResponse(THIS) \
+      << "\t" << agast::KeyPointResponse(OTHER) \
       << std::endl << "size:\t" << THIS.size << "\t" << OTHER.size \
       << std::endl;\
       CHECK(false) << ss.str(); \
@@ -201,9 +216,9 @@ struct DatasetEntry {
  private:
   std::map<std::string, Blob> userdata_;
   std::string path_;
-  cv::Mat imgGray_;
-  std::vector<cv::KeyPoint> keypoints_;
-  cv::Mat descriptors_;
+  agast::Mat imgGray_;
+  std::vector<agast::KeyPoint> keypoints_;
+  agast::Mat descriptors_;
 
  public:
   DatasetEntry() = default;
@@ -217,15 +232,15 @@ struct DatasetEntry {
     return path_;
   }
 
-  const cv::Mat& GetImage() const {
+  const agast::Mat& GetImage() const {
     return imgGray_;
   }
 
-  const std::vector<cv::KeyPoint>& GetKeyPoints() const {
+  const std::vector<agast::KeyPoint>& GetKeyPoints() const {
     return keypoints_;
   }
 
-  const cv::Mat& GetDescriptors() const {
+  const agast::Mat& GetDescriptors() const {
     return descriptors_;
   }
 
@@ -233,20 +248,20 @@ struct DatasetEntry {
     return &path_;
   }
 
-  cv::Mat* GetImgMutable() {
+  agast::Mat* GetImgMutable() {
     return &imgGray_;
   }
 
-  std::vector<cv::KeyPoint>* GetKeyPointsMutable() {
+  std::vector<agast::KeyPoint>* GetKeyPointsMutable() {
     return &keypoints_;
   }
 
-  cv::Mat* GetDescriptorsMutable() {
+  agast::Mat* GetDescriptorsMutable() {
     return &descriptors_;
   }
 
   /*
-   * especially do a deep copy of the cv::Mats
+   * especially do a deep copy of the agast::Mats
    */
   DatasetEntry(const DatasetEntry& other) {
     path_ = other.path_;
@@ -330,23 +345,20 @@ struct DatasetEntry {
     // location to allow detection and description to be done with blocking type
     // optimizations.
     int kpidx = 0;
-    for (std::vector<cv::KeyPoint>::const_iterator it_this = this->keypoints_
+    for (std::vector<agast::KeyPoint>::const_iterator it_this = this->keypoints_
         .begin(), it_other = other.keypoints_.begin(), end_this = this
         ->keypoints_.end(), end_other = other.keypoints_.end();
         it_this != end_this && it_other != end_other;
         ++it_this, ++it_other, ++kpidx) {
-      CHECKCVKEYPOINTANGLESAME((*it_this), (*it_other), angle, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), octave, kpidx);
 #if HAVE_OPENCV
       CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), class_id, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), pt.x, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), pt.y, kpidx);
-#else
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), x, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), y, kpidx);
 #endif
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), response, kpidx);
-      CHECKCVKEYPOINTMEMBERSAME((*it_this), (*it_other), size, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointX, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointY, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointAngle, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointOctave, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointResponse, kpidx);
+      EXPECTSAMETHROWACCESSOR((*it_this), (*it_other), agast::KeyPointSize, kpidx);
     }
 
     // Check descriptors.
@@ -421,7 +433,7 @@ struct DatasetEntry {
   // Remove processing results so we can re-run the pipeline on this image.
   void clear_processed_data(bool clearDescriptors, bool clearKeypoints) {
     if (clearDescriptors) {
-      descriptors_ = cv::Mat::zeros(0, 0, CV_8U);
+      descriptors_ = agast::Mat::zeros(0, 0, CV_8U);
     }
     if (clearKeypoints) {
       keypoints_.clear();

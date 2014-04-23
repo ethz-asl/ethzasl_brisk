@@ -48,9 +48,9 @@
 #include <agast/wrap-opencv.h>
 
 namespace brisk {
-void Halfsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
-void Halfsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
-void Twothirdsample16(const cv::Mat& srcimg, cv::Mat& dstimg);
-void Twothirdsample8(const cv::Mat& srcimg, cv::Mat& dstimg);
+void Halfsample16(const agast::Mat& srcimg, agast::Mat& dstimg);
+void Halfsample8(const agast::Mat& srcimg, agast::Mat& dstimg);
+void Twothirdsample16(const agast::Mat& srcimg, agast::Mat& dstimg);
+void Twothirdsample8(const agast::Mat& srcimg, agast::Mat& dstimg);
 }  // namespace brisk
 #endif  // INTERNAL_IMAGE_DOWN_SAMPLING_H_

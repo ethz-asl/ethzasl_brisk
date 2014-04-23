@@ -106,11 +106,11 @@ void HarrisScoreCalculator::Get2dMaxima(std::vector<PointWithScore>& points,  //
 }
 
 // X and Y denote the size of the mask.
-void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
-                                            cv::Mat& dydy, cv::Mat& dxdy) {
+void HarrisScoreCalculator::GetCovarEntries(const agast::Mat& src, agast::Mat& dxdx,
+                                            agast::Mat& dydy, agast::Mat& dxdy) {
   // Sanity check.
   assert(src.type() == CV_8U);
-  cv::Mat kernel = cv::Mat::zeros(3, 3, CV_16S);
+  agast::Mat kernel = agast::Mat::zeros(3, 3, CV_16S);
   kernel.at<int16_t>(0, 0) = 3 * 8;
   kernel.at<int16_t>(1, 0) = 10 * 8;
   kernel.at<int16_t>(2, 0) = 3 * 8;
@@ -124,9 +124,9 @@ void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
   const unsigned int cy = 1;
 
   // Dest will be 16 bit.
-  dxdx = cv::Mat::zeros(src.rows, src.cols, CV_16S);
-  dydy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
-  dxdy = cv::Mat::zeros(src.rows, src.cols, CV_16S);
+  dxdx = agast::Mat::zeros(src.rows, src.cols, CV_16S);
+  dydy = agast::Mat::zeros(src.rows, src.cols, CV_16S);
+  dxdy = agast::Mat::zeros(src.rows, src.cols, CV_16S);
 
   const unsigned int maxJ = ((src.cols - 2) / 16) * 16;
   const unsigned int maxI = src.rows - 2;
@@ -155,7 +155,7 @@ void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
                                           m_dx, m_dx);
           __m128i mult_dy = _mm_set_epi16(m_dy, m_dy, m_dy, m_dy, m_dy, m_dy,
                                           m_dy, m_dy);
-          uchar* p = (src.data + (stride * (i + y)) + x + j);
+          unsigned char* p = (src.data + (stride * (i + y)) + x + j);
           __m128i i0 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
           __m128i i0_hi = _mm_and_si128(i0, mask_hi);
           __m128i i0_lo = _mm_srli_si128(_mm_and_si128(i0, mask_lo), 1);
@@ -192,22 +192,22 @@ void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
           _mm_mulhi_epi16(result_lo_dy, result_lo_dx), 4);
 
       // Store.
-      uchar* p_lo_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
-      uchar* p_hi_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
+      unsigned char* p_lo_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
+      unsigned char* p_hi_dxdx = (dxdx.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
       _mm_storeu_si128(reinterpret_cast<__m128i *>(p_hi_dxdx),
                        _mm_unpackhi_epi16(i_hi_dx_dx, i_lo_dx_dx));
       _mm_storeu_si128(reinterpret_cast<__m128i *>(p_lo_dxdx),
                        _mm_unpacklo_epi16(i_hi_dx_dx, i_lo_dx_dx));
-      uchar* p_lo_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
-      uchar* p_hi_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
+      unsigned char* p_lo_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
+      unsigned char* p_hi_dydy = (dydy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
       _mm_storeu_si128(reinterpret_cast<__m128i *>(p_hi_dydy),
                        _mm_unpackhi_epi16(i_hi_dy_dy, i_lo_dy_dy));
       _mm_storeu_si128(reinterpret_cast<__m128i *>(p_lo_dydy),
                        _mm_unpacklo_epi16(i_hi_dy_dy, i_lo_dy_dy));
-      uchar* p_lo_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
-      uchar* p_hi_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
+      unsigned char* p_lo_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
+      unsigned char* p_hi_dxdy = (dxdy.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j
           + 16;
       _mm_storeu_si128(reinterpret_cast<__m128i *>(p_hi_dxdy),
                        _mm_unpackhi_epi16(i_hi_dx_dy, i_lo_dx_dy));
@@ -224,12 +224,12 @@ void HarrisScoreCalculator::GetCovarEntries(const cv::Mat& src, cv::Mat& dxdx,
   }
 }
 
-void HarrisScoreCalculator::CornerHarris(const cv::Mat& dxdxSmooth,
-                                         const cv::Mat& dydySmooth,
-                                         const cv::Mat& dxdySmooth,
-                                         cv::Mat& dst) {
+void HarrisScoreCalculator::CornerHarris(const agast::Mat& dxdxSmooth,
+                                         const agast::Mat& dydySmooth,
+                                         const agast::Mat& dxdySmooth,
+                                         agast::Mat& dst) {
   // Dest will be 16 bit.
-  dst = cv::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32S);
+  dst = agast::Mat::zeros(dxdxSmooth.rows, dxdxSmooth.cols, CV_32S);
   const unsigned int maxJ = ((dxdxSmooth.cols - 2) / 8) * 8;
   const unsigned int maxI = dxdxSmooth.rows - 2;
   const unsigned int stride = dxdxSmooth.cols;

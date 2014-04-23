@@ -52,7 +52,7 @@
 #include <agast/wrap-opencv.h>
 
 template<int X, int Y>
-__inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLINT
+__inline__ void Filter2D16S(agast::Mat& src, agast::Mat& dst, agast::Mat& kernel) {  // NOLINT
   // Sanity check.
   assert(kernel.type() == CV_16S);
   assert(Y == kernel.rows);
@@ -63,7 +63,7 @@ __inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // N
   int cy = Y / 2;
 
   // Destination will be 16 bit.
-  dst = cv::Mat::zeros(src.rows, src.cols, CV_16S);
+  dst = agast::Mat::zeros(src.rows, src.cols, CV_16S);
   const unsigned int maxJ = ((src.cols - 2) / 8) * 8;
   const unsigned int maxI = src.rows - 2;
   const unsigned int stride = src.cols;
@@ -100,7 +100,7 @@ __inline__ void Filter2D16S(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // N
 }
 
 template<int X, int Y>
-__inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLINT
+__inline__ void Filter2D8U(agast::Mat& src, agast::Mat& dst, agast::Mat& kernel) {  // NOLINT
   // Sanity check.
   assert(kernel.type() == CV_8S);
   assert(Y == kernel.rows);
@@ -111,7 +111,7 @@ __inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NO
   int cy = Y / 2;
 
   // Destination will be 16 bit.
-  dst = cv::Mat::zeros(src.rows, src.cols, CV_16S);
+  dst = agast::Mat::zeros(src.rows, src.cols, CV_16S);
   const unsigned int maxJ = ((src.cols - 2) / 16) * 16;
   const unsigned int maxI = src.rows - 2;
   const unsigned int stride = src.cols;
@@ -135,7 +135,7 @@ __inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NO
           if (m == 0)
             continue;
           __m128i mult = _mm_set_epi16(m, m, m, m, m, m, m, m);
-          uchar* p = (src.data + (stride * (i + y)) + x + j);
+          unsigned char* p = (src.data + (stride * (i + y)) + x + j);
           __m128i i0 = _mm_loadu_si128(reinterpret_cast<__m128i *>(p));
           __m128i i0_hi = _mm_and_si128(i0, mask_hi);
           __m128i i0_lo = _mm_srli_si128(_mm_and_si128(i0, mask_lo), 1);
@@ -147,8 +147,8 @@ __inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NO
         }
       }
       // Store.
-      uchar* p_lo = (dst.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
-      uchar* p_hi = (dst.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j + 16;
+      unsigned char* p_lo = (dst.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j;
+      unsigned char* p_hi = (dst.data + (2 * stride * (i + cy))) + 2 * cx + 2 * j + 16;
       _mm_storeu_si128(reinterpret_cast<__m128i *>(p_hi),
                        _mm_unpackhi_epi16(result_hi, result_lo));
       _mm_storeu_si128(reinterpret_cast<__m128i *>(p_lo),
@@ -166,7 +166,7 @@ __inline__ void Filter2D8U(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NO
 
 // X and Y denote the size of the mask.
 template<int X, int Y>
-__inline__ void Filter2D(cv::Mat& src, cv::Mat& dst, cv::Mat& kernel) {  // NOLINT
+__inline__ void Filter2D(agast::Mat& src, agast::Mat& dst, agast::Mat& kernel) {  // NOLINT
   if (src.type() == CV_8U)
     Filter2D8U<X, Y>(src, dst, kernel);
   else if (src.type() == CV_16S)
