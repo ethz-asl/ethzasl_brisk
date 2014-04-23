@@ -50,48 +50,45 @@ target_link_libraries(demo ${PROJECT_NAME})
 
 # Testing.
 ##########
-if(CATKIN_ENABLE_TESTING AND NOT ANDROID)
   enable_testing()
   file(COPY src/test/test_data DESTINATION ${PROJECT_BINARY_DIR})
 
-  add_library(${PROJECT_NAME}_test_lib src/test/serialization.cc
+add_library(${PROJECT_NAME}_test_lib src/test/serialization.cc
                                        src/test/bench-ds.cc
                                        src/opencv-ref.cc)
 
-  catkin_add_gtest(test_integral_image src/test/test-integral-image.cc
-                   WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-  target_link_libraries(test_integral_image ${GLOG_LIBRARY} 
-                                            ${PROJECT_NAME}
-                                            ${PROJECT_NAME}_test_lib)
+catkin_add_gtest(test_integral_image src/test/test-integral-image.cc
+                 WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+target_link_libraries(test_integral_image ${GLOG_LIBRARY} 
+                                          ${PROJECT_NAME}
+                                          ${PROJECT_NAME}_test_lib)
                                           
-  catkin_add_gtest(test_popcnt src/test/test-popcount.cc
-                   WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-  target_link_libraries(test_popcnt ${GLOG_LIBRARY} 
+catkin_add_gtest(test_popcnt src/test/test-popcount.cc
+                 WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+target_link_libraries(test_popcnt ${GLOG_LIBRARY} 
                                     ${PROJECT_NAME}
                                     ${PROJECT_NAME}_test_lib)
 
-  catkin_add_gtest(test_downsampling src/test/test-downsampling.cc
-                   WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-  target_link_libraries(test_downsampling ${GLOG_LIBRARY} 
-                                          ${PROJECT_NAME}
-                                          ${PROJECT_NAME}_test_lib)
+catkin_add_gtest(test_downsampling src/test/test-downsampling.cc
+                 WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+target_link_libraries(test_downsampling ${GLOG_LIBRARY} 
+                                        ${PROJECT_NAME}
+                                        ${PROJECT_NAME}_test_lib)
 
-  catkin_add_gtest(test_binary_equal src/test/test-binary-equal.cc
-                   WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-  target_link_libraries(test_binary_equal ${GLOG_LIBRARY} 
-                                          ${PROJECT_NAME}
-                                          ${PROJECT_NAME}_test_lib)
+catkin_add_gtest(test_binary_equal src/test/test-binary-equal.cc
+                 WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+target_link_libraries(test_binary_equal ${GLOG_LIBRARY} 
+                                        ${PROJECT_NAME}
+                                        ${PROJECT_NAME}_test_lib)
 
-  catkin_add_gtest(test_match src/test/test-match.cc
-                   WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-  target_link_libraries(test_match ${GLOG_LIBRARY} 
+catkin_add_gtest(test_match src/test/test-match.cc
+                 WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+target_link_libraries(test_match ${GLOG_LIBRARY} 
                                    ${PROJECT_NAME}
                                    ${PROJECT_NAME}_test_lib)
 
-  catkin_add_gtest(test_serialization src/test/test-serialization.cc
-                   WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-  target_link_libraries(test_serialization ${GLOG_LIBRARY} 
-                                           ${PROJECT_NAME}
-                                           ${PROJECT_NAME}_test_lib)
-                      
-endif()
+catkin_add_gtest(test_serialization src/test/test-serialization.cc
+                 WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+target_link_libraries(test_serialization ${GLOG_LIBRARY} 
+                                         ${PROJECT_NAME}
+                                         ${PROJECT_NAME}_test_lib)

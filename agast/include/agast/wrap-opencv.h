@@ -38,6 +38,8 @@
 #ifndef AGAST_WRAP_OPENCV_H_
 #define AGAST_WRAP_OPENCV_H_
 
+#define HAVE_OPENCV 1
+
 #if HAVE_OPENCV
 #include <agast/glog.h>
 #include <opencv2/features2d/features2d.hpp>
