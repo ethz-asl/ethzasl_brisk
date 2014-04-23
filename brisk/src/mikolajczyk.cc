@@ -178,6 +178,20 @@ int main(int argc, char ** argv) {
   } else if (strncmp("ORB", argv[3], 3) == 0) {
     threshold = atoi(argv[3] + 3);
     detector = new cv::OrbFeatureDetector(threshold);
+  } else if (strncmp("S-BRISKUNIFORM", argv[3], 14) == 0) {
+    threshold = atoi(argv[3] + 14);
+    if (threshold == 0)
+      threshold = 50;
+    detector =
+        new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>(
+            0, threshold, 160);
+  } else if (strncmp("BRISKUNIFORM", argv[3], 12) == 0) {
+    threshold = atoi(argv[3] + 12);
+    if (threshold == 0)
+      threshold = 50;
+    detector =
+        new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>(
+            3, threshold, 160);
   } else if (strncmp("S-BRISKOLD", argv[3], 10) == 0) {
     threshold = atoi(argv[3] + 10);
     if (threshold == 0)
@@ -196,14 +210,14 @@ int main(int argc, char ** argv) {
       threshold = 50;
     detector =
         new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>(
-            0, threshold, 20);
+            0, 0, threshold);
   } else if (strncmp("BRISK", argv[3], 5) == 0) {
     threshold = atoi(argv[3] + 5);
     if (threshold == 0)
       threshold = 50;
     detector =
         new brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator>(
-            3, threshold, 20);
+            3, 0, threshold);
   } else if (strncmp("SURF", argv[3], 4) == 0) {
     threshold = atoi(argv[3] + 4);
     if (threshold == 0)
@@ -291,7 +305,23 @@ int main(int argc, char ** argv) {
   cv::Ptr<cv::DescriptorExtractor> descriptorExtractor;
   // now the extractor:
   bool intVals = false;
-  if (std::string(argv[4]) == "BRISK") {
+  if (std::string(argv[4]) == "BRISKOLD") {
+    descriptorExtractor = new brisk::BriskDescriptorExtractor(
+        true, true, brisk::BriskDescriptorExtractor::briskV1);
+    intVals = true;
+  } else if (std::string(argv[4]) == "U-BRISKOLD") {
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        false, true, brisk::BriskDescriptorExtractor::briskV1);
+    intVals = true;
+  } else if (std::string(argv[4]) == "SU-BRISKOLD") {
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        false, false, brisk::BriskDescriptorExtractor::briskV1);
+    intVals = true;
+  } else if (std::string(argv[4]) == "S-BRISKOLD") {
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        true, false, brisk::BriskDescriptorExtractor::briskV1);
+    intVals = true;
+  } else if (std::string(argv[4]) == "BRISK") {
     descriptorExtractor = new brisk::BriskDescriptorExtractor(true, true);
     intVals = true;
   } else if (std::string(argv[4]) == "U-BRISK") {

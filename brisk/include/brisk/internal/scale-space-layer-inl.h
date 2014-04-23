@@ -206,10 +206,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       }
     }
   } else {
-    brisk::timing::DebugTimer timerNonMaxSuppression2d(
-        "0.2 BRISK Detection: 2d nonmax suppression (per layer)");
+    //brisk::timing::DebugTimer timerNonMaxSuppression2d(
+        //"0.2 BRISK Detection: 2d nonmax suppression (per layer)");
     _scoreCalculator.Get2dMaxima(points, _absoluteThreshold);
-    timerNonMaxSuppression2d.Stop();
+    //timerNonMaxSuppression2d.Stop();
   }
   // Next check above and below. The code looks a bit stupid, but that's
   // for speed. We don't want to make the distinction analyzing whether or
@@ -217,12 +217,12 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (!usePassedKeypoints) {
     if (_aboveLayer_ptr != 0 && _belowLayer_ptr != 0) {
       // Check above and below
-      brisk::timing::DebugTimer timerNonMaxSuppression3d(
-          "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
+      //brisk::timing::DebugTimer timerNonMaxSuppression3d(
+          //"0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
-      const int one_over_scale_above = 1.0 / _scale_above;
-      const int one_over_scale_below = 1.0 / _scale_below;
+      const float one_over_scale_above = 1.0 / _scale_above;
+      const float one_over_scale_below = 1.0 / _scale_below;
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
@@ -278,14 +278,15 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.Stop();
+      //timerNonMaxSuppression3d.Stop();
     } else if (_aboveLayer_ptr != 0) {
       // Check above.
-      brisk::timing::DebugTimer timerNonMaxSuppression3d(
-          "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
+      //brisk::timing::DebugTimer timerNonMaxSuppression3d(
+          //"0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
-      const int one_over_scale_above = 1.0 / _scale_above;
+      const float one_over_scale_above = 1.0 / _scale_above;
+      //std::cout<<"one_over_scale_above:"<<one_over_scale_above<<std::endl;
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
@@ -319,14 +320,15 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.Stop();
+      //timerNonMaxSuppression3d.Stop();
     } else if (_belowLayer_ptr != 0) {
       // Check below.
-      brisk::timing::DebugTimer timerNonMaxSuppression3d(
-          "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
+      //brisk::timing::DebugTimer timerNonMaxSuppression3d(
+          //"0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
-      const int one_over_scale_below = 1.0 / _scale_below;
+      const float one_over_scale_below = 1.0 / _scale_below;
+      //std::cout<<"one_over_scale_below:"<<one_over_scale_below<<std::endl;
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
@@ -360,7 +362,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.Stop();
+      //timerNonMaxSuppression3d.Stop();
     }
   }
 
@@ -373,9 +375,9 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   }
 
   // 3d(/2d) subpixel refinement.
-  brisk::timing::DebugTimer timer_subpixel_refinement(
-      "0.4 BRISK Detection: "
-      "subpixel(&scale) refinement (per layer)");
+  //brisk::timing::DebugTimer timer_subpixel_refinement(
+      //"0.4 BRISK Detection: "
+      //"subpixel(&scale) refinement (per layer)");
   if (usePassedKeypoints)
     keypoints.clear();
   if (doRefinement) {
@@ -419,19 +421,21 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       keypoints.push_back(keypoint);
     }
   }
-  timer_subpixel_refinement.Stop();
+  //timer_subpixel_refinement.Stop();
 }
 
 // Utilities.
 template<class SCORE_CALCULATOR_T>
 inline double ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScoreAbove(double u,
                                                               double v) {
+  //return 0;
   return _aboveLayer_ptr->_scoreCalculator.Score(
       _scale_above * (u + _offset_above), _scale_above * (v + _offset_above));
 }
 template<class SCORE_CALCULATOR_T>
 inline double ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScoreBelow(double u,
                                                               double v) {
+  //return 0;
   return _belowLayer_ptr->_scoreCalculator.Score(
       _scale_below * (u + _offset_below), _scale_below * (v + _offset_below));
 }
