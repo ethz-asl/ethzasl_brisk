@@ -1,8 +1,22 @@
 cmake_minimum_required(VERSION 2.8.3)
+project(agast)
 
-find_package(redwood_catkin)
-if (redwood_catkin_FOUND)
-  include(${PROJECT_SOURCE_DIR}/CMakeLists_catkin_simple.txt)
-else()
-  include(${PROJECT_SOURCE_DIR}/CMakeLists_rosbuild.txt)
-endif()
+find_package(catkin REQUIRED COMPONENTS roscpp)
+
+catkin_package(
+    DEPENDS
+    CATKIN_DEPENDS roscpp
+    INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
+    LIBRARIES agast
+    CFG_EXTRAS export_flags.cmake
+)
+find_package(OpenCV REQUIRED)
+
+include_directories(include ${catkin_INCLUDE_DIRS})
+
+add_definitions(-Wextra -Wall -Werror -pedantic -DHAVE_OPENCV)
+
+file(GLOB AGAST_SOURCE_FILES  "${PROJECT_SOURCE_DIR}/src/*.cc")
+file(GLOB AGAST_HEADER_FILES  "${PROJECT_SOURCE_DIR}/include/agast/*.h")
+
+add_library(${PROJECT_NAME} ${AGAST_SOURCE_FILES})

@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>brisk</name>
+  <name>brisk_ros_demo</name>
   <version>2.0.0</version>
-  <description>The brisk lib</description>
+  <description>The brisk ros demo package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <maintainer email="slynen@ethz.ch">Simon Lynen</maintainer>
@@ -16,19 +16,16 @@
   <author email="slynen@ethz.ch">Simon Lynen</author>
 
   <build_depend>agast</build_depend>
-  <build_depend>gtest</build_depend>
+  <build_depend>brisk</build_depend>
+  <build_depend>image_transport</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>opencv</build_depend>
-  <build_depend>eigen</build_depend>
-  <build_depend>glog</build_depend>
+  <build_depend>opencv2</build_depend>
   
   <run_depend>agast</run_depend>
-  <run_depend>gtest</run_depend>
+  <run_depend>brisk</run_depend>
+  <run_depend>image_transport</run_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>opencv</run_depend>
-  <run_depend>eigen</run_depend>
-  <run_depend>glog</run_depend>
-  
+  <run_depend>opencv2</run_depend>
+
   <buildtool_depend>catkin</buildtool_depend>
-  <buildtool_depend>catkin_simple</buildtool_depend>
 </package>

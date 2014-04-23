@@ -211,12 +211,8 @@ void AssertNotEqual(const agast::Mat& lhs, const agast::Mat& rhs) {
 template<typename TYPE>
 void RunSerializationTest() {
   TYPE saved_value, loaded_value;
-#ifdef TEST_IN_SOURCE
-    std::string filename = "src/test/test_data/tmp/"
-#else
-    std::string filename = "./"
-#endif
-    "serialization_file_" + std::string(typeid(TYPE).name()) + "_tmp";
+  std::string filename = "./serialization_file_" +
+      std::string(typeid(TYPE).name()) + "_tmp";
 
   std::mt19937 rd(42);
   {  // Scoping to flush and close file.
