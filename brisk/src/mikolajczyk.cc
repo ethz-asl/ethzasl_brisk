@@ -8,6 +8,7 @@
 #include <sys/time.h>
 #include <opencv2/opencv.hpp>
 #include <brisk/brisk.h>
+#include <brisk/brisk-v1.h>
 #include <fstream>
 #include <iostream>
 #include <opencv2/nonfree/features2d.hpp>
@@ -224,13 +225,13 @@ int main(int argc, char ** argv) {
     if (threshold == 0)
       threshold = 50;
     detector =
-        new brisk::BriskFeatureDetector(threshold, 0);
+        new brisk_v1::BriskFeatureDetector(threshold, 0);
   } else if (strncmp("BRISKOLD", argv[3], 8) == 0) {
     threshold = atoi(argv[3] + 8);
     if (threshold == 0)
       threshold = 50;
     detector =
-        new brisk::BriskFeatureDetector(threshold, 3);
+        new brisk_v1::BriskFeatureDetector(threshold, 3);
   } else if (strncmp("S-BRISK", argv[3], 7) == 0) {
     threshold = atoi(argv[3] + 7);
     if (threshold == 0)
@@ -411,8 +412,11 @@ int main(int argc, char ** argv) {
   std::cout << "detection repeatability:" << repeatability << std::endl;
 
   // save to files readable by the Mikolajczyk evaluation Matlab Toolset
-  std::ofstream file1("Matlab/Mikolajczyk/file1.txt");
-  std::ofstream file2("Matlab/Mikolajczyk/file2.txt");
+  std::stringstream ofname1, ofname2;
+  ofname1<<argv[1]<<"/"<<argv[3]<<"-"<<argv[4]<<"-1.kpts";
+  ofname2<<argv[1]<<"/"<<argv[3]<<"-"<<argv[4]<<"-"<<argv[2]<<".kpts";
+  std::ofstream file1(ofname1.str());
+  std::ofstream file2(ofname2.str());
 
   const int descIntLength = descriptors.cols * 8;
   assert(descIntLength==descriptors2.cols*8);
@@ -508,9 +512,10 @@ int main(int argc, char ** argv) {
   infofile << "];" << std::endl;
   infofile.close();
 
-  std::cout << "wrote: " << std::endl << "Matlab/Mikolajczyk/file1.txt"
-            << std::endl << "Matlab/Mikolajczyk/file2.txt" << std::endl
-            << "Matlab/Mikolajczyk/info.m" << std::endl;
+  std::cout << "wrote: " << std::endl
+      << ofname1.str() << std::endl
+      << ofname2.str() << std::endl
+      << "Matlab/Mikolajczyk/info.m" << std::endl;
 
   if (hamming){
     descriptorMatcher = new brisk::BruteForceMatcherSse;
@@ -529,7 +534,7 @@ int main(int argc, char ** argv) {
 
    char key=0;
    while(key!=27){
-     key=cvWaitKey(1000);
+     key=cvWaitKey(10);
    }
 
   //cv::imwrite("out.ppm",outimg)

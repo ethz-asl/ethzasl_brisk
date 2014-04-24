@@ -243,55 +243,35 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
-        const typename ScoreCalculator_t::Score_t center = it->score;
-        const int x = it->x;
-        const int y = it->y;
+        const typename ScoreCalculator_t::Score_t center = 1.3*float(it->score); // give 30% margin
+        const double x = it->x;
+        const double y = it->y;
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
           continue;
-        if (center < ScoreAbove(x, y))
+
+        bool ismax=true;
+        for(float a = -1; a<=1; ++a){
+          for(float b = -1; b<=1; ++b){
+            if (center < ScoreBelow(x + a*one_over_scale_below, y + b*one_over_scale_below)){
+              ismax=false;
+              break;
+            }
+            if (center < ScoreAbove(x + a*one_over_scale_above, y + b*one_over_scale_above)){
+              ismax=false;
+              break;
+            }
+            //std::cout << ScoreBelow(x + a*one_over_scale_below, y + b*one_over_scale_below) << " ";
+            //std::cout<<ScoreAbove(x + a*one_over_scale_above, y + b*one_over_scale_above)<<std::endl;
+            //std::cout<<ScoreBelow(x + a*one_over_scale_below, y + b*one_over_scale_below)<<std::endl;
+          }
+          if(!ismax)
+            break;
+          //std::cout<<std::endl;
+        }
+        //std::cout<<"=============================="<<std::endl;
+        if(!ismax)
           continue;
-        if (center < ScoreAbove(x + one_over_scale_above, y))
-          continue;
-        if (center < ScoreAbove(x - one_over_scale_above, y))
-          continue;
-        if (center < ScoreAbove(x, y + one_over_scale_above))
-          continue;
-        if (center < ScoreAbove(x, y - one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x + one_over_scale_above, y + one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x + one_over_scale_above, y - one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x - one_over_scale_above, y + one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x - one_over_scale_above, y - one_over_scale_above))
-          continue;
-        if (center < ScoreBelow(x, y))
-          continue;
-        if (center < ScoreBelow(x + one_over_scale_below, y))
-          continue;
-        if (center < ScoreBelow(x - one_over_scale_below, y))
-          continue;
-        if (center < ScoreBelow(x, y + one_over_scale_below))
-          continue;
-        if (center < ScoreBelow(x, y - one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x + one_over_scale_below, y + one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x + one_over_scale_below, y - one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x - one_over_scale_below, y + one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x - one_over_scale_below, y - one_over_scale_below))
-          continue;
+
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
@@ -310,30 +290,23 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         const typename ScoreCalculator_t::Score_t center = it->score;
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
           continue;
-        const int x = it->x;
-        const int y = it->y;
-        if (center < ScoreAbove(x, y))
+        const double x = it->x;
+        const double y = it->y;
+
+        bool ismax=true;
+        for(float a = -1; a<=1; ++a){
+          for(float b = -1; b<=1; ++b){
+            if (center < ScoreAbove(x + a*one_over_scale_above, y + b*one_over_scale_above)){
+              ismax=false;
+              break;
+            }
+            if(!ismax)
+              break;
+          }
+        }
+        if(!ismax)
           continue;
-        if (center < ScoreAbove(x + one_over_scale_above, y))
-          continue;
-        if (center < ScoreAbove(x - one_over_scale_above, y))
-          continue;
-        if (center < ScoreAbove(x, y + one_over_scale_above))
-          continue;
-        if (center < ScoreAbove(x, y - one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x + one_over_scale_above, y + one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x + one_over_scale_above, y - one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x - one_over_scale_above, y + one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x - one_over_scale_above, y - one_over_scale_above))
-          continue;
+
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
@@ -352,30 +325,23 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         const typename ScoreCalculator_t::Score_t center = it->score;
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
           continue;
-        const int x = it->x;
-        const int y = it->y;
-        if (center < ScoreBelow(x, y))
+        const double x = it->x;
+        const double y = it->y;
+
+        bool ismax=true;
+        for(float a = -1; a<=1; ++a){
+          for(float b = -1; b<=1; ++b){
+            if (center < ScoreBelow(x + a*one_over_scale_below, y + b*one_over_scale_below)){
+              ismax=false;
+              break;
+            }
+            if(!ismax)
+              break;
+          }
+        }
+        if(!ismax)
           continue;
-        if (center < ScoreBelow(x + one_over_scale_below, y))
-          continue;
-        if (center < ScoreBelow(x - one_over_scale_below, y))
-          continue;
-        if (center < ScoreBelow(x, y + one_over_scale_below))
-          continue;
-        if (center < ScoreBelow(x, y - one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x + one_over_scale_below, y + one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x + one_over_scale_below, y - one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x - one_over_scale_below, y + one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x - one_over_scale_below, y - one_over_scale_below))
-          continue;
+
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
@@ -403,8 +369,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         points.begin(); it != points.end(); ++it) {
       const int u = it->x;
       const int v = it->y;
-      float delta_x;
-      float delta_y;
+      float delta_x=0;
+      float delta_y=0;
 
       const double s_1_1 = _scoreCalculator.Score(u - 1, v - 1);
       const double s0_1 = _scoreCalculator.Score(u , v - 1);
@@ -494,8 +460,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
 
       //std::cout<<delta_x<<" , "<<delta_y<<std::endl;
       agast::KeyPoint keypoint;
-      agast::KeyPointX(keypoint) = _scale * ((it->x + delta_x) + _offset);
-      agast::KeyPointY(keypoint) = _scale * ((it->y + delta_y) + _offset);
+      agast::KeyPointX(keypoint) = _scale * (it->x + delta_x + 0.5) - 0.5;
+      agast::KeyPointY(keypoint) = _scale * (it->y + delta_y + 0.5) - 0.5;
       agast::KeyPointSize(keypoint) = _scale * scale_refinement * 12.0;
       agast::KeyPointAngle(keypoint) = -1;
       agast::KeyPointResponse(keypoint) = it->score;
@@ -507,8 +473,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         typename ScoreCalculator_t::PointWithScore>::const_iterator it =
         points.begin(); it != points.end(); ++it) {
       agast::KeyPoint keypoint;
-      agast::KeyPointX(keypoint) = _scale * ((it->x) + _offset);
-      agast::KeyPointY(keypoint) = _scale * ((it->y) + _offset);
+      agast::KeyPointX(keypoint) = _scale * (it->x + 0.5) - 0.5;
+      agast::KeyPointY(keypoint) = _scale * (it->y + 0.5) - 0.5;
       agast::KeyPointSize(keypoint) = _scale * 12.0;
       agast::KeyPointAngle(keypoint) = -1;
       agast::KeyPointResponse(keypoint) = it->score;
@@ -525,14 +491,15 @@ inline double ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScoreAbove(double u,
                                                               double v) {
   //return 0;
   return _aboveLayer_ptr->_scoreCalculator.Score(
-      _scale_above * (u + _offset_above), _scale_above * (v + _offset_above));
+      int(_scale_above * (u + 0.5) - 0.5), int(_scale_above * (v + 0.5) - 0.5));
 }
 template<class SCORE_CALCULATOR_T>
 inline double ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScoreBelow(double u,
                                                               double v) {
   //return 0;
+  //std::cout<<"_offset_below="<<_offset_below<<", _scale_below="<<_scale_below<<std::endl;
   return _belowLayer_ptr->_scoreCalculator.Score(
-      _scale_below * (u + _offset_below), _scale_below * (v + _offset_below));
+      int(_scale_below * (u + 0.5) - 0.5), int(_scale_below * (v + 0.5) - 0.5));
 }
 
 template<class SCORE_CALCULATOR_T>
