@@ -353,19 +353,51 @@ int main(int argc, char ** argv) {
     intVals = true;
   } else if (std::string(argv[4]) == "BRISK") {
     descriptorExtractor = new brisk::BriskDescriptorExtractor(
-        true, true,  brisk::BriskDescriptorExtractor::briskV2, 2);
+        true, true,  brisk::BriskDescriptorExtractor::briskV2);
     intVals = true;
   } else if (std::string(argv[4]) == "U-BRISK") {
     descriptorExtractor = new cv::BriskDescriptorExtractor(
-        false, true, brisk::BriskDescriptorExtractor::briskV2, 2);
+        false, true, brisk::BriskDescriptorExtractor::briskV2);
     intVals = true;
   } else if (std::string(argv[4]) == "SU-BRISK") {
     descriptorExtractor = new cv::BriskDescriptorExtractor(
-        false, false, brisk::BriskDescriptorExtractor::briskV2, 2);
+        false, false, brisk::BriskDescriptorExtractor::briskV2);
     intVals = true;
   } else if (std::string(argv[4]) == "S-BRISK") {
     descriptorExtractor = new cv::BriskDescriptorExtractor(
-        true, false, brisk::BriskDescriptorExtractor::briskV2, 2);
+        true, false, brisk::BriskDescriptorExtractor::briskV2);
+    intVals = true;
+  } else if (std::string(argv[4]) == "BRISK-L") {
+    descriptorExtractor = new brisk::BriskDescriptorExtractor(
+        true, true,  brisk::BriskDescriptorExtractor::briskV2, 2.35);
+    intVals = true;
+  } else if (std::string(argv[4]) == "U-BRISK-L") {
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        false, true, brisk::BriskDescriptorExtractor::briskV2, 2.35);
+    intVals = true;
+  } else if (std::string(argv[4]) == "SU-BRISK-L") {
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        false, false, brisk::BriskDescriptorExtractor::briskV2, 2.35);
+    intVals = true;
+  } else if (std::string(argv[4]) == "S-BRISK-L") {
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        true, false, brisk::BriskDescriptorExtractor::briskV2, 2.35);
+    intVals = true;
+  } else if (std::string(argv[4]) == "BRISK-B") {
+    descriptorExtractor = new brisk::BriskDescriptorExtractor(
+        true, true,  brisk::BriskDescriptorExtractor::briskV2, 1.0);
+    intVals = true;
+  } else if (std::string(argv[4]) == "U-BRISK-B") {
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        false, true, brisk::BriskDescriptorExtractor::briskV2, 1.0);
+    intVals = true;
+  } else if (std::string(argv[4]) == "SU-BRISK-B") {
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        false, false, brisk::BriskDescriptorExtractor::briskV2, 1.0);
+    intVals = true;
+  } else if (std::string(argv[4]) == "S-BRISK-B") {
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        true, false, brisk::BriskDescriptorExtractor::briskV2, 1.0);
     intVals = true;
   } else if (std::string(argv[4]) == "BRIEF") {
     descriptorExtractor = new cv::BriefDescriptorExtractor(64);
