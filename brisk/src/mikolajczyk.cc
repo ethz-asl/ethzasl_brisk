@@ -193,6 +193,8 @@ int main(int argc, char ** argv) {
     imwrite("rotated.pgm", imgGray2);
   }
 
+  float region_scale = 1.0;
+
   // run FAST in first image
   int threshold;
 
@@ -255,6 +257,7 @@ int main(int argc, char ** argv) {
     float edgeThreshold = atof(argv[3] + 4);
     if (edgeThreshold == 0)
       edgeThreshold = 10.0;
+    region_scale=4.0;
     detector = new cv::SiftFeatureDetector(0, 3, 0.04, edgeThreshold);
   } else {
     detector = cv::FeatureDetector::create(argv[3]);
@@ -349,16 +352,20 @@ int main(int argc, char ** argv) {
         true, false, brisk::BriskDescriptorExtractor::briskV1);
     intVals = true;
   } else if (std::string(argv[4]) == "BRISK") {
-    descriptorExtractor = new brisk::BriskDescriptorExtractor(true, true);
+    descriptorExtractor = new brisk::BriskDescriptorExtractor(
+        true, true,  brisk::BriskDescriptorExtractor::briskV2, 2);
     intVals = true;
   } else if (std::string(argv[4]) == "U-BRISK") {
-    descriptorExtractor = new cv::BriskDescriptorExtractor(false, true);
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        false, true, brisk::BriskDescriptorExtractor::briskV2, 2);
     intVals = true;
   } else if (std::string(argv[4]) == "SU-BRISK") {
-    descriptorExtractor = new cv::BriskDescriptorExtractor(false, false);
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        false, false, brisk::BriskDescriptorExtractor::briskV2, 2);
     intVals = true;
   } else if (std::string(argv[4]) == "S-BRISK") {
-    descriptorExtractor = new cv::BriskDescriptorExtractor(true, false);
+    descriptorExtractor = new cv::BriskDescriptorExtractor(
+        true, false, brisk::BriskDescriptorExtractor::briskV2, 2);
     intVals = true;
   } else if (std::string(argv[4]) == "BRIEF") {
     descriptorExtractor = new cv::BriefDescriptorExtractor(64);
@@ -432,7 +439,7 @@ int main(int argc, char ** argv) {
   // number of points
   file1 << keypoints.size() << std::endl;
   for (size_t k = 0; k < keypoints.size(); k++) {
-    const float r = keypoints[k].size / 4.0;
+    const float r = region_scale*keypoints[k].size / 4.0;
     const float a = 1.0 / (r * r);
     file1 << keypoints[k].pt.x << " " << keypoints[k].pt.y << " " << a << " "
           << 0.0 << " " << a;
@@ -458,7 +465,7 @@ int main(int argc, char ** argv) {
   }
   file2 << keypoints2.size() << std::endl;
   for (size_t k = 0; k < keypoints2.size(); k++) {
-    const float r = keypoints2[k].size / 4.0;
+    const float r = region_scale*keypoints2[k].size / 4.0;
     const float a = 1.0 / (r * r);
     file2 << keypoints2[k].pt.x << " " << keypoints2[k].pt.y << " " << a << " "
           << 0.0 << " " << a;
@@ -525,7 +532,16 @@ int main(int argc, char ** argv) {
   else
     descriptorMatcher = new cv::BFMatcher(cv::NORM_L2);
 
-  // Create Trackbar
+  /*/ save detections
+  cv::Mat det1, det2;
+  cv::drawKeypoints(imgRGB1,keypoints,det1,cv::Scalar(0,255,255),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+  cv::drawKeypoints(imgRGB2,keypoints2,det2,cv::Scalar(0,255,255),cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
+  std::cout<<keypoints.size()<<std::endl;
+  std::cout<<keypoints2.size()<<std::endl;
+  cv::imwrite("/home/lestefan/Desktop/det1.png",det1);
+  cv::imwrite("/home/lestefan/Desktop/det2.png",det2);*/
+
+  /*/ Create Trackbar
   cv::namedWindow("Matches");
   cv::createTrackbar( "Matching Threshold", "Matches", &alpha_slider, alpha_slider_max, on_trackbar );
 
@@ -535,7 +551,7 @@ int main(int argc, char ** argv) {
    char key=0;
    while(key!=27){
      key=cvWaitKey(10);
-   }
+   }*/
 
   //cv::imwrite("out.ppm",outimg)
   /*imgRGB1.release();

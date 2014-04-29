@@ -65,13 +65,16 @@ class BriskDescriptorExtractor {
   };
 
   // Create a descriptor with standard pattern.
-  BriskDescriptorExtractor(bool rotationInvariant = true, bool scaleInvariant =
-                               true,
-                           int version = Version::briskV2);
+  BriskDescriptorExtractor(
+      bool rotationInvariant = true,
+      bool scaleInvariant =true,
+      int version = Version::briskV2, float patternScale=1.0);
   // Create a descriptor with custom pattern file.
-  BriskDescriptorExtractor(const std::string& fname, bool rotationInvariant =
-                               true,
-                           bool scaleInvariant = true);
+  BriskDescriptorExtractor(
+      const std::string& fname,
+      bool rotationInvariant = true,
+      bool scaleInvariant = true,
+      float patternScale=1.0 );
   virtual ~BriskDescriptorExtractor();
 
   int descriptorSize() const;
@@ -130,7 +133,7 @@ class BriskDescriptorExtractor {
                           std::vector<int>());
 
   void InitFromStream(bool rotationInvariant, bool scaleInvariant,
-                      std::istream& pattern_stream);
+                      std::istream& pattern_stream, float patternScale=1.0);
   template<typename ImgPixel_T, typename IntegralPixel_T>
   __inline__ IntegralPixel_T SmoothedIntensity(const agast::Mat& image,
                                                const agast::Mat& integral,

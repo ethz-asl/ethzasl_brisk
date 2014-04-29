@@ -189,7 +189,9 @@ void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
     }  // Limit the max number if necessary.
   }
   points.assign(pt_tmp.begin(), pt_tmp.end());
-
+  /*cv::imshow("occupancy",occupancy);
+  cv::waitKey();
+  cv::imwrite("/home/lestefan/Desktop/occupancy.pgm",occupancy);*/
   //timer_uniformity_enforcement.Stop();
 }
 #endif  // BRISK_UNIFORMITY_ENFORCEMENT_INL_H_

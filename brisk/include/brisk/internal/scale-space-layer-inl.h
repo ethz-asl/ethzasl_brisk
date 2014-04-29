@@ -243,7 +243,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
-        const typename ScoreCalculator_t::Score_t center = 1.3*float(it->score); // give 30% margin
+        const typename ScoreCalculator_t::Score_t center = 1.5*float(it->score); // give 30% margin
         const double x = it->x;
         const double y = it->y;
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
@@ -287,7 +287,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
-        const typename ScoreCalculator_t::Score_t center = it->score;
+        const typename ScoreCalculator_t::Score_t center =  1.5*float(it->score); // give 30% margin
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
           continue;
         const double x = it->x;
@@ -322,7 +322,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
-        const typename ScoreCalculator_t::Score_t center = it->score;
+        const typename ScoreCalculator_t::Score_t center =  1.5*float(it->score); // give 30% margin
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
           continue;
         const double x = it->x;

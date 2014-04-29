@@ -179,7 +179,8 @@ strings_=(int)ceil((float(noShortPairs_))/128.0)*4*4;
 
 void BriskDescriptorExtractor::InitFromStream(bool rotationInvariant,
                                               bool scaleInvariant,
-                                              std::istream& pattern_stream) {
+                                              std::istream& pattern_stream,
+                                              float patternScale) {
   // Not in use.
   dMax_ = 0;
   dMin_ = 0;
@@ -209,9 +210,9 @@ void BriskDescriptorExtractor::InitFromStream(bool rotationInvariant,
   float* u_y = new float[points_];
   float* sigma = new float[points_];
   for (unsigned int i = 0; i < points_; i++) {
-    pattern_stream >> u_x[i];
-    pattern_stream >> u_y[i];
-    pattern_stream >> sigma[i];
+    pattern_stream >> u_x[i]; u_x[i]*=patternScale;
+    pattern_stream >> u_y[i]; u_y[i]*=patternScale;
+    pattern_stream >> sigma[i]; sigma[i]*=patternScale;
   }
 
   // Now fill all the scaled and rotated versions.
@@ -290,12 +291,12 @@ void BriskDescriptorExtractor::InitFromStream(bool rotationInvariant,
 }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
-                                                   bool scaleInvariant, int version) {
+                                                   bool scaleInvariant, int version, float patternScale) {
   CHECK(version==Version::briskV1 || version==Version::briskV2);
   if(version==Version::briskV2){
     std::stringstream ss;
     brisk::GetDefaultPatternAsStream(&ss);
-    InitFromStream(rotationInvariant, scaleInvariant, ss);
+    InitFromStream(rotationInvariant, scaleInvariant, ss, patternScale);
   } else if(version==Version::briskV1){
     std::vector<float> rList;
     std::vector<int> nList;
@@ -303,7 +304,7 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
     // this is the standard pattern found to be suitable also
     rList.resize(5);
     nList.resize(5);
-    const double f = 0.85;
+    const double f = 0.85*patternScale;
 
     rList[0] = f * 0;
     rList[1] = f * 2.9;
@@ -327,11 +328,12 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
                                                    bool rotationInvariant,
-                                                   bool scaleInvariant) {
+                                                   bool scaleInvariant,
+                                                   float patternScale) {
   std::ifstream myfile(fname.c_str());
   assert(myfile.is_open());
 
-  InitFromStream(rotationInvariant, scaleInvariant, myfile);
+  InitFromStream(rotationInvariant, scaleInvariant, myfile, patternScale);
 
   myfile.close();
 }
