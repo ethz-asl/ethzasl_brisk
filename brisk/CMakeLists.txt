@@ -19,7 +19,7 @@ find_package(Eigen REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(GLog REQUIRED)
 
-add_definitions(-march=native -Wextra -Wall -pedantic
+add_definitions(-march=native -Wextra -Wall -pedantic #-Werror
                 -Wno-overloaded-virtual -Wno-non-virtual-dtor # OpenCV.
                 -std=c++0x -DENABLE_BRISK_TIMING
                 -DHAVE_OPENCV)

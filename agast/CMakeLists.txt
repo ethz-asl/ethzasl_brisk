@@ -14,7 +14,9 @@ find_package(OpenCV REQUIRED)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
 
-add_definitions(-Wextra -Wall -Werror -pedantic -DHAVE_OPENCV)
+add_definitions(-Wextra -Wall -pedantic -DHAVE_OPENCV
+                #-Werror
+                )
 
 file(GLOB AGAST_SOURCE_FILES  "${PROJECT_SOURCE_DIR}/src/*.cc")
 file(GLOB AGAST_HEADER_FILES  "${PROJECT_SOURCE_DIR}/include/agast/*.h")
