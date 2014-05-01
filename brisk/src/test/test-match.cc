@@ -48,18 +48,11 @@
 #endif
 
 TEST(Brisk, MatchBitset) {
-  agast::Mat img1, img2;
-#ifdef TEST_IN_SOURCE
-  std::string image1path = "src/test/test_data/img1.pgm";
-  std::string image2path = "src/test/test_data/img2.pgm";
-  img1 = cv::imread(image1path, 0);
-  img2 = cv::imread(image2path, 0);
-#else
+  cv::Mat img1, img2;
   std::string image1path = "./test_data/img1.pgm";
   std::string image2path = "./test_data/img2.pgm";
-  img1 = agast::imread(image1path);
-  img2 = agast::imread(image2path);
-#endif
+  img1 = cv::imread(image1path, CV_LOAD_IMAGE_GRAYSCALE);
+  img2 = cv::imread(image2path, CV_LOAD_IMAGE_GRAYSCALE);
 
   const unsigned int detection_threshold = 70;
   const unsigned int matching_threshold = 50;

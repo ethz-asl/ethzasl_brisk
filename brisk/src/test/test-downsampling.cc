@@ -142,12 +142,8 @@ void PlainTwoThirdSample(const unsigned char* src, unsigned char* dst,
 }
 
 TEST(Brisk, HalfSample) {
-#ifdef TEST_IN_SOURCE
-    std::string imagepath = "src/test/test_data/img1.pgm";
-#else
-    std::string imagepath = "./test_data/img1.pgm";
-#endif
-  agast::Mat src_img = agast::imread(imagepath);
+  std::string imagepath = "./test_data/img1.pgm";
+  cv::Mat src_img = cv::imread(imagepath, CV_LOAD_IMAGE_GRAYSCALE);
 
   static const int source_cols = src_img.cols;
   static const int source_rows = src_img.rows;
@@ -163,12 +159,8 @@ TEST(Brisk, HalfSample) {
 }
 
 TEST(Brisk, TwoThirdSample) {
-#ifdef TEST_IN_SOURCE
-    std::string imagepath = "src/test/test_data/img1.pgm";
-#else
-    std::string imagepath = "./test_data/img1.pgm";
-#endif
-  agast::Mat src_img = agast::imread(imagepath);
+  std::string imagepath = "./test_data/img1.pgm";
+  cv::Mat src_img = cv::imread(imagepath, CV_LOAD_IMAGE_GRAYSCALE);
 
   static const int source_cols = src_img.cols;
   static const int source_rows = src_img.rows;
