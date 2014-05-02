@@ -21,8 +21,6 @@ find_package(GLog REQUIRED)
 
 add_definitions("-mssse3 -DHAVE_OPENCV")
 
-message("OPENCV LIBS: ${OpenCV_LIBS}")
-
 include_directories(include  ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_definitions(-Wextra -Wall -pedantic)
