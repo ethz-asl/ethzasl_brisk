@@ -19,11 +19,13 @@ find_package(Eigen REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(GLog REQUIRED)
 
-add_definitions("-mssse3 -DHAVE_OPENCV -std=c++0x")
+add_definitions("-mssse3 -DHAVE_OPENCV")
+
+message("OPENCV LIBS: ${OpenCV_LIBS}")
 
 include_directories(include  ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
-add_definitions(-Wextra -Wall -Werror -pedantic)
+add_definitions(-Wextra -Wall -pedantic)
 
 add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                             src/brisk-feature-detector.cc   
@@ -56,6 +58,7 @@ target_link_libraries(demo ${PROJECT_NAME})
 add_library(${PROJECT_NAME}_test_lib src/test/serialization.cc
                                        src/test/bench-ds.cc
                                        src/opencv-ref.cc)
+target_link_libraries(${PROJECT_NAME}_test_lib ${PROJECT_NAME})
 
 catkin_add_gtest(test_integral_image src/test/test-integral-image.cc
                  WORKING_DIRECTORY ${PROJECT_BINARY_DIR})

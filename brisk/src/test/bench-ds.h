@@ -154,6 +154,20 @@ struct Blob {
     }
   }
 
+  Blob & operator=(const Blob& other) {
+    size_ = other.size_;
+    if (size_) {
+      verification_data_.reset(new unsigned char[size_]);
+      memcpy(verification_data_.get(), other.verification_data_.get(), size_);
+      if (other.current_data_) {
+        current_data_.reset(new unsigned char[size_]);
+        memcpy(current_data_.get(), other.current_data_.get(), size_);
+      }
+    }
+    return *this;
+  }
+
+
   uint32_t Size() const {
     return size_;
   }
