@@ -142,15 +142,15 @@ void BriskScaleSpace::GetKeypoints(std::vector<agast::KeyPoint>* keypoints) {
 
         // Let's do the subpixel and float scale refinement:
         brisk::BriskLayer& l = pyramid_[i];
-        register int s_0_0 = l.GetAgastScore(point_x - 1, point_y - 1, 1);
-        register int s_1_0 = l.GetAgastScore(point_x, point_y - 1, 1);
-        register int s_2_0 = l.GetAgastScore(point_x + 1, point_y - 1, 1);
-        register int s_2_1 = l.GetAgastScore(point_x + 1, point_y, 1);
-        register int s_1_1 = l.GetAgastScore(point_x, point_y, 1);
-        register int s_0_1 = l.GetAgastScore(point_x - 1, point_y, 1);
-        register int s_0_2 = l.GetAgastScore(point_x - 1, point_y + 1, 1);
-        register int s_1_2 = l.GetAgastScore(point_x, point_y + 1, 1);
-        register int s_2_2 = l.GetAgastScore(point_x + 1, point_y + 1, 1);
+        int s_0_0 = l.GetAgastScore(point_x - 1, point_y - 1, 1);
+        int s_1_0 = l.GetAgastScore(point_x, point_y - 1, 1);
+        int s_2_0 = l.GetAgastScore(point_x + 1, point_y - 1, 1);
+        int s_2_1 = l.GetAgastScore(point_x + 1, point_y, 1);
+        int s_1_1 = l.GetAgastScore(point_x, point_y, 1);
+        int s_0_1 = l.GetAgastScore(point_x - 1, point_y, 1);
+        int s_0_2 = l.GetAgastScore(point_x - 1, point_y + 1, 1);
+        int s_1_2 = l.GetAgastScore(point_x, point_y + 1, 1);
+        int s_2_2 = l.GetAgastScore(point_x + 1, point_y + 1, 1);
         float delta_x, delta_y;
         float max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
                                s_2_1, s_2_2, delta_x, delta_y);
@@ -183,15 +183,15 @@ void BriskScaleSpace::GetKeypoints(std::vector<agast::KeyPoint>* keypoints) {
 
       // Let's do the subpixel and float scale refinement:
       brisk::BriskLayer& l = pyramid_[0];
-      register int s_0_0 = l.GetAgastScore(point_x - 1, point_y - 1, 1);
-      register int s_1_0 = l.GetAgastScore(point_x, point_y - 1, 1);
-      register int s_2_0 = l.GetAgastScore(point_x + 1, point_y - 1, 1);
-      register int s_2_1 = l.GetAgastScore(point_x + 1, point_y, 1);
-      register int s_1_1 = l.GetAgastScore(point_x, point_y, 1);
-      register int s_0_1 = l.GetAgastScore(point_x - 1, point_y, 1);
-      register int s_0_2 = l.GetAgastScore(point_x - 1, point_y + 1, 1);
-      register int s_1_2 = l.GetAgastScore(point_x, point_y + 1, 1);
-      register int s_2_2 = l.GetAgastScore(point_x + 1, point_y + 1, 1);
+      int s_0_0 = l.GetAgastScore(point_x - 1, point_y - 1, 1);
+      int s_1_0 = l.GetAgastScore(point_x, point_y - 1, 1);
+      int s_2_0 = l.GetAgastScore(point_x + 1, point_y - 1, 1);
+      int s_2_1 = l.GetAgastScore(point_x + 1, point_y, 1);
+      int s_1_1 = l.GetAgastScore(point_x, point_y, 1);
+      int s_0_1 = l.GetAgastScore(point_x - 1, point_y, 1);
+      int s_0_2 = l.GetAgastScore(point_x - 1, point_y + 1, 1);
+      int s_1_2 = l.GetAgastScore(point_x, point_y + 1, 1);
+      int s_2_2 = l.GetAgastScore(point_x + 1, point_y + 1, 1);
       float delta_x, delta_y;
       float max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
                              s_2_1, s_2_2, delta_x, delta_y);
@@ -229,15 +229,15 @@ void BriskScaleSpace::GetKeypoints(std::vector<agast::KeyPoint>* keypoints) {
           continue;
 
         // Get the patch on this layer:
-        register int s_0_0 = l.GetAgastScore(point_x - 1, point_y - 1, 1);
-        register int s_1_0 = l.GetAgastScore(point_x, point_y - 1, 1);
-        register int s_2_0 = l.GetAgastScore(point_x + 1, point_y - 1, 1);
-        register int s_2_1 = l.GetAgastScore(point_x + 1, point_y, 1);
-        register int s_1_1 = l.GetAgastScore(point_x, point_y, 1);
-        register int s_0_1 = l.GetAgastScore(point_x - 1, point_y, 1);
-        register int s_0_2 = l.GetAgastScore(point_x - 1, point_y + 1, 1);
-        register int s_1_2 = l.GetAgastScore(point_x, point_y + 1, 1);
-        register int s_2_2 = l.GetAgastScore(point_x + 1, point_y + 1, 1);
+        int s_0_0 = l.GetAgastScore(point_x - 1, point_y - 1, 1);
+        int s_1_0 = l.GetAgastScore(point_x, point_y - 1, 1);
+        int s_2_0 = l.GetAgastScore(point_x + 1, point_y - 1, 1);
+        int s_2_1 = l.GetAgastScore(point_x + 1, point_y, 1);
+        int s_1_1 = l.GetAgastScore(point_x, point_y, 1);
+        int s_0_1 = l.GetAgastScore(point_x - 1, point_y, 1);
+        int s_0_2 = l.GetAgastScore(point_x - 1, point_y + 1, 1);
+        int s_1_2 = l.GetAgastScore(point_x, point_y + 1, 1);
+        int s_2_2 = l.GetAgastScore(point_x + 1, point_y + 1, 1);
         float delta_x, delta_y;
         float max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2, s_2_0,
                                s_2_1, s_2_2, delta_x, delta_y);
@@ -559,30 +559,30 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
       unsigned char max_below_uchar = 0;
       // Guess the lower intra octave...
       BriskLayer& l = pyramid_[0];
-      register int s_0_0 = l.GetAgastScore_5_8(x_layer - 1, y_layer - 1, 1);
+      int s_0_0 = l.GetAgastScore_5_8(x_layer - 1, y_layer - 1, 1);
       max_below_uchar = s_0_0;
-      register int s_1_0 = l.GetAgastScore_5_8(x_layer, y_layer - 1, 1);
+      int s_1_0 = l.GetAgastScore_5_8(x_layer, y_layer - 1, 1);
       if (s_1_0 > max_below_uchar)
         max_below_uchar = s_1_0;
-      register int s_2_0 = l.GetAgastScore_5_8(x_layer + 1, y_layer - 1, 1);
+      int s_2_0 = l.GetAgastScore_5_8(x_layer + 1, y_layer - 1, 1);
       if (s_2_0 > max_below_uchar)
         max_below_uchar = s_2_0;
-      register int s_2_1 = l.GetAgastScore_5_8(x_layer + 1, y_layer, 1);
+      int s_2_1 = l.GetAgastScore_5_8(x_layer + 1, y_layer, 1);
       if (s_2_1 > max_below_uchar)
         max_below_uchar = s_2_1;
-      register int s_1_1 = l.GetAgastScore_5_8(x_layer, y_layer, 1);
+      int s_1_1 = l.GetAgastScore_5_8(x_layer, y_layer, 1);
       if (s_1_1 > max_below_uchar)
         max_below_uchar = s_1_1;
-      register int s_0_1 = l.GetAgastScore_5_8(x_layer - 1, y_layer, 1);
+      int s_0_1 = l.GetAgastScore_5_8(x_layer - 1, y_layer, 1);
       if (s_0_1 > max_below_uchar)
         max_below_uchar = s_0_1;
-      register int s_0_2 = l.GetAgastScore_5_8(x_layer - 1, y_layer + 1, 1);
+      int s_0_2 = l.GetAgastScore_5_8(x_layer - 1, y_layer + 1, 1);
       if (s_0_2 > max_below_uchar)
         max_below_uchar = s_0_2;
-      register int s_1_2 = l.GetAgastScore_5_8(x_layer, y_layer + 1, 1);
+      int s_1_2 = l.GetAgastScore_5_8(x_layer, y_layer + 1, 1);
       if (s_1_2 > max_below_uchar)
         max_below_uchar = s_1_2;
-      register int s_2_2 = l.GetAgastScore_5_8(x_layer + 1, y_layer + 1, 1);
+      int s_2_2 = l.GetAgastScore_5_8(x_layer + 1, y_layer + 1, 1);
       if (s_2_2 > max_below_uchar)
         max_below_uchar = s_2_2;
 
@@ -598,15 +598,15 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
     }
 
     // Get the patch on this layer:
-    register int s_0_0 = thisLayer.GetAgastScore(x_layer - 1, y_layer - 1, 1);
-    register int s_1_0 = thisLayer.GetAgastScore(x_layer, y_layer - 1, 1);
-    register int s_2_0 = thisLayer.GetAgastScore(x_layer + 1, y_layer - 1, 1);
-    register int s_2_1 = thisLayer.GetAgastScore(x_layer + 1, y_layer, 1);
-    register int s_1_1 = thisLayer.GetAgastScore(x_layer, y_layer, 1);
-    register int s_0_1 = thisLayer.GetAgastScore(x_layer - 1, y_layer, 1);
-    register int s_0_2 = thisLayer.GetAgastScore(x_layer - 1, y_layer + 1, 1);
-    register int s_1_2 = thisLayer.GetAgastScore(x_layer, y_layer + 1, 1);
-    register int s_2_2 = thisLayer.GetAgastScore(x_layer + 1, y_layer + 1, 1);
+    int s_0_0 = thisLayer.GetAgastScore(x_layer - 1, y_layer - 1, 1);
+    int s_1_0 = thisLayer.GetAgastScore(x_layer, y_layer - 1, 1);
+    int s_2_0 = thisLayer.GetAgastScore(x_layer + 1, y_layer - 1, 1);
+    int s_2_1 = thisLayer.GetAgastScore(x_layer + 1, y_layer, 1);
+    int s_1_1 = thisLayer.GetAgastScore(x_layer, y_layer, 1);
+    int s_0_1 = thisLayer.GetAgastScore(x_layer - 1, y_layer, 1);
+    int s_0_2 = thisLayer.GetAgastScore(x_layer - 1, y_layer + 1, 1);
+    int s_1_2 = thisLayer.GetAgastScore(x_layer, y_layer + 1, 1);
+    int s_2_2 = thisLayer.GetAgastScore(x_layer + 1, y_layer + 1, 1);
 
     // Second derivative needs to be sufficiently large.
     if (layer == 0) {
@@ -688,15 +688,15 @@ __inline__ float BriskScaleSpace::Refine3D(const uint8_t layer,
       return 0.0;
 
     // Get the patch on this layer:
-    register int s_0_0 = thisLayer.GetAgastScore(x_layer - 1, y_layer - 1, 1);
-    register int s_1_0 = thisLayer.GetAgastScore(x_layer, y_layer - 1, 1);
-    register int s_2_0 = thisLayer.GetAgastScore(x_layer + 1, y_layer - 1, 1);
-    register int s_2_1 = thisLayer.GetAgastScore(x_layer + 1, y_layer, 1);
-    register int s_1_1 = thisLayer.GetAgastScore(x_layer, y_layer, 1);
-    register int s_0_1 = thisLayer.GetAgastScore(x_layer - 1, y_layer, 1);
-    register int s_0_2 = thisLayer.GetAgastScore(x_layer - 1, y_layer + 1, 1);
-    register int s_1_2 = thisLayer.GetAgastScore(x_layer, y_layer + 1, 1);
-    register int s_2_2 = thisLayer.GetAgastScore(x_layer + 1, y_layer + 1, 1);
+    int s_0_0 = thisLayer.GetAgastScore(x_layer - 1, y_layer - 1, 1);
+    int s_1_0 = thisLayer.GetAgastScore(x_layer, y_layer - 1, 1);
+    int s_2_0 = thisLayer.GetAgastScore(x_layer + 1, y_layer - 1, 1);
+    int s_2_1 = thisLayer.GetAgastScore(x_layer + 1, y_layer, 1);
+    int s_1_1 = thisLayer.GetAgastScore(x_layer, y_layer, 1);
+    int s_0_1 = thisLayer.GetAgastScore(x_layer - 1, y_layer, 1);
+    int s_0_2 = thisLayer.GetAgastScore(x_layer - 1, y_layer + 1, 1);
+    int s_1_2 = thisLayer.GetAgastScore(x_layer, y_layer + 1, 1);
+    int s_2_2 = thisLayer.GetAgastScore(x_layer + 1, y_layer + 1, 1);
 
     // Second derivative needs to be sufficiently large.
     if ((s_1_1 - kMaxThreshold_ < (max_above))
@@ -863,15 +863,15 @@ __inline__ float BriskScaleSpace::GetScoreMaxAbove(const uint8_t layer,
   }
 
   // Find dx / dy:
-  register int s_0_0 = layerAbove.GetAgastScore(max_x - 1, max_y - 1, 1);
-  register int s_1_0 = layerAbove.GetAgastScore(max_x, max_y - 1, 1);
-  register int s_2_0 = layerAbove.GetAgastScore(max_x + 1, max_y - 1, 1);
-  register int s_2_1 = layerAbove.GetAgastScore(max_x + 1, max_y, 1);
-  register int s_1_1 = layerAbove.GetAgastScore(max_x, max_y, 1);
-  register int s_0_1 = layerAbove.GetAgastScore(max_x - 1, max_y, 1);
-  register int s_0_2 = layerAbove.GetAgastScore(max_x - 1, max_y + 1, 1);
-  register int s_1_2 = layerAbove.GetAgastScore(max_x, max_y + 1, 1);
-  register int s_2_2 = layerAbove.GetAgastScore(max_x + 1, max_y + 1, 1);
+  int s_0_0 = layerAbove.GetAgastScore(max_x - 1, max_y - 1, 1);
+  int s_1_0 = layerAbove.GetAgastScore(max_x, max_y - 1, 1);
+  int s_2_0 = layerAbove.GetAgastScore(max_x + 1, max_y - 1, 1);
+  int s_2_1 = layerAbove.GetAgastScore(max_x + 1, max_y, 1);
+  int s_1_1 = layerAbove.GetAgastScore(max_x, max_y, 1);
+  int s_0_1 = layerAbove.GetAgastScore(max_x - 1, max_y, 1);
+  int s_0_2 = layerAbove.GetAgastScore(max_x - 1, max_y + 1, 1);
+  int s_1_2 = layerAbove.GetAgastScore(max_x, max_y + 1, 1);
+  int s_2_2 = layerAbove.GetAgastScore(max_x + 1, max_y + 1, 1);
   float dx_1, dy_1;
   float refined_max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
                                  s_2_0, s_2_1, s_2_2, dx_1, dy_1);
@@ -1047,15 +1047,15 @@ __inline__ float BriskScaleSpace::GetScoreMaxBelow(const uint8_t layer,
   }
 
   // Find dx/dy:
-  register int s_0_0 = layerBelow.GetAgastScore(max_x - 1, max_y - 1, 1);
-  register int s_1_0 = layerBelow.GetAgastScore(max_x, max_y - 1, 1);
-  register int s_2_0 = layerBelow.GetAgastScore(max_x + 1, max_y - 1, 1);
-  register int s_2_1 = layerBelow.GetAgastScore(max_x + 1, max_y, 1);
-  register int s_1_1 = layerBelow.GetAgastScore(max_x, max_y, 1);
-  register int s_0_1 = layerBelow.GetAgastScore(max_x - 1, max_y, 1);
-  register int s_0_2 = layerBelow.GetAgastScore(max_x - 1, max_y + 1, 1);
-  register int s_1_2 = layerBelow.GetAgastScore(max_x, max_y + 1, 1);
-  register int s_2_2 = layerBelow.GetAgastScore(max_x + 1, max_y + 1, 1);
+  int s_0_0 = layerBelow.GetAgastScore(max_x - 1, max_y - 1, 1);
+  int s_1_0 = layerBelow.GetAgastScore(max_x, max_y - 1, 1);
+  int s_2_0 = layerBelow.GetAgastScore(max_x + 1, max_y - 1, 1);
+  int s_2_1 = layerBelow.GetAgastScore(max_x + 1, max_y, 1);
+  int s_1_1 = layerBelow.GetAgastScore(max_x, max_y, 1);
+  int s_0_1 = layerBelow.GetAgastScore(max_x - 1, max_y, 1);
+  int s_0_2 = layerBelow.GetAgastScore(max_x - 1, max_y + 1, 1);
+  int s_1_2 = layerBelow.GetAgastScore(max_x, max_y + 1, 1);
+  int s_2_2 = layerBelow.GetAgastScore(max_x + 1, max_y + 1, 1);
   float dx_1, dy_1;
   float refined_max = Subpixel2D(s_0_0, s_0_1, s_0_2, s_1_0, s_1_1, s_1_2,
                                  s_2_0, s_2_1, s_2_2, dx_1, dy_1);
@@ -1234,20 +1234,20 @@ __inline__ float BriskScaleSpace::Subpixel2D(const int s_0_0, const int s_0_1,
                                              const int s_2_2, float& delta_x,
                                              float& delta_y) {
   // The coefficients of the 2d quadratic function least-squares fit:
-  register int tmp1 = s_0_0 + s_0_2 - 2 * s_1_1 + s_2_0 + s_2_2;
-  register int coeff1 = 3 * (tmp1 + s_0_1 - ((s_1_0 + s_1_2) << 1) + s_2_1);
-  register int coeff2 = 3 * (tmp1 - ((s_0_1 + s_2_1) << 1) + s_1_0 + s_1_2);
-  register int tmp2 = s_0_2 - s_2_0;
-  register int tmp3 = (s_0_0 + tmp2 - s_2_2);
-  register int tmp4 = tmp3 - 2 * tmp2;
-  register int coeff3 = -3 * (tmp3 + s_0_1 - s_2_1);
-  register int coeff4 = -3 * (tmp4 + s_1_0 - s_1_2);
-  register int coeff5 = (s_0_0 - s_0_2 - s_2_0 + s_2_2) << 2;
-  register int coeff6 = -(s_0_0 + s_0_2 - ((s_1_0 + s_0_1 + s_1_2 + s_2_1) << 1)
+  int tmp1 = s_0_0 + s_0_2 - 2 * s_1_1 + s_2_0 + s_2_2;
+  int coeff1 = 3 * (tmp1 + s_0_1 - ((s_1_0 + s_1_2) << 1) + s_2_1);
+  int coeff2 = 3 * (tmp1 - ((s_0_1 + s_2_1) << 1) + s_1_0 + s_1_2);
+  int tmp2 = s_0_2 - s_2_0;
+  int tmp3 = (s_0_0 + tmp2 - s_2_2);
+  int tmp4 = tmp3 - 2 * tmp2;
+  int coeff3 = -3 * (tmp3 + s_0_1 - s_2_1);
+  int coeff4 = -3 * (tmp4 + s_1_0 - s_1_2);
+  int coeff5 = (s_0_0 - s_0_2 - s_2_0 + s_2_2) << 2;
+  int coeff6 = -(s_0_0 + s_0_2 - ((s_1_0 + s_0_1 + s_1_2 + s_2_1) << 1)
       - 5 * s_1_1 + s_2_0 + s_2_2) << 1;
 
   // 2nd derivative test:
-  register int H_det = 4 * coeff1 * coeff2 - coeff5 * coeff5;
+  int H_det = 4 * coeff1 * coeff2 - coeff5 * coeff5;
 
   if (H_det == 0) {
     delta_x = 0.0;

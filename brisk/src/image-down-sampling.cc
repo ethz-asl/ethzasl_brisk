@@ -64,7 +64,7 @@ void Halfsample16(const agast::Mat& srcimg, agast::Mat& dstimg) {
   CHECK_EQ(srcimg.rows / 2, dstimg.rows);
   CHECK_EQ(srcimg.type(), CV_16UC1);
 
-  register const __m128i ones = _mm_set_epi16(1, 1, 1, 1, 1, 1, 1, 1);
+  const __m128i ones = _mm_set_epi16(1, 1, 1, 1, 1, 1, 1, 1);
 
   const int colsMax = (srcimg.cols / 2) * 2 - 16;
   const int rows = (srcimg.rows / 2) * 2 - 1;
@@ -150,11 +150,11 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
   // Mask needed later:
   uint8_t tmpmask[16] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF,
     0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
-  register uint8x16_t mask = vld1q_u8(&tmpmask[0]);
+  uint8x16_t mask = vld1q_u8(&tmpmask[0]);
   // To be added in order to make successive averaging correct:
   uint8_t tmpones[16] = {0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1,
       0x1, 0x1, 0x1, 0x1, 0x1};
-  register uint8x16_t ones = vld1q_u8(&tmpones[0]);
+  uint8x16_t ones = vld1q_u8(&tmpones[0]);
 
   // Data pointers:
   const uint8x16_t* p1 = reinterpret_cast<const uint8x16_t*>(srcimg.data);
@@ -283,10 +283,10 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
   }
 #else
   // Mask needed later:
-  register __m128i mask = _mm_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF00FF,
+  __m128i mask = _mm_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF00FF,
                                         0x00FF00FF);
   // To be added in order to make successive averaging correct:
-  register __m128i ones = _mm_set_epi8(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+  __m128i ones = _mm_set_epi8(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                                        1, 1);
 
   // Data pointers:
@@ -592,7 +592,7 @@ void Twothirdsample8(const agast::Mat& srcimg, agast::Mat& dstimg) {
     const uint8_t tmpstore_mask[16] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         // Lacking the masked storing intrinsics in NEON.
       0xFF, 0xFF, 0xFF, 0, 0, 0, 0, 0, 0};
-    register uint8x16_t store_mask = vld1q_u8(&tmpstore_mask[0]);
+    uint8x16_t store_mask = vld1q_u8(&tmpstore_mask[0]);
 
     while (p3 < p_end) {
       for (int i = 0; i < hsize; ++i) {
@@ -710,15 +710,15 @@ void Twothirdsample8(const agast::Mat& srcimg, agast::Mat& dstimg) {
     }
 #else
   // Masks:
-  register __m128i mask1 = _mm_set_epi8(-128, -128, -128, -128, -128, -128,
+  __m128i mask1 = _mm_set_epi8(-128, -128, -128, -128, -128, -128,
                                         -128, 13, -128, 10, -128, 7, -128, 4,
                                         -128, 1);
-  register __m128i mask2 = _mm_set_epi8(-128, -128, -128, -128, -128, -128,
+  __m128i mask2 = _mm_set_epi8(-128, -128, -128, -128, -128, -128,
                                         13, -128, 10, -128, 7, -128, 4, -128,
                                         1, -128);
-  register __m128i mask = _mm_set_epi8(-128, -128, -128, -128, -128, -128, 14,
+  __m128i mask = _mm_set_epi8(-128, -128, -128, -128, -128, -128, 14,
                                        12, 11, 9, 8, 6, 5, 3, 2, 0);
-  register __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, -128, -128, -128,
+  __m128i store_mask = _mm_set_epi8(0, 0, 0, 0, 0, 0, -128, -128, -128,
                                              -128, -128, -128, -128, -128, -128,
                                              -128);
 

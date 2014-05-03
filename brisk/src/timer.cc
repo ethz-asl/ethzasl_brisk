@@ -5,7 +5,7 @@
 #include <sstream>
 #include <stdio.h>
 #include <string>
-
+#include <cmath>
 
 #ifdef USE_RDTSC
 #include <brisk/internal/rdtsc.h>
