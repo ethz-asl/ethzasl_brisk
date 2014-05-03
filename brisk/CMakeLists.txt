@@ -25,6 +25,13 @@ include_directories(include  ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_definitions(-Wextra -Wall -pedantic)
 
+if(NOT APPLE)
+  # The clang compiler (on osx) is somehow much more strict
+  # than the compilers on ubuntu and so this does not seem
+  # possible on OSX just yet.
+  add_definitions( -Werror )
+endif()
+
 add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                             src/brisk-feature-detector.cc   
                             src/brisk-layer.cc

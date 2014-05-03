@@ -19,10 +19,14 @@ find_package(GLog REQUIRED)
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
-add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall -Werror
+add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall
                 -Wno-overloaded-virtual -Wno-non-virtual-dtor # OpenCV.
                 -std=c++0x -DENABLE_BRISK_TIMING -DTEST_IN_SOURCE
                 -DHAVE_OPENCV)
+
+if(NOT APPLE)
+  add_definitions( -Werror )
+endif()
 
 add_executable(livedemo src/livedemo.cc)
 target_link_libraries(livedemo ${catkin_LIBRARIES} 

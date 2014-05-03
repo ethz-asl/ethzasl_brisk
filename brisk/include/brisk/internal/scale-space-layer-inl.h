@@ -558,21 +558,21 @@ __inline__ float ScaleSpaceLayer<SCORE_CALCULATOR_T>::Subpixel2D(
     const double s_2_0, const double s_2_1, const double s_2_2, float& delta_x,
     float& delta_y) {
   // The coefficients of the 2d quadratic function least-squares fit:
-  register double tmp1 = s_0_0 + s_0_2 - 2 * s_1_1 + s_2_0 + s_2_2;
-  register double coeff1 = 3 * (tmp1 + s_0_1 - ((s_1_0 + s_1_2) / 2.0) + s_2_1);
-  register double coeff2 = 3 * (tmp1 - ((s_0_1 + s_2_1) / 2.0) + s_1_0 + s_1_2);
-  register double tmp2 = s_0_2 - s_2_0;
-  register double tmp3 = (s_0_0 + tmp2 - s_2_2);
-  register double tmp4 = tmp3 - 2 * tmp2;
-  register double coeff3 = -3 * (tmp3 + s_0_1 - s_2_1);
-  register double coeff4 = -3 * (tmp4 + s_1_0 - s_1_2);
-  register double coeff5 = (s_0_0 - s_0_2 - s_2_0 + s_2_2) / 4.0;
-  register double coeff6 = -(s_0_0 + s_0_2
+  double tmp1 = s_0_0 + s_0_2 - 2 * s_1_1 + s_2_0 + s_2_2;
+  double coeff1 = 3 * (tmp1 + s_0_1 - ((s_1_0 + s_1_2) / 2.0) + s_2_1);
+  double coeff2 = 3 * (tmp1 - ((s_0_1 + s_2_1) / 2.0) + s_1_0 + s_1_2);
+  double tmp2 = s_0_2 - s_2_0;
+  double tmp3 = (s_0_0 + tmp2 - s_2_2);
+  double tmp4 = tmp3 - 2 * tmp2;
+  double coeff3 = -3 * (tmp3 + s_0_1 - s_2_1);
+  double coeff4 = -3 * (tmp4 + s_1_0 - s_1_2);
+  double coeff5 = (s_0_0 - s_0_2 - s_2_0 + s_2_2) / 4.0;
+  double coeff6 = -(s_0_0 + s_0_2
       - ((s_1_0 + s_0_1 + s_1_2 + s_2_1) / 2.0) - 5 * s_1_1 + s_2_0 + s_2_2)
       / 2.01;
 
   // 2nd derivative test:
-  register double H_det = 4 * coeff1 * coeff2 - coeff5 * coeff5;
+  double H_det = 4 * coeff1 * coeff2 - coeff5 * coeff5;
 
   if (H_det == 0) {
     delta_x = 0.0;
