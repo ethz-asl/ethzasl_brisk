@@ -15,6 +15,7 @@
   <author email="lestefan@ethz.ch">Stefan Leutenegger</author>
   <author email="slynen@ethz.ch">Simon Lynen</author>
 
+  <build_depend>cmake_modules</build_depend>
   <build_depend>agast</build_depend>
   <build_depend>gtest</build_depend>
   <build_depend>roscpp</build_depend>

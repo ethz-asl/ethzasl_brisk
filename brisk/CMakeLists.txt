@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(brisk)
 
-find_package(catkin REQUIRED COMPONENTS roscpp agast)
+find_package(catkin REQUIRED COMPONENTS roscpp agast cmake_modules)
 find_package(Eigen REQUIRED)
 
 catkin_package(
