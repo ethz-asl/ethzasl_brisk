@@ -560,6 +560,8 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   std::vector < std::vector<cv::KeyPoint> > keypointsVec(_N_x * _N_y);
   std::vector<cv::Mat> descriptorsVec(_N_x * _N_y);
   int original_class_id = -1;
+  int nrows = _cameraModelSelection.rows;
+  int ncols = _cameraModelSelection.cols;
   for (size_t k = 0; k < keypoints.size(); ++k) {
 	  int x = std::rint(keypoints[k].pt.x);
 	  int y = std::rint(keypoints[k].pt.y);
