@@ -556,18 +556,38 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   // remove boundary points
   removeBorderKeypoints(2.0, image.getMat(), keypoints);
 
+  int nrows = _cameraModelSelection.rows;
+  int ncols = _cameraModelSelection.cols;
+  size_t vmax = 0;
+  for(int i = 0; i < nrows; i++)
+  {
+	  for(int j = 0; j < ncols; j++)
+	  {
+		  size_t v = _cameraModelSelection.at<uchar>(i, j);
+		  if(v > vmax) vmax = v;
+	  }
+  }
+
+  std::cout << "vmax: " << vmax << std::endl;
+
   // group the keypoints / descriptors
   std::vector < std::vector<cv::KeyPoint> > keypointsVec(_N_x * _N_y);
   std::vector<cv::Mat> descriptorsVec(_N_x * _N_y);
   int original_class_id = -1;
   for (size_t k = 0; k < keypoints.size(); ++k) {
-    size_t idx = (_cameraModelSelection.at<uchar>(keypoints[k].pt.y,
-                                                  keypoints[k].pt.x));
+	  float fx = keypoints[k].pt.x;
+	  float fy = keypoints[k].pt.y;
+	  int x = std::rint(keypoints[k].pt.x);
+	  int y = std::rint(keypoints[k].pt.y);
+	  CV_Assert((x >= 0) && (x < ncols));
+	  CV_Assert((y >= 0) && (y < nrows));
+    size_t idx = (_cameraModelSelection.at<uchar>(y, x));
     if (idx == 0)
       continue;  // meaning there is no image assigned... maybe we should issue a warning here...?
     idx -= 1;
 
-    if (original_class_id == -1) {
+    if (original_class_id == -1)
+    {
       original_class_id = keypoints[k].class_id;
     }
     keypoints[k].class_id = k;  // abuse the class id
@@ -584,8 +604,7 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
 
     // remap image
     cv::Mat undistorted_image;
-    cv::remap(image, undistorted_image, _distort_1_maps[i], _distort_2_maps[i],
-              cv::INTER_LINEAR);
+    cv::remap(image, undistorted_image, _distort_1_maps[i], _distort_2_maps[i], cv::INTER_LINEAR);
 
     // undistortion
     std::vector<cv::KeyPoint> undistortedKeypoints;
@@ -620,9 +639,15 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
 
     // extraction - on undistorted image
     cv::Mat descriptors_;
-    _feature2dPtr->compute(undistorted_image, undistortedKeypoints,
-                           descriptors_);
+    int nrows_ui = undistorted_image.rows;
+    int ncols_ui = undistorted_image.cols;
+    size_t nKpts = undistortedKeypoints.size();
+
+    _feature2dPtr->compute(undistorted_image, undistortedKeypoints, descriptors_);
     //distortKeypoints(undistortedKeypoints,keypoints);
+    int nrows = descriptors_.rows;
+    int ncols = descriptors_.cols;
+
     descriptorsVec[i] = descriptors_;  // convert input output array
     //std::cout<<descriptors_.row(0)<<std::endl;
 
@@ -655,14 +680,16 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   // assemble descriptor output
   if (descriptorsVec.size() == 0)
     return;  // would be very weird...
-  cv::Mat descriptors_final(numFeatures, descriptorsVec.at(0).cols,
-                            descriptorsVec.at(0).type());
+  cv::Mat descriptors_final(numFeatures, descriptorsVec.at(0).cols, descriptorsVec.at(0).type());
   size_t start_row = 0;
-  for (size_t i = 0; i < keypointsVec.size(); ++i) {
-    if (keypointsVec.at(i).size() > 0) {
-      descriptorsVec.at(i).copyTo(
-          descriptors_final.rowRange(start_row,
-                                     start_row + descriptorsVec.at(i).rows));
+  for (size_t i = 0; i < keypointsVec.size(); ++i)
+  {
+    if (keypointsVec.at(i).size() > 0)
+    {
+      size_t nrows = static_cast<size_t>(descriptorsVec.at(i).rows);
+      size_t end = start_row + nrows;
+      CV_Assert(end < numFeatures);
+      descriptorsVec.at(i).copyTo(descriptors_final.rowRange(start_row, end));
       //descriptors_final.rowRange(start_row,start_row+descriptorsVec.at(i).rows)=descriptorsVec.at(i);
       //std::cout<<descriptors_final.row(start_row)<<std::endl;
       start_row += descriptorsVec.at(i).rows;
