@@ -1,0 +1,84 @@
+UndistortingPipeline {
+  nThreads 1
+  doBackProjection true
+  doBackProjectionUncertainty false
+  cameraSystemName /brisk_evaluation  ; The full path of the camera system in the config file
+  timestampTolerance 0.01 ; The tolerance for accepting images as being seen at the same time (seconds)
+  doTimestampCorrection false
+  framerate 10.0 ; [hz]
+
+  undistorter0 {
+     ; This undistorts images using the interpolation method below. Choose 'NullMaskedDistortedOmniCameraGeometry' to disable undistortion.
+     type MaskedOmniUndistorter
+     ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image
+     alpha 0.0
+     ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
+     interpolationType 4
+     ; scale the image?
+     scale 0.5
+     makeCopy true
+  }
+ 
+  frameBuilder0 {
+    type brisk
+    brisk
+    {
+        octaves 3
+        uniformityRadius 25
+        absoluteThreshold 20
+        maxNoKeypoints 1100
+        rotationInvariant true
+        scaleInvariant true
+        cameraModel RadialTangentialPinhole
+        intrinsics /brisk_evaluation/intrinsics0
+    }
+  }
+}
+
+brisk_evaluation {
+  nCameras 1
+  vehicle-name brisk_evaluator
+  compute-overlaps  0
+  intrinsics0 {
+    type MaskedDistortedOmni
+    shutter {
+      line-delay 0.0001
+    }
+
+    ; The front camera intrinsics
+    projection {
+      xi  0.738258
+      fu  730.150336
+      fv  728.090774
+      cu  634.469761
+      cv  462.747955
+      ru  1280
+      rv  960
+      distortion {
+	   k1 -0.395203
+	   k2 0.159667
+	   p1 -0.001601
+	   p2 -0.001578
+      }
+    }
+    mask {
+      mask-file  ../masks/mono_front_camera_mask.png
+    }
+  }
+  extrinsics0 {
+    ; The front camera extrinsics
+    T_v_c {
+      q_a_b {
+	x 0.485498863586866724606494
+	y -0.503443735222953270280755
+	z 0.51827760675072920282247
+	w 0.492162149304825491391568
+      }
+      t_a_b_a {
+	x 1.7390409174999998942468
+	y -0.0210879276999999983044365
+	z -0.00565827629999999994619975
+      }
+    }
+  }
+}
