@@ -9,13 +9,13 @@ UndistortingPipeline {
 
   undistorter0 {
      ; This undistorts images using the interpolation method below. Choose 'NullMaskedDistortedOmniCameraGeometry' to disable undistortion.
-     type MaskedOmniUndistorter
+     type NullPinholeCameraGeometry
      ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image
      alpha 0.0
      ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
      interpolationType 4
      ; scale the image?
-     scale 0.5
+     scale 1.0
      makeCopy true
   }
  
@@ -23,10 +23,10 @@ UndistortingPipeline {
     type brisk
     brisk
     {
-        octaves 3
-        uniformityRadius 25
-        absoluteThreshold 20
-        maxNoKeypoints 1100
+        octaves 2
+        uniformityRadius 30
+        absoluteThreshold 200
+        maxNoKeypoints 400
         rotationInvariant true
         scaleInvariant true
         cameraModel RadialTangentialPinhole
