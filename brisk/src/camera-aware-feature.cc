@@ -560,14 +560,20 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   std::vector < std::vector<cv::KeyPoint> > keypointsVec(_N_x * _N_y);
   std::vector<cv::Mat> descriptorsVec(_N_x * _N_y);
   int original_class_id = -1;
+  int nrows = _cameraModelSelection.rows;
+  int ncols = _cameraModelSelection.cols;
   for (size_t k = 0; k < keypoints.size(); ++k) {
-    size_t idx = (_cameraModelSelection.at<uchar>(keypoints[k].pt.y,
-                                                  keypoints[k].pt.x));
+	  int x = std::rint(keypoints[k].pt.x);
+	  int y = std::rint(keypoints[k].pt.y);
+	  CV_Assert((x >= 0) && (x < ncols)); // todo: change this to debug assert
+	  CV_Assert((y >= 0) && (y < nrows)); // todo: change this to debug assert
+    size_t idx = (_cameraModelSelection.at<uchar>(y, x));
     if (idx == 0)
       continue;  // meaning there is no image assigned... maybe we should issue a warning here...?
     idx -= 1;
 
-    if (original_class_id == -1) {
+    if (original_class_id == -1)
+    {
       original_class_id = keypoints[k].class_id;
     }
     keypoints[k].class_id = k;  // abuse the class id
@@ -584,8 +590,7 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
 
     // remap image
     cv::Mat undistorted_image;
-    cv::remap(image, undistorted_image, _distort_1_maps[i], _distort_2_maps[i],
-              cv::INTER_LINEAR);
+    cv::remap(image, undistorted_image, _distort_1_maps[i], _distort_2_maps[i], cv::INTER_LINEAR);
 
     // undistortion
     std::vector<cv::KeyPoint> undistortedKeypoints;
@@ -620,11 +625,12 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
 
     // extraction - on undistorted image
     cv::Mat descriptors_;
-    _feature2dPtr->compute(undistorted_image, undistortedKeypoints,
-                           descriptors_);
+    CV_Assert(undistortedKeypoints.size() > 0); //todo: change this to CV_DbgAssert()
+
+    _feature2dPtr->compute(undistorted_image, undistortedKeypoints, descriptors_);
     //distortKeypoints(undistortedKeypoints,keypoints);
+
     descriptorsVec[i] = descriptors_;  // convert input output array
-    //std::cout<<descriptors_.row(0)<<std::endl;
 
     /*cv::Mat out;
     cv::drawKeypoints(undistorted_image,undistortedKeypoints,out,cv::Scalar::all(-1), cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
@@ -655,17 +661,21 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   // assemble descriptor output
   if (descriptorsVec.size() == 0)
     return;  // would be very weird...
-  cv::Mat descriptors_final(numFeatures, descriptorsVec.at(0).cols,
-                            descriptorsVec.at(0).type());
+  cv::Mat descriptors_final(numFeatures, descriptorsVec.at(0).cols, descriptorsVec.at(0).type());
   size_t start_row = 0;
-  for (size_t i = 0; i < keypointsVec.size(); ++i) {
-    if (keypointsVec.at(i).size() > 0) {
-      descriptorsVec.at(i).copyTo(
-          descriptors_final.rowRange(start_row,
-                                     start_row + descriptorsVec.at(i).rows));
-      //descriptors_final.rowRange(start_row,start_row+descriptorsVec.at(i).rows)=descriptorsVec.at(i);
-      //std::cout<<descriptors_final.row(start_row)<<std::endl;
-      start_row += descriptorsVec.at(i).rows;
+  for (size_t i = 0; i < keypointsVec.size(); ++i)
+  {
+    if (keypointsVec.at(i).size() > 0)
+    {
+      size_t nrows = static_cast<size_t>(descriptorsVec.at(i).rows);
+      //todo: change these to debug asserts (CV_DbgAssert).
+      // however, the dbg asserts did not trigger properly in debug mode
+      CV_Assert(nrows > 0);
+      size_t end = start_row + nrows;
+      CV_Assert(end <= numFeatures); //todo: change to debug assert
+      descriptorsVec.at(i).copyTo(descriptors_final.rowRange(start_row, end));
+
+      start_row += static_cast<size_t>(descriptorsVec.at(i).rows);
     }
   }
   descriptors.getMatRef() = descriptors_final;
