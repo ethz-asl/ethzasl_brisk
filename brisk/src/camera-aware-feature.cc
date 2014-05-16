@@ -665,12 +665,12 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   size_t start_row = 0;
   for (size_t i = 0; i < keypointsVec.size(); ++i)
   {
-    if ((keypointsVec.at(i).size() > 0) && (descriptorsVec.at(i).rows > 0))
+    if (keypointsVec.at(i).size() > 0)
     {
       size_t nrows = static_cast<size_t>(descriptorsVec.at(i).rows);
       //todo: change these to debug asserts (CV_DbgAssert).
       // however, the dbg asserts did not trigger properly in debug mode
-      //CV_Assert(nrows > 0);
+      CV_Assert(nrows > 0);
       size_t end = start_row + nrows;
       CV_Assert(end <= numFeatures); //todo: change to debug assert
       descriptorsVec.at(i).copyTo(descriptors_final.rowRange(start_row, end));
