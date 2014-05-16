@@ -625,7 +625,7 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
 
     // extraction - on undistorted image
     cv::Mat descriptors_;
-    CV_Assert(undistortedKeypoints.size() > 0); //todo: change this to CV_DbgAssert()
+    //CV_Assert(undistortedKeypoints.size() > 0); //todo: change this to CV_DbgAssert()
 
     _feature2dPtr->compute(undistorted_image, undistortedKeypoints, descriptors_);
     //distortKeypoints(undistortedKeypoints,keypoints);
@@ -665,12 +665,12 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   size_t start_row = 0;
   for (size_t i = 0; i < keypointsVec.size(); ++i)
   {
-    if (keypointsVec.at(i).size() > 0)
+    if ((keypointsVec.at(i).size() > 0) && (descriptorsVec.at(i).rows > 0))
     {
       size_t nrows = static_cast<size_t>(descriptorsVec.at(i).rows);
       //todo: change these to debug asserts (CV_DbgAssert).
       // however, the dbg asserts did not trigger properly in debug mode
-      CV_Assert(nrows > 0);
+      //CV_Assert(nrows > 0);
       size_t end = start_row + nrows;
       CV_Assert(end <= numFeatures); //todo: change to debug assert
       descriptorsVec.at(i).copyTo(descriptors_final.rowRange(start_row, end));
