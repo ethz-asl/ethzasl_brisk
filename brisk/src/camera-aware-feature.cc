@@ -586,7 +586,9 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   keypoints_tmp.swap(keypoints);
   keypoints.clear();
   keypoints.reserve(keypoints_tmp.size());
-  for (size_t i = 0; i < keypointsVec.size(); ++i) {
+  for (size_t i = 0; i < keypointsVec.size(); ++i)
+  {
+	size_t numKeypointsInThisClass = keypointsVec[i].size();
 
     // remap image
     cv::Mat undistorted_image;
@@ -597,8 +599,13 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
     undistortKeypoints(i, keypointsVec[i], undistortedKeypoints);
     std::vector<cv::KeyPoint> undistortedKeypoints_bkp = undistortedKeypoints;  // back up, since compute might secretly delete...
 
+    // check: there should be as many undistorted keypoints as there were intial keypoints of this class
+    size_t numUndistortedKeypointsInThisClass = undistortedKeypoints.size();
+    CV_Assert(numUndistortedKeypointsInThisClass == numKeypointsInThisClass);
+
     // override extraction direction, if requested:
-    if(_e_C.dot(_e_C)!=0.0){
+    double e_C_dotprod = _e_C.dot(_e_C);
+    if(e_C_dotprod > 0){
       for(size_t k=0; k<undistortedKeypoints.size(); ++k){
         // FIXME: this is still very dumb and inefficient, could be done wiht look-ups...
         cameras::Vec2d e_orig;
@@ -629,6 +636,9 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
 
     _feature2dPtr->compute(undistorted_image, undistortedKeypoints, descriptors_);
     //distortKeypoints(undistortedKeypoints,keypoints);
+
+    // check! there descriptors_ should have as many rows as there were intially keypoints in this class!
+    CV_Assert(static_cast<size_t>(descriptors_.rows) == numKeypointsInThisClass);
 
     descriptorsVec[i] = descriptors_;  // convert input output array
 
