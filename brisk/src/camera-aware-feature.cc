@@ -638,6 +638,7 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
     //distortKeypoints(undistortedKeypoints,keypoints);
 
     // check! there descriptors_ should have as many rows as there were intially keypoints in this class!
+    numKeypointsInThisClass = undistortedKeypoints.size();
     CV_Assert(static_cast<size_t>(descriptors_.rows) == numKeypointsInThisClass);
 
     descriptorsVec[i] = descriptors_;  // convert input output array
@@ -673,19 +674,17 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
     return;  // would be very weird...
   cv::Mat descriptors_final(numFeatures, descriptorsVec.at(0).cols, descriptorsVec.at(0).type());
   size_t start_row = 0;
-  for (size_t i = 0; i < keypointsVec.size(); ++i)
+  // I believe here we should no iterate over the keypointsVec, because featured2d->compute(...) might have thrown away some keypoints
+  // for these, there no descriptors and hence there's no equivalence anymore between the descriptorVec and the keypointsVec!
+  for (size_t i = 0; i < descriptorsVec.size(); ++i)
   {
-    if (keypointsVec.at(i).size() > 0)
+	size_t nrows = static_cast<size_t>(descriptorsVec.at(i).rows);
+    if (nrows > 0)
     {
-      size_t nrows = static_cast<size_t>(descriptorsVec.at(i).rows);
-      //todo: change these to debug asserts (CV_DbgAssert).
-      // however, the dbg asserts did not trigger properly in debug mode
-      CV_Assert(nrows > 0);
       size_t end = start_row + nrows;
       CV_Assert(end <= numFeatures); //todo: change to debug assert
       descriptorsVec.at(i).copyTo(descriptors_final.rowRange(start_row, end));
-
-      start_row += static_cast<size_t>(descriptorsVec.at(i).rows);
+      start_row += nrows;
     }
   }
   descriptors.getMatRef() = descriptors_final;
