@@ -10,11 +10,14 @@ import Image
 import sm
 import aslam_cv as acv
 import ShelveWrapper as sw
+import aslam_simulation as sim
+
+sm.setLoggingLevel(sm.LoggingLevel.Debug)
+
+ts_corrector = sm.DoubleTimestampCorrector()
 
 # Passing clearIntermediateResults will delete the file and start over
-db = sw.ShelveDb('test.shelve')
-
-frameTable = db.getTable('frames')
+db = sw.ShelveDb('test.shelve', clear=True)
 
 sm.setLoggingLevel(sm.LoggingLevel.Debug)
 
@@ -28,35 +31,50 @@ bagin = rosbag.Bag('/mnt/data/Data-Server/Stefan/roundandroundandroundandround1_
 gt_topic = '/vicon/brisk_roundabout/brisk_roundabout'
 cam_topic = '/mv_cameras_manager/GX005924/image_raw'
 
+traj = sim.DiscreteTrajectory()
+
 gt_trans_list = []
 gt_rot_list = []
-i = 0
+index = 0
 
-for topic, msg, t in bagin.read_messages():
-  #print topic
-  if topic == gt_topic:
-    gt_trans = msg.transform.translation
-    gt_rot = msg.transform.rotation
-    gt_trans_list.append(gt_trans)
-    gt_rot_list.append(gt_rot )
-    last_trans = gt_trans
-    last_rot = gt_rot
+t_offset_vicon_cam = -54295835
 
-  if topic == cam_topic:
-        img = Image.fromstring("L", [msg.width, msg.height], msg.data)
-        stamp = acv.Time()
-        stamp.fromNSec(t.to_nsec())
-        mf = pipeline.addImage(stamp, 0, np.asanyarray(img))
-        f = mf.getFrame(0)
-        f.setId(i)
-        keypoints = []
-        for i in range(f.numKeypoints()):
-          kp = f.keypoint(i)
-          ray = kp.backProjection()
-          keypoints.append((kp.y(), ray))
+for topic, msg, t in bagin.read_messages(topics=[gt_topic]):
+  t_cor = ts_corrector.correctTimestamp(index, long(t.to_nsec()))
+  gt_trans = msg.transform.translation
+  gt_rot = msg.transform.rotation
+  tr = np.array([gt_trans.x, gt_trans.y, gt_trans.z])
+  q = np.array([gt_rot.x, gt_rot.y, gt_rot.z, gt_rot.w])
+  T = sm.Transformation(q,tr)
+  traj.addPose(long(t_cor), T)
+  index += 1
 
-        frameTable[i] = (f.image(), last_trans, last_rot, keypoints)
-        print 'stored frame ', i
-        i += 1
+tmin = traj.minTime()
+tmax = traj.maxTime()
+
+index = 0
+for topic, msg, t in bagin.read_messages(topics=[cam_topic]):
+  tnsec = t.to_nsec()
+  tnsec_gt = long(tnsec + t_offset_vicon_cam)
+  if (tnsec_gt < tmin) or (tnsec_gt > tmax):
+    continue
+
+  img = Image.fromstring("L", [msg.width, msg.height], msg.data)
+  stamp = acv.Time()
+  stamp.fromNSec(tnsec)
+  #print 'adding frame ', index
+  #if index == 785:
+  #  IPython.embed()
+
+  if True:
+    mf = pipeline.addImage(stamp, 0, np.asanyarray(img))
+    mf.setId(index)
+    T_gt = traj.T(tnsec_gt)
+    db[index] = (mf, T_gt)
+    print 'stored frame ', index
+
+  index += 1
+
+db.sync()
 
   
