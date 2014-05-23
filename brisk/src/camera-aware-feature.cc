@@ -10,6 +10,7 @@
 #include <agast/wrap-opencv.h>
 #include <brisk/camera-aware-feature.h>
 #include <brisk/brisk-feature.h>
+#include <brisk/brisk-descriptor-extractor.h>
 #include <opencv2/calib3d/calib3d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -540,8 +541,7 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   if (image.empty())
     return;
 
-  CV_Assert(
-      mask.empty() || (mask.type() == CV_8UC1 && mask.size() == image.size()));
+  CV_Assert(mask.empty() || (mask.type() == CV_8UC1 && mask.size() == image.size()));
 
   // detection
   if (useProvidedKeypoints) {
@@ -672,7 +672,9 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
   // assemble descriptor output
   if (descriptorsVec.size() == 0)
     return;  // would be very weird...
-  cv::Mat descriptors_final(numFeatures, descriptorsVec.at(0).cols, descriptorsVec.at(0).type());
+
+  const int numBriskBytes = brisk::BriskDescriptorExtractor::kDescriptorLength / 8;
+  cv::Mat descriptors_final(static_cast<int>(numFeatures), numBriskBytes, 0);
   size_t start_row = 0;
   // I believe here we should no iterate over the keypointsVec, because featured2d->compute(...) might have thrown away some keypoints
   // for these, there no descriptors and hence there's no equivalence anymore between the descriptorVec and the keypointsVec!
