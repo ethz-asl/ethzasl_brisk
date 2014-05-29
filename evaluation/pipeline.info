@@ -1,3 +1,20 @@
+Matcher {
+  maxTraceLength 10
+  matchInImageSpace false
+  initialLandmarkId 0
+  
+  DenseMatcher {
+    nThreads 8
+    nBest 4
+    useDistanceRatioThreshold false 
+  }
+
+  DescriptorTrackingAlgorithm {
+    distanceThreshold 60
+    disparityThreshold 1e12
+  }
+}
+
 UndistortingPipeline {
   nThreads 1
   doBackProjection true
@@ -9,7 +26,7 @@ UndistortingPipeline {
 
   undistorter0 {
      ; This undistorts images using the interpolation method below. Choose 'NullMaskedDistortedOmniCameraGeometry' to disable undistortion.
-     type NullPinholeCameraGeometry
+     type OmniUndistorter
      ; alpha: The free scaling parameter between 0 (when all the pixels in the undistorted image will be valid) and 1 (when all the source image pixels will be retained in the undistorted image
      alpha 0.0
      ; interpolation: INTER_NEAREST(0), INTER_LINEAR(1), INTER_CUBIC(2), INTER_LANCZOS4(4)
@@ -62,7 +79,7 @@ brisk_evaluation {
       }
     }
     mask {
-      mask-file  ../masks/mono_front_camera_mask.png
+      mask-file  none
     }
   }
   extrinsics0 {

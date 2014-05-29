@@ -17,7 +17,8 @@ import aslam_vcharge as vc
 from matplotlib.pyplot import *
 
 def main():
-  angles, precisions, recalls = pickle.load(open('BRISK_evaluation.bin'))
+  angles, precisions, recalls, repeatabilities = pickle.load(open('BRISK_evaluation.bin'))
+
   f = figure(figsize=(20,12))
   plot(angles, precisions, '.', color='b')
   xlabel('yaw angle wrt. reference frame [deg]')
@@ -25,6 +26,7 @@ def main():
   grid(True)
   show()
   f.savefig('BRISK_precision_camaware.png')
+
   f = figure(figsize=(20,12))
   plot(angles, recalls, '.', color='g')
   xlabel('yaw angle wrt. reference frame [deg]')
@@ -33,6 +35,13 @@ def main():
   show()
   f.savefig('BRISK_recall_camaware.png')
 
+  f = figure(figsize=(20,12))
+  plot(angles, repeatabilities, '.', color='r')
+  xlabel('yaw angle wrt. reference frame [deg]')
+  ylabel('repeatability []')
+  grid(True)
+  show()
+  f.savefig('BRISK_repeatability_camaware.png')
 
 if __name__ == '__main__':
     main()

@@ -59,7 +59,7 @@ def getGroundTruthCorrespondences(mf1, mf2, T_mf1_mf2, plot=True):
   return (matches, candidates)
 
 def main():
-  s = sw.ShelveDb('test.shelve')
+  s = sw.ShelveDb('BRISK_bag.shelve')
   keys = s.keys()
   candidates = {}
   reference = 1400
