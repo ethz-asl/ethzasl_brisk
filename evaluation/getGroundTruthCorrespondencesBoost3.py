@@ -112,13 +112,8 @@ def process(inputshelve, outputbin, tag):
   startFrame = 1400
   endFrame = 2700
 
-  print 'building essential matrices...'
-  [buildEssentialMatrices(i, s[i][0]) for i in range(startFrame, endFrame)]
-  pickle.dump(essentialMatrices, open('essentialMatrices_' + tag + '.bin', 'w'))
-  print 'done!'
-
-  #idxs = pickle.load(open('indices_' + tag + '.bin'))
-  #essentialMatrices = pickle.load(open('essentialMatrices_' + tag + '.bin'))
+  idxs = pickle.load(open('indices_' + tag + '.bin'))
+  essentialMatrices = pickle.load(open('essentialMatrices_' + tag + '.bin'))
   
   for i in range(len(idxs)):
     a = idxs[i]

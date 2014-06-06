@@ -58,7 +58,7 @@ def viconBagToTranslationAndRotation( bag, topicName):
     return timestamps, rotations, translations, bagtimestamps, correctedBagTimestamps
 
 
-def process(outputfile, limit=0):
+def process(outputfile, config):
   sm.setLoggingLevel(sm.LoggingLevel.Debug)
 
   ts_corrector = sm.DoubleTimestampCorrector()
@@ -67,7 +67,7 @@ def process(outputfile, limit=0):
   db = sw.ShelveDb(outputfile, clear=True)
 
   btree = sm.BoostPropertyTree()
-  btree.loadInfo('pipeline.info')
+  btree.loadInfo(config)
 
   pipeline = acv.NCameraPipeline(sm.PropertyTree(btree, "UndistortingPipeline"))
 
@@ -112,8 +112,8 @@ def process(outputfile, limit=0):
 
   index = 0
   for topic, msg, t in bagin.read_messages(topics=[cam_topic]):
-    if limit > 0 and index > limit:
-      break
+    #if limit > 0 and index > limit:
+    #  break
 
     tnsec = t.to_nsec()
     tnsec_gt = long(tnsec + t_offset_vicon_cam)
@@ -129,6 +129,9 @@ def process(outputfile, limit=0):
 
     if True:
       mf = pipeline.addImage(stamp, 0, np.asanyarray(img))
+      #if index == 0:
+      #  IPython.embed()
+
       mf.setId(index)
       T_w_rig_gt= traj.T(tnsec_gt)
       db[index] = (mf, T_w_rig_gt)

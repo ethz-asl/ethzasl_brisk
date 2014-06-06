@@ -43,7 +43,7 @@ UndistortingPipeline {
         octaves 2
         uniformityRadius 30
         absoluteThreshold 200
-        maxNoKeypoints 400
+        maxNoKeypoints 10000
         rotationInvariant true
         scaleInvariant true
         cameraModel RadialTangentialPinhole

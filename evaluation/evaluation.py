@@ -12,9 +12,13 @@ import pickle
 import sm
 import aslam_cv as acv
 import ShelveWrapper as sw
-import aslam_vcharge as vc
+#import aslam_vcharge as vc
 
 from matplotlib.pyplot import *
+
+import argparse
+
+#import getGroundTruthCorrespondences as gGTC
 
 def getKeypointFurthestLeftAndRight(mf):
   xmin = 1e12
@@ -33,6 +37,17 @@ def getKeypointFurthestLeftAndRight(mf):
       kpright = i
 
   return (kpleft, kpright)
+
+def invertDictionary(d):
+  d_inv = {}
+  for key, value in d.iteritems():
+    for v in value:
+      if d_inv.has_key(v):
+        d_inv[v].append(key)
+      else:
+        d_inv[v] = [key]
+
+  return d_inv
 
 def badShitThatWasTotallyUseless():
   angle = sm.rad2deg(sm.R2rph(T_A_B.C())[2])
@@ -79,13 +94,22 @@ def badShitThatWasTotallyUseless():
   rayLb_cb_x = (rayLb_cb_p / np.linalg.norm(rayLb_cb_p))[0]
   rayRb_cb_x = (rayRb_cb_p / np.linalg.norm(rayRb_cb_p))[0]
 
+def dictToList(d, idA, idB):
+  matches = []
+  for key, value in d.iteritems():
+    for v in value:
+      matches.append(acv.KeypointIdentifierMatch(acv.KeypointIdentifier(idA ,0 ,key), acv.KeypointIdentifier(idB, 0, v), 0.0))
+
+  return matches
 
 def computeRepeatability(mfA, mfB, T_A_B, gt_correspondences):
+  #gt_correspondences_inv = invertDictionary(gt_correspondences)
   numKeypointsA = mfA.numKeypoints()
   numKeypointsB = mfB.numKeypoints()
   numValidA = 0
   numValidB = 0
-  numberOfCorrespondences = 0
+  numberOfCorrespondencesA = 0
+  numberOfCorrespondencesB = 0
   geoA = mfA.getFrame(0).geometry()
   geoB = mfB.getFrame(0).geometry()
   for i in range(numKeypointsA):
@@ -99,15 +123,15 @@ def computeRepeatability(mfA, mfB, T_A_B, gt_correspondences):
     if visibleInB:
       numValidA += 1
       if gt_correspondences.has_key(i):
-        numberOfCorrespondences += 1    
+        numberOfCorrespondencesA += 1    
     else:
       if gt_correspondences.has_key(i):
         print 'WARNING! keypint ', i, 'in the reference frame is considered outside the common field of view but has a GT correspondence.'
-        IPython.embed()
+        #IPython.embed()
 
-  if len(gt_correspondences) != numberOfCorrespondences:
+  if len(gt_correspondences) != numberOfCorrespondencesA:
     print 'ERROR! mismtach between the number of correspondences and the number of correspondences ;-)'
-    IPython.embed()
+    #IPython.embed()
 
   for i in range(numKeypointsB):
     ray_cb = mfB.keypoint(i).backProjection()
@@ -119,15 +143,22 @@ def computeRepeatability(mfA, mfB, T_A_B, gt_correspondences):
 
     if visibleInA:
       numValidB += 1
+      #if gt_correspondences_inv.has_key(i):
+      #  numberOfCorrespondencesB += 1
+    #else:
+    #  if gt_correspondences_inv.has_key(i):
+    #    print 'WARNING! keypint ', i, 'in  frame B is considered outside the common field of view but has a GT correspondence.'
+
+  #if len(gt_correspondences_inv) != numberOfCorrespondencesB:
+  #  print 'ERROR! mismtach between the number of inv correspondences and the number of correspondences ;-)'
+  #  #IPython.embed()
 
   minKeypoints = min(numValidA, numValidB)
   if minKeypoints == 0:
     return 0
-  else: 
-    repeatability = float(numberOfCorrespondences) / float(minKeypoints)
-    if repeatability > 1.0:
-      IPython.embed()
-    return repeatability
+
+  repeatability = float(numberOfCorrespondencesA) / float(minKeypoints)
+  return repeatability
 
 def evaluateMatches(matches, gt_correspondences, mfRef, mfB):
   numRightPositives = 0
@@ -146,48 +177,94 @@ def evaluateMatches(matches, gt_correspondences, mfRef, mfB):
 
   return (numRightPositives, numFalsePositives)
 
-def main():
-  gt_data = pickle.load(open('BRISK_gt.bin'))
-  s = sw.ShelveDb('BRISK_bag.shelve')
+def process(gtinputbin, inputshelve, tag):
+  gt_data = pickle.load(open(gtinputbin))
+  s = sw.ShelveDb(inputshelve)
+  idxs = pickle.load(open('indices_' + tag + '.bin'))
 
   btree = sm.BoostPropertyTree()
   btree.loadInfo('pipeline.info')
 
-  matcher = acv.MultiFrameTracker(sm.PropertyTree(btree, "Matcher"))
+  matcher = acv.DescriptorMatcher(sm.PropertyTree(btree, "Matcher"))
 
-  mfRef, T_w_ref = s[1400]
-  
-  #mfB, T_w_b = s[1670]
-  #T_ref_b = T_w_ref.inverse() * T_w_b
-  #bla(mfRef, mfB, T_ref_b, gt_data[1670])
-  
-  angles = []
-  precisions = []
-  recalls = []
+  nindices = len(idxs)
+
+  startFrame = idxs[0]
+  endFrame = idxs[nindices-1]
+
+  data = []
   repeatabilities = []
-  for i in range(1401, 3574):
-    mfB, T_w_b = s[i]
-    T_ref_b = T_w_ref.inverse() * T_w_b
 
-    repeatability = computeRepeatability(mfRef, mfB, T_ref_b, gt_data[i])
-    repeatabilities.append(repeatability)
+  for i in range(nindices):
+    t0 = time.time()
+    a = idxs[i]
+    mfA, T_w_a = s[a]
+    for j in range(i+1, nindices):
+      t1 = time.time()
+      b = idxs[j]
+      print '----------- frame A: ', a, ' Frame B: ', b
+      mfB, T_w_b = s[b]
+      T_a_b = T_w_a.inverse() * T_w_b
+      angle = sm.rad2deg(sm.R2rph(T_a_b.C())[2])
 
-    a_deg = sm.rad2deg(sm.R2rph(T_ref_b.C())[2])
-    angles.append(a_deg)
+      #(gt_matches, gt_dict) = gGTC.getGroundTruthCorrespondences(mfA, mfB, T_a_b)
+      gt_dict = gt_data[(a,b)]
 
-    matches = matcher.match2D2D(mfRef, mfB)
-    numRP, numFP = evaluateMatches(matches, gt_data[i], mfRef, mfB)
-    precision = 1.0 - (float(numFP) / float((numFP + numRP)))
-    numGtCorrespondences = len(gt_data[i])
-    if numGtCorrespondences > 0:
-      recall = float(numRP) / float(numGtCorrespondences)
-    else:
-      recall = 0.0
+      t2 = time.time()
+      repeatability = computeRepeatability(mfA, mfB, T_a_b, gt_dict)
+      repeatabilities.append((angle, repeatability))
+      t3 = time.time()
+      print 'computing repeatability took ', t3 - t2, 's'
 
-    precisions.append(precision)
-    recalls.append( recall)   
+      for descriptorThreshold in range(0, 190, 5):
+        t4 = time.time()
+        #print 'oooooooooooooooooooooooooooooooo threshold: ', descriptorThreshold
+        matcher.setDescriptorDistanceThreshold(descriptorThreshold)
+        
 
-  pickle.dump((angles, precisions, recalls, repeatabilities), open('BRISK_evaluation.bin', 'w'))
+        matches = matcher.match2D2D(mfA, mfB)
+        t5 = time.time()
+        print 'matching took ', t5 - t4, 's'
+        if len(matches) > 0:
+          numRP, numFP = evaluateMatches(matches, gt_dict, mfA, mfB)
+
+          precision = 1.0 - (float(numFP) / float((numFP + numRP)))
+          numGtCorrespondences = len(gt_dict)
+          if numGtCorrespondences > 0:
+            recall = float(numRP) / float(numGtCorrespondences)
+          else:
+            recall = 0.0
+
+          data.append((descriptorThreshold, angle, precision, recall))
+        
+        t6 = time.time()
+        print 'computing precision/recall took for one threshold', t6 - t4, 's'
+
+      t7 = time.time()
+      print 'computing precision/recall for all thresholds took ', t7 - t3, 's'
+
+
+  print 'dumping data...'
+  pickle.dump(data, open('BRISK_evaluation_' + tag + '_precision_recall.bin', 'w'))
+  pickle.dump(repeatabilities, open('BRISK_evaluation_' + tag + '_repeatability.bin', 'w'))
+  print 'done!'
+
+def main():
+    parser = argparse.ArgumentParser(description="compute the BRISK ground truth")
+
+    parser.add_argument("gtinputbin", type=str, help="")
+    parser.add_argument("inputshelve", type=str, help="")
+    parser.add_argument("tag", type=str, help="")
+    #parser.add_argument("min_deg", type=str, help="")
+
+    args = parser.parse_args()
+
+    gtinputbin = str(args.gtinputbin)
+    inputshelve = str(args.inputshelve)
+    tag = str(args.tag)
+    #min_deg = str(args.min_deg)
+
+    process(gtinputbin, inputshelve, tag)
 
 if __name__ == '__main__':
     main()
