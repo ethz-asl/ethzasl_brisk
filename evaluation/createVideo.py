@@ -207,7 +207,28 @@ def evaluateMatches(matches, gt_correspondences, mfRef, mfB):
 
   return (numRightPositives, numFalsePositives)
 
+def splitMatches(matches, gt_dict):
+  goodMatches = []
+  badMatches = []
+  for m in matches:
+    ka = m.getItem0().keypointIndex
+    kb = m.getItem1().keypointIndex
+    good = False
+    if gt_dict.has_key(ka):
+      for v, d in gt_dict[ka]:
+        if v == kb:
+          good = True
+          break
+
+    if good:
+      goodMatches.append(m)
+    else:
+      badMatches.append(m)
+
+  return (goodMatches, badMatches)
+
 def process(gtinputbin, inputshelve, tag):
+  print 'creating video'
   gt_data = pickle.load(open(gtinputbin))
   s = sw.ShelveDb(inputshelve)
   idxs = pickle.load(open('indices_' + tag + '.bin'))
@@ -219,66 +240,46 @@ def process(gtinputbin, inputshelve, tag):
 
   nindices = len(idxs)
 
-  startFrame = idxs[0]
-  endFrame = idxs[nindices-1]
+  i = 0
+  endFrame = 120
 
   data = []
   repeatabilities = []
 
-  for i in range(nindices):
-    t0 = time.time()
-    a = idxs[i]
-    mfA, T_w_a = s[a]
-    for j in range(i+1, nindices):
-      t1 = time.time()
-      b = idxs[j]
-      print '----------- frame A: ', a, ' Frame B: ', b
-      mfB, T_w_b = s[b]
-      T_a_b = T_w_a.inverse() * T_w_b
-      angle = sm.rad2deg(sm.R2rph(T_a_b.C())[2])
 
-      #(gt_matches, gt_dict) = gGTC.getGroundTruthCorrespondences(mfA, mfB, T_a_b)
-      gt_dict = gt_data[(a,b)]
+  t0 = time.time()
+  a = idxs[i]
+  mfA, T_w_a = s[a]
+  for j in range(i+1, endFrame):
+    t1 = time.time()
+    b = idxs[j]
+    print '----------- frame A: ', a, ' Frame B: ', b
+    mfB, T_w_b = s[b]
+    T_a_b = T_w_a.inverse() * T_w_b
+    angle = sm.rad2deg(sm.R2rph(T_a_b.C())[2])
 
-      t2 = time.time()
-      repeatability = computeRepeatability(mfA, mfB, T_a_b, gt_dict)
-      repeatabilities.append((angle, repeatability))
-      t3 = time.time()
-      print 'computing repeatability took ', t3 - t2, 's'
+    #(gt_matches, gt_dict) = gGTC.getGroundTruthCorrespondences(mfA, mfB, T_a_b)
+    gt_dict = gt_data[(a,b)]
 
-      if True:
-        for descriptorThreshold in range(0, 190, 5):
-          t4 = time.time()
-          #print 'oooooooooooooooooooooooooooooooo threshold: ', descriptorThreshold
-          matcher.setDescriptorDistanceThreshold(descriptorThreshold)
-          
+    descriptorThreshold = 55
+    t4 = time.time()
+    #print 'oooooooooooooooooooooooooooooooo threshold: ', descriptorThreshold
+    matcher.setDescriptorDistanceThreshold(descriptorThreshold)
+    
+    matches = matcher.match2D2D(mfA, mfB)
+    goodMatches, badMatches = splitMatches(matches, gt_dict)
+    if len(matches) > 0:
+      f = figure(figsize=(12, 18))
+      vc.util.plot.plotTwoMultiFrames(mfA, mfB, keypointColor='y')
+      vc.util.plot.plotMultiFrameMatches(mfA, mfB, goodMatches  )
+      vc.util.plot.plotMultiFrameMatches(mfA, mfB, badMatches, lineColor='r')
+      axis('off')
+      #f.title(tag + ' - descriptor matching threshold = 55')
+      tight_layout()
+      nbr = str(j).zfill(6)
+      f.savefig('video/' + tag + '/frame' + nbr + '.png')
+      #f.close()
 
-          matches = matcher.match2D2D(mfA, mfB)
-          t5 = time.time()
-          print 'matching took ', t5 - t4, 's'
-          if len(matches) > 0:
-            numRP, numFP = evaluateMatches(matches, gt_dict, mfA, mfB)
-
-            precision = 1.0 - (float(numFP) / float((numFP + numRP)))
-            numGtCorrespondences = len(gt_dict)
-            if numGtCorrespondences > 0:
-              recall = float(numRP) / float(numGtCorrespondences)
-            else:
-              recall = 0.0
-
-            data.append((descriptorThreshold, angle, precision, recall))
-          
-          t6 = time.time()
-          print 'computing precision/recall took for one threshold', t6 - t4, 's'
-
-        t7 = time.time()
-        print 'computing precision/recall for all thresholds took ', t7 - t3, 's'
-
-
-  print 'dumping data...'
-  pickle.dump(data, open('BRISK_evaluation_' + tag + '_precision_recall.bin', 'w'))
-  pickle.dump(repeatabilities, open('BRISK_evaluation_' + tag + '_repeatability.bin', 'w'))
-  print 'done!'
 
 def main():
     parser = argparse.ArgumentParser(description="compute the BRISK ground truth")

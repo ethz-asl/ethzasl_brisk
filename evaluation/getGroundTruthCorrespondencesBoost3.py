@@ -13,6 +13,7 @@ import aslam_cv as acv
 import ShelveWrapper as sw
 import math
 import sys
+import aslam_vcharge as vc
 
 import pickle
 from collections import defaultdict
@@ -53,7 +54,7 @@ def boolMatrixToList(G, idA, idB):
   
 # takes two multiframes and the ground truth transformation between them and returns a tuple
 # with a list of all the matches and a dictionary with all the matches for a specific keypoint
-def getGroundTruthCorrespondences(M1_c1, S1, M2_c2, S2, b, n1, n2, T_c1_c2, mf1, mf2, plot=False):
+def getGroundTruthCorrespondences(M1_c1, S1, M2_c2, S2, b, n1, n2, T_c1_c2, mf1, mf2, plot=True):
   S1_full = 3.0 * np.tile(S1, (1, n2))  
   S2_full = 3.0 * np.tile(S2.transpose(), (n1, 1)) 
   
@@ -76,17 +77,17 @@ def getGroundTruthCorrespondences(M1_c1, S1, M2_c2, S2, b, n1, n2, T_c1_c2, mf1,
   it = np.nditer(G, flags=['multi_index'])
   while not it.finished:
     if it[0]:
-      candidates[it.multi_index[0]].append(it.multi_index[1])
+      i = it.multi_index[0]
+      j = it.multi_index[1]
+      candidates[i].append((j, H[i][j]))
     it.iternext()
   
-  return candidates
-
-  #if plot:
-  #  matches = boolMatrixToList(G, mf1.id(), mf2.id())
-  #  clf()
-  #  vc.util.plot.plotTwoMultiFrames(mf1, mf2)
-  #  vc.util.plot.plotMultiFrameMatches(mf1, mf2, matches)
-  #  show()
+  if plot:
+    matches = boolMatrixToList(G, mf1.id(), mf2.id())
+    clf()
+    vc.util.plot.plotTwoMultiFrames(mf1, mf2)
+    vc.util.plot.plotMultiFrameMatches(mf1, mf2, matches)
+    show()
 
   return candidates
 
@@ -109,8 +110,8 @@ def process(inputshelve, outputbin, tag):
   s = sw.ShelveDb(inputshelve)
   keys = s.keys()
   candidates = {}
-  startFrame = 1400
-  endFrame = 2700
+  #startFrame = 1400
+  #endFrame = 2700
 
   idxs = pickle.load(open('indices_' + tag + '.bin'))
   essentialMatrices = pickle.load(open('essentialMatrices_' + tag + '.bin'))

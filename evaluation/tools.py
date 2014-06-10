@@ -49,6 +49,9 @@ def extractFrameIndices(inputshelve, tag, min_deg):
       indices.append(b)
       q += min_deg
 
+    if q > 150.0:
+      break
+
   if not endFrame in indices:
     indices.append(endFrame)
 

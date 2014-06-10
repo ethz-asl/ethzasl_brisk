@@ -13,6 +13,8 @@ import ShelveWrapper as sw
 import aslam_simulation as sim
 import argparse
 
+import aslam_vcharge as vc
+
 def correctRosTimestamps(timestamps):
     corrector = sm.DoubleTimestampCorrector()
     correctedTimestamps = []
@@ -126,11 +128,14 @@ def process(outputfile, config):
     #print 'adding frame ', index
     #if index == 785:
     #  IPython.embed()
+    #if index < 1400:
+    #  index += 1
+    #  continue
 
     if True:
       mf = pipeline.addImage(stamp, 0, np.asanyarray(img))
       #if index == 0:
-      #  IPython.embed()
+      #IPython.embed()
 
       mf.setId(index)
       T_w_rig_gt= traj.T(tnsec_gt)
