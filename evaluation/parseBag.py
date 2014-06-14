@@ -60,7 +60,7 @@ def viconBagToTranslationAndRotation( bag, topicName):
     return timestamps, rotations, translations, bagtimestamps, correctedBagTimestamps
 
 
-def process(outputfile, config):
+def process(outputfile, config, useExtractionDirection):
   sm.setLoggingLevel(sm.LoggingLevel.Debug)
 
   ts_corrector = sm.DoubleTimestampCorrector()
@@ -132,15 +132,17 @@ def process(outputfile, config):
     #  index += 1
     #  continue
 
-    if True:
+    if useExtractionDirection:
+      mf = pipeline.addImageWithExtractionDirection(stamp, 0, np.asanyarray(img), np.array([[0], [1], [0]], dtype=np.uint8))
+    else:
       mf = pipeline.addImage(stamp, 0, np.asanyarray(img))
-      #if index == 0:
-      #IPython.embed()
+    #if index == 0:
+    #IPython.embed()
 
-      mf.setId(index)
-      T_w_rig_gt= traj.T(tnsec_gt)
-      db[index] = (mf, T_w_rig_gt)
-      print 'stored frame ', index
+    mf.setId(index)
+    T_w_rig_gt= traj.T(tnsec_gt)
+    db[index] = (mf, T_w_rig_gt)
+    print 'stored frame ', index
 
     index += 1
 
@@ -151,13 +153,16 @@ def main():
 
     #parser.add_argument("inputFile", type=str, help="")
     parser.add_argument("outputshelve", type=str, help="")
+    parser.add_argument("config", type=str, help="")
+    parser.add_argument("useExtractionDirection", type=bool, help="")
 
     args = parser.parse_args()
 
-    #inputfile = str(args.inputFile)
-    outputfile = str(args.outputFile)
+    outputshelve = str(args.outputshelve)
+    config = str(args.config)
+    useExtractionDirection = str(args.useExtractionDirection)
 
-    process(outputfile)
+    process(outputshelve, config, useExtractionDirection)
 
 if __name__ == '__main__':
     main()

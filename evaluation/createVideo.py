@@ -13,6 +13,7 @@ import sm
 import aslam_cv as acv
 import ShelveWrapper as sw
 import aslam_vcharge as vc
+import os
 
 from matplotlib.pyplot import *
 
@@ -237,6 +238,10 @@ def process(gtinputbin, inputshelve, tag):
   btree.loadInfo('pipeline.info')
 
   matcher = acv.DescriptorMatcher(sm.PropertyTree(btree, "Matcher"))
+
+
+  if not os.path.exists("video/" + tag):
+    os.makedirs("video/" + tag)
 
   nindices = len(idxs)
 

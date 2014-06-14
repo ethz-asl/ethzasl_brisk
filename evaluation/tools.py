@@ -21,7 +21,7 @@ def buildEssentialMatrices(inputshelve, tag):
     for i in range(n):
       kp = mf.keypoint(i)
       M[i,:] = kp.backProjection()
-      S[i,0] = kp.invR()[0,0]
+      S[i,0] = 1.0 / np.sqrt(kp.invR()[0,0])
 
     essentialMatrices[index] = (M, S)
 
