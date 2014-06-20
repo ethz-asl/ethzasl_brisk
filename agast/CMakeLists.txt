@@ -18,7 +18,7 @@ include_directories(include ${catkin_INCLUDE_DIRS})
 if(APPLE)
   add_definitions(-Wextra -Wall -pedantic -DHAVE_OPENCV -std=c++11)
 else()
-  add_definitions(-Wextra -Wall -Werror -pedantic -DHAVE_OPENCV -std=c++11)
+  add_definitions(-Wextra -Wall -Werror -pedantic -DHAVE_OPENCV -std=c++0x)
 endif()
 
 
