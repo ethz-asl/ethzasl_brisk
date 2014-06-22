@@ -3,9 +3,41 @@ import ShelveWrapper as sw
 import sm
 import pickle 
 import numpy as np
+import IPython
 
 startFrame = 1400
 endFrame = 2700
+
+def splitMatches(matches, gt_dict):
+  goodMatches = []
+  badMatches = []
+  for m in matches:
+    ka = m.getItem0().keypointIndex
+    kb = m.getItem1().keypointIndex
+    good = False
+    if gt_dict.has_key(ka):
+      for v, d in gt_dict[ka]:
+        if v == kb:
+          good = True
+          break
+
+    if good:
+      goodMatches.append(m)
+    else:
+      badMatches.append(m)
+
+  return (goodMatches, badMatches)
+
+def buildEssentialMatrix(mf):
+  n = mf.numKeypoints()
+  M = np.zeros((n, 3))
+  S = np.zeros((n, 1))
+  for i in range(n):
+    kp = mf.keypoint(i)
+    M[i,:] = kp.backProjection()
+    S[i,0] = 1.0 / np.sqrt(kp.invR()[0,0])
+
+  return M, S
 
 def buildEssentialMatrices(inputshelve, tag):
   s = sw.ShelveDb(inputshelve)
@@ -36,7 +68,7 @@ def extractFrameIndices(inputshelve, tag, min_deg):
   T_a_w = T_w_a.inverse() 
   q = min_deg
   for b in range(startFrame + 1, endFrame+1):
-    print 'at b: ', b
+    print 'at frame: ', b
     mfB, T_w_b = s[b]
     T_a_b = T_a_w * T_w_b
     angle = sm.rad2deg(sm.R2rph(T_a_b.C())[2])
@@ -49,8 +81,8 @@ def extractFrameIndices(inputshelve, tag, min_deg):
       indices.append(b)
       q += min_deg
 
-    if q > 150.0:
-      break
+    #if q > 150.0:
+    #  break
 
   if not endFrame in indices:
     indices.append(endFrame)

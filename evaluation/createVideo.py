@@ -19,6 +19,8 @@ from matplotlib.pyplot import *
 
 import argparse
 
+import tools as tls
+
 #import getGroundTruthCorrespondences as gGTC
 
 def getKeypointFurthestLeftAndRight(mf):
@@ -208,25 +210,7 @@ def evaluateMatches(matches, gt_correspondences, mfRef, mfB):
 
   return (numRightPositives, numFalsePositives)
 
-def splitMatches(matches, gt_dict):
-  goodMatches = []
-  badMatches = []
-  for m in matches:
-    ka = m.getItem0().keypointIndex
-    kb = m.getItem1().keypointIndex
-    good = False
-    if gt_dict.has_key(ka):
-      for v, d in gt_dict[ka]:
-        if v == kb:
-          good = True
-          break
 
-    if good:
-      goodMatches.append(m)
-    else:
-      badMatches.append(m)
-
-  return (goodMatches, badMatches)
 
 def process(gtinputbin, inputshelve, tag):
   print 'creating video'
@@ -272,7 +256,7 @@ def process(gtinputbin, inputshelve, tag):
     matcher.setDescriptorDistanceThreshold(descriptorThreshold)
     
     matches = matcher.match2D2D(mfA, mfB)
-    goodMatches, badMatches = splitMatches(matches, gt_dict)
+    goodMatches, badMatches = tls.splitMatches(matches, gt_dict)
     if len(matches) > 0:
       f = figure(figsize=(12, 18))
       vc.util.plot.plotTwoMultiFrames(mfA, mfB, keypointColor='y')

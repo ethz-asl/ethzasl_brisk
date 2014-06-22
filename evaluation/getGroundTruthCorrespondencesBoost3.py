@@ -23,9 +23,9 @@ from matplotlib.pyplot import *
 # dot product threshold for matches
 threshold = 0.9995
 focalLength = 914.0
-scale_range = 1.1
+scale_range = 1.6
 scale_range_inv = 1.0 / scale_range
-viconUncertainty = 0.01
+viconUncertainty = 0.05
 viconUncertainty2 = viconUncertainty * viconUncertainty
 #T_rig_camera = sm.Transformation(np.array([[ 0.02514192,  0.01364611,  0.99959075,  0.04200892],[-0.99959381, -0.01307991,  0.02532056,  0.00606903],[ 0.01342009, -0.99982133,  0.01331171, -0.01774598],[0,0,0,1]]))
 
@@ -90,21 +90,6 @@ def getGroundTruthCorrespondences(M1_c1, S1, M2_c2, S2, b, n1, n2, T_c1_c2, mf1,
     show()
 
   return candidates
-
-def buildEssentialMatrices(index, mf):
-  
-  n = mf.numKeypoints()
-
-  M = np.zeros((n, 3))
-  S = np.zeros((n, 1))
-  for i in range(n):
-    kp = mf.keypoint(i)
-    M[i,:] = kp.backProjection()
-    S[i,0] = kp.invR()[0,0]
-
-  essentialMatrices[index] = (M, S)
-
-
 
 def process(inputshelve, outputbin, tag):
   s = sw.ShelveDb(inputshelve)
