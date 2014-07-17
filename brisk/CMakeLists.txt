@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 
 project(brisk)
 
-find_package(catkin REQUIRED COMPONENTS roscpp agast)
+find_package(catkin REQUIRED COMPONENTS roscpp agast cmake_modules)
 find_package(Eigen REQUIRED)
 
 catkin_package(
@@ -19,18 +19,18 @@ find_package(Eigen REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(GLog REQUIRED)
 
-add_definitions(-march=native -Wextra -Wall -pedantic #-Werror
-                -Wno-overloaded-virtual -Wno-non-virtual-dtor # OpenCV.
-                -std=c++0x -DENABLE_BRISK_TIMING
-                -DHAVE_OPENCV)
+add_definitions("-mssse3 -DHAVE_OPENCV")
 
 include_directories(include  ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
-if(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm") 
-  add_definitions ( -mfpu=neon -mfloat-abi=hard)
-else(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
-  add_definitions (-msse2 -mssse3) 
-endif(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
+add_definitions(-Wextra -Wall -pedantic)
+
+if(NOT APPLE)
+  # The clang compiler (on osx) is somehow much more strict
+  # than the compilers on ubuntu and so this does not seem
+  # possible on OSX just yet.
+  add_definitions( -Werror )
+endif()
 
 add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                             src/brisk-feature-detector.cc   
@@ -71,6 +71,7 @@ target_link_libraries(camera ${PROJECT_NAME})
 add_library(${PROJECT_NAME}_test_lib src/test/serialization.cc
                                        src/test/bench-ds.cc
                                        src/opencv-ref.cc)
+target_link_libraries(${PROJECT_NAME}_test_lib ${PROJECT_NAME})
 
 catkin_add_gtest(test_integral_image src/test/test-integral-image.cc
                  WORKING_DIRECTORY ${PROJECT_BINARY_DIR})

@@ -75,8 +75,13 @@ endif(MSVC)
 if(MSVC)
     _FIND_GLOG_LIBRARY(GLOG_LIBRARY                   libglog.lib)
 else(MSVC)
+  if(APPLE)
+	# Linux/OS X builds
+    _FIND_GLOG_LIBRARY(GLOG_LIBRARY                   libglog.dylib)
+  else(APPLE)
 	# Linux/OS X builds
     _FIND_GLOG_LIBRARY(GLOG_LIBRARY                   libglog.so)
+  endif(APPLE)
 endif(MSVC)
 
 message("glog library = " ${GLOG_LIBRARY})
