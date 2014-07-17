@@ -21,16 +21,16 @@ class NoDistortion : public DistortionBase {
   }
 
   // distort an undistorted point
-  virtual void distort(Point2d& point) const {
-  }
-  virtual void distort(Point2d& point, Matx22d& jacobian_out) const {
+  virtual void distort(Point2d& /*point*/) const {}
+
+  virtual void distort(Point2d& /*point*/, Matx22d& jacobian_out) const {
     jacobian_out = Matx22d::eye();
   }
 
   // undistort a distorted point
-  virtual void undistort(Point2d& point) const {
-  }
-  virtual void undistort(Point2d& point, Matx22d& inverse_jacobian_out) const {
+  virtual void undistort(Point2d& /*point*/) const {}
+
+  virtual void undistort(Point2d& /*point*/, Matx22d& inverse_jacobian_out) const {
     inverse_jacobian_out = Matx22d::eye();
   }
 
