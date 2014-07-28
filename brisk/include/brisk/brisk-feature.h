@@ -56,9 +56,10 @@ class BriskFeature : public cv::Feature2D {
   BriskFeature(size_t octaves, double uniformityRadius,
                double absoluteThreshold = 0,
                size_t maxNumKpt = std::numeric_limits < size_t > ::max(),
-               bool rotationInvariant = true, bool scaleInvariant = true)
+               bool rotationInvariant = true, bool scaleInvariant = true,
+               int extractorVersion=BriskDescriptorExtractor::Version::briskV2)
       : _briskDetector(octaves, uniformityRadius, absoluteThreshold, maxNumKpt),
-        _briskExtractor(rotationInvariant, scaleInvariant) { }
+        _briskExtractor(rotationInvariant, scaleInvariant, extractorVersion) { }
 
   virtual ~BriskFeature() { }
 
