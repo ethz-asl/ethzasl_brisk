@@ -12,19 +12,46 @@
 
 int main(int /*argc*/, char ** /*argv*/) {
   // Process command line args.
+  bool draw = false;
+  bool tryOutExtractionDirection = false;
 
+  enum CameraGeometryChoice 
+  {
+    EQUIDIST,
+    RADIAL,
+    UNDIST
+  }
+  
+  CameraGeometryChoice camGeomtry = CameraGeometryChoice::EQUIDIST;
+  
   // TODO (lestefan): make a proper unit test of this stuff...
-  brisk::cameras::EquidistantPinholeCameraGeometry cameraGeometry(
-      602, 601, 318, 241, 640, 480,
-      brisk::cameras::EquidistantDistortion(0.3, 0.2, 0.01, 0.0002));
-  //brisk::cameras::RadialTangentialPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480, brisk::cameras::RadialTangentialDistortion(0.3,0.2,0.01,0.0002));
-  //brisk::cameras::UndistortedPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480);
+  
   brisk::cameras::Point2d keypoint;
   brisk::cameras::Point3d p_C(0.1, 0.2, 1.0);
   p_C = p_C * 1.0 / cv::norm(p_C);  // normalize for later comparison
   brisk::cameras::Point3d p_C2;
-  cameraGeometry.euclideanToKeypoint(p_C, keypoint);
-  cameraGeometry.keypointToEuclidean(keypoint, p_C2);
+
+  switch(camGeomtry)
+  {
+    case EQUIDIST:
+      brisk::cameras::EquidistantPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480, 
+          brisk::cameras::EquidistantDistortion(0.3, 0.2, 0.01, 0.0002));
+          
+      cameraGeometry.euclideanToKeypoint(p_C, keypoint);
+      cameraGeometry.keypointToEuclidean(keypoint, p_C2);
+      break;
+    case RADIAL:
+      brisk::cameras::RadialTangentialPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480, brisk::cameras::RadialTangentialDistortion(0.3,0.2,0.01,0.0002));
+      cameraGeometry.euclideanToKeypoint(p_C, keypoint);
+      cameraGeometry.keypointToEuclidean(keypoint, p_C2);
+      break;
+    case UNDIST:
+      brisk::cameras::UndistortedPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480);
+      cameraGeometry.euclideanToKeypoint(p_C, keypoint);
+      cameraGeometry.keypointToEuclidean(keypoint, p_C2);
+      break;
+  }
+
   p_C2 = p_C2 * 1.0 / cv::norm(p_C2);  // normalize for later comparison
   std::cout << "original point:" << p_C << std::endl;
   std::cout << "projected and reprojected point:" << p_C2 << std::endl;
@@ -67,16 +94,22 @@ int main(int /*argc*/, char ** /*argv*/) {
                                                 cameraGeometry1Ptr, 2e-1);
 
   // try out the extraction direction...
-  //camera0AwareFeature.setExtractionDirection(brisk::cameras::Vec3d(0,1,0));
-  //camera1AwareFeature.setExtractionDirection(brisk::cameras::Vec3d(0,1,0));
+  if(tryOutExtractionDirection)
+  {
+    camera0AwareFeature.setExtractionDirection(brisk::cameras::Vec3d(0,1,0));
+    camera1AwareFeature.setExtractionDirection(brisk::cameras::Vec3d(0,1,0));
+  }
 
   // read imgates
   cv::Mat img0, img1;
   img0 = cv::imread("../images/img0_aslam.pgm", CV_LOAD_IMAGE_GRAYSCALE);
   img1 = cv::imread("../images/img1_aslam.pgm", CV_LOAD_IMAGE_GRAYSCALE);
-  //cv::imshow("img0_aslam.pgm",img0);
-  //cv::imshow("img1_aslam.pgm",img1);
-  //cv::waitKey();
+  if(draw)
+  {
+    cv::imshow("img0_aslam.pgm",img0);
+    cv::imshow("img1_aslam.pgm",img1);
+    cv::waitKey();
+  }
 
   // detect and extract
   std::vector<cv::KeyPoint> kpts0;
@@ -92,11 +125,15 @@ int main(int /*argc*/, char ** /*argv*/) {
   matcher.radiusMatch(descriptors0, descriptors1, matches, 50.0);
 
   // draw stuff
-  /*cv::Mat out0, out1;
+  if(draw)
+  {
+   cv::Mat out0, out1;
    cv::drawKeypoints(img0,kpts0,out0);
    cv::drawKeypoints(img1,kpts1,out1);
    cv::imshow("img0_aslam.pgm",out0);
-   cv::imshow("img1_aslam.pgm",out1);*/
+   cv::imshow("img1_aslam.pgm",out1);
+  }
+  
   cv::Mat out;
   cv::drawMatches(img0, kpts0, img1, kpts1, matches, out, cv::Scalar(0, 255, 0),
                   cv::Scalar(0, 0, 255), std::vector<std::vector<char> >(),
