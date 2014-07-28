@@ -13,7 +13,6 @@
 namespace brisk {
 namespace cameras {
 
-// some useful types
 typedef cv::Vec2d Point2d;
 typedef cv::Vec3d Point3d;
 typedef cv::Vec2d Vec2d;
