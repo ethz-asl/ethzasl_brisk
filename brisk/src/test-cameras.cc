@@ -34,22 +34,28 @@ int main(int /*argc*/, char ** /*argv*/) {
   switch(camGeomtry)
   {
     case EQUIDIST:
-      brisk::cameras::EquidistantPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480, 
-          brisk::cameras::EquidistantDistortion(0.3, 0.2, 0.01, 0.0002));
-          
-      cameraGeometry.euclideanToKeypoint(p_C, keypoint);
-      cameraGeometry.keypointToEuclidean(keypoint, p_C2);
-      break;
+      {
+        brisk::cameras::EquidistantPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480, 
+            brisk::cameras::EquidistantDistortion(0.3, 0.2, 0.01, 0.0002));
+            
+        cameraGeometry.euclideanToKeypoint(p_C, keypoint);
+        cameraGeometry.keypointToEuclidean(keypoint, p_C2);
+        break;
+      }
     case RADIAL:
-      brisk::cameras::RadialTangentialPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480, brisk::cameras::RadialTangentialDistortion(0.3,0.2,0.01,0.0002));
-      cameraGeometry.euclideanToKeypoint(p_C, keypoint);
-      cameraGeometry.keypointToEuclidean(keypoint, p_C2);
-      break;
+      {
+        brisk::cameras::RadialTangentialPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480, brisk::cameras::RadialTangentialDistortion(0.3,0.2,0.01,0.0002));
+        cameraGeometry.euclideanToKeypoint(p_C, keypoint);
+        cameraGeometry.keypointToEuclidean(keypoint, p_C2);
+        break;
+      }
     case UNDIST:
-      brisk::cameras::UndistortedPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480);
-      cameraGeometry.euclideanToKeypoint(p_C, keypoint);
-      cameraGeometry.keypointToEuclidean(keypoint, p_C2);
-      break;
+      {
+        brisk::cameras::UndistortedPinholeCameraGeometry cameraGeometry(602, 601, 318, 241, 640, 480);
+        cameraGeometry.euclideanToKeypoint(p_C, keypoint);
+        cameraGeometry.keypointToEuclidean(keypoint, p_C2);
+        break;
+      }
   }
 
   p_C2 = p_C2 * 1.0 / cv::norm(p_C2);  // normalize for later comparison
