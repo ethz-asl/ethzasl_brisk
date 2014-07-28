@@ -57,6 +57,9 @@ target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARY}
 add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
 
+add_executable(mikolajczyk src/mikolajczyk.cc)
+target_link_libraries(mikolajczyk ${PROJECT_NAME})
+
 add_executable(camera src/test-cameras.cc)
 target_link_libraries(camera ${PROJECT_NAME})
 
