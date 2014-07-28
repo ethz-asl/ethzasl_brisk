@@ -10,7 +10,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
 
-int main(int argc, char ** argv) {
+int main(int /*argc*/, char ** /*argv*/) {
   // Process command line args.
 
   // TODO (lestefan): make a proper unit test of this stuff...

@@ -845,9 +845,9 @@ void CameraAwareFeature::removeBorderKeypoints(
 }
 
 /* cv::DescriptorExtractor interface */
-void CameraAwareFeature::computeImpl(const cv::Mat& image,
-                                     std::vector<cv::KeyPoint>& keypoints,
-                                     cv::Mat& descriptors) const {
+void CameraAwareFeature::computeImpl(const cv::Mat& /*image*/,
+                                     std::vector<cv::KeyPoint>& /*keypoints*/,
+                                     cv::Mat& /*descriptors*/) const {
   // convert image and mask
   /*cv::Mat undistorted_image, undistorted_mask;
    cv::remap(image,undistorted_image,_distort_1_maps[0],_distort_2_maps[0],cv::INTER_LINEAR);
