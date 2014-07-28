@@ -46,8 +46,7 @@ add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                             src/pattern-provider.cc
                             src/vectorized-filters.cc
                             src/timer.cc
-                            src/test/image-io.cc
-                            src/brisk-v1.cc)  
+                            src/test/image-io.cc)  
                      
 target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARY} 
                                       ${OpenCV_LIBS}
