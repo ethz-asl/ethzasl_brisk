@@ -20,7 +20,7 @@ int main(int /*argc*/, char ** /*argv*/) {
     EQUIDIST,
     RADIAL,
     UNDIST
-  }
+  };
   
   CameraGeometryChoice camGeomtry = CameraGeometryChoice::EQUIDIST;
   
