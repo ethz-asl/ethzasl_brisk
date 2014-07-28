@@ -38,7 +38,6 @@ add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                             src/brisk-opencv.cc
                             src/brisk-scale-space.cc
                             src/brute-force-matcher.cc   
-                            src/camera-aware-feature.cc
                             src/harris-feature-detector.cc
                             src/harris-score-calculator.cc
                             src/harris-score-calculator-float.cc
@@ -56,12 +55,6 @@ target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARY}
 
 add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
-
-add_executable(mikolajczyk src/mikolajczyk.cc)
-target_link_libraries(mikolajczyk ${PROJECT_NAME})
-
-add_executable(camera src/test-cameras.cc)
-target_link_libraries(camera ${PROJECT_NAME})
 
 # Testing.
 ##########
