@@ -53,27 +53,29 @@ namespace brisk {
 #if HAVE_OPENCV
 class BriskDescriptorExtractor : public cv::DescriptorExtractor {
 #else
-  class BriskDescriptorExtractor {
+class BriskDescriptorExtractor {
 #endif  // HAVE_OPENCV
  public:
-    friend class BriskFeature;
-    static const unsigned int kDescriptorLength = 384;
-  // Create a descriptor with standard pattern.
-  BriskDescriptorExtractor(bool rotationInvariant = true,
-                           bool scaleInvariant = true);
-  // Create a descriptor with custom pattern file.
-  BriskDescriptorExtractor(const std::string& fname,
-                           bool rotationInvariant = true,
-                           bool scaleInvariant = true);
-  virtual ~BriskDescriptorExtractor();
+  friend class BriskFeature;
+  static const unsigned int kDescriptorLength = 384;  // note lestefan: this is only used for Simon's phone stuff...
 
-  // Call this to generate the kernel:
-  // Circle of radius r (pixels), with n points;
-  // Short pairings with dMax, long pairings with dMin.
-  void GenerateKernel(const std::vector<float>& radiusList,
-                      const std::vector<int>& numberList, float dMax = 5.85f,
-                      float dMin = 8.2f, std::vector<int> indexChange =
-                          std::vector<int>());
+  enum Version {
+    briskV1 = 1,
+    briskV2 = 2
+  };
+
+  // Create a descriptor with standard pattern.
+  BriskDescriptorExtractor(
+      bool rotationInvariant = true,
+      bool scaleInvariant =true,
+      int version = Version::briskV2, float patternScale=1.0);
+  // Create a descriptor with custom pattern file.
+  BriskDescriptorExtractor(
+      const std::string& fname,
+      bool rotationInvariant = true,
+      bool scaleInvariant = true,
+      float patternScale=1.0 );
+  virtual ~BriskDescriptorExtractor();
 
   int descriptorSize() const;
   int descriptorType() const;
@@ -90,8 +92,7 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
   // }  Opencv 2.1
 
   virtual void compute(
-      const agast::Mat& image,
-      std::vector<agast::KeyPoint>& keypoints,
+      const agast::Mat& image, std::vector<agast::KeyPoint>& keypoints,
       std::vector<std::bitset<kDescriptorLength> >& descriptors) const {
     computeImpl(image, keypoints, descriptors);
   }
@@ -101,14 +102,14 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
                            std::vector<agast::KeyPoint>& keypoints,
                            agast::Mat& descriptors) const;
   virtual void computeImpl(
-      const agast::Mat& image,
-      std::vector<agast::KeyPoint>& keypoints,
+      const agast::Mat& image, std::vector<agast::KeyPoint>& keypoints,
       std::vector<std::bitset<kDescriptorLength> >& descriptors) const;
 
   void setDescriptorBits(int keypoint_idx, const int* values,
                          agast::Mat* descriptors) const;
 
-  void setDescriptorBits(int keypoint_idx, const int* values,
+  void setDescriptorBits(
+      int keypoint_idx, const int* values,
       std::vector<std::bitset<kDescriptorLength> >* descriptors) const;
 
   void AllocateDescriptors(size_t count, agast::Mat& descriptors) const;
@@ -122,8 +123,17 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
                                std::vector<agast::KeyPoint>& keypoints,
                                DESCRIPTOR_CONTAINER& descriptors) const;
 
+  // Legacy BRISK 1.0
+  // Call this to generate the kernel:
+  // Circle of radius r (pixels), with n points;
+  // Short pairings with dMax, long pairings with dMin.
+  void generateKernel(std::vector<float> &radiusList,
+                      std::vector<int> &numberList, float dMax = 5.85f,
+                      float dMin = 8.2f, std::vector<int> indexChange =
+                          std::vector<int>());
+
   void InitFromStream(bool rotationInvariant, bool scaleInvariant,
-                      std::istream& pattern_stream);
+                      std::istream& pattern_stream, float patternScale=1.0);
   template<typename ImgPixel_T, typename IntegralPixel_T>
   __inline__ IntegralPixel_T SmoothedIntensity(const agast::Mat& image,
                                                const agast::Mat& integral,
