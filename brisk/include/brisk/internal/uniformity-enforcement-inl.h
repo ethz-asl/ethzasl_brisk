@@ -63,9 +63,9 @@ void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
   occupancy = agast::Mat::zeros((imgrows) * ceil(scaling) + 32,
                              (imgcols) * ceil(scaling) + 32, CV_8U);
 
-  brisk::timing::DebugTimer timer_uniformity_enforcement(
-      "0.3 BRISK Detection: "
-      "uniformity enforcement (per layer)");
+  //brisk::timing::DebugTimer timer_uniformity_enforcement(
+      //"0.3 BRISK Detection: "
+      //"uniformity enforcement (per layer)");
   // Go through the sorted keypoints and reject too close ones.
   for (typename std::vector<POINT_WITH_SCORE>::const_iterator it =
       points.begin(); it != points.end(); ++it) {
@@ -129,9 +129,9 @@ void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
       uint8x16_t mask2 = vld1q_u8(tmpstore_mask2);
 
       vst1q_u8(&occupancy.at<uint8_t>(cy + y - 15, cx - 15),
-          vqaddq_u8(mem1, mask1));
+               vmaxq_u8(mem1, mask1));
       vst1q_u8(&occupancy.at<uint8_t>(cy + y - 15, cx + 1),
-          vqaddq_u8(mem2, mask2));
+               vmaxq_u8(mem2, mask2));
 # else
       __m128i mem1 =
           _mm_loadu_si128(
@@ -174,10 +174,10 @@ void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
                                    ceil(LUT.at<float>(y, 16) * nsc));
       _mm_storeu_si128(
           reinterpret_cast<__m128i *>(&occupancy.at<unsigned char>(cy + y - 15, cx - 15)),
-          _mm_adds_epu8(mem1, mask1));
+          _mm_max_epu8(mem1, mask1));
       _mm_storeu_si128(
           reinterpret_cast<__m128i *>(&occupancy.at<unsigned char>(cy + y - 15, cx + 1)),
-          _mm_adds_epu8(mem2, mask2));
+          _mm_max_epu8(mem2, mask2));
 #endif  // __ARM_NEON__
     }
 
@@ -189,7 +189,9 @@ void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
     }  // Limit the max number if necessary.
   }
   points.assign(pt_tmp.begin(), pt_tmp.end());
-
-  timer_uniformity_enforcement.Stop();
+  /*cv::imshow("occupancy",occupancy);
+  cv::waitKey();
+  cv::imwrite("/home/lestefan/Desktop/occupancy.pgm",occupancy);*/
+  //timer_uniformity_enforcement.Stop();
 }
 #endif  // BRISK_UNIFORMITY_ENFORCEMENT_INL_H_

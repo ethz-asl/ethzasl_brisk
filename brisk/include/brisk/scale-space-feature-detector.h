@@ -66,6 +66,7 @@ class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
 class ScaleSpaceFeatureDetector {
 #endif  // HAVE_OPENCV
  public:
+  virtual ~ScaleSpaceFeatureDetector(){}
   ScaleSpaceFeatureDetector(
       size_t octaves, double uniformityRadius, double absoluteThreshold = 0,
       size_t maxNumKpt = std::numeric_limits < size_t > ::max())
