@@ -49,6 +49,7 @@
 #include <brisk/harris-score-calculator.h>
 #include <agast/wrap-opencv.h>
 #include <brisk/scale-space-feature-detector.h>
+#include <brisk/cameras/cameras.h>
 
 namespace cv {
 typedef brisk::BriskDescriptorExtractor BriskDescriptorExtractor;
