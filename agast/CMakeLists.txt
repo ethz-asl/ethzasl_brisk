@@ -1,16 +1,22 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(agast)
 
+set(USE_CATKIN true CACHE BOOL "Whether to use catkin as a build system or not")
 
-find_package(catkin REQUIRED COMPONENTS roscpp)
+if (USE_CATKIN)
 
-catkin_package(
-    DEPENDS
-    CATKIN_DEPENDS roscpp
-    INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
-    LIBRARIES agast
-    CFG_EXTRAS export_flags.cmake
-)
+	find_package(catkin REQUIRED COMPONENTS roscpp)
+
+	catkin_package(
+	    DEPENDS
+	    CATKIN_DEPENDS roscpp
+	    INCLUDE_DIRS include ${Eigen_INCLUDE_DIRS}
+	    LIBRARIES agast
+	    CFG_EXTRAS export_flags.cmake
+	)
+else()
+	add_definitions(-DAGAST_GLOG)
+endif()
 find_package(OpenCV REQUIRED)
 
 include_directories(include ${catkin_INCLUDE_DIRS})
