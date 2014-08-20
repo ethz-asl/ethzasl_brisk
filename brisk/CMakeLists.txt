@@ -23,6 +23,8 @@ add_definitions("-mssse3 -DHAVE_OPENCV")
 
 include_directories(include  ${Eigen_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
+CHECK_INCLUDE_FILES(opencv2/nonfree/nonfree.hpp HAVE_OPENCV_NONFREE_H)
+
 add_definitions(-Wextra -Wall -pedantic)
 
 if(NOT APPLE)
@@ -54,11 +56,13 @@ target_link_libraries(${PROJECT_NAME} ${GLOG_LIBRARY}
                                       ${OpenCV_LIBS}
                                       ${catkin_LIBRARIES})
 
+IF(HAVE_OPENCV_NONFREE_H)
 add_executable(demo src/demo.cc)
 target_link_libraries(demo ${PROJECT_NAME})
 
 add_executable(mikolajczyk src/mikolajczyk.cc)
 target_link_libraries(mikolajczyk ${PROJECT_NAME})
+ENDIF()
 
 add_executable(camera src/test-cameras.cc)
 target_link_libraries(camera ${PROJECT_NAME})
