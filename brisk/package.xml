@@ -19,15 +19,15 @@
   <build_depend>agast</build_depend>
   <build_depend>gtest</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>opencv</build_depend>
-  <build_depend>eigen</build_depend>
+  <build_depend>opencv2_catkin</build_depend>
+  <build_depend>eigen_catkin</build_depend>
   <build_depend>glog</build_depend>
   
   <run_depend>agast</run_depend>
   <run_depend>gtest</run_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>opencv</run_depend>
-  <run_depend>eigen</run_depend>
+  <run_depend>opencv2_catkin</run_depend>
+  <run_depend>eigen_catkin</run_depend>
   <run_depend>glog</run_depend>
   
   <buildtool_depend>catkin</buildtool_depend>
