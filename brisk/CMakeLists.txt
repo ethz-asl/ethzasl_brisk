@@ -96,11 +96,14 @@ target_link_libraries(test_downsampling ${GLOG_LIBRARY}
                                         ${PROJECT_NAME}
                                         ${PROJECT_NAME}_test_lib)
 
-catkin_add_gtest(test_binary_equal src/test/test-binary-equal.cc
-                 WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
-target_link_libraries(test_binary_equal ${GLOG_LIBRARY} 
-                                        ${PROJECT_NAME}
-                                        ${PROJECT_NAME}_test_lib)
+# TODO(slynen): The test files from Linux don't verify binary equal on OSX.
+if(NOT APPLE)
+  catkin_add_gtest(test_binary_equal src/test/test-binary-equal.cc
+                   WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
+  target_link_libraries(test_binary_equal ${GLOG_LIBRARY} 
+                                          ${PROJECT_NAME}
+                                          ${PROJECT_NAME}_test_lib)
+endif()
 
 catkin_add_gtest(test_match src/test/test-match.cc
                  WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
