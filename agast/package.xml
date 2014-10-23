@@ -10,10 +10,10 @@
   <author email="elmar.mair@dlr.de">Elmar Mair</author>
 
   <build_depend>roscpp</build_depend>
-  <build_depend>opencv</build_depend>
+  <build_depend>opencv2_catkin</build_depend>
   <build_depend>glog_catkin</build_depend>
   <run_depend>roscpp</run_depend>
-  <run_depend>opencv</run_depend>
+  <run_depend>opencv2_catkin</run_depend>
     
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
