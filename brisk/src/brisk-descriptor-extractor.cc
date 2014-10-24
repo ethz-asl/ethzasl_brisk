@@ -290,22 +290,19 @@ void BriskDescriptorExtractor::InitFromStream(bool rotationInvariant,
   delete[] sigma;
 }
 
-BriskDescriptorExtractor::BriskDescriptorExtractor() {
-  BriskDescriptorExtractor(true, true);
-}
+BriskDescriptorExtractor::BriskDescriptorExtractor() :
+  BriskDescriptorExtractor(true, true) { }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
-                                                   bool scaleInvariant) {
+                                                   bool scaleInvariant) :
   BriskDescriptorExtractor(rotationInvariant, scaleInvariant,
-                           Version::briskV2, 1.0);
-}
+                           Version::briskV2, 1.0) { }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
                                                    bool scaleInvariant,
-                                                   int version) {
+                                                   int version) :
   BriskDescriptorExtractor(rotationInvariant, scaleInvariant,
-                           version, 1.0);
-}
+                           version, 1.0) { }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
                                                    bool scaleInvariant,
@@ -345,20 +342,17 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
   }
 }
 
-BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname) {
-  BriskDescriptorExtractor(fname, true);
-}
+BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname) :
+  BriskDescriptorExtractor(fname, true) { }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
-                                                   bool rotationInvariant) {
-  BriskDescriptorExtractor(fname, rotationInvariant, true);
-}
+                                                   bool rotationInvariant) :
+  BriskDescriptorExtractor(fname, rotationInvariant, true) { }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
                                                    bool rotationInvariant,
-                                                   bool scaleInvariant) {
-  BriskDescriptorExtractor(fname, rotationInvariant, scaleInvariant, 1.0);
-}
+                                                   bool scaleInvariant) :
+  BriskDescriptorExtractor(fname, rotationInvariant, scaleInvariant, 1.0) { }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
                                                    bool rotationInvariant,
