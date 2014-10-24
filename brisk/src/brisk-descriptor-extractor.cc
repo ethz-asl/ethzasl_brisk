@@ -290,6 +290,10 @@ void BriskDescriptorExtractor::InitFromStream(bool rotationInvariant,
   delete[] sigma;
 }
 
+BriskDescriptorExtractor::BriskDescriptorExtractor() {
+  BriskDescriptorExtractor(true, true);
+}
+
 BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
                                                    bool scaleInvariant) {
   BriskDescriptorExtractor(rotationInvariant, scaleInvariant,

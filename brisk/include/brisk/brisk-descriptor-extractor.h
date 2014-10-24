@@ -65,6 +65,8 @@ class BriskDescriptorExtractor {
   };
 
   // Create a descriptor with standard pattern.
+  explicit BriskDescriptorExtractor();
+
   explicit BriskDescriptorExtractor(
       bool rotationInvariant,
       bool scaleInvariant);
