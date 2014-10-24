@@ -57,7 +57,7 @@ class BriskDescriptorExtractor {
 #endif  // HAVE_OPENCV
  public:
   friend class BriskFeature;
-  static const unsigned int kDescriptorLength = 384;  // note lestefan: this is only used for Simon's phone stuff...
+  static const unsigned int kDescriptorLength = 384;
 
   enum Version {
     briskV1 = 1,
@@ -65,16 +65,36 @@ class BriskDescriptorExtractor {
   };
 
   // Create a descriptor with standard pattern.
-  BriskDescriptorExtractor(
-      bool rotationInvariant = true,
-      bool scaleInvariant =true,
-      int version = Version::briskV2, float patternScale=1.0);
-  // Create a descriptor with custom pattern file.
-  BriskDescriptorExtractor(
-      const std::string& fname,
-      bool rotationInvariant = true,
-      bool scaleInvariant = true,
-      float patternScale=1.0 );
+  explicit BriskDescriptorExtractor();
+
+  explicit BriskDescriptorExtractor(
+      bool rotationInvariant,
+      bool scaleInvariant);
+
+  explicit BriskDescriptorExtractor(
+      bool rotationInvariant,
+      bool scaleInvariant,
+      int version);
+
+  explicit BriskDescriptorExtractor(
+      bool rotationInvariant,
+      bool scaleInvariant,
+      int version, float patternScale);
+
+  explicit BriskDescriptorExtractor(const std::string& fname);
+
+  explicit BriskDescriptorExtractor(const std::string& fname,
+                                    bool rotationInvariant);
+
+  explicit BriskDescriptorExtractor(const std::string& fname,
+                                    bool rotationInvariant,
+                                    bool scaleInvariant);
+
+  explicit BriskDescriptorExtractor(const std::string& fname,
+                                    bool rotationInvariant,
+                                    bool scaleInvariant,
+                                    float patternScale);
+
   virtual ~BriskDescriptorExtractor();
 
   int descriptorSize() const;

@@ -290,21 +290,37 @@ void BriskDescriptorExtractor::InitFromStream(bool rotationInvariant,
   delete[] sigma;
 }
 
+BriskDescriptorExtractor::BriskDescriptorExtractor() :
+  BriskDescriptorExtractor(true, true) { }
+
 BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
-                                                   bool scaleInvariant, int version, float patternScale) {
-  CHECK(version==Version::briskV1 || version==Version::briskV2);
-  if(version==Version::briskV2){
+                                                   bool scaleInvariant) :
+  BriskDescriptorExtractor(rotationInvariant, scaleInvariant,
+                           Version::briskV2, 1.0) { }
+
+BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
+                                                   bool scaleInvariant,
+                                                   int version) :
+  BriskDescriptorExtractor(rotationInvariant, scaleInvariant,
+                           version, 1.0) { }
+
+BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
+                                                   bool scaleInvariant,
+                                                   int version,
+                                                   float patternScale) {
+  CHECK(version == Version::briskV1 || version == Version::briskV2);
+  if(version == Version::briskV2){
     std::stringstream ss;
     brisk::GetDefaultPatternAsStream(&ss);
     InitFromStream(rotationInvariant, scaleInvariant, ss, patternScale);
-  } else if(version==Version::briskV1){
+  } else if(version == Version::briskV1){
     std::vector<float> rList;
     std::vector<int> nList;
 
     // this is the standard pattern found to be suitable also
     rList.resize(5);
     nList.resize(5);
-    const double f = 0.85*patternScale;
+    const double f = 0.85 * patternScale;
 
     rList[0] = f * 0;
     rList[1] = f * 2.9;
@@ -325,6 +341,18 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
     throw std::runtime_error("only Version::briskV1 or Version::briskV2 supported!");
   }
 }
+
+BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname) :
+  BriskDescriptorExtractor(fname, true) { }
+
+BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
+                                                   bool rotationInvariant) :
+  BriskDescriptorExtractor(fname, rotationInvariant, true) { }
+
+BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
+                                                   bool rotationInvariant,
+                                                   bool scaleInvariant) :
+  BriskDescriptorExtractor(fname, rotationInvariant, scaleInvariant, 1.0) { }
 
 BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
                                                    bool rotationInvariant,
