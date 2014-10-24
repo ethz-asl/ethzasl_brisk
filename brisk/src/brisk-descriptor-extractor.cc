@@ -341,6 +341,21 @@ BriskDescriptorExtractor::BriskDescriptorExtractor(bool rotationInvariant,
   }
 }
 
+BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname) {
+  BriskDescriptorExtractor(fname, true);
+}
+
+BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
+                                                   bool rotationInvariant) {
+  BriskDescriptorExtractor(fname, rotationInvariant, true);
+}
+
+BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
+                                                   bool rotationInvariant,
+                                                   bool scaleInvariant) {
+  BriskDescriptorExtractor(fname, rotationInvariant, scaleInvariant, 1.0);
+}
+
 BriskDescriptorExtractor::BriskDescriptorExtractor(const std::string& fname,
                                                    bool rotationInvariant,
                                                    bool scaleInvariant,

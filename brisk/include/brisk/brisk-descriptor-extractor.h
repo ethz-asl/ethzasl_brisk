@@ -79,6 +79,15 @@ class BriskDescriptorExtractor {
       bool scaleInvariant,
       int version, float patternScale);
 
+  explicit BriskDescriptorExtractor(const std::string& fname);
+
+  explicit BriskDescriptorExtractor(const std::string& fname,
+                                    bool rotationInvariant);
+
+  explicit BriskDescriptorExtractor(const std::string& fname,
+                                    bool rotationInvariant,
+                                    bool scaleInvariant);
+
   explicit BriskDescriptorExtractor(const std::string& fname,
                                     bool rotationInvariant,
                                     bool scaleInvariant,
