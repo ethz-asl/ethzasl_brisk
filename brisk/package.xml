@@ -17,7 +17,6 @@
   
   <depend>cmake_modules</depend>
   <depend>agast</depend>
-  <depend>gtest</depend>
   <depend>roscpp</depend>
   <depend>opencv2_catkin</depend>
   <depend>eigen_catkin</depend>
