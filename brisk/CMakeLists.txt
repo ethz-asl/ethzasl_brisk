@@ -28,10 +28,10 @@ check_include_files(opencv2/nonfree/nonfree.hpp HAVE_OPENCV_NONFREE_H)
 
 add_definitions(-Wextra -Wall -pedantic)
 
-if(NOT APPLE)
-  # The clang compiler (on osx) is somehow much more strict
-  # than the compilers on ubuntu and so this does not seem
-  # possible on OSX just yet.
+if (NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+  # The clang compiler is somehow much more strict
+  # than gcc and so this does not seem
+  # possible with (Apple-)Clang just yet.
   add_definitions( -Werror )
 endif()
 

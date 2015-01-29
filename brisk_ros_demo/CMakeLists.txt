@@ -24,7 +24,7 @@ add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall
                 -std=c++0x -DENABLE_BRISK_TIMING -DTEST_IN_SOURCE
                 -DHAVE_OPENCV)
 
-if(NOT APPLE)
+if (NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
   add_definitions( -Werror )
 endif()
 
