@@ -1,33 +1,24 @@
 <?xml version="1.0"?>
-<package>
+<package format="2">
   <name>brisk_ros_demo</name>
   <version>2.0.0</version>
   <description>The brisk ros demo package</description>
 
-  <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <maintainer email="slynen@ethz.ch">Simon Lynen</maintainer>
   <maintainer email="lestefan@ethz.ch">Stefan Leutenegger</maintainer>
 
   <license>New BSD</license>
 
-  <!-- Author tags are optional, mutiple are allowed, one per tag -->
-  <!-- Authors do not have to be maintianers, but could be -->
   <author email="lestefan@ethz.ch">Stefan Leutenegger</author>
   <author email="slynen@ethz.ch">Simon Lynen</author>
 
-  <build_depend>agast</build_depend>
-  <build_depend>brisk</build_depend>
-  <build_depend>image_transport</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>opencv2</build_depend>
-  <build_depend>glog_catkin</build_depend>
-  
-  <run_depend>agast</run_depend>
-  <run_depend>brisk</run_depend>
-  <run_depend>image_transport</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>opencv2</run_depend>
-  <run_depend>glog_catkin</run_depend>
-
   <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+  
+  <depend>agast</depend>
+  <depend>brisk</depend>
+  <depend>image_transport</depend>
+  <depend>roscpp</depend>
+  <depend>opencv2_catkin</depend>
+  <depend>glog_catkin</depend>
 </package>
