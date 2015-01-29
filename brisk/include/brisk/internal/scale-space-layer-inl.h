@@ -51,7 +51,7 @@
 namespace brisk {
 template<class SCORE_CALCULATOR_T>
 ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScaleSpaceLayer(const agast::Mat& img,
-                                                     bool initScores) {
+                                                     bool /*initScores*/) {
   Create(img);
 }
 
