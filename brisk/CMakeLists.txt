@@ -12,7 +12,7 @@ check_include_files(opencv2/nonfree/nonfree.hpp HAVE_OPENCV_NONFREE_H)
 
 add_definitions(-Wextra -Wall -pedantic)
 
-if(NOT APPLE)
+if (NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
   add_definitions( -Werror )
 endif()
 
