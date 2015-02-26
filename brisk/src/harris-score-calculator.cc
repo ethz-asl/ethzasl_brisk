@@ -140,8 +140,7 @@ void HarrisScoreCalculator::GetCovarEntries(const agast::Mat& src, agast::Mat& d
   for (unsigned int i = 0; i < maxI; ++i) {
     bool end = false;
     for (unsigned int j = 0; j < maxJ;) {
-      __m128i zeros;
-      zeros = _mm_xor_si128(zeros, zeros);
+      __m128i zeros = _mm_setzero_si128();
       __m128i result_hi_dx = zeros;
       __m128i result_lo_dx = zeros;
       __m128i result_hi_dy = zeros;
