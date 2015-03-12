@@ -299,7 +299,7 @@ int main(int argc, char ** argv) {
     if (std::string(argv[4]) == "BRISK") {
       descriptorExtractor = new brisk::BriskDescriptorExtractor();
     } else if (std::string(argv[4]) == "U-BRISK") {
-      descriptorExtractor = new brisk::BriskDescriptorExtractor(false);
+      descriptorExtractor = new brisk::BriskDescriptorExtractor(false, true);
     } else if (std::string(argv[4]) == "SU-BRISK") {
       descriptorExtractor = new brisk::BriskDescriptorExtractor(false, false);
     } else if (std::string(argv[4]) == "S-BRISK") {
