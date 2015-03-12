@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-include(CheckIncludeFiles)
+include(CheckIncludeFileCXX)
 
 project(brisk)
 
@@ -8,7 +8,9 @@ catkin_simple(ALL_DEPS_REQUIRED)
 
 add_definitions("-mssse3 -DHAVE_OPENCV")
 
-check_include_files(opencv2/nonfree/nonfree.hpp HAVE_OPENCV_NONFREE_H)
+include_directories(${CATKIN_DEVEL_PREFIX}/include)
+
+check_include_file_cxx(opencv2/nonfree/nonfree.hpp HAVE_OPENCV_NONFREE_H)
 
 add_definitions(-Wextra -Wall -pedantic)
 
