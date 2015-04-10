@@ -265,7 +265,9 @@ void HarrisScoresSSE(const agast::Mat& src, agast::Mat& scores) {
           >> 4);
 
       int trace_div_by_2 = ((dxdx) + (dydy)) >> 1;
-      *(reinterpret_cast<int*>(scores.data) + i * stride + j) =
+      // The scores Mat has elements of integer size. By casting to (int *)
+      // we can use pointer arithmetic to find the offset to store the score.
+      *(reinterpret_cast<int*>(scores.data) + i * cols + j) =
           ((((dxdx) * (dydy))) - (((dxdy) * (dxdy))))
           - ((((trace_div_by_2)) * ((trace_div_by_2)) >> 2));
     }
