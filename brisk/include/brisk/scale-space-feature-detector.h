@@ -111,9 +111,10 @@ class ScaleSpaceFeatureDetector {
       scaleSpaceLayers[i].SetMaxNumKpt(_maxNumKpt);
       scaleSpaceLayers[i].SetAbsoluteThreshold(_absoluteThreshold);
     }
+    bool enforceUniformity = _uniformityRadius > 0.0;
     for (size_t i = 0; i < scaleSpaceLayers.size(); ++i) {
       // Only do refinement, if no keypoints are passed.
-      scaleSpaceLayers[i].DetectScaleSpaceMaxima(keypoints, true,
+      scaleSpaceLayers[i].DetectScaleSpaceMaxima(keypoints, enforceUniformity,
                                                  !usePassedKeypoints,
                                                  usePassedKeypoints);
     }
