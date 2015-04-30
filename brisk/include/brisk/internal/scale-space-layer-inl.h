@@ -370,6 +370,12 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (enforceUniformity && _radius > 0.0) {
     EnforceKeyPointUniformity(_LUT, _radius, _img.rows, _img.cols, _maxNumKpt,
                               points);
+  }else{
+    // If no uniformity constraint is enforced, we need to limit the number of keypoints.
+    if(points.size() > _maxNumKpt){
+      std::sort(points.begin(), points.end());
+      points.resize(_maxNumKpt);
+    }
   }
 
   // 3d(/2d) subpixel refinement.
