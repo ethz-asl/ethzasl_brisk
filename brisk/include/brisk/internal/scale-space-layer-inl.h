@@ -373,7 +373,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   }else{
     // If no uniformity constraint is enforced, we need to limit the number of keypoints.
     if(points.size() > _maxNumKpt){
-      std::sort(points.begin(), points.end());
+      std::partial_sort(points.begin(), points.begin() + _maxNumKpt, points.end());
       points.resize(_maxNumKpt);
     }
   }
