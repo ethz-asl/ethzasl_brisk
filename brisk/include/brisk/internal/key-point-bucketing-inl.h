@@ -45,8 +45,8 @@ template<typename POINT_WITH_SCORE>
 inline void KeyPointBuckets::filterKeyPoints(std::vector<POINT_WITH_SCORE>* keyPoints){
     CHECK_NOTNULL(keyPoints);
     if(!keyPoints->empty()){
-      if(_isFull){
-        resetBuckets();
+      if(_needsReset){
+        resetBucketCounters();
       }
 
       std::sort(keyPoints->begin(), keyPoints->end());
@@ -54,30 +54,21 @@ inline void KeyPointBuckets::filterKeyPoints(std::vector<POINT_WITH_SCORE>* keyP
       std::vector<POINT_WITH_SCORE> filteredKeyPoints;
       filteredKeyPoints.reserve(_maxNumKeyPointsTotal);
       for(const POINT_WITH_SCORE& key_point : *keyPoints){
-        if(!isBucketFull(key_point)){
+        unsigned int coord_u = key_point.x / _stepSizeU;
+        unsigned int coord_v = key_point.y / _stepSizeV;
+        CHECK_LT(coord_u, _numBucketsU);
+        CHECK_LT(coord_v, _numBucketsV);
+        unsigned int* bucket_counter_ptr = &(_numKeyPointsInBuckets[coord_u][coord_v]);
+        if(*bucket_counter_ptr < _maxNumKeyPointsPerBucket){
+          ++(*bucket_counter_ptr);
           filteredKeyPoints.emplace_back(key_point);
         }
       }
       CHECK_LE(filteredKeyPoints.size(), keyPoints->size());
 
       keyPoints->swap(filteredKeyPoints);
-      _isFull = true;
+      _needsReset = true;
     }
-}
-
-template<typename POINT_WITH_SCORE>
-inline bool KeyPointBuckets::isBucketFull(const POINT_WITH_SCORE& key_point){
-  unsigned int coord_u = key_point.x / _stepSizeU;
-  unsigned int coord_v = key_point.y / _stepSizeV;
-  CHECK_LT(coord_u, _numBucketsU);
-  CHECK_LT(coord_v, _numBucketsV);
-  unsigned int* bucket_counter_ptr = &(_numKeyPointsInBuckets[coord_u][coord_v]);
-  if(*bucket_counter_ptr < _maxNumKeyPointsPerBucket){
-    ++(*bucket_counter_ptr);
-    return false;
-  }else{
-    return true;
-  }
 }
 
 template<typename POINT_WITH_SCORE>

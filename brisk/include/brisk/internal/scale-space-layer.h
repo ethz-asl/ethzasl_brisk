@@ -81,7 +81,7 @@ class ScaleSpaceLayer {
                   true);  // For successive construction.
 
   void SetUniformityRadius(double radius);
-  void SetNumBuckets(size_t numBucketsU, size_t numBucketsV){
+  void SetNumBuckets(size_t numBucketsU, size_t numBucketsV) {
     _numBucketsU = numBucketsU;
     _numBucketsV = numBucketsV;
   }

@@ -50,7 +50,7 @@ class KeyPointBuckets{
   KeyPointBuckets(size_t numBucketsU, size_t numBucketsV,
                   size_t numImgCols, size_t numImgRows,
                   size_t maxNumKeyPoints) :
-                    _isFull(false),
+                    _needsReset(false),
                     _numBucketsU(numBucketsU), _numBucketsV(numBucketsV),
                     _numImgCols(numImgCols), _numImgRows(numImgRows),
                     _maxNumKeyPointsTotal(maxNumKeyPoints),
@@ -67,21 +67,20 @@ class KeyPointBuckets{
     _stepSizeV = 1u + ((numImgRows - 1u) / numBucketsV);
   }
 
-  // Takes a sorted key point vector and filters it using bucketing.
   template<typename POINT_WITH_SCORE>
   inline void filterKeyPoints(std::vector<POINT_WITH_SCORE>* keyPoints);
 
-  template<typename POINT_WITH_SCORE>
-  inline bool isBucketFull(const POINT_WITH_SCORE& key_point);
-
-  void resetBuckets(){
-    _numKeyPointsInBuckets =
-        OccupancyMatrix(_numBucketsU, OccupancyColumn(_numBucketsV, 0u));
-    _isFull = false;
+  void resetBucketCounters(){
+    for(size_t i = 0; i < _numKeyPointsInBuckets.size(); ++i){
+      for(size_t j = 0; j < _numKeyPointsInBuckets[i].size(); ++j){
+        _numKeyPointsInBuckets[i][j] = 0u;
+      }
+    }
+    _needsReset = false;
   }
 
  private:
-  bool _isFull;
+  bool _needsReset;
 
   // Parameters.
   size_t _numBucketsU;
