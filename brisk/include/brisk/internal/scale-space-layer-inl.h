@@ -44,9 +44,10 @@
 #include <algorithm>
 #include <vector>
 
-#include <brisk/internal/uniformity-enforcement.h>
 #include <brisk/internal/image-down-sampling.h>
+#include <brisk/internal/key-point-bucketing.h>
 #include <brisk/internal/timer.h>
+#include <brisk/internal/uniformity-enforcement.h>
 
 namespace brisk {
 template<class SCORE_CALCULATOR_T>
@@ -364,18 +365,16 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
     }
   }
 
-  // Uniformity enforcement.
+  // Use uniformity enforcement or bucketing to achieve more uniform
+  // distribution and limit the number of key points.
   if (points.size() == 0)
     return;
   if (enforceUniformity && _radius > 0.0) {
-    EnforceKeyPointUniformity(_LUT, _radius, _img.rows, _img.cols, _maxNumKpt,
-                              points);
+    EnforceKeyPointUniformity(_LUT, _radius, _img.rows, _img.cols,
+                              _maxNumKpt, points);
   }else{
-    // If no uniformity constraint is enforced, we need to limit the number of keypoints.
-    if(points.size() > _maxNumKpt){
-      std::partial_sort(points.begin(), points.begin() + _maxNumKpt, points.end());
-      points.resize(_maxNumKpt);
-    }
+    KeyPointBucketing(_img.rows, _img.cols, _maxNumKpt,
+                      _numBucketsU, _numBucketsV, &points);
   }
 
   // 3d(/2d) subpixel refinement.

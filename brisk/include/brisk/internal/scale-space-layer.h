@@ -53,7 +53,25 @@ template<class SCORE_CALCULATOR_T>
 class ScaleSpaceLayer {
  public:
   typedef SCORE_CALCULATOR_T ScoreCalculator_t;
-  ScaleSpaceLayer() { }
+  ScaleSpaceLayer() :
+    _isOctave(false),
+    _layerNumber(0),
+    _img(),
+    _scoreCalculator(),
+    _aboveLayer_ptr(nullptr),
+    _belowLayer_ptr(nullptr),
+    _offset_above(0.0),
+    _offset_below(0.0),
+    _scale_above(0.0),
+    _scale_below(0.0),
+    _scale(0.0),
+    _offset(0.0),
+    _radius(0.0),
+    _maxNumKpt(1000),
+    _absoluteThreshold(0.0),
+    _LUT(),
+    _numBucketsU(4u),
+    _numBucketsV(4u) { }
   ScaleSpaceLayer(const agast::Mat& img, bool initScores = true);  // Octave 0.
   ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
                   bool initScores = true);  // For successive construction.
@@ -63,6 +81,10 @@ class ScaleSpaceLayer {
                   true);  // For successive construction.
 
   void SetUniformityRadius(double radius);
+  void SetNumBuckets(size_t numBucketsU, size_t numBucketsV){
+    _numBucketsU = numBucketsU;
+    _numBucketsV = numBucketsV;
+  }
   void SetMaxNumKpt(size_t maxNumKpt) {
     _maxNumKpt = maxNumKpt;
   }
@@ -126,6 +148,10 @@ class ScaleSpaceLayer {
   size_t _maxNumKpt;
   double _absoluteThreshold;
   agast::Mat _LUT;
+
+  // Key point bucketing related.
+  size_t _numBucketsU;
+  size_t _numBucketsV;
 };
 }  // namespace brisk
 
