@@ -97,7 +97,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(const agast::Mat& img,
 
 template<class SCORE_CALCULATOR_T>
 ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScaleSpaceLayer(
-    ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores) {
+    ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores)
+{
   Create(layerBelow, initScores);
 }
 

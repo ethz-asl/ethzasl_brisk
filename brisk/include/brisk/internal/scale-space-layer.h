@@ -69,9 +69,8 @@ class ScaleSpaceLayer {
     _radius(0.0),
     _maxNumKpt(1000),
     _absoluteThreshold(0.0),
-    _LUT(),
-    _numBucketsU(4u),
-    _numBucketsV(4u) { }
+    _LUT() {
+  }
   ScaleSpaceLayer(const agast::Mat& img, bool initScores = true);  // Octave 0.
   ScaleSpaceLayer(ScaleSpaceLayer<ScoreCalculator_t>* layerBelow,
                   bool initScores = true);  // For successive construction.
@@ -81,10 +80,6 @@ class ScaleSpaceLayer {
                   true);  // For successive construction.
 
   void SetUniformityRadius(double radius);
-  void SetNumBuckets(size_t numBucketsU, size_t numBucketsV) {
-    _numBucketsU = numBucketsU;
-    _numBucketsV = numBucketsV;
-  }
   void SetMaxNumKpt(size_t maxNumKpt) {
     _maxNumKpt = maxNumKpt;
   }
@@ -124,8 +119,8 @@ class ScaleSpaceLayer {
                               float& delta_y);
 
   // Layer properties.
-  bool _isOctave;
-  int _layerNumber;
+  bool _isOctave = false;
+  int _layerNumber = 0;
 
   // Have a reference to the image for convenience:
   agast::Mat _img;
@@ -134,24 +129,22 @@ class ScaleSpaceLayer {
   ScoreCalculator_t _scoreCalculator;
 
   // Remember next and previous layer.
-  ScaleSpaceLayer* _aboveLayer_ptr;
-  ScaleSpaceLayer* _belowLayer_ptr;
+  ScaleSpaceLayer* _aboveLayer_ptr = nullptr;
+  ScaleSpaceLayer* _belowLayer_ptr = nullptr;
 
   // For coordinate transformations:
-  double _offset_above, _offset_below;
-  double _scale_above, _scale_below;
-  double _scale;
-  double _offset;
+  double _offset_above = 0.0;
+  double _offset_below = 0.0;
+  double _scale_above = 0.0;
+  double _scale_below = 0.0;
+  double _scale = 0.0;
+  double _offset = 0.0;
 
   // Uniformity enforcement related.
-  double _radius;
-  size_t _maxNumKpt;
-  double _absoluteThreshold;
+  double _radius = 0.0;
+  size_t _maxNumKpt = 0;
+  double _absoluteThreshold = 0.0;
   agast::Mat _LUT;
-
-  // Key point bucketing related.
-  size_t _numBucketsU;
-  size_t _numBucketsV;
 };
 }  // namespace brisk
 
