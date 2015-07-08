@@ -39,21 +39,16 @@
 #define BRISK_UNIFORMITY_ENFORCEMENT_INL_H_
 
 #include <agast/wrap-opencv.h>
-#include <brisk/internal/timer.h>
 
 template<typename POINT_WITH_SCORE>
 void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
                                int imgrows, int imgcols, size_t maxNumKpt,
                                std::vector<POINT_WITH_SCORE>& points) {
-  brisk::timing::DebugTimer timer_sort_keypoints(
-      "0.31 BRISK Detection: "
-      "sort keypoints by score (per layer)");
   std::vector<POINT_WITH_SCORE> pt_tmp;
 
   // Sort.
   std::sort(points.begin(), points.end());
-  const float maxScore = points.front().score;
-  timer_sort_keypoints.Stop();
+  const float maxScore = points.front().score;;
 
   pt_tmp.reserve(points.size());  // Allow appending.
 
@@ -63,9 +58,6 @@ void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
   occupancy = agast::Mat::zeros((imgrows) * ceil(scaling) + 32,
                              (imgcols) * ceil(scaling) + 32, CV_8U);
 
-  brisk::timing::DebugTimer timer_uniformity_enforcement(
-      "0.3 BRISK Detection: "
-      "uniformity enforcement (per layer)");
   // Go through the sorted keypoints and reject too close ones.
   for (typename std::vector<POINT_WITH_SCORE>::const_iterator it =
       points.begin(); it != points.end(); ++it) {
@@ -190,6 +182,5 @@ void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
   }
   points.assign(pt_tmp.begin(), pt_tmp.end());
 
-  timer_uniformity_enforcement.Stop();
 }
 #endif  // BRISK_UNIFORMITY_ENFORCEMENT_INL_H_

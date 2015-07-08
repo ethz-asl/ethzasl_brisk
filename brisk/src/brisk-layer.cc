@@ -66,7 +66,8 @@ BriskLayer::BriskLayer(const agast::Mat& img, unsigned char upperThreshold,
   agastDetector_5_8_.reset(new agast::AgastDetector5_8(img.cols, img.rows, 0));
 
   // Calculate threshold map.
-  CalculateThresholdMap();
+  if(useThresholdMap_)
+    CalculateThresholdMap();
 }
 // Derive a layer.
 BriskLayer::BriskLayer(const BriskLayer& layer, int mode, unsigned char upperThreshold,
@@ -91,7 +92,8 @@ BriskLayer::BriskLayer(const BriskLayer& layer, int mode, unsigned char upperThr
       new agast::AgastDetector5_8(img_.cols, img_.rows, 0));
 
   // Calculate threshold map.
-  CalculateThresholdMap();
+  if(useThresholdMap_)
+    CalculateThresholdMap();
 }
 
 // Fast/Agast.
@@ -101,7 +103,10 @@ void BriskLayer::GetAgastPoints(uint8_t threshold,
   CHECK_NOTNULL(keypoints);
   oastDetector_->set_threshold(threshold, upperThreshold_, lowerThreshold_);
   if (keypoints->empty()) {
-    oastDetector_->detect(img_.data, *keypoints, &thrmap_);
+    if(useThresholdMap_)
+      oastDetector_->detect(img_.data, *keypoints, &thrmap_);
+    else
+      oastDetector_->detect(img_.data, *keypoints);
   }
   // Also write scores.
   const int num = keypoints->size();
@@ -110,8 +115,10 @@ void BriskLayer::GetAgastPoints(uint8_t threshold,
   for (int i = 0; i < num; i++) {
     const int offs = agast::KeyPointX((*keypoints)[i]) +
         agast::KeyPointY((*keypoints)[i]) * imcols;
-    int thr = *(thrmap_.data + offs);
-    oastDetector_->set_threshold(thr);
+    if(useThresholdMap_){
+      int thr = *(thrmap_.data + offs);
+      oastDetector_->set_threshold(thr);
+    }
     *(scores_.data + offs) = oastDetector_->cornerScore(img_.data + offs);
   }
 }

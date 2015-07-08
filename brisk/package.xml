@@ -5,16 +5,17 @@
   <description>The brisk lib</description>
 
   <maintainer email="slynen@ethz.ch">Simon Lynen</maintainer>
-  <maintainer email="lestefan@ethz.ch">Stefan Leutenegger</maintainer>
+  <maintainer email="s.leutenegger@imperial.ac.uk">Stefan Leutenegger</maintainer>
 
   <license>New BSD</license>
 
-  <author email="lestefan@ethz.ch">Stefan Leutenegger</author>
+  <author email="s.leutenegger@imperial.ac.uk">Stefan Leutenegger</author>
   <author email="slynen@ethz.ch">Simon Lynen</author>
 
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
   
+  <depend>roslib</depend>
   <depend>agast</depend>
   <depend>cmake_modules</depend>
   <depend>eigen_catkin</depend>

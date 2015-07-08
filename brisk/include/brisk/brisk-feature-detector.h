@@ -48,14 +48,15 @@
 
 namespace brisk {
 #if HAVE_OPENCV
-class  BriskFeatureDetector : public cv::FeatureDetector {
+class  BriskFeatureDetectorAgast : public cv::FeatureDetector {
 #else
-  class  BriskFeatureDetector {
+  class  BriskFeatureDetectorAgast {
 #endif  // HAVE_OPENCV
  public:
-  BriskFeatureDetector(int thresh, int octaves = 3,
-                       bool suppressScaleNonmaxima = true);
-  virtual ~BriskFeatureDetector() { }
+    BriskFeatureDetectorAgast(int thresh, int octaves = 3,
+                       bool suppressScaleNonmaxima = true,
+                       bool useContrastAdaptation = false);
+  virtual ~BriskFeatureDetectorAgast() { }
   int threshold;
   int octaves;
 #if !HAVE_OPENCV
@@ -72,6 +73,7 @@ protected:
                           std::vector<agast::KeyPoint>& keypoints,
                           const agast::Mat& mask = agast::Mat()) const;
   bool m_suppressScaleNonmaxima;
+  bool m_useContrastAdaptation = false;
 };
 }  // namespace brisk
 

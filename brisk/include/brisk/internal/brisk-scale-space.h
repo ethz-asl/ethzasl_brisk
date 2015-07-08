@@ -51,7 +51,8 @@ namespace brisk {
 class  BriskScaleSpace {
  public:
   // Construct telling the octaves number:
-  BriskScaleSpace(uint8_t octaves = 3, bool suppress_scale_nonmaxima = true);
+  BriskScaleSpace(uint8_t octaves = 3, bool suppress_scale_nonmaxima = true,
+                  bool useContrastAdaptation = false);
   ~BriskScaleSpace();
 
   // Construct the image pyramids.
@@ -101,7 +102,7 @@ class  BriskScaleSpace {
   std::vector<brisk::BriskLayer> pyramid_;
 
   // Agast:
-  uint8_t threshold_;
+  uint8_t threshold_ = 0;
 
   // Some constant parameters:
   static const float kBasicSize_;
@@ -116,6 +117,7 @@ class  BriskScaleSpace {
   static const unsigned char kDefaultLowerThreshold;
 
   bool suppressScaleNonmaxima_;
+  bool useContrastAdaptation_ = false;
 };
 }  // namespace brisk
 #endif  // INTERNAL_BRISK_SCALE_SPACE_H_

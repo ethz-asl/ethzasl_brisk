@@ -44,6 +44,8 @@
 #include <list>
 #include <vector>
 
+#include <ros/package.h>
+
 #include <brisk/brisk.h>
 #include <brisk/brute-force-matcher.h>
 #include <opencv2/opencv.hpp>
@@ -118,12 +120,14 @@ int main(int argc, char ** argv) {
   fextensions.push_back(".tif");
 
   // If no arguments are passed:
+  std::string path = ros::package::getPath("brisk");
   if (argc == 1) {
     int i = 0;
     int fextensions_size = fextensions.size();
     while (imgRGB1.empty() || imgRGB2.empty()) {
-      fname1 = "../images/img1" + fextensions[i];
-      fname2 = "../images/img2" + fextensions[i];
+
+      fname1 = path+"/images/img1" + fextensions[i];
+      fname2 = path+"/images/img2" + fextensions[i];
       imgRGB1 = cv::imread(fname1);
       imgRGB2 = cv::imread(fname2);
       i++;
@@ -195,7 +199,8 @@ int main(int argc, char ** argv) {
   // Create the detector:
   cv::Ptr < cv::FeatureDetector > detector;
   if (argc == 1) {
-    detector = new brisk::BriskFeatureDetector(70, 4);
+    //detector = new brisk::BriskFeatureDetectorHarris(4, 50);
+    detector = new brisk::BriskFeatureDetectorAgast(70, 4);
   } else {
     if (strncmp("FAST", argv[3], 4) == 0) {
       threshold = atoi(argv[3] + 4);
@@ -206,12 +211,12 @@ int main(int argc, char ** argv) {
       threshold = atoi(argv[3] + 5);
       if (threshold == 0)
         threshold = 30;
-      detector = new brisk::BriskFeatureDetector(threshold, 0);
+      detector = new brisk::BriskFeatureDetectorAgast(threshold, 0);
     } else if (strncmp("BRISK", argv[3], 5) == 0) {
       threshold = atoi(argv[3] + 5);
       if (threshold == 0)
         threshold = 30;
-      detector = new brisk::BriskFeatureDetector(threshold, 4);
+      detector = new brisk::BriskFeatureDetectorAgast(threshold, 4);
     } else if (strncmp("ORB", argv[3], 3) == 0) {
       threshold = atoi(argv[3] + 3);
       detector = new cv::OrbFeatureDetector(threshold);
@@ -352,7 +357,7 @@ int main(int argc, char ** argv) {
 
   if (hamming) {
     brisk::BruteForceMatcher matcher;
-    matcher.radiusMatch(descriptors2, descriptors, matches, 80.0);
+    matcher.radiusMatch(descriptors2, descriptors, matches, 55.0*descriptors.cols/48.0);
   } else {
     cv::BFMatcher matcher(cv::NORM_L2);
     matcher.radiusMatch(descriptors2, descriptors, matches, 0.21);

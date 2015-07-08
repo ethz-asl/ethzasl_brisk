@@ -75,6 +75,11 @@ class  BriskLayer {
   uint8_t GetAgastScore(float xf, float yf, uint8_t threshold,
                         float scale = 1.0f);
 
+  // Should we use contrast-adaptation?
+  void setUseThresholdMap(bool useThresholdMap) {
+    useThresholdMap_ = useThresholdMap;
+  }
+
   // Accessors.
   inline const agast::Mat& img() const {
     return img_;
@@ -114,6 +119,8 @@ class  BriskLayer {
 
   unsigned char upperThreshold_;
   unsigned char lowerThreshold_;
+
+  bool useThresholdMap_ = false;
 };
 }  // namespace brisk
 #endif  // INTERNAL_BRISK_LAYER_H_

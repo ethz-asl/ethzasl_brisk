@@ -53,14 +53,7 @@
 
 #include <stdint.h>
 
-namespace rdtsc {
-namespace timing {
-class DummyTimer;
-}  // namespace timing
-}  // namespace rdtsc
-
 namespace brisk {
-typedef rdtsc::timing::DummyTimer DebugTimer;
 // This is needed to avoid aliasing issues with the __m128i data type:
 #ifdef __GNUC__
 typedef unsigned char __attribute__ ((__may_alias__)) UCHAR_ALIAS;
@@ -77,4 +70,5 @@ typedef uint8_t __attribute__ ((__may_alias__)) U_INT8T_ALIAS;
 #define __inline__ __forceinline
 #endif
 }  // namespace brisk
+
 #endif  // INTERNAL_MACROS_H_

@@ -49,19 +49,22 @@
 #include <brisk/harris-score-calculator.h>
 #include <agast/wrap-opencv.h>
 #include <brisk/scale-space-feature-detector.h>
-#include <brisk/cameras/cameras.h>
-#include <brisk/camera-aware-feature.h>
 #include <brisk/brisk-feature.h>
 
 namespace cv {
 typedef brisk::BriskDescriptorExtractor BriskDescriptorExtractor;
-typedef brisk::BriskFeatureDetector BriskFeatureDetector;
+typedef brisk::BriskFeatureDetectorAgast BriskFeatureDetectorAgast;
+typedef brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator> BriskFeatureDetectorHarris;
 }  // namespace cv
 
 namespace brisk {
 // Deprecated names.
 typedef brisk::BruteForceMatcher BruteForceMatcherSse;
 typedef brisk::Hamming HammingSse;
+
+// alias
+typedef brisk::ScaleSpaceFeatureDetector<brisk::HarrisScoreCalculator> BriskFeatureDetectorHarris;
+
 }
 
 #endif  // BRISK_BRISK_H_

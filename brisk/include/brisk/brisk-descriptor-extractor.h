@@ -56,7 +56,8 @@ class BriskDescriptorExtractor : public cv::DescriptorExtractor {
 class BriskDescriptorExtractor {
 #endif  // HAVE_OPENCV
  public:
-  friend class BriskFeature;
+  friend class BriskFeatureHarris;
+  friend class BriskFeatureAgast;
   static const unsigned int kDescriptorLength = 384;
 
   enum Version {

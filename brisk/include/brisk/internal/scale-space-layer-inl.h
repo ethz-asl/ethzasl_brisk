@@ -45,8 +45,6 @@
 #include <vector>
 
 #include <brisk/internal/image-down-sampling.h>
-#include <brisk/internal/key-point-bucketing.h>
-#include <brisk/internal/timer.h>
 #include <brisk/internal/uniformity-enforcement.h>
 
 namespace brisk {
@@ -107,8 +105,6 @@ template<class SCORE_CALCULATOR_T>
 void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(
     ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores) {
   // For successive construction.
-  brisk::timing::Timer timerDownsample(
-      "0.0 BRISK Detection: Creation&Downsampling (per layer)");
   int type = layerBelow->_img.type();
   if (layerBelow->_isOctave) {
     if (layerBelow->_layerNumber >= 2) {
@@ -155,7 +151,6 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(
     _scale = pow(2.0, static_cast<double>(_layerNumber / 2)) * 1.5;
     _offset = _scale * 0.5 - 0.5;
   }
-  timerDownsample.Stop();
 
   // By default no uniformity radius.
   _radius = 1;
@@ -207,10 +202,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       }
     }
   } else {
-    brisk::timing::DebugTimer timerNonMaxSuppression2d(
-        "0.2 BRISK Detection: 2d nonmax suppression (per layer)");
     _scoreCalculator.Get2dMaxima(points, _absoluteThreshold);
-    timerNonMaxSuppression2d.Stop();
   }
   // Next check above and below. The code looks a bit stupid, but that's
   // for speed. We don't want to make the distinction analyzing whether or
@@ -218,8 +210,6 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (!usePassedKeypoints) {
     if (_aboveLayer_ptr != 0 && _belowLayer_ptr != 0) {
       // Check above and below
-      brisk::timing::DebugTimer timerNonMaxSuppression3d(
-          "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
       const int one_over_scale_above = 1.0 / _scale_above;
@@ -279,11 +269,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.Stop();
     } else if (_aboveLayer_ptr != 0) {
       // Check above.
-      brisk::timing::DebugTimer timerNonMaxSuppression3d(
-          "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
       const int one_over_scale_above = 1.0 / _scale_above;
@@ -320,11 +307,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.Stop();
     } else if (_belowLayer_ptr != 0) {
       // Check below.
-      brisk::timing::DebugTimer timerNonMaxSuppression3d(
-          "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
       const int one_over_scale_below = 1.0 / _scale_below;
@@ -361,7 +345,6 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.Stop();
     }
   }
 
@@ -372,15 +355,9 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (enforceUniformity && _radius > 0.0) {
     EnforceKeyPointUniformity(_LUT, _radius, _img.rows, _img.cols,
                               _maxNumKpt, points);
-  }else{
-    KeyPointBucketing(_img.rows, _img.cols, _maxNumKpt,
-                      _numBucketsU, _numBucketsV, &points);
   }
 
   // 3d(/2d) subpixel refinement.
-  brisk::timing::DebugTimer timer_subpixel_refinement(
-      "0.4 BRISK Detection: "
-      "subpixel(&scale) refinement (per layer)");
   if (usePassedKeypoints)
     keypoints.clear();
   if (doRefinement) {
@@ -424,7 +401,6 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       keypoints.push_back(keypoint);
     }
   }
-  timer_subpixel_refinement.Stop();
 }
 
 // Utilities.

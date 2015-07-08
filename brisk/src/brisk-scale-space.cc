@@ -52,7 +52,8 @@ const unsigned char BriskScaleSpace::kDefaultUpperThreshold = 230;
 
 // Construct telling the octaves number:
 BriskScaleSpace::BriskScaleSpace(uint8_t _octaves,
-                                 bool suppressScaleNonmaxima) {
+                                 bool suppressScaleNonmaxima, bool useContrastAdaptation) {
+  useContrastAdaptation_ = useContrastAdaptation;
   suppressScaleNonmaxima_ = suppressScaleNonmaxima;
   if (_octaves == 0)
     layers_ = 1;
@@ -72,10 +73,12 @@ void BriskScaleSpace::ConstructPyramid(const agast::Mat& image, unsigned char th
   // Fill the pyramid:
   pyramid_.push_back(
       BriskLayer(image.clone(), kDefaultUpperThreshold, overwrite_lower_thres));
+  pyramid_.back().setUseThresholdMap(useContrastAdaptation_);
   if (layers_ > 1) {
     pyramid_.push_back(
         BriskLayer(pyramid_.back(), BriskLayer::CommonParams::TWOTHIRDSAMPLE,
                    (kDefaultUpperThreshold), (overwrite_lower_thres)));
+    pyramid_.back().setUseThresholdMap(useContrastAdaptation_);
   }
   const int octaves2 = layers_;
 
@@ -83,9 +86,11 @@ void BriskScaleSpace::ConstructPyramid(const agast::Mat& image, unsigned char th
     pyramid_.push_back(
         BriskLayer(pyramid_[i - 2], BriskLayer::CommonParams::HALFSAMPLE,
                    (kDefaultUpperThreshold), (overwrite_lower_thres)));
+    pyramid_.back().setUseThresholdMap(useContrastAdaptation_);
     pyramid_.push_back(
         BriskLayer(pyramid_[i - 1], BriskLayer::CommonParams::HALFSAMPLE,
                    (kDefaultUpperThreshold), (overwrite_lower_thres)));
+    pyramid_.back().setUseThresholdMap(useContrastAdaptation_);
   }
 }
 

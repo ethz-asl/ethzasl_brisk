@@ -17,14 +17,14 @@
 
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
-     * Redistributions of source code must retain the above copyright
-       notice, this list of conditions and the following disclaimer.
-     * Redistributions in binary form must reproduce the above copyright
-       notice, this list of conditions and the following disclaimer in the
-       documentation and/or other materials provided with the distribution.
-     * Neither the name of the <organization> nor the
-       names of its contributors may be used to endorse or promote products
-       derived from this software without specific prior written permission.
+ * Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ * Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ * Neither the name of the <organization> nor the
+ names of its contributors may be used to endorse or promote products
+ derived from this software without specific prior written permission.
 
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -47,7 +47,8 @@
 
 namespace {
 void RemoveInvalidKeyPoints(const agast::Mat& mask,
-                            std::vector<agast::KeyPoint>* keypoints) {
+                            std::vector<agast::KeyPoint>* keypoints)
+{
   CHECK_NOTNULL(keypoints);
   if (mask.empty())
     return;
@@ -58,34 +59,40 @@ void RemoveInvalidKeyPoints(const agast::Mat& mask,
         const float& keypoint_y = agast::KeyPointY(key_pt);
         return mask.at<unsigned char>(static_cast<int>(keypoint_y + 0.5f),
             static_cast<int>(keypoint_x + 0.5f)) == 0;
-  };
+      };
 
   keypoints->erase(
-      std::remove_if(keypoints->begin(), keypoints->end(),
-                     masking), keypoints->end());
+      std::remove_if(keypoints->begin(), keypoints->end(), masking),
+      keypoints->end());
 }
 }  // namespace
 
 namespace brisk {
-BriskFeatureDetector::BriskFeatureDetector(int thresh, int octaves,
-                                           bool suppressScaleNonmaxima) {
+BriskFeatureDetectorAgast::BriskFeatureDetectorAgast(int thresh, int octaves,
+                                           bool suppressScaleNonmaxima,
+                                           bool useContrastAdaptation)
+{
   threshold = thresh;
   this->octaves = octaves;
   m_suppressScaleNonmaxima = suppressScaleNonmaxima;
+  m_useContrastAdaptation = useContrastAdaptation;
 }
 
-void BriskFeatureDetector::detectImpl(const agast::Mat& image,
+void BriskFeatureDetectorAgast::detectImpl(const agast::Mat& image,
                                       std::vector<agast::KeyPoint>& keypoints,
-                                      const agast::Mat& mask) const {
+                                      const agast::Mat& mask) const
+{
   keypoints.clear();
-  brisk::BriskScaleSpace briskScaleSpace(octaves, m_suppressScaleNonmaxima);
+  brisk::BriskScaleSpace briskScaleSpace(octaves, m_suppressScaleNonmaxima,
+                                         m_useContrastAdaptation);
   briskScaleSpace.ConstructPyramid(image, threshold);
   briskScaleSpace.GetKeypoints(&keypoints);
   RemoveInvalidKeyPoints(mask, &keypoints);
 }
 
-void BriskFeatureDetector::ComputeScale(
-    const agast::Mat& image, std::vector<agast::KeyPoint>& keypoints) const {
+void BriskFeatureDetectorAgast::ComputeScale(
+    const agast::Mat& image, std::vector<agast::KeyPoint>& keypoints) const
+{
   BriskScaleSpace briskScaleSpace(octaves, m_suppressScaleNonmaxima);
   briskScaleSpace.ConstructPyramid(image, threshold, 0);
   briskScaleSpace.GetKeypoints(&keypoints);
