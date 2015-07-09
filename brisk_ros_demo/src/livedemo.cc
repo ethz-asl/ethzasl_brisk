@@ -450,7 +450,7 @@ int main(int argc, char ** argv) {
     threshold = atoi(argv[1] + 9);
     if (threshold == 0)
       threshold = 30;
-    detector = new cv::BriskFeatureDetector(threshold, 4);
+    detector = new cv::BriskFeatureDetectorAgast(threshold, 4);
   } else if (strncmp("BRISK", argv[1], 5) == 0) {
     threshold = atoi(argv[1] + 5);
     if (threshold == 0)
