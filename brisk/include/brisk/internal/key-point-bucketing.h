@@ -52,7 +52,6 @@ class KeyPointBuckets{
                   size_t maxNumKeyPoints) :
                     _needsReset(false),
                     _numBucketsU(numBucketsU), _numBucketsV(numBucketsV),
-                    _numImgCols(numImgCols), _numImgRows(numImgRows),
                     _maxNumKeyPointsTotal(maxNumKeyPoints),
                     _numKeyPointsInBuckets(numBucketsU,
                                            OccupancyColumn(numBucketsV, 0u)) {
@@ -85,8 +84,6 @@ class KeyPointBuckets{
   // Parameters.
   size_t _numBucketsU;
   size_t _numBucketsV;
-  size_t _numImgCols;
-  size_t _numImgRows;
   size_t _maxNumKeyPointsTotal;
   OccupancyMatrix _numKeyPointsInBuckets;
 
