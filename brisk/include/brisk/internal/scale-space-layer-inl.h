@@ -50,6 +50,22 @@
 #include <brisk/internal/uniformity-enforcement.h>
 
 namespace brisk {
+
+template<class SCORE_CALCULATOR_T>
+float ScaleSpaceLayer<SCORE_CALCULATOR_T>::max9(
+    float i0, float i1, float i2, float i3, float i4, float i5, float i6, float i7,float i8){
+  float max=i0;
+  if(i1>max) max=i1;
+  if(i2>max) max=i2;
+  if(i3>max) max=i3;
+  if(i4>max) max=i4;
+  if(i5>max) max=i5;
+  if(i6>max) max=i6;
+  if(i7>max) max=i7;
+  if(i8>max) max=i8;
+  return max;
+}
+
 template<class SCORE_CALCULATOR_T>
 ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScaleSpaceLayer(const agast::Mat& img,
                                                      bool /*initScores*/) {
@@ -107,8 +123,8 @@ template<class SCORE_CALCULATOR_T>
 void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(
     ScaleSpaceLayer<ScoreCalculator_t>* layerBelow, bool initScores) {
   // For successive construction.
-  brisk::timing::Timer timerDownsample(
-      "0.0 BRISK Detection: Creation&Downsampling (per layer)");
+  //brisk::timing::Timer timerDownsample(
+      //"0.0 BRISK Detection: Creation&Downsampling (per layer)");
   int type = layerBelow->_img.type();
   if (layerBelow->_isOctave) {
     if (layerBelow->_layerNumber >= 2) {
@@ -155,7 +171,7 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::Create(
     _scale = pow(2.0, static_cast<double>(_layerNumber / 2)) * 1.5;
     _offset = _scale * 0.5 - 0.5;
   }
-  timerDownsample.Stop();
+  //timerDownsample.Stop();
 
   // By default no uniformity radius.
   _radius = 1;
@@ -207,10 +223,10 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       }
     }
   } else {
-    brisk::timing::DebugTimer timerNonMaxSuppression2d(
-        "0.2 BRISK Detection: 2d nonmax suppression (per layer)");
+    //brisk::timing::DebugTimer timerNonMaxSuppression2d(
+        //"0.2 BRISK Detection: 2d nonmax suppression (per layer)");
     _scoreCalculator.Get2dMaxima(points, _absoluteThreshold);
-    timerNonMaxSuppression2d.Stop();
+    //timerNonMaxSuppression2d.Stop();
   }
   // Next check above and below. The code looks a bit stupid, but that's
   // for speed. We don't want to make the distinction analyzing whether or
@@ -218,150 +234,119 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   if (!usePassedKeypoints) {
     if (_aboveLayer_ptr != 0 && _belowLayer_ptr != 0) {
       // Check above and below
-      brisk::timing::DebugTimer timerNonMaxSuppression3d(
-          "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
+      //brisk::timing::DebugTimer timerNonMaxSuppression3d(
+          //"0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
-      const int one_over_scale_above = 1.0 / _scale_above;
-      const int one_over_scale_below = 1.0 / _scale_below;
+      const float one_over_scale_above = 1.0 / _scale_above;
+      const float one_over_scale_below = 1.0 / _scale_below;
+      //std::cout<<"_scale_below:"<<_scale_below<<", _scale:"<<_scale<<", _scale_above:"<<_scale_above<<std::endl;
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
-        const typename ScoreCalculator_t::Score_t center = it->score;
-        const int x = it->x;
-        const int y = it->y;
+        const typename ScoreCalculator_t::Score_t center = 1.5*float(it->score); // give 30% margin
+        const double x = it->x;
+        const double y = it->y;
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
           continue;
-        if (center < ScoreAbove(x, y))
+
+        bool ismax=true;
+        for(float a = -1; a<=1; ++a){
+          for(float b = -1; b<=1; ++b){
+            if (center < ScoreBelow(x + a*one_over_scale_below, y + b*one_over_scale_below)){
+              ismax=false;
+              break;
+            }
+            if (center < ScoreAbove(x + a*one_over_scale_above, y + b*one_over_scale_above)){
+              ismax=false;
+              break;
+            }
+            //std::cout << ScoreBelow(x + a*one_over_scale_below, y + b*one_over_scale_below) << " ";
+            //std::cout<<ScoreAbove(x + a*one_over_scale_above, y + b*one_over_scale_above)<<std::endl;
+            //std::cout<<ScoreBelow(x + a*one_over_scale_below, y + b*one_over_scale_below)<<std::endl;
+          }
+          if(!ismax)
+            break;
+          //std::cout<<std::endl;
+        }
+        //std::cout<<"=============================="<<std::endl;
+        if(!ismax)
           continue;
-        if (center < ScoreAbove(x + one_over_scale_above, y))
-          continue;
-        if (center < ScoreAbove(x - one_over_scale_above, y))
-          continue;
-        if (center < ScoreAbove(x, y + one_over_scale_above))
-          continue;
-        if (center < ScoreAbove(x, y - one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x + one_over_scale_above, y + one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x + one_over_scale_above, y - one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x - one_over_scale_above, y + one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x - one_over_scale_above, y - one_over_scale_above))
-          continue;
-        if (center < ScoreBelow(x, y))
-          continue;
-        if (center < ScoreBelow(x + one_over_scale_below, y))
-          continue;
-        if (center < ScoreBelow(x - one_over_scale_below, y))
-          continue;
-        if (center < ScoreBelow(x, y + one_over_scale_below))
-          continue;
-        if (center < ScoreBelow(x, y - one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x + one_over_scale_below, y + one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x + one_over_scale_below, y - one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x - one_over_scale_below, y + one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x - one_over_scale_below, y - one_over_scale_below))
-          continue;
+
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.Stop();
+      //timerNonMaxSuppression3d.Stop();
     } else if (_aboveLayer_ptr != 0) {
       // Check above.
-      brisk::timing::DebugTimer timerNonMaxSuppression3d(
-          "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
+      //brisk::timing::DebugTimer timerNonMaxSuppression3d(
+          //"0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
-      const int one_over_scale_above = 1.0 / _scale_above;
+      const float one_over_scale_above = 1.0 / _scale_above;
+      //std::cout<<"one_over_scale_above:"<<one_over_scale_above<<std::endl;
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
-        const typename ScoreCalculator_t::Score_t center = it->score;
+        const typename ScoreCalculator_t::Score_t center =  1.5*float(it->score); // give 30% margin
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
           continue;
-        const int x = it->x;
-        const int y = it->y;
-        if (center < ScoreAbove(x, y))
+        const double x = it->x;
+        const double y = it->y;
+
+        bool ismax=true;
+        for(float a = -1; a<=1; ++a){
+          for(float b = -1; b<=1; ++b){
+            if (center < ScoreAbove(x + a*one_over_scale_above, y + b*one_over_scale_above)){
+              ismax=false;
+              break;
+            }
+            if(!ismax)
+              break;
+          }
+        }
+        if(!ismax)
           continue;
-        if (center < ScoreAbove(x + one_over_scale_above, y))
-          continue;
-        if (center < ScoreAbove(x - one_over_scale_above, y))
-          continue;
-        if (center < ScoreAbove(x, y + one_over_scale_above))
-          continue;
-        if (center < ScoreAbove(x, y - one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x + one_over_scale_above, y + one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x + one_over_scale_above, y - one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x - one_over_scale_above, y + one_over_scale_above))
-          continue;
-        if (center
-            < ScoreAbove(x - one_over_scale_above, y - one_over_scale_above))
-          continue;
+
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.Stop();
+      //timerNonMaxSuppression3d.Stop();
     } else if (_belowLayer_ptr != 0) {
       // Check below.
-      brisk::timing::DebugTimer timerNonMaxSuppression3d(
-          "0.3 BRISK Detection: 3d nonmax suppression (per layer)");
+      //brisk::timing::DebugTimer timerNonMaxSuppression3d(
+          //"0.3 BRISK Detection: 3d nonmax suppression (per layer)");
       std::vector<typename ScoreCalculator_t::PointWithScore> pt_tmp;
       pt_tmp.reserve(points.size());
-      const int one_over_scale_below = 1.0 / _scale_below;
+      const float one_over_scale_below = 1.0 / _scale_below;
+      //std::cout<<"_scale_below:"<<_scale_below<<std::endl;
       for (typename std::vector<
           typename ScoreCalculator_t::PointWithScore>::const_iterator it =
           points.begin(); it != points.end(); ++it) {
-        const typename ScoreCalculator_t::Score_t center = it->score;
+        const typename ScoreCalculator_t::Score_t center =  1.5*float(it->score); // give 30% margin
         if (center < (typename ScoreCalculator_t::Score_t) (_absoluteThreshold))
           continue;
-        const int x = it->x;
-        const int y = it->y;
-        if (center < ScoreBelow(x, y))
+        const double x = it->x;
+        const double y = it->y;
+
+        bool ismax=true;
+        for(float a = -1; a<=1; ++a){
+          for(float b = -1; b<=1; ++b){
+            if (center < ScoreBelow(x + a*one_over_scale_below, y + b*one_over_scale_below)){
+              ismax=false;
+              break;
+            }
+            if(!ismax)
+              break;
+          }
+        }
+        if(!ismax)
           continue;
-        if (center < ScoreBelow(x + one_over_scale_below, y))
-          continue;
-        if (center < ScoreBelow(x - one_over_scale_below, y))
-          continue;
-        if (center < ScoreBelow(x, y + one_over_scale_below))
-          continue;
-        if (center < ScoreBelow(x, y - one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x + one_over_scale_below, y + one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x + one_over_scale_below, y - one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x - one_over_scale_below, y + one_over_scale_below))
-          continue;
-        if (center
-            < ScoreBelow(x - one_over_scale_below, y - one_over_scale_below))
-          continue;
+
         pt_tmp.push_back(*it);
       }
       points.assign(pt_tmp.begin(), pt_tmp.end());
-      timerNonMaxSuppression3d.Stop();
+      //timerNonMaxSuppression3d.Stop();
     }
   }
 
@@ -378,9 +363,9 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
   }
 
   // 3d(/2d) subpixel refinement.
-  brisk::timing::DebugTimer timer_subpixel_refinement(
-      "0.4 BRISK Detection: "
-      "subpixel(&scale) refinement (per layer)");
+  //brisk::timing::DebugTimer timer_subpixel_refinement(
+      //"0.4 BRISK Detection: "
+      //"subpixel(&scale) refinement (per layer)");
   if (usePassedKeypoints)
     keypoints.clear();
   if (doRefinement) {
@@ -389,22 +374,100 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         points.begin(); it != points.end(); ++it) {
       const int u = it->x;
       const int v = it->y;
-      float delta_x;
-      float delta_y;
-      Subpixel2D(_scoreCalculator.Score(u - 1, v - 1),
-                 _scoreCalculator.Score(u, v - 1),
-                 _scoreCalculator.Score(u + 1, v - 1),
-                 _scoreCalculator.Score(u - 1, v),
-                 _scoreCalculator.Score(u, v),
-                 _scoreCalculator.Score(u + 1, v),
-                 _scoreCalculator.Score(u - 1, v + 1),
-                 _scoreCalculator.Score(u, v + 1),
-                 _scoreCalculator.Score(u + 1, v + 1), delta_x, delta_y);
-      // TODO(lestefan): 3d refinement.
+      float delta_x=0;
+      float delta_y=0;
+
+      const double s_1_1 = _scoreCalculator.Score(u - 1, v - 1);
+      const double s0_1 = _scoreCalculator.Score(u , v - 1);
+      const double s1_1 = _scoreCalculator.Score(u + 1, v - 1);
+      const double s_10 = _scoreCalculator.Score(u - 1, v);
+      const double s00 = _scoreCalculator.Score(u , v );
+      const double s10 = _scoreCalculator.Score(u + 1, v );
+      const double s_11 = _scoreCalculator.Score(u - 1, v + 1);
+      const double s01 = _scoreCalculator.Score(u , v + 1);
+      const double s11 = _scoreCalculator.Score(u + 1, v + 1);
+
+      //std::cout<<s_1_1<<","<<s0_1<<","<<s1_1<<std::endl;
+      //std::cout<<s_10<<","<<s00<<","<<s10<<std::endl;
+      //std::cout<<s_11<<","<<s01<<","<<s11<<std::endl;
+
+      Subpixel2D(s_1_1, s0_1, s1_1,
+                 s_10, s00, s10,
+                 s_11, s01, s11,
+                 delta_x,
+                 delta_y);
+
+      if(delta_x>0.99 || delta_x<-0.99 || delta_y>0.99 || delta_y<-0.99){
+        delta_x=0.0;
+        delta_y=0.0;
+      }
+
+      // scale refinement, if possible:
+      float scale_refinement = 1.0f;
+      // this does not seem to have a positive influence:
+      /*if (_aboveLayer_ptr != 0 && _belowLayer_ptr != 0) {
+        const float one_over_scale_above = 1.0 / _scale_above;
+        const float one_over_scale_below = 1.0 / _scale_below;
+
+        // get patch above
+        const double a_1_1 = ScoreAbove(u - one_over_scale_above, v - one_over_scale_above);
+        const double a0_1 = ScoreAbove(u, v - one_over_scale_above);
+        const double a1_1 = ScoreAbove(u + one_over_scale_above, v - one_over_scale_above);
+        const double a_10 = ScoreAbove(u - one_over_scale_above, v);
+        const double a00 = ScoreAbove(u , v);
+        const double a10 = ScoreAbove(u + one_over_scale_above, v);
+        const double a_11 = ScoreAbove(u - one_over_scale_above, v + one_over_scale_above);
+        const double a01 = ScoreAbove(u, v + one_over_scale_above);
+        const double a11 = ScoreAbove(u + one_over_scale_above, v + one_over_scale_above);
+        // get patch below
+        const double b_1_1 = ScoreBelow(u - one_over_scale_below, v - one_over_scale_below);
+        const double b0_1 = ScoreBelow(u, v - one_over_scale_below);
+        const double b1_1 = ScoreBelow(u + one_over_scale_below, v - one_over_scale_below);
+        const double b_10 = ScoreBelow(u - one_over_scale_below, v);
+        const double b00 = ScoreBelow(u , v);
+        const double b10 = ScoreBelow(u + one_over_scale_below, v);
+        const double b_11 = ScoreBelow(u - one_over_scale_below, v + one_over_scale_below);
+        const double b01 = ScoreBelow(u, v + one_over_scale_below);
+        const double b11 = ScoreBelow(u + one_over_scale_below, v + one_over_scale_below);
+
+        // refine above:
+        float a_delta_x, a_delta_y;
+        float a =  max9(a_1_1, a0_1, a1_1, a_10, a00, a10, a_11, a01, a11);
+        Subpixel2D(a_1_1, a0_1, a1_1, a_10, a00, a10, a_11, a01, a11, a_delta_x, a_delta_y);
+
+        // refine below:
+        float b_delta_x, b_delta_y;
+        float b = max9(b_1_1, b0_1, b1_1, b_10, b00, b10, b_11, b01, b11);
+        Subpixel2D(b_1_1, b0_1, b1_1,b_10, b00, b10,b_11, b01, b11,b_delta_x,b_delta_y);
+
+        // refine scale
+        float s_max;
+        if(_scale_above>0.7) // 1.333
+          scale_refinement=Refine1D_1(b,s00,a,s_max);
+        else
+          scale_refinement=Refine1D(b,s00,a,s_max); // 1.5
+
+        // interpolate coordinates
+        if(scale_refinement>1.0){
+          delta_x=(scale_refinement-1.0f)/(one_over_scale_above-1.0f)*a_delta_x*one_over_scale_above+
+              (2.0f-scale_refinement)/(one_over_scale_above-1.0f)*delta_x;
+          delta_y=(scale_refinement-1.0f)/(one_over_scale_above-1.0f)*a_delta_y*one_over_scale_above+
+              (2.0f-scale_refinement)/(one_over_scale_above-1.0f)*delta_y;
+        } else {
+          delta_x=(scale_refinement)/(1.0f-one_over_scale_below)*b_delta_x*one_over_scale_below+
+              (1.0f-scale_refinement)/(1.0f-one_over_scale_below)*delta_x;
+          delta_y=(scale_refinement)/(1.0f-one_over_scale_below)*b_delta_y*one_over_scale_below+
+              (1.0f-scale_refinement)/(1.0f-one_over_scale_below)*delta_y;
+        }
+        //std::cout<<b<<", "<<s00<<", "<<a<<", scale_refinement"<<scale_refinement<<std::endl;
+        //scale_refinement=1.0;
+      }*/
+
+      //std::cout<<delta_x<<" , "<<delta_y<<std::endl;
       agast::KeyPoint keypoint;
-      agast::KeyPointX(keypoint) = _scale * ((it->x + delta_x) + _offset);
-      agast::KeyPointY(keypoint) = _scale * ((it->y + delta_y) + _offset);
-      agast::KeyPointSize(keypoint) = _scale * 12.0;
+      agast::KeyPointX(keypoint) = _scale * (it->x + delta_x + 0.5) - 0.5;
+      agast::KeyPointY(keypoint) = _scale * (it->y + delta_y + 0.5) - 0.5;
+      agast::KeyPointSize(keypoint) = _scale * scale_refinement * 12.0;
       agast::KeyPointAngle(keypoint) = -1;
       agast::KeyPointResponse(keypoint) = it->score;
       agast::KeyPointOctave(keypoint) = _layerNumber / 2;
@@ -415,8 +478,8 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
         typename ScoreCalculator_t::PointWithScore>::const_iterator it =
         points.begin(); it != points.end(); ++it) {
       agast::KeyPoint keypoint;
-      agast::KeyPointX(keypoint) = _scale * ((it->x) + _offset);
-      agast::KeyPointY(keypoint) = _scale * ((it->y) + _offset);
+      agast::KeyPointX(keypoint) = _scale * (it->x + 0.5) - 0.5;
+      agast::KeyPointY(keypoint) = _scale * (it->y + 0.5) - 0.5;
       agast::KeyPointSize(keypoint) = _scale * 12.0;
       agast::KeyPointAngle(keypoint) = -1;
       agast::KeyPointResponse(keypoint) = it->score;
@@ -424,21 +487,24 @@ void ScaleSpaceLayer<SCORE_CALCULATOR_T>::DetectScaleSpaceMaxima(
       keypoints.push_back(keypoint);
     }
   }
-  timer_subpixel_refinement.Stop();
+  //timer_subpixel_refinement.Stop();
 }
 
 // Utilities.
 template<class SCORE_CALCULATOR_T>
 inline double ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScoreAbove(double u,
                                                               double v) {
+  //return 0;
   return _aboveLayer_ptr->_scoreCalculator.Score(
-      _scale_above * (u + _offset_above), _scale_above * (v + _offset_above));
+      int(_scale_above * (u + 0.5) - 0.5), int(_scale_above * (v + 0.5) - 0.5));
 }
 template<class SCORE_CALCULATOR_T>
 inline double ScaleSpaceLayer<SCORE_CALCULATOR_T>::ScoreBelow(double u,
                                                               double v) {
+  //return 0;
+  //std::cout<<"_offset_below="<<_offset_below<<", _scale_below="<<_scale_below<<std::endl;
   return _belowLayer_ptr->_scoreCalculator.Score(
-      _scale_below * (u + _offset_below), _scale_below * (v + _offset_below));
+      int(_scale_below * (u + 0.5) - 0.5), int(_scale_below * (v + 0.5) - 0.5));
 }
 
 template<class SCORE_CALCULATOR_T>

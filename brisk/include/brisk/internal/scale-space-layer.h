@@ -122,6 +122,8 @@ class ScaleSpaceLayer {
                               const double s_2_0, const double s_2_1,
                               const double s_2_2, float& delta_x,
                               float& delta_y);
+  __inline__ float max9(float i0, float i1, float i2, float i3, float i4,
+                        float i5, float i6, float i7,float i8);
 
   // Layer properties.
   bool _isOctave;
