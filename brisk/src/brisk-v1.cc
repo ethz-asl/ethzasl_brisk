@@ -548,14 +548,14 @@ BriskFeatureDetector::BriskFeatureDetector(int thresh, int octaves){
 
 void BriskFeatureDetector::detectImpl( const cv::Mat& image,
     std::vector<cv::KeyPoint>& keypoints,
-    const cv::Mat& mask) const
+    const cv::Mat& /*mask*/) const
 {
   BriskScaleSpace briskScaleSpace(octaves);
   briskScaleSpace.constructPyramid(image);
   briskScaleSpace.getKeypoints(threshold,keypoints);
 
   // remove invalid points
-  removeInvalidPoints(mask, keypoints);
+  // removeInvalidPoints(mask, keypoints);
 }
 
 // construct telling the octaves number:

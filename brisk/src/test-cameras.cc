@@ -149,10 +149,10 @@ int main(int /*argc*/, char ** /*argv*/) {
   // do the thing again with conventional feature:
   kpts0.clear();
   descriptors0.setTo(0);
-  briskFeaturePtr->operator ()(img0, cv::Mat(), kpts0, descriptors0);
+  briskFeaturePtr->detectAndCompute(img0, cv::Mat(), kpts0, descriptors0);
   kpts1.clear();
   descriptors1.setTo(0);
-  briskFeaturePtr->operator ()(img1, cv::Mat(), kpts1, descriptors1);
+  briskFeaturePtr->detectAndCompute(img1, cv::Mat(), kpts1, descriptors1);
 
   // match
   std::vector<std::vector<cv::DMatch> > matches2;

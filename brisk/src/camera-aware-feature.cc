@@ -22,7 +22,7 @@ CameraAwareFeature::CameraAwareFeature():_e_C(0,0,0){}
 CameraAwareFeature::~CameraAwareFeature() { }
 
 CameraAwareFeature::CameraAwareFeature(
-    cv::Ptr<const cv::Feature2D> feature2dPtr,
+    cv::Ptr<cv::Feature2D> feature2dPtr,
     const/*CAMERA_GEOMETRY_T*/cv::Ptr<cameras::CameraGeometryBase> cameraGeometryPtr,
     double distortionTolerance)
     : _distortionTolerance(distortionTolerance), _e_C(0,0,0) {
@@ -32,7 +32,7 @@ CameraAwareFeature::CameraAwareFeature(
 
 // setters
 void CameraAwareFeature::setFeature2d(
-    cv::Ptr<const cv::Feature2D> feature2dPtr) {
+    cv::Ptr<cv::Feature2D> feature2dPtr) {
   _feature2dPtr = feature2dPtr;
 }
 
@@ -545,12 +545,12 @@ void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
 
   // detection
   if (useProvidedKeypoints) {
-    const brisk::BriskFeature* briskFeaturePtr =
-        dynamic_cast<const brisk::BriskFeature*>(_feature2dPtr.obj);
+    brisk::BriskFeature* briskFeaturePtr =
+        dynamic_cast<brisk::BriskFeature*>(_feature2dPtr.get());
     if (briskFeaturePtr)
-      briskFeaturePtr->detect(image.getMat(), keypoints, mask.getMat());  // this is already taking keypoints, if provided
+      briskFeaturePtr->detect(image, keypoints, mask);  // this is already taking keypoints, if provided
   } else {
-    _feature2dPtr->detect(image.getMat(), keypoints, mask.getMat());  // this will clear keypoints
+    _feature2dPtr->detect(image, keypoints, mask);  // this will clear keypoints
   }
 
   // remove boundary points
