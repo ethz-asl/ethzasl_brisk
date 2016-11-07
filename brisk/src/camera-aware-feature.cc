@@ -510,10 +510,11 @@ bool CameraAwareFeature::threePlaneIntersection(const cv::Vec3d& n1, double d1,
  }*/
 
 /* cv::Feature2d  interface */
-void CameraAwareFeature::operator()(cv::InputArray image, cv::InputArray mask,
-                                    std::vector<cv::KeyPoint>& keypoints,
-                                    cv::OutputArray descriptors,
-                                    bool useProvidedKeypoints) const {
+void CameraAwareFeature::detectAndCompute(cv::InputArray image,
+                                          cv::InputArray mask,
+                                          std::vector<cv::KeyPoint>& keypoints,
+                                          cv::OutputArray descriptors,
+                                          bool useProvidedKeypoints) {
 
   /*for(size_t i=0; i<_N_x*_N_y; ++i){
    cv::Mat undistorted;

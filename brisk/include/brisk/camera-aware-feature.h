@@ -34,10 +34,10 @@ class CameraAwareFeature : public cv::Feature2D {
   }
 
   /* cv::Feature2d  interface */
-  virtual void operator()(cv::InputArray image, cv::InputArray mask,
-                          std::vector<cv::KeyPoint>& keypoints,
-                          cv::OutputArray descriptors,
-                          bool useProvidedKeypoints = false) const;
+  virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask,
+                                std::vector<cv::KeyPoint>& keypoints,
+                                cv::OutputArray descriptors,
+                                bool useProvidedKeypoints = false);
 
   /* cv::DescriptorExtractor interface */
   virtual int descriptorSize() const {

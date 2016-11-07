@@ -120,10 +120,10 @@ int main(int /*argc*/, char ** /*argv*/) {
   // detect and extract
   std::vector<cv::KeyPoint> kpts0;
   cv::Mat descriptors0;
-  camera0AwareFeature(img0, cv::Mat(), kpts0, descriptors0);
+  camera0AwareFeature.detectAndCompute(img0, cv::Mat(), kpts0, descriptors0);
   std::vector<cv::KeyPoint> kpts1;
   cv::Mat descriptors1;
-  camera1AwareFeature(img1, cv::Mat(), kpts1, descriptors1);
+  camera1AwareFeature.detectAndCompute(img1, cv::Mat(), kpts1, descriptors1);
 
   // match
   std::vector<std::vector<cv::DMatch> > matches;
