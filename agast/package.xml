@@ -9,9 +9,9 @@
 
   <author email="elmar.mair@dlr.de">Elmar Mair</author>
 
-  <depend>roscpp</depend>
-  <depend>cv_bridge</depend>
   <depend>glog_catkin</depend>
+  <depend>opencv3_catkin</depend>
+  <depend>roscpp</depend>
     
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>

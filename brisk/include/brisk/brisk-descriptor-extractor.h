@@ -117,10 +117,10 @@ class BriskDescriptorExtractor {
     computeImpl(image, keypoints, descriptors);
   }
 
-  virtual void detectAndCompute(cv::InputArray image, cv::InputArray /* mask */,
+  virtual void detectAndCompute(cv::InputArray image, cv::InputArray /*mask*/,
                                 std::vector<cv::KeyPoint>& keypoints,
                                 cv::OutputArray descriptors,
-                                bool /* useProvidedKeypoints */ = false) {
+                                bool /*useProvidedKeypoints*/ = false) {
     computeImpl(image.getMat(), keypoints, descriptors.getMatRef());
   }
 
