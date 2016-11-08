@@ -47,7 +47,7 @@
 
 namespace brisk {
 #if HAVE_OPENCV
-class  BriskFeatureDetector : public cv::FeatureDetector {
+class  BriskFeatureDetector : public cv::Feature2D {
 #else
   class  BriskFeatureDetector {
 #endif  // HAVE_OPENCV
