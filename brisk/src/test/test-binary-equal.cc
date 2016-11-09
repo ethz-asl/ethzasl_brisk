@@ -318,24 +318,18 @@ TEST(Brisk, ValidationHarris) {
 
 TEST(Brisk, ValidationAST) {
   bool do_gtest_checks = true;
-  std::cout << 1 << std::endl;
 
   // Detection.
   brisk::BriskFeatureDetector detector(brisk::BRISK_AstThreshold);
-  std::cout << 2 << std::endl;
 
   // Extraction.
   brisk::BriskDescriptorExtractor extractor;
-  std::cout << 3 << std::endl;
 
   std::string datasetfilename = "brisk_verification_ast.set";
-  std::cout << 4 << std::endl;
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
-  std::cout << 5 << std::endl;
 
   brisk::timing::Timing::Print(std::cout);
-  std::cout << 6 << std::endl;
 }
 
 int main(int argc, char** argv) {
