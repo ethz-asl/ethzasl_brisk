@@ -165,9 +165,9 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
   unsigned char* p_dest_char;
 
   // Size:
-  const unsigned int size = (srcimg.cols * srcimg.rows) / 16;
   const unsigned int hsize = srcimg.cols / 16;
-  const uint8x16_t* p_end = p1 + size;
+  const uint8x16_t* p_end = reinterpret_cast<const uint8x16_t*>
+      (srcimg.data + (srcimg.cols * srcimg.rows) - leftoverCols);
   unsigned int row = 0;
   const unsigned int end = hsize / 2;
   bool half_end;
@@ -178,15 +178,8 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
   while (p2 < p_end) {
     for (unsigned int i = 0; i < end; ++i) {
       // Load the two blocks of memory:
-      uint8x16_t upper;
-      uint8x16_t lower;
-      if (noleftover) {
-        upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
-        lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
-      } else {
-        upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
-        lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
-      }
+      uint8x16_t upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
+      uint8x16_t lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
 
       uint8x16_t result1 = vqaddq_u8(upper, ones);
       result1 = vrhaddq_u8(upper, lower);  // Average - halving add.
@@ -230,15 +223,8 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
     // If we are not at the end of the row, do the rest:
     if (half_end) {
       // Load the two blocks of memory:
-      uint8x16_t upper;
-      uint8x16_t lower;
-      if (noleftover) {
-        upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
-        lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
-      } else {
-        upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
-        lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
-      }
+      uint8x16_t upper = vld1q_u8(reinterpret_cast<const uint8_t*>(p1));
+      uint8x16_t lower = vld1q_u8(reinterpret_cast<const uint8_t*>(p2));
 
       uint8x16_t result1 = vqaddq_u8(upper, ones);
       result1 = vrhaddq_u8(upper, lower);
@@ -268,9 +254,9 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
       const unsigned char* p2_src_char =
           reinterpret_cast<const unsigned char*>(p2);
       for (unsigned int k = 0; k < leftoverCols; ++k) {
-        uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
-        + p2_src_char[k] + p2_src_char[k + 1];
-        *(p_dest_char++) = static_cast<unsigned char>(tmp / 4);
+        uint16_t tmp = p1_src_char[2*k] + p1_src_char[2*k + 1]
+        + p2_src_char[2*k] + p2_src_char[2*k + 1];
+        *(p_dest_char++) = static_cast<unsigned char>((tmp+2) / 4);
       }
       // Done with the two rows:
       ++row;
@@ -296,9 +282,9 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
   unsigned char* p_dest_char;
 
   // Size:
-  const unsigned int size = (srcimg.cols * srcimg.rows) / 16;
   const unsigned int hsize = srcimg.cols / 16;
-  __m128i* p_end = p1+size;
+  const __m128i* p_end = reinterpret_cast<const __m128i*>
+      (srcimg.data + (srcimg.cols * srcimg.rows) - leftoverCols);
   unsigned int row = 0;
   const unsigned int end = hsize / 2;
   bool half_end;
@@ -390,9 +376,9 @@ CHECK_EQ(srcimg.rows / 2, dstimg.rows);
       const unsigned char* p1_src_char = reinterpret_cast<unsigned char*>(p1);
       const unsigned char* p2_src_char = reinterpret_cast<unsigned char*>(p2);
       for (unsigned int k = 0; k < leftoverCols; ++k) {
-        uint16_t tmp = p1_src_char[k] + p1_src_char[k + 1]
-            + p2_src_char[k] + p2_src_char[k + 1];
-        *(p_dest_char++) = static_cast<unsigned char>(tmp / 4);
+        uint16_t tmp = p1_src_char[2*k] + p1_src_char[2*k + 1]
+        + p2_src_char[2*k] + p2_src_char[2*k + 1];
+        *(p_dest_char++) = static_cast<unsigned char>((tmp+2) / 4);
       }
       // Done with the two rows:
       ++row;
