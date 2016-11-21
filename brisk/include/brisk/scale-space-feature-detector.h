@@ -61,7 +61,7 @@ namespace brisk {
 // scale space detector from a given ScoreCalculator.
 template<class SCORE_CALCULATOR_T>
 #if HAVE_OPENCV
-class ScaleSpaceFeatureDetector : public cv::FeatureDetector {
+class ScaleSpaceFeatureDetector : public cv::Feature2D {
 #else
 class ScaleSpaceFeatureDetector {
 #endif  // HAVE_OPENCV
@@ -87,6 +87,13 @@ class ScaleSpaceFeatureDetector {
             || (mask.type() == CV_8UC1 && mask.rows == image.rows
                 && mask.cols == image.cols));
     detectImpl(image, keypoints, mask);
+  }
+
+  virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask,
+                                std::vector<cv::KeyPoint>& keypoints,
+                                cv::OutputArray /*descriptors*/,
+                                bool /*useProvidedKeypoints*/ = false) {
+    detect(image.getMat(), keypoints, mask.getMat());
   }
 
  protected:
