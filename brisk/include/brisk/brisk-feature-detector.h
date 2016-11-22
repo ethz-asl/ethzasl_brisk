@@ -16,8 +16,7 @@
  All rights reserved.
 
  Redistribution and use in source and binary forms, with or without
- modification, are permitted provided that the following conditions are met:
- * Redistributions of source code must retain the above copyright
+ modification, are permitted provided that the following conditions are met: * Redistributions of source code must retain the above copyright
  notice, this list of conditions and the following disclaimer.
  * Redistributions in binary form must reproduce the above copyright
  notice, this list of conditions and the following disclaimer in the
@@ -48,7 +47,7 @@
 
 namespace brisk {
 #if HAVE_OPENCV
-class  BriskFeatureDetector : public cv::FeatureDetector {
+class  BriskFeatureDetector : public cv::Feature2D {
 #else
   class  BriskFeatureDetector {
 #endif  // HAVE_OPENCV
@@ -65,6 +64,14 @@ class  BriskFeatureDetector : public cv::FeatureDetector {
     detectImpl(image, keypoints, mask);
   }
 #endif
+
+  virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask,
+                                std::vector<cv::KeyPoint>& keypoints,
+                                cv::OutputArray /*descriptors*/,
+                                bool /*useProvidedKeypoints*/ = false) {
+    detectImpl(image.getMat(), keypoints, mask.getMat());
+  }
+
   void ComputeScale(const agast::Mat& image,
                     std::vector<agast::KeyPoint>& keypoints) const;
 protected:

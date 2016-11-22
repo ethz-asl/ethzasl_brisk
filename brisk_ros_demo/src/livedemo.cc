@@ -46,8 +46,8 @@
 #include <brisk/internal/brisk-layer.h>
 
 #include <image_transport/image_transport.h>
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/nonfree/features2d.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/xfeatures2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <ros/ros.h>
@@ -445,12 +445,12 @@ int main(int argc, char ** argv) {
     threshold = atoi(argv[1] + 4);
     if (threshold == 0)
       threshold = 30;
-    detector = new cv::FastFeatureDetector(threshold, true);
+    detector = cv::FastFeatureDetector::create(threshold, true);
   } else if (strncmp("BRISK_old", argv[1], 9) == 0) {
     threshold = atoi(argv[1] + 9);
     if (threshold == 0)
       threshold = 30;
-    detector = new cv::BriskFeatureDetector(threshold, 4);
+    detector = cv::BRISK::create(threshold, 4);
   } else if (strncmp("BRISK", argv[1], 5) == 0) {
     threshold = atoi(argv[1] + 5);
     if (threshold == 0)
@@ -462,10 +462,11 @@ int main(int argc, char ** argv) {
     threshold = atoi(argv[1] + 4);
     if (threshold == 0)
       threshold = 400;
-    detector = new cv::SurfFeatureDetector(threshold);
+    detector = cv::xfeatures2d::SurfFeatureDetector::create(threshold);
   } else if (strncmp("SIFT", argv[1], 4) == 0) {
     float edgeThreshold = atof(argv[1] + 4);
-    detector = new cv::SiftFeatureDetector(0, 3, 0.04, edgeThreshold);
+    detector =
+        cv::xfeatures2d::SiftFeatureDetector::create(0, 3, 0.04, edgeThreshold);
     //I=1; // save time, this is so slow anyways...
   }
   if (detector.empty()) {
@@ -481,11 +482,11 @@ int main(int argc, char ** argv) {
   } else if (std::string(argv[2]) == "U-BRISK") {
     descriptorExtractor = new cv::BriskDescriptorExtractor(true, false);
   } else if (std::string(argv[2]) == "SURF") {
-    descriptorExtractor = new cv::SurfDescriptorExtractor();
+    descriptorExtractor = cv::xfeatures2d::SurfDescriptorExtractor::create();
   } else if (std::string(argv[2]) == "SIFT") {
-    descriptorExtractor = new cv::SiftDescriptorExtractor();
+    descriptorExtractor = cv::xfeatures2d::SiftDescriptorExtractor::create();
   } else if (std::string(argv[2]) == "BRIEF") {
-    descriptorExtractor = new cv::BriefDescriptorExtractor(64);
+    descriptorExtractor = cv::xfeatures2d::BriefDescriptorExtractor::create(64);
   }
   if (descriptorExtractor.empty()) {
     std::cout << "Descriptor " << argv[2] << " not recognized. Check spelling!"

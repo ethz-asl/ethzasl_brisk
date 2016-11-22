@@ -555,7 +555,7 @@ void BriskFeatureDetector::detectImpl( const cv::Mat& image,
   briskScaleSpace.getKeypoints(threshold,keypoints);
 
   // remove invalid points
-  removeInvalidPoints(mask, keypoints);
+  KeyPointsFilter::runByPixelsMask(keypoints, mask);
 }
 
 // construct telling the octaves number:

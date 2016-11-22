@@ -57,22 +57,24 @@ const {
 }
 
 void BruteForceMatcher::knnMatchImpl(
-    const agast::Mat& queryDescriptors,
-    std::vector<std::vector<cv::DMatch> >& matches,
-    int k,
-    const std::vector<agast::Mat>& masks,
+    cv::InputArray queryDescriptors,
+    std::vector<std::vector<cv::DMatch>>& matches, int k,
+    cv::InputArrayOfArrays masks,
     bool compactResult) {
-  commonKnnMatchImpl(*this, queryDescriptors, matches, k, masks, compactResult);
+  std::vector<agast::Mat> masks_mat_vector;
+  masks.getMatVector(masks_mat_vector);
+  commonKnnMatchImpl(*this, queryDescriptors.getMat(), matches, k,
+                     masks_mat_vector, compactResult);
 }
 
 void BruteForceMatcher::radiusMatchImpl(
-    const agast::Mat& queryDescriptors,
-    std::vector<std::vector<cv::DMatch> >& matches,
-    float maxDistance,
-    const std::vector<agast::Mat>& masks,
-    bool compactResult) {
-  commonRadiusMatchImpl(*this, queryDescriptors, matches, maxDistance, masks,
-                        compactResult);
+    cv::InputArray& queryDescriptors,
+    std::vector<std::vector<cv::DMatch>>& matches, float maxDistance,
+    cv::InputArrayOfArrays masks, bool compactResult) {
+  std::vector<agast::Mat> masks_mat_vector;
+  masks.getMatVector(masks_mat_vector);
+  commonRadiusMatchImpl(*this, queryDescriptors.getMat(), matches, maxDistance,
+                        masks_mat_vector, compactResult);
 }
 
 inline void BruteForceMatcher::commonKnnMatchImpl(

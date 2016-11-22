@@ -51,7 +51,7 @@
 
 namespace brisk {
 #if HAVE_OPENCV
-class BriskDescriptorExtractor : public cv::DescriptorExtractor {
+class BriskDescriptorExtractor : public cv::Feature2D {
 #else
 class BriskDescriptorExtractor {
 #endif  // HAVE_OPENCV
@@ -117,6 +117,13 @@ class BriskDescriptorExtractor {
     computeImpl(image, keypoints, descriptors);
   }
 
+  virtual void detectAndCompute(cv::InputArray image, cv::InputArray /*mask*/,
+                                std::vector<cv::KeyPoint>& keypoints,
+                                cv::OutputArray descriptors,
+                                bool /*useProvidedKeypoints*/ = false) {
+    computeImpl(image.getMat(), keypoints, descriptors.getMatRef());
+  }
+
  protected:
   virtual void computeImpl(const agast::Mat& image,
                            std::vector<agast::KeyPoint>& keypoints,
@@ -138,7 +145,7 @@ class BriskDescriptorExtractor {
       size_t count,
       std::vector<std::bitset<kDescriptorLength> >& descriptors) const;
 
-  template<typename DESCRIPTOR_CONTAINER>
+  template <typename DESCRIPTOR_CONTAINER>
   void doDescriptorComputation(const agast::Mat& image,
                                std::vector<agast::KeyPoint>& keypoints,
                                DESCRIPTOR_CONTAINER& descriptors) const;
@@ -147,21 +154,18 @@ class BriskDescriptorExtractor {
   // Call this to generate the kernel:
   // Circle of radius r (pixels), with n points;
   // Short pairings with dMax, long pairings with dMin.
-  void generateKernel(std::vector<float> &radiusList,
-                      std::vector<int> &numberList, float dMax = 5.85f,
-                      float dMin = 8.2f, std::vector<int> indexChange =
-                          std::vector<int>());
+  void generateKernel(std::vector<float>& radiusList,
+                      std::vector<int>& numberList, float dMax = 5.85f,
+                      float dMin = 8.2f,
+                      std::vector<int> indexChange = std::vector<int>());
 
   void InitFromStream(bool rotationInvariant, bool scaleInvariant,
-                      std::istream& pattern_stream, float patternScale=1.0);
-  template<typename ImgPixel_T, typename IntegralPixel_T>
-  __inline__ IntegralPixel_T SmoothedIntensity(const agast::Mat& image,
-                                               const agast::Mat& integral,
-                                               const float key_x,
-                                               const float key_y,
-                                               const unsigned int scale,
-                                               const unsigned int rot,
-                                               const unsigned int point) const;
+                      std::istream& pattern_stream, float patternScale = 1.0);
+  template <typename ImgPixel_T, typename IntegralPixel_T>
+  __inline__ IntegralPixel_T SmoothedIntensity(
+      const agast::Mat& image, const agast::Mat& integral, const float key_x,
+      const float key_y, const unsigned int scale, const unsigned int rot,
+      const unsigned int point) const;
   // Pattern properties.
   brisk::BriskPatternPoint* patternPoints_;
   // Total number of collocation points.

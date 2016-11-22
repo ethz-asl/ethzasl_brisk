@@ -18,13 +18,13 @@ class CameraAwareFeature : public cv::Feature2D {
 
   CameraAwareFeature();
   CameraAwareFeature(
-      cv::Ptr<const cv::Feature2D> feature2dPtr,
+      cv::Ptr<cv::Feature2D> feature2dPtr,
       const/*CAMERA_GEOMETRY_T*/cv::Ptr<cameras::CameraGeometryBase> cameraGeometryPtr,
       double distortionTolerance = 2e-1);
   ~CameraAwareFeature();
 
   // setters
-  void setFeature2d(cv::Ptr<const cv::Feature2D> feature2dPtr);
+  void setFeature2d(cv::Ptr<cv::Feature2D> feature2dPtr);
   //template<class CAMERA_GEOMETRY_T>
   void setCameraGeometry(
       const/*CAMERA_GEOMETRY_T*/cv::Ptr<cameras::CameraGeometryBase> cameraGeometryPtr);
@@ -34,10 +34,10 @@ class CameraAwareFeature : public cv::Feature2D {
   }
 
   /* cv::Feature2d  interface */
-  virtual void operator()(cv::InputArray image, cv::InputArray mask,
-                          std::vector<cv::KeyPoint>& keypoints,
-                          cv::OutputArray descriptors,
-                          bool useProvidedKeypoints = false) const;
+  virtual void detectAndCompute(cv::InputArray image, cv::InputArray mask,
+                                std::vector<cv::KeyPoint>& keypoints,
+                                cv::OutputArray descriptors,
+                                bool useProvidedKeypoints = false);
 
   /* cv::DescriptorExtractor interface */
   virtual int descriptorSize() const {
@@ -60,7 +60,7 @@ class CameraAwareFeature : public cv::Feature2D {
                            cv::Mat& descriptors) const;
 
   // contains the underlying feature detection and extraction
-  cv::Ptr<const cv::Feature2D> _feature2dPtr;
+  cv::Ptr<cv::Feature2D> _feature2dPtr;
 
   // specifies the distortion tolerance w.r.t. perspective projection
   double _distortionTolerance;
