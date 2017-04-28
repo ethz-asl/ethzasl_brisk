@@ -10,8 +10,6 @@ add_definitions("-mssse3 -DHAVE_OPENCV")
 
 include_directories(${CATKIN_DEVEL_PREFIX}/include)
 
-check_include_file_cxx(opencv2/nonfree/nonfree.hpp HAVE_OPENCV_NONFREE_H)
-
 add_definitions(-Wextra -Wall -pedantic)
 
 if (NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
@@ -36,14 +34,6 @@ cs_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                src/test/image-io.cc
                                src/brisk-v1.cc)  
                      
-if(HAVE_OPENCV_NONFREE_H)
-	cs_add_executable(demo src/demo.cc)
-	target_link_libraries(demo ${PROJECT_NAME})
-	
-	cs_add_executable(mikolajczyk src/mikolajczyk.cc)
-	target_link_libraries(mikolajczyk ${PROJECT_NAME})
-endif()
-
 cs_add_executable(camera src/test-cameras.cc)
 target_link_libraries(camera ${PROJECT_NAME})
 
