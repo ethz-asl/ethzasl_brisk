@@ -5,6 +5,7 @@
 #include <chrono>
 #include <limits>
 #include <map>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -115,21 +116,22 @@ class DummyTimer {
 
 class Timer {
  public:
-  Timer(size_t handle, bool construct_stopped = false);
-  Timer(std::string const& tag, bool construct_stopped = false);
+  Timer(const std::string& tag, bool construct_stopped = false);
   ~Timer();
 
   void Start();
-  void Stop();
+  // Returns the amount of time passed between Start() and Stop().
+  double Stop();
+  void Discard();
   bool IsTiming() const;
   size_t GetHandle() const;
+
  private:
   std::chrono::time_point<std::chrono::system_clock> time_;
-#if USE_RDTSC
-  tsc_counter start_, end_;
-#endif
-  bool timing_;
+
+  bool is_timing_;
   size_t handle_;
+  std::string tag_;
 };
 
 class Timing {
@@ -137,31 +139,32 @@ class Timing {
   typedef std::map<std::string, size_t> map_t;
   friend class Timer;
   // Definition of static functions to query the timers.
-  static size_t GetHandle(std::string const& tag);
+  static size_t GetHandle(const std::string& tag);
   static std::string GetTag(size_t handle);
   static double GetTotalSeconds(size_t handle);
-  static double GetTotalSeconds(std::string const& tag);
+  static double GetTotalSeconds(const std::string& tag);
   static double GetMeanSeconds(size_t handle);
-  static double GetMeanSeconds(std::string const& tag);
+  static double GetMeanSeconds(const std::string& tag);
   static size_t GetNumSamples(size_t handle);
-  static size_t GetNumSamples(std::string const& tag);
+  static size_t GetNumSamples(const std::string& tag);
   static double GetVarianceSeconds(size_t handle);
-  static double GetVarianceSeconds(std::string const& tag);
+  static double GetVarianceSeconds(const std::string& tag);
   static double GetMinSeconds(size_t handle);
-  static double GetMinSeconds(std::string const& tag);
+  static double GetMinSeconds(const std::string& tag);
   static double GetMaxSeconds(size_t handle);
-  static double GetMaxSeconds(std::string const& tag);
+  static double GetMaxSeconds(const std::string& tag);
   static double GetHz(size_t handle);
-  static double GetHz(std::string const& tag);
-  static void Print(std::ostream& out);  //NOLINT
+  static double GetHz(const std::string& tag);
+  static void Print(std::ostream& out);  // NOLINT
   static std::string Print();
   static std::string SecondsToTimeString(double seconds);
   static void Reset();
-  static const map_t& GetTimers() {return Instance().tagMap_;}
+  static const map_t& GetTimerImpls() {
+    return Instance().tag_map_;
+  }
 
  private:
   void AddTime(size_t handle, double seconds);
-  void AddCycles(size_t handle, double cycles);
 
   static Timing& Instance();
 
@@ -171,8 +174,9 @@ class Timing {
   typedef std::vector<TimerMapValue> list_t;
 
   list_t timers_;
-  map_t tagMap_;
-  size_t maxTagLength_;
+  map_t tag_map_;
+  size_t max_tag_length_;
+  std::mutex mutex_;
 };
 
 #if ENABLE_BRISK_TIMING

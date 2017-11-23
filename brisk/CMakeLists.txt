@@ -30,8 +30,8 @@ cs_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                src/image-down-sampling.cc
                                src/pattern-provider.cc
                                src/vectorized-filters.cc
-                               src/timer.cc
                                src/test/image-io.cc
+                               src/timer.cc
                                src/brisk-v1.cc)  
                      
 cs_add_executable(camera src/test-cameras.cc)
