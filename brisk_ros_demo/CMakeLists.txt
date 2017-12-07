@@ -4,7 +4,7 @@ project(brisk_ros_demo)
 find_package(catkin_simple REQUIRED)
 catkin_simple(ALL_DEPS_REQUIRED)
 
-add_definitions(-msse2 -mssse3 -march=native -Wextra -Wall
+add_definitions(-march=native -Wextra -Wall
                 -Wno-overloaded-virtual -Wno-non-virtual-dtor # OpenCV.
                 -std=c++0x -DENABLE_BRISK_TIMING -DTEST_IN_SOURCE
                 -DHAVE_OPENCV)
