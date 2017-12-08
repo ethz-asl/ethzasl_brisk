@@ -21,7 +21,7 @@ if (NOT HAS_NEON)
                                  src/brisk-opencv.cc
                                  src/brisk-scale-space.cc
                                  src/brute-force-matcher.cc
-				 src/camera-aware-feature.cc
+                                 src/camera-aware-feature.cc
                                  src/harris-feature-detector.cc
                                  src/harris-score-calculator.cc
                                  src/harris-score-calculator-float.cc
@@ -31,8 +31,8 @@ if (NOT HAS_NEON)
                                  src/vectorized-filters.cc
                                  src/test/image-io.cc
                                  src/timer.cc
-				 src/brisk-v1.cc)
-  
+                                 src/brisk-v1.cc)
+
   cs_add_executable(camera src/test-cameras.cc)
   target_link_libraries(camera ${PROJECT_NAME})
 else()
@@ -104,5 +104,5 @@ target_link_libraries(test_serialization ${GLOG_LIBRARY}
                                          ${PROJECT_NAME}
                                          ${PROJECT_NAME}_test_lib)
 
-cs_export(CFG_EXTRAS export_flags.cmake)
+cs_export()
 cs_install()

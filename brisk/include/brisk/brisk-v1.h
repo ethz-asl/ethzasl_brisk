@@ -41,7 +41,6 @@
 #include <agast/oast9-16.h>
 #include <agast/agast7-12s.h>
 #include <agast/agast5-8.h>
-#include <emmintrin.h>
 
 #ifndef M_PI
   #define M_PI 3.141592653589793

@@ -44,7 +44,12 @@
 #include <agast/agast7-12s.h>
 #include <agast/agast5-8.h>
 #include <stdlib.h>
-#include <tmmintrin.h>
+
+#ifdef __SSE2__
+#include <x86intrin.h>
+#else
+#error "Not implemented for processor architectures which do not support Streaming SIMD Extensions (e.g. ARM)."
+#endif
 
 
 using namespace brisk_v1;
