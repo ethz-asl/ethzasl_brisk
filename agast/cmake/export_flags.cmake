@@ -1,5 +1,4 @@
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DHAVE_OPENCV -std=c++0x")
-add_definitions(-march=native -mtune=native)
 set(HAS_NEON FALSE)
 execute_process(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCH)
 if (ARCH MATCHES "^(arm)")
