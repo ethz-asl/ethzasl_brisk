@@ -14,44 +14,30 @@ if (NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
   add_definitions( -Werror )
 endif()
 
+cs_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
+                               src/brisk-feature-detector.cc
+                               src/brisk-layer.cc
+                               src/brisk-opencv.cc
+                               src/brisk-scale-space.cc
+                               src/brute-force-matcher.cc
+                               src/harris-feature-detector.cc
+                               src/harris-score-calculator.cc
+                               src/harris-score-calculator-float.cc
+                               src/harris-scores.cc
+                               src/image-down-sampling.cc
+                               src/pattern-provider.cc
+                               src/vectorized-filters.cc
+                               src/test/image-io.cc
+                               src/timer.cc)
+
 if (NOT HAS_NEON)
-  cs_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
-                                 src/brisk-feature-detector.cc
-                                 src/brisk-layer.cc
-                                 src/brisk-opencv.cc
-                                 src/brisk-scale-space.cc
-                                 src/brute-force-matcher.cc
-                                 src/camera-aware-feature.cc
-                                 src/harris-feature-detector.cc
-                                 src/harris-score-calculator.cc
-                                 src/harris-score-calculator-float.cc
-                                 src/harris-scores.cc
-                                 src/image-down-sampling.cc
-                                 src/pattern-provider.cc
-                                 src/vectorized-filters.cc
-                                 src/test/image-io.cc
-                                 src/timer.cc
+  cs_add_library(${PROJECT_NAME}_sse src/camera-aware-feature.cc
                                  src/brisk-v1.cc)
 
   cs_add_executable(camera src/test-cameras.cc)
-  target_link_libraries(camera ${PROJECT_NAME})
+  target_link_libraries(camera ${PROJECT_NAME} ${PROJECT_NAME}_sse)
 else()
   message(WARNING "Neon instructions not implemented for ethzasl_brisk.")
-  cs_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
-                                 src/brisk-feature-detector.cc
-                                 src/brisk-layer.cc
-                                 src/brisk-opencv.cc
-                                 src/brisk-scale-space.cc
-                                 src/brute-force-matcher.cc
-                                 src/harris-feature-detector.cc
-                                 src/harris-score-calculator.cc
-                                 src/harris-score-calculator-float.cc
-                                 src/harris-scores.cc
-                                 src/image-down-sampling.cc
-                                 src/pattern-provider.cc
-                                 src/vectorized-filters.cc
-                                 src/test/image-io.cc
-                                 src/timer.cc)
 endif()
 
 
