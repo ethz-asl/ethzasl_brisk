@@ -30,7 +30,7 @@ cs_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc
                                src/test/image-io.cc
                                src/timer.cc)
 
-if (NOT HAS_NEON)
+if (IS_SSE_ENABLED)
   cs_add_library(${PROJECT_NAME}_sse src/camera-aware-feature.cc
                                  src/brisk-v1.cc)
 
