@@ -37,18 +37,18 @@
  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
 #include <arm_neon.h>
 #else
 #include <emmintrin.h>
 #include <tmmintrin.h>
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 #include <stdint.h>
 
 #include <brisk/internal/vectorized-filters.h>
 
 namespace brisk {
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
   // Not implemented.
 #else
 void FilterGauss3by316S(agast::Mat& src, agast::Mat& dst) {  // NOLINT
@@ -119,9 +119,9 @@ void FilterGauss3by316S(agast::Mat& src, agast::Mat& dst) {  // NOLINT
     }
   }
 }
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
   // Not implemented.
 #else
 void FilterGauss3by332F(agast::Mat& src, agast::Mat& dst) {  // NOLINT
@@ -176,9 +176,9 @@ void FilterGauss3by332F(agast::Mat& src, agast::Mat& dst) {  // NOLINT
     }
   }
 }
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
 // Not implemented.
 #else
 void FilterBox3by316S(agast::Mat& src, agast::Mat& dst) {  // NOLINT
@@ -244,5 +244,5 @@ void FilterBox3by316S(agast::Mat& src, agast::Mat& dst) {  // NOLINT
     }
   }
 }
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 }  // namespace brisk

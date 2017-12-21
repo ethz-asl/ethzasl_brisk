@@ -41,12 +41,12 @@
 #ifndef INTERNAL_VECTORIZED_FILTERS_INL_H_
 #define INTERNAL_VECTORIZED_FILTERS_INL_H_
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
 #include <arm_neon.h>
 #else
 #include <emmintrin.h>
 #include <tmmintrin.h>
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 #include <stdint.h>
 
 #include <agast/wrap-opencv.h>

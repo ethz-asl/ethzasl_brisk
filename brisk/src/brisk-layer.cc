@@ -41,12 +41,12 @@
 #include <brisk/internal/brisk-layer.h>
 #include <brisk/internal/image-down-sampling.h>
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
 #include <arm_neon.h>
 #else
 #include <emmintrin.h>
 #include <tmmintrin.h>
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 
 namespace brisk {
 // Construct a layer.
@@ -288,7 +288,7 @@ void BriskLayer::CalculateThresholdMap() {
     while (x + 16 < img_.cols - 1) {
       // Access.
       unsigned char* p = img_.data + x - 1 + (y - 1) * rowstride;
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
       // NEON version.
       uint8x16_t v_1_1 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
       p++;
@@ -372,7 +372,7 @@ void BriskLayer::CalculateThresholdMap() {
           reinterpret_cast<__m128i *>(tmpmax.data + x + y * rowstride), max);
       _mm_storeu_si128(
           reinterpret_cast<__m128i *>(tmpmin.data + x + y * rowstride), min);
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
       // Next block.
       x += 16;
     }
@@ -383,7 +383,7 @@ void BriskLayer::CalculateThresholdMap() {
     while (x + 16 < img_.cols - 3) {
       // Access.
       unsigned char* p = img_.data + x + y * rowstride;
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
       // NEON version //
       uint8x16_t v00 = vld1q_u8(reinterpret_cast<const uint8_t*>(p));
       p -= 2 + 2 * rowstride;
@@ -487,7 +487,7 @@ void BriskLayer::CalculateThresholdMap() {
       __m128i diff = _mm_sub_epi8(max, min);
       _mm_storeu_si128(reinterpret_cast<__m128i *>(thrmap_.data + x +
           y * rowstride), diff);
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
       // Next block.
       x += 16;
     }

@@ -295,7 +295,7 @@ void Draw(std::vector<DatasetEntry>& dataset) {  // NOLINT
 DatasetEntry* DatasetEntry::current_entry = NULL;
 }  // namespace brisk
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
 // Harris not implemented, so test not possible.
 #else
 TEST(Brisk, ValidationHarris) {
@@ -314,7 +314,7 @@ TEST(Brisk, ValidationHarris) {
 
   RunValidation(do_gtest_checks, detector, extractor, datasetfilename);
 }
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 
 TEST(Brisk, ValidationAST) {
   bool do_gtest_checks = true;

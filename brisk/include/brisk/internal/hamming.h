@@ -40,12 +40,12 @@
 
 #ifndef INTERNAL_HAMMING_H_
 #define INTERNAL_HAMMING_H_
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
 #include <arm_neon.h>
 #else
 #include <emmintrin.h>
 #include <tmmintrin.h>
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 
 #include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
@@ -57,7 +57,7 @@ class  Hamming {
  public:
   Hamming() { }
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
   static __inline__ uint32_t NEONPopcntofXORed(const uint8x16_t* signature1,
                                                const uint8x16_t* signature2,
                                                const int numberOf128BitWords);
@@ -89,7 +89,7 @@ class  Hamming {
                               reinterpret_cast<const __m128i*>(signature2),
                               numberOf128BitWords);
   }
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 
   typedef unsigned char ValueType;
 
@@ -101,7 +101,7 @@ class  Hamming {
   ResultType operator()(const unsigned char* a,
                         const unsigned char* b,
                         const int size) const {
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
     return NEONPopcntofXORed(reinterpret_cast<const uint8x16_t*>(a),
                              reinterpret_cast<const uint8x16_t*>(b),
                              size / 16);
@@ -109,7 +109,7 @@ class  Hamming {
     return SSSE3PopcntofXORed(reinterpret_cast<const __m128i*>(a),
                               reinterpret_cast<const __m128i*>(b),
                               size / 16);
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
   }
 };
 }  // namespace brisk

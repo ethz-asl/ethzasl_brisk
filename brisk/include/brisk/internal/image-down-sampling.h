@@ -38,12 +38,12 @@
 #ifndef INTERNAL_IMAGE_DOWN_SAMPLING_H_
 #define INTERNAL_IMAGE_DOWN_SAMPLING_H_
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
 #include <arm_neon.h>
 #else
 #include <emmintrin.h>
 #include <tmmintrin.h>
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 
 #include <agast/wrap-opencv.h>
 

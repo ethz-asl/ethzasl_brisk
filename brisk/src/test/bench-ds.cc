@@ -39,7 +39,7 @@
 
 namespace brisk {
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
 std::string DescriptorToString(const uint8x16_t* d, int num128Words) {
 #else
   std::string DescriptorToString(const __m128i * d, int num128Words) {

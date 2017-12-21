@@ -45,12 +45,12 @@
 #include <agast/wrap-opencv.h>
 
 namespace brisk {
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
   // Not implemented.
 #else
 // SSE speeded up (dxdx dxdy and dydy only).
 // Based on harrisScores_basic_noMats(.).
 void HarrisScoresSSE(const agast::Mat& src, agast::Mat& scores);
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 }  // namespace brisk
 #endif  // INTERNAL_HARRIS_SCORES_H_
