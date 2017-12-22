@@ -7,7 +7,6 @@ execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dM -E -x c /dev/null
 set(IS_SSE_ENABLED FALSE)
 if (PREPROCESSOR_DIRECTIVES MATCHES "__SSE2__")
   add_definitions(-mssse3)
-  set(SIMD_SSE 1)
   set(IS_SSE_ENABLED TRUE)
 # For both armv7 and armv8, __ARM_NEON is used as preprocessor directive.
 elseif (PREPROCESSOR_DIRECTIVES MATCHES "__ARM_ARCH 7")
