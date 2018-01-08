@@ -46,7 +46,7 @@
 #include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 #include <brisk/internal/vectorized-filters.h>
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
 // Not implemented.
 #else
 namespace brisk {
@@ -79,5 +79,5 @@ class HarrisFeatureDetector {
   agast::Mat _LUT;
 };
 }  // namespace brisk
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 #endif  // BRISK_HARRIS_FEATURE_DETECTOR_H_

@@ -44,7 +44,7 @@
 #include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
   // Not implemented.
 #else
 namespace brisk {
@@ -72,5 +72,5 @@ void FilterGauss3by332F(agast::Mat& src, agast::Mat& dst);  // NOLINT
 
 }  // namespace brisk
 #include "./vectorized-filters-inl.h"
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 #endif  // INTERNAL_VECTORIZED_FILTERS_H_

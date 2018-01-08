@@ -86,7 +86,7 @@ TEST(Brisk, PopCount) {
   data2[15] = 0x75;
 
   brisk::Hamming popcnt;
-#if __ARM_NEON__
+#if __ARM_NEON
   const uint8x16_t* signature1 = reinterpret_cast<const uint8x16_t*>(data1);
   const uint8x16_t* signature2 = reinterpret_cast<const uint8x16_t*>(data2);
   unsigned int cnt = popcnt.NEONPopcntofXORed(signature1, signature2,
@@ -96,7 +96,7 @@ TEST(Brisk, PopCount) {
   const __m128i* signature2 = reinterpret_cast<const __m128i*>(data2);
   unsigned int cnt = popcnt.SSSE3PopcntofXORed(signature1, signature2,
                                                num_128_words);
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
   unsigned int verification_result = PopCountOfXor(data1, data2);
   ASSERT_EQ(cnt, verification_result);
 }

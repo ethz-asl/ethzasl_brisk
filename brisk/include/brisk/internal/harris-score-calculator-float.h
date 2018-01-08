@@ -41,7 +41,7 @@
 #ifndef INTERNAL_HARRIS_SCORE_CALCULATOR_FLOAT_H_
 #define INTERNAL_HARRIS_SCORE_CALCULATOR_FLOAT_H_
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
 // Not implemented.
 #else
 #include <emmintrin.h>
@@ -94,5 +94,5 @@ class HarrisScoreCalculatorFloat : public ScoreCalculator<float> {
                            const agast::Mat& dxdySmooth, agast::Mat& score);
 };
 }  // namespace brisk
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
 #endif  // INTERNAL_HARRIS_SCORE_CALCULATOR_FLOAT_H_

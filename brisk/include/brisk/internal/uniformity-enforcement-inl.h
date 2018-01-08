@@ -82,7 +82,7 @@ void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
     // Masks.
     const float nsc = 0.99f * nsc1;
     for (int y = 0; y < 2 * 16 - 1; ++y) {
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
       uint8x16_t mem1 = vld1q_u8(reinterpret_cast<const uint8_t*>(
               &occupancy.at<uint8_t>(cy + y - 15, cx - 15)));
       uint8x16_t mem2 = vld1q_u8(reinterpret_cast<const uint8_t*>(
@@ -178,7 +178,7 @@ void EnforceKeyPointUniformity(const agast::Mat& LUT, double radius,
       _mm_storeu_si128(
           reinterpret_cast<__m128i *>(&occupancy.at<unsigned char>(cy + y - 15, cx + 1)),
           _mm_adds_epu8(mem2, mask2));
-#endif  // __ARM_NEON__
+#endif  // __ARM_NEON
     }
 
     // Store.

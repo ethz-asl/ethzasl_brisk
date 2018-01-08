@@ -125,7 +125,7 @@ struct DatasetEntry;
       return false;\
     } } while (0);
 
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
   std::string DescriptorToString(const uint8x16_t* d, int num128Words);
 #else
   std::string DescriptorToString(const __m128i * d, int num128Words);
@@ -390,7 +390,7 @@ struct DatasetEntry {
     uint32_t hammdisttolerance = 5;
     int numberof128Blocks = other.descriptors_.step * 8 / 128;
     for (int rowidx = 0; rowidx < this->descriptors_.rows; ++rowidx) {
-#ifdef __ARM_NEON__
+#ifdef __ARM_NEON
       const uint8x16_t* d1 = reinterpret_cast<const uint8x16_t *>(
           this->descriptors_.data + this->descriptors_.step * rowidx);
       const uint8x16_t* d2 = reinterpret_cast<const uint8x16_t *>(
