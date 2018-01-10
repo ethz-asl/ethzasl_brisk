@@ -70,7 +70,8 @@ target_link_libraries(test_downsampling ${GLOG_LIBRARY}
                                         ${PROJECT_NAME}_test_lib)
 
 # TODO(slynen): The test files from Linux don't verify binary equal on OSX.
-if(NOT APPLE)
+# TODO(fabianbl): Same for ARM processors.
+if(NOT APPLE AND NOT IS_NEON_ENABLED)
   catkin_add_gtest(test_binary_equal src/test/test-binary-equal.cc
                    WORKING_DIRECTORY ${PROJECT_BINARY_DIR})
   target_link_libraries(test_binary_equal ${GLOG_LIBRARY}
