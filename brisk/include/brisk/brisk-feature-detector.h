@@ -41,6 +41,7 @@
 #define BRISK_BRISK_FEATURE_DETECTOR_H_
 
 #include <vector>
+#include <functional>
 
 #include <agast/wrap-opencv.h>
 #include <brisk/internal/macros.h>
