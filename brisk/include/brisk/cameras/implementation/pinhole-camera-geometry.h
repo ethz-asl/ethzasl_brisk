@@ -15,7 +15,9 @@ PinholeCameraGeometry<DISTORTION_T>::PinholeCameraGeometry()
       _imageCenterU(0.0),
       _imageCenterV(0.0),
       _pixelsU(0),
-      _pixelsV(0) {
+      _pixelsV(0),
+      _recip_fu(0),
+      _recip_fv(0) {
 }
 
 template<class DISTORTION_T>
@@ -29,6 +31,8 @@ PinholeCameraGeometry<DISTORTION_T>::PinholeCameraGeometry(
       _imageCenterV(imageCenterV),
       _pixelsU(pixelsU),
       _pixelsV(pixelsV),
+      _recip_fu(0),
+      _recip_fv(0),
       _distortion(distortion) {
 }
 
