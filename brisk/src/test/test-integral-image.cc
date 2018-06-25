@@ -83,7 +83,7 @@ TEST(Brisk, IntegralImage8bit) {
   ASSERT_EQ(integral.rows, integral_verification.rows);
   ASSERT_EQ(integral.cols, integral_verification.cols);
 
-  bool errors = 0;
+  int errors = 0;
   const int kMaxErrors = 10;
   for (int row = 0; row < integral.rows; ++row) {
     for (int col = 0; col < integral.cols; ++col) {
