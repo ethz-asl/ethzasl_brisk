@@ -39,6 +39,7 @@
  */
 
 #include <algorithm>
+#include <functional>
 
 #include <agast/glog.h>
 #include <agast/wrap-opencv.h>
