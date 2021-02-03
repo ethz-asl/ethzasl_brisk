@@ -8,10 +8,12 @@ catkin_simple(ALL_DEPS_REQUIRED)
 
 include_directories(${CATKIN_DEVEL_PREFIX}/include)
 
-add_definitions(-Wextra -Wall -pedantic)
-
-if (NOT (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
-  add_definitions( -Werror )
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
+if(COMPILER_SUPPORTS_CXX14)
+  add_definitions(-Wextra -Wall -pedantic -std=c++14)
+else()
+  message(FATAL_ERROR "The compiler does not support C++14.")
 endif()
 
 cs_add_library(${PROJECT_NAME} src/brisk-descriptor-extractor.cc

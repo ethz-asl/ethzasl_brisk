@@ -4,11 +4,12 @@ project(agast)
 find_package(catkin_simple REQUIRED)
 catkin_simple()
 
-if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  # Disable -Werror on clang.
-  add_definitions(-Wextra -Wall -pedantic -DHAVE_OPENCV -std=c++11)
+include(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++14" COMPILER_SUPPORTS_CXX14)
+if(COMPILER_SUPPORTS_CXX14)
+  add_definitions(-Wextra -Wall -pedantic -DHAVE_OPENCV -std=c++14)
 else()
-  add_definitions(-Wextra -Wall -Werror -pedantic -DHAVE_OPENCV -std=c++0x)
+  message(FATAL_ERROR "The compiler does not support C++14.")
 endif()
 
 file(GLOB AGAST_SOURCE_FILES  "${PROJECT_SOURCE_DIR}/src/*.cc")
