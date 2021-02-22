@@ -74,7 +74,7 @@ void ComputeReferenceIntegralImage8Bit(const agast::Mat& src, agast::Mat* dest) 
 
 TEST(Brisk, IntegralImage8bit) {
   std::string imagepath = "./test_data/img1.pgm";
-  cv::Mat src_img = cv::imread(imagepath, CV_LOAD_IMAGE_GRAYSCALE);
+  cv::Mat src_img = cv::imread(imagepath, cv::IMREAD_GRAYSCALE);
 
   agast::Mat integral, integral_verification;
   ComputeReferenceIntegralImage8Bit(src_img, &integral_verification);
