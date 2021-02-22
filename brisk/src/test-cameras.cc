@@ -108,8 +108,8 @@ int main(int /*argc*/, char ** /*argv*/) {
 
   // read imgates
   cv::Mat img0, img1;
-  img0 = cv::imread("../images/img0_aslam.pgm", CV_LOAD_IMAGE_GRAYSCALE);
-  img1 = cv::imread("../images/img1_aslam.pgm", CV_LOAD_IMAGE_GRAYSCALE);
+  img0 = cv::imread("../images/img0_aslam.pgm", cv::IMREAD_GRAYSCALE);
+  img1 = cv::imread("../images/img1_aslam.pgm", cv::IMREAD_GRAYSCALE);
   if(draw)
   {
     cv::imshow("img0_aslam.pgm",img0);

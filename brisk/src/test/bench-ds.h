@@ -459,7 +459,7 @@ struct DatasetEntry {
   // Get the images from the path and convert to grayscale.
   void readImage(const std::string& path) {
     path_ = path;
-    imgGray_ = cv::imread(path_, CV_LOAD_IMAGE_GRAYSCALE);
+    imgGray_ = cv::imread(path_, cv::IMREAD_GRAYSCALE);
     std::cout << "Done reading image: " << imgGray_.rows << "x" <<
         imgGray_.cols << std::endl;
   }
