@@ -51,8 +51,8 @@ TEST(Brisk, MatchBitset) {
   cv::Mat img1, img2;
   std::string image1path = "./test_data/img1.pgm";
   std::string image2path = "./test_data/img2.pgm";
-  img1 = cv::imread(image1path, CV_LOAD_IMAGE_GRAYSCALE);
-  img2 = cv::imread(image2path, CV_LOAD_IMAGE_GRAYSCALE);
+  img1 = cv::imread(image1path, cv::IMREAD_GRAYSCALE);
+  img2 = cv::imread(image2path, cv::IMREAD_GRAYSCALE);
 
   const unsigned int detection_threshold = 70;
   const unsigned int matching_threshold = 50;
